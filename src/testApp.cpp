@@ -186,7 +186,7 @@ void testApp::draw(){
 		return;
 	}
 	textureSource.draw(0, 0);
-	ofDrawBitmapStringHighlight(ofToString(m_av_clock->OMXMediaTime()), 200, 200, ofColor::black, ofColor::yellow);
+	ofDrawBitmapStringHighlight(ofToString(ofGetFrameRate()), 200, 200, ofColor::black, ofColor::yellow);
 	/*ofLog(OF_LOG_VERBOSE, "OMXMediaTime: %8.02f", m_av_clock->OMXMediaTime());
 	ofLog(OF_LOG_VERBOSE, "GetDecoderBufferSize: %8d", m_player_video.GetDecoderBufferSize());
 	ofLog(OF_LOG_VERBOSE, "GetDecoderFreeSpace: %8d", m_player_video.GetDecoderFreeSpace());

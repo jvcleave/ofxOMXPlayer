@@ -120,7 +120,18 @@ bool COMXVideo::SendDecoderConfig()
   
   return true;
 }
-
+COMXCoreComponent *m_omx_renderStatic;
+OMX_BUFFERHEADERTYPE* eglBufferStatic;
+OMX_ERRORTYPE onFillBufferDone(OMX_HANDLETYPE hComponent,
+							   OMX_PTR pAppData,
+							   OMX_BUFFERHEADERTYPE* pBuffer)
+{    
+	
+	ofLogVerbose() << "onFillBufferDone<----------";
+	//COMXCoreComponent *ctx = static_cast<COMXCoreComponent*>(pAppData);
+	OMX_ERRORTYPE didFillBuffer = OMX_FillThisBuffer(hComponent, pBuffer);
+	return didFillBuffer;
+}
 bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglImage_)
 {
 	eglImage = eglImage_;
@@ -307,11 +318,11 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglImag
 
 	if (hints.fpsscale > 0 && hints.fpsrate > 0)
 	{
-	//formatType.xFramerate = (long long)(1<<16)*hints.fpsrate / hints.fpsscale;
+		formatType.xFramerate = (long long)(1<<16)*hints.fpsrate / hints.fpsscale;
 	}
 	else
 	{
-	// formatType.xFramerate = 25 * (1<<16);
+		formatType.xFramerate = 25 * (1<<16);
 	}
 
 	omx_err = m_omx_decoder.SetParameter(OMX_IndexParamVideoPortFormat, &formatType);
@@ -392,17 +403,6 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglImag
 		return false;
 	}
 	
-	
-	/*omx_err = m_omx_decoder.WaitForEvent(OMX_EventPortSettingsChanged);	
-	if(omx_err == OMX_ErrorNone)
-	{
-		ofLogVerbose() << "m_omx_decoder WaitForEvent OMX_EventPortSettingsChanged PASS";
-	}else 
-	{
-		ofLog(OF_LOG_ERROR, "m_omx_decoder WaitForEvent OMX_EventPortSettingsChanged FAIL omx_err(0x%08x)", omx_err);
-		return false;
-	}*/
-
 
 	omx_err = m_omx_tunnel_sched.Establish(false);
 	if(omx_err == OMX_ErrorNone)
@@ -452,6 +452,7 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglImag
 	omx_err = m_omx_render.UseEGLImage(&eglBuffer, m_omx_render.GetOutputPort(), NULL, eglImage);
 	if(omx_err == OMX_ErrorNone)
 	{
+		eglBufferStatic = eglBuffer;
 		ofLogVerbose() << "m_omx_render UseEGLImage PASS";
 	}else 
 	{
@@ -461,6 +462,16 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglImag
 
 	
 	
+	if(SendDecoderConfig())
+	{
+		ofLogVerbose() << "SendDecoderConfig PASS";
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "SendDecoderConfig");
+		return false;
+	}
+	
+	m_omx_render.SetCustomDecoderFillBufferDoneHandler(onFillBufferDone);
 	omx_err = m_omx_render.SetStateForComponent(OMX_StateExecuting);
 	if(omx_err == OMX_ErrorNone)
 	{
@@ -470,16 +481,16 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglImag
 		ofLog(OF_LOG_ERROR, "m_omx_render OMX_StateExecuting FAIL omx_err(0x%08x)", omx_err);
 		return false;
 	}
-
-	if(SendDecoderConfig())
+	omx_err = m_omx_render.FillThisBuffer(eglBuffer);
+	if(omx_err == OMX_ErrorNone)
 	{
-		ofLogVerbose() << "SendDecoderConfig PASS";
+		ofLogVerbose() << "m_omx_render FillThisBuffer PASS";
 	}else 
 	{
-		ofLog(OF_LOG_ERROR, "SendDecoderConfig");
+		ofLog(OF_LOG_ERROR, "m_omx_render FillThisBuffer FAIL omx_err(0x%08x)", omx_err);
 		return false;
 	}
-
+	
 	m_is_open           = true;
 	m_drop_state        = false;
 	m_setStartTime      = true;
