@@ -72,7 +72,7 @@
 #
 #   Note: Leave a leading space when adding list items with the += operator
 ################################################################################
-# PROJECT_EXCLUSIONS =
+PROJECT_EXCLUSIONS =$(PROJECT_ROOT)/ffmpeg/include%
 
 ################################################################################
 # PROJECT LINKER FLAGS
@@ -88,7 +88,19 @@
 # add a runtime path to search for those shared libraries, since they aren't 
 # incorporated directly into the final executable application binary.
 # TODO: should this be a default setting?
-# PROJECT_LDFLAGS=-Wl,-rpath=./libs
+#PROJECT_LDFLAGS=-lc -lWFC -L$(PROJECT_ROOT)/ffmpeg/lib -lopenmaxil -lvchiq_arm -lvcos -lrt -lpthread -lavutil -lavcodec -lavformat -lswscale -lpcre
+FFMPEG_LIBS = $(PROJECT_ROOT)/ffmpeg/lib
+UTIL_STATIC=$(FFMPEG_LIBS)/libavutil.a
+CODEC_STATIC=$(FFMPEG_LIBS)/libavcodec.a
+FORMAT_STATIC=$(FFMPEG_LIBS)/libavformat.a
+SCALE_STATIC=$(FFMPEG_LIBS)/libswscale.a
+
+FILTER_STATIC=$(FFMPEG_LIBS)/libavfilter.a
+POSTPROC_STATIC=$(FFMPEG_LIBS)/libpostproc.a
+DEVICE_STATIC=$(FFMPEG_LIBS)/libavdevice.a
+RESAMPLE_STATIC=$(FFMPEG_LIBS)/libswresample.a
+
+PROJECT_LDFLAGS=-L$(FFMPEG_LIBS) $(FORMAT_STATIC) $(CODEC_STATIC) $(SCALE_STATIC) $(UTIL_STATIC) -lm
 
 ################################################################################
 # PROJECT DEFINES
@@ -116,7 +128,7 @@
 #
 #   Note: Leave a leading space when adding list items with the += operator
 ################################################################################
-# PROJECT_CFLAGS = 
+PROJECT_CFLAGS = -I$(PROJECT_ROOT)/ffmpeg/include -std=c++0x -DSTANDALONE -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -DTARGET_POSIX -D_LINUX -fPIC -DPIC -D_REENTRANT -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_CMAKE_CONFIG -D__VIDEOCORE4__ -U_FORTIFY_SOURCE -Wall -DHAVE_OMXLIB -DUSE_EXTERNAL_FFMPEG  -DHAVE_LIBAVCODEC_AVCODEC_H -DHAVE_LIBAVUTIL_OPT_H -DHAVE_LIBAVUTIL_MEM_H -DHAVE_LIBAVUTIL_AVUTIL_H -DHAVE_LIBAVFORMAT_AVFORMAT_H -DHAVE_LIBAVFILTER_AVFILTER_H -DHAVE_LIBSWRESAMPLE_SWRESAMPLE_H -DOMX -DOMX_SKIP64BIT -ftree-vectorize -DUSE_EXTERNAL_OMX -DTARGET_RASPBERRY_PI -DUSE_EXTERNAL_LIBBCM_HOST
 
 ################################################################################
 # PROJECT OPTIMIZATION CFLAGS
