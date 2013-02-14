@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofAppEGLWindow.h"
 
 extern "C" {
 #include <libavformat/avformat.h>
@@ -52,9 +53,14 @@ class testApp : public ofBaseApp{
 	
 	OMXPacket* m_omx_pkt;
 	bool m_buffer_empty;
-	void DecoderEventHandler(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData);
-	void DecoderEmptyBufferDone(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_BUFFERHEADERTYPE* pBuffer);
-	void DecoderFillBufferDone(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_BUFFERHEADERTYPE* pBuffer);
-
+	
+	ofTexture textureSource;
+	GLuint texture;
+	EGLImageKHR eglImage;
+	int videoWidth;
+	int videoHeight;
+	void generateEGLImage();
+	EGLDisplay display;
+	EGLContext context;
 };
 

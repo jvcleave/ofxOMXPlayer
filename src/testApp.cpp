@@ -1,55 +1,60 @@
 #include "testApp.h"
 
-#if 0
-void testApp::DecoderEventHandler(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
+void testApp::generateEGLImage()
 {
-	COMXCoreComponent *ctx = static_cast<COMXCoreComponent*>(pAppData);
-	string name = ctx->GetName();
-	ofLogVerbose() << "testApp DecoderEventHandler " << "name: " << name;
+	ofDisableArbTex();
 	
-	/*if (name == "OMX.broadcom.egl_render") 
+	ofAppEGLWindow *appEGLWindow = (ofAppEGLWindow *) ofGetWindowPtr();
+	display = appEGLWindow->getEglDisplay();
+	context = appEGLWindow->getEglContext();
+	ofLogVerbose() << "videoWidth: " << videoWidth;
+	ofLogVerbose() << "videoHeight: " << videoHeight;
+	
+	textureSource.allocate(videoWidth, videoHeight, GL_RGBA);
+	textureSource.getTextureData().bFlipTexture = true;
+	textureSource.setTextureWrap(GL_REPEAT, GL_REPEAT);
+	//textureSource.setTextureMinMagFilter(GL_NEAREST, GL_NEAREST);
+	//textureSource.setTextureWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+	texture = textureSource.getTextureData().textureID;
+	
+	
+	glEnable(GL_TEXTURE_2D);
+	
+	
+	// setup first texture
+	int dataSize = videoWidth * videoHeight * 4;
+	
+	GLubyte* pixelData = new GLubyte [dataSize];
+	
+	
+    memset(pixelData, 0xff, dataSize);  // white texture, opaque
+	
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, videoWidth, videoHeight, 0,
+				 GL_RGBA, GL_UNSIGNED_BYTE, pixelData); //I think this is why other videos won't display
+	
+	delete[] pixelData;
+	
+	
+	// Create EGL Image
+	eglImage = eglCreateImageKHR(
+								 display,
+								 context,
+								 EGL_GL_TEXTURE_2D_KHR,
+								 (EGLClientBuffer)texture,
+								 0);
+    glDisable(GL_TEXTURE_2D);
+	if (eglImage == EGL_NO_IMAGE_KHR)
 	{
-		
-		OMX_STATETYPE  checkState = ctx->GetState();
-		switch (checkState) 
-		{
-			case OMX_StateExecuting:
-				ofLogVerbose () << "testApp checkState OMX_StateExecuting";
-				break;
-			case OMX_StateIdle:
-				ofLogVerbose () << "testApp checkState OMX_StateIdle";
-				break;
-			case OMX_StateLoaded:
-				ofLogVerbose () << "testApp checkState OMX_StateLoaded";
-				break;
-			case OMX_StateInvalid:
-				ofLogVerbose () << "testApp checkState OMX_StateInvalid";
-				break;
-			case OMX_StateWaitForResources:
-				ofLogVerbose () << "testApp checkState OMX_StateWaitForResources";
-				break;
-			default:
-				ofLogVerbose () <<"testApp checkState STATE: " << checkState;
-				break;
-		}
-		ofLogVerbose() << "testApp DecoderEventHandler " << "InputPort: " << ctx->GetInputPort();
-		ofLogVerbose() << "testApp DecoderEventHandler " << "OutputPort: " << ctx->GetOutputPort() << endl;
+		ofLogError()	<< "Create EGLImage FAIL";
+		return;
 	}
-	unsigned int      GetInputPort()   { return m_input_port;    };
-	unsigned int      GetOutputPort()  { return m_output_port;   };
-	std::string       GetName()        { return m_componentName; };*/
+	else
+	{
+		ofLogVerbose()	<< "Create EGLImage PASS";
+	}
+	
 }
-
-void testApp::DecoderEmptyBufferDone(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_BUFFERHEADERTYPE* pBuffer)
-{
-	//ofLogVerbose() << "DecoderEmptyBufferDone<-------------------------";
-}
-
-void testApp::DecoderFillBufferDone(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_BUFFERHEADERTYPE* pBuffer)
-{
-	ofLogVerbose() << "DecoderFillBufferDone<-------------------------";
-}
-#endif
 //--------------------------------------------------------------
 void testApp::setup(){
 	isReady = false;
@@ -87,18 +92,10 @@ void testApp::setup(){
 			ofLogVerbose() << "Clock Init success";
 			
 			m_omx_reader.GetHints(OMXSTREAM_VIDEO, m_hints_video);
+			videoWidth = m_hints_video.width;
+			videoHeight = m_hints_video.height;
 			
-			// get display aspect
-			/*memset(&current_tv_state, 0, sizeof(TV_GET_STATE_RESP_T));
-			m_BcmHost.vc_tv_get_state(&current_tv_state);
-			
-			if(current_tv_state.width && current_tv_state.height)
-			{
-				m_display_aspect = (float)current_tv_state.width / (float)current_tv_state.height;
-				ofLogVerbose() << "(float)current_tv_state.width " << (float)current_tv_state.width;
-				ofLogVerbose() << "(float)current_tv_state.height " << (float)current_tv_state.height;
-				ofLogVerbose() << "m_display_aspect: " << m_display_aspect;
-			}*/
+			generateEGLImage();
 			if(m_has_video)
 			{
 				bool didOpenVideo = m_player_video.Open(m_hints_video, m_av_clock);
