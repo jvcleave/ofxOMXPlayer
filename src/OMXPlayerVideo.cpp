@@ -65,8 +65,9 @@ void OMXPlayerVideo::UnLockDecoder()
 }
 
 
-bool OMXPlayerVideo::Open(COMXStreamInfo &hints, OMXClock *av_clock)
+bool OMXPlayerVideo::Open(COMXStreamInfo &hints, OMXClock *av_clock, EGLImageKHR eglImage_)
 {
+	eglImage = eglImage_;
 	printf("OMXPlayerVideo::Open\n");
   if (!m_dllAvUtil.Load() || !m_dllAvCodec.Load() || !m_dllAvFormat.Load() || !av_clock)
     return false;
@@ -363,7 +364,7 @@ bool OMXPlayerVideo::OpenDecoder()
   m_frametime = (double)DVD_TIME_BASE / m_fps;
 
   m_decoder = new COMXVideo();
-  if(!m_decoder->Open(m_hints, m_av_clock))
+  if(!m_decoder->Open(m_hints, m_av_clock, eglImage))
   {
     CloseDecoder();
     return false;

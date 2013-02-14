@@ -98,14 +98,14 @@ void testApp::setup(){
 			generateEGLImage();
 			if(m_has_video)
 			{
-				bool didOpenVideo = m_player_video.Open(m_hints_video, m_av_clock);
+				bool didOpenVideo = m_player_video.Open(m_hints_video, m_av_clock, eglImage);
 				
 				if (didOpenVideo) 
 				{
 					ofLogVerbose() << "Opened video!";
-					m_av_clock->SetSpeed(DVD_PLAYSPEED_NORMAL);
-					m_av_clock->OMXStateExecute();
-					m_av_clock->OMXStart();
+					//m_av_clock->SetSpeed(DVD_PLAYSPEED_NORMAL);
+//					m_av_clock->OMXStateExecute();
+					//m_av_clock->OMXStart();
 					isReady  = true;
 
 				}else 
@@ -185,6 +185,7 @@ void testApp::draw(){
 	{
 		return;
 	}
+	textureSource.draw(0, 0);
 	ofDrawBitmapStringHighlight(ofToString(m_av_clock->OMXMediaTime()), 200, 200, ofColor::black, ofColor::yellow);
 	/*ofLog(OF_LOG_VERBOSE, "OMXMediaTime: %8.02f", m_av_clock->OMXMediaTime());
 	ofLog(OF_LOG_VERBOSE, "GetDecoderBufferSize: %8d", m_player_video.GetDecoderBufferSize());
