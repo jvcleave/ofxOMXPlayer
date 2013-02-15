@@ -127,7 +127,7 @@ OMX_ERRORTYPE onFillBufferDone(OMX_HANDLETYPE hComponent,
 							   OMX_BUFFERHEADERTYPE* pBuffer)
 {    
 	
-	ofLogVerbose() << "onFillBufferDone<----------";
+	//ofLogVerbose() << "onFillBufferDone<----------";
 	//COMXCoreComponent *ctx = static_cast<COMXCoreComponent*>(pAppData);
 	OMX_ERRORTYPE didFillBuffer = OMX_FillThisBuffer(hComponent, pBuffer);
 	return didFillBuffer;

@@ -77,8 +77,8 @@ void testApp::setup(){
 	//
 	//m_filename = "/home/pi/P1020079.MOV";
 	//m_filename = "/home/pi/sorted_1280x720.mp4";
-	//m_filename = "/home/pi/lily_allen_-the_fear-_mk_ii_HD.mp4";
-	m_filename = "/home/pi/super8_vimeo_480x270.mp4";
+	m_filename = "/opt/vc/src/hello_pi/hello_video/test.h264";
+	//m_filename = "/home/pi/super8_vimeo_480x270.mp4";
 	if(m_omx_reader.Open(m_filename.c_str(), m_dump_format))
 	{
 		
@@ -103,9 +103,6 @@ void testApp::setup(){
 				if (didOpenVideo) 
 				{
 					ofLogVerbose() << "Opened video!";
-					//m_av_clock->SetSpeed(DVD_PLAYSPEED_NORMAL);
-//					m_av_clock->OMXStateExecute();
-					//m_av_clock->OMXStart();
 					isReady  = true;
 
 				}else 
@@ -135,23 +132,6 @@ void testApp::update()
 	{
 		return;
 	}
-
-	
-	
-	/*if(m_omx_reader.IsEof() && !m_omx_pkt)
-    {
-		if (!m_player_video.GetCached())
-		{
-			break;
-		}
-		// Abort audio buffering, now we're on our own
-		if (m_buffer_empty)
-		{
-			m_av_clock->OMXResume();
-		}
-		OMXClock::OMXSleep(10);
-		continue;
-    }*/
 	if(!m_omx_pkt)
 	{
 		m_omx_pkt = m_omx_reader.Read();
@@ -185,7 +165,7 @@ void testApp::draw(){
 	{
 		return;
 	}
-	textureSource.draw(0, 0);
+	textureSource.draw(0, 0, ofGetWidth(), ofGetHeight());
 	ofDrawBitmapStringHighlight(ofToString(ofGetFrameRate()), 200, 200, ofColor::black, ofColor::yellow);
 	/*ofLog(OF_LOG_VERBOSE, "OMXMediaTime: %8.02f", m_av_clock->OMXMediaTime());
 	ofLog(OF_LOG_VERBOSE, "GetDecoderBufferSize: %8d", m_player_video.GetDecoderBufferSize());
