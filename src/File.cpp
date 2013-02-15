@@ -69,7 +69,8 @@ unsigned int CFile::Read(void *lpBuf, int64_t uiBufSize)
 
   if(!m_pFile)
     return 0;
-
+//TODO
+//ENABLES TEMPORARY LOOPING
 	if (feof(m_pFile))
 	{
 		rewind(m_pFile);
