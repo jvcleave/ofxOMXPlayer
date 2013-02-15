@@ -17,23 +17,26 @@ ofxOMXPlayer::ofxOMXPlayer()
 	isMPEG               = false;
 	hasVideo           = false;
 	packet = NULL;
-	filepath = "NO FILENAME";
+	moviePath = "moviePath is undefined";
 	clock = NULL;
+	playerTex = NULL;
+	pixels = NULL;
+	m_Pause = false;
 	
 }
-void ofxOMXPlayer::setup(string filepath)
+void ofxOMXPlayer::loadMovie(string filepath)
 {
-	this->filepath = filepath; 
+	moviePath = filepath; 
 	rbp.Initialize();
 	omxCore.Initialize();
 	
 	clock = new OMXClock(); 
 	bool doDumpFormat = false;
 
-	if(omxReader.Open(filepath.c_str(), doDumpFormat))
+	if(omxReader.Open(moviePath.c_str(), doDumpFormat))
 	{
 		
-		ofLogVerbose() << "omxReader successfully opened: " << filepath;
+		ofLogVerbose() << "omxReader successfully opened moviePath : " << moviePath;
 		hasVideo     = omxReader.VideoStreamCount();
 		if (hasVideo) 
 		{
@@ -69,7 +72,7 @@ void ofxOMXPlayer::setup(string filepath)
 		}
 	}else 
 	{
-		ofLogError() << "omxReader could not open file: " << filepath;
+		ofLogError() << "omxReader could not open file: " << moviePath;
 	}
 	
 }
@@ -83,12 +86,12 @@ void ofxOMXPlayer::generateEGLImage()
 	ofLogVerbose() << "videoWidth: " << videoWidth;
 	ofLogVerbose() << "videoHeight: " << videoHeight;
 	
-	textureSource.allocate(videoWidth, videoHeight, GL_RGBA);
-	textureSource.getTextureData().bFlipTexture = true;
-	textureSource.setTextureWrap(GL_REPEAT, GL_REPEAT);
+	tex.allocate(videoWidth, videoHeight, GL_RGBA);
+	tex.getTextureData().bFlipTexture = true;
+	tex.setTextureWrap(GL_REPEAT, GL_REPEAT);
 	//textureSource.setTextureMinMagFilter(GL_NEAREST, GL_NEAREST);
 	//textureSource.setTextureWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-	texture = textureSource.getTextureData().textureID;
+	textureID = tex.getTextureData().textureID;
 	
 	
 	glEnable(GL_TEXTURE_2D);
@@ -102,7 +105,7 @@ void ofxOMXPlayer::generateEGLImage()
 	
     memset(pixelData, 0xff, dataSize);  // white texture, opaque
 	
-	glBindTexture(GL_TEXTURE_2D, texture);
+	glBindTexture(GL_TEXTURE_2D, textureID);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, videoWidth, videoHeight, 0,
 				 GL_RGBA, GL_UNSIGNED_BYTE, pixelData);
 	
@@ -114,7 +117,7 @@ void ofxOMXPlayer::generateEGLImage()
 								 display,
 								 context,
 								 EGL_GL_TEXTURE_2D_KHR,
-								 (EGLClientBuffer)texture,
+								 (EGLClientBuffer)textureID,
 								 0);
     glDisable(GL_TEXTURE_2D);
 	if (eglImage == EGL_NO_IMAGE_KHR)
@@ -126,8 +129,21 @@ void ofxOMXPlayer::generateEGLImage()
 	{
 		ofLogVerbose()	<< "Create EGLImage PASS";
 	}
-	
+	pixels = new ofPixels();
+	pixels->allocate(videoWidth, videoHeight, OF_PIXELS_RGBA);
 }
+
+//---------------------------------------------------------------------------
+//for getting a reference to the texture
+ofTexture & ofxOMXPlayer::getTextureReference(){
+	if(playerTex == NULL){
+		return tex;
+	}
+	else{
+		return *playerTex;
+	}
+}
+
 void ofxOMXPlayer::update()
 {
 	if(!isReady)
@@ -158,16 +174,74 @@ void ofxOMXPlayer::update()
 		}
 	}
 }
-
-
-void ofxOMXPlayer::draw()
-{
-	if(!isReady)
-	{
-		return;
-	}
+//--------------------------------------------------------
+void ofxOMXPlayer::play(){
 	
-	textureSource.draw(0, 0, ofGetWidth(), ofGetHeight());
+}
+
+//--------------------------------------------------------
+void ofxOMXPlayer::stop(){
+	
+}
+
+//---------------------------------------------------------------------------
+void ofxOMXPlayer::setPaused(bool _bPause){
+	m_Pause = _bPause;
+	if(m_Pause)
+	{
+		omxPlayerVideo.SetSpeed(OMX_PLAYSPEED_PAUSE);
+		clock->OMXPause();
+	}else 
+	{
+		omxPlayerVideo.SetSpeed(OMX_PLAYSPEED_NORMAL);
+		clock->OMXResume();
+	}
+
+			
+}
+
+//---------------------------------------------------------------------------
+unsigned char * ofxOMXPlayer::getPixels(){
+	if( pixels != NULL ){
+		return pixels->getPixels();
+	}
+	return NULL;	
+}
+
+//---------------------------------------------------------------------------
+ofPixelsRef ofxOMXPlayer::getPixelsRef(){
+	if (pixels ==NULL) 
+	{
+		//TODO figure this out
+		ofLogError() << "probably going to crash";
+	}
+	return *pixels;
+}
+
+//------------------------------------
+void ofxOMXPlayer::draw(float _x, float _y, float _w, float _h)
+{
+	if(!isReady) return;
+	getTextureReference().draw(_x, _y, _w, _h);	
+}
+
+//------------------------------------
+void ofxOMXPlayer::draw(float _x, float _y)
+{
+	if(!isReady) return;
+	getTextureReference().draw(_x, _y);
+}
+
+//----------------------------------------------------------
+float ofxOMXPlayer::getWidth()
+{
+	return videoWidth;
+}
+
+//----------------------------------------------------------
+float ofxOMXPlayer::getHeight()
+{
+	return videoHeight;
 }
 
 void ofxOMXPlayer::close()

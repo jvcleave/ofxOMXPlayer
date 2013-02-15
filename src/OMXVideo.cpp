@@ -344,7 +344,10 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglImag
 		return false;
 	}
 	portParam.nPortIndex = m_omx_decoder.GetInputPort();
-	portParam.nBufferCountActual = VIDEO_BUFFERS;
+	// JVC: I think numVideoBuffers can be probed for an optimal amount
+	// omxplayer uses 60 but maybe that takes away GPU memory for other operations?
+	int numVideoBuffers = 30;
+	portParam.nBufferCountActual = numVideoBuffers; 
 
 	portParam.format.video.nFrameWidth  = m_decoded_width;
 	portParam.format.video.nFrameHeight = m_decoded_height;
