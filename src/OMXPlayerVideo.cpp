@@ -134,7 +134,7 @@ bool OMXPlayerVideo::Close()
   m_iCurrentPts   = DVD_NOPTS_VALUE;
   m_pStream       = NULL;
   m_pts           = 0;
-  m_syncclock     = true;
+  m_syncclock     = false;
   m_speed         = DVD_PLAYSPEED_NORMAL;
 
   return true;

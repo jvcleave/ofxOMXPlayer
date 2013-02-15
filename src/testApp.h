@@ -22,6 +22,9 @@ class testApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);		
 	ofxOMXPlayer omxPlayer;
+	ofShader shader;
+	ofFbo fbo;
+	void updateFbo();
 
 };
 

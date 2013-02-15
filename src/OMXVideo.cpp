@@ -313,11 +313,11 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglImag
 
 	if (hints.fpsscale > 0 && hints.fpsrate > 0)
 	{
-		formatType.xFramerate = (long long)(1<<16)*hints.fpsrate / hints.fpsscale;
+		//formatType.xFramerate = (long long)(1<<16)*hints.fpsrate / hints.fpsscale;
 	}
 	else
 	{
-		formatType.xFramerate = 25 * (1<<16);
+		//formatType.xFramerate = 25 * (1<<16);
 	}
 
 	omx_err = m_omx_decoder.SetParameter(OMX_IndexParamVideoPortFormat, &formatType);

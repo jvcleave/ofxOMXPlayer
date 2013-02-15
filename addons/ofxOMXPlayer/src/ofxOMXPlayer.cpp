@@ -167,7 +167,7 @@ void ofxOMXPlayer::draw()
 		return;
 	}
 	
-	textureSource.draw(0, 0);
+	textureSource.draw(0, 0, ofGetWidth(), ofGetHeight());
 }
 
 void ofxOMXPlayer::close()

@@ -11,7 +11,7 @@
 #include "OMXReader.h"
 
 
-#define VIDEO_BUFFERS 60
+#define VIDEO_BUFFERS 30
 
 #define CLASSNAME "COMXVideo"
 
