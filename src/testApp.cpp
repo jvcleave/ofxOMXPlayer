@@ -67,7 +67,7 @@ void testApp::setup(){
 	
 	
 	
-	ofSetLogLevel(OF_LOG_VERBOSE);
+	ofSetLogLevel(OF_LOG_VERBOSE);  
 	g_RBP.Initialize();
 	g_OMX.Initialize();
 	
@@ -187,7 +187,10 @@ void testApp::exit(){
 		}
 		m_omx_reader.Close();
 	}
-	
+	if (eglImage !=NULL) 
+	{
+		eglDestroyImageKHR(display, eglImage);
+	}
 	
 	g_OMX.Deinitialize();
 	g_RBP.Deinitialize();

@@ -90,7 +90,7 @@ bool COMXVideo::SendDecoderConfig()
 
     if(omx_buffer == NULL)
     {
-      printf("\n%s::%s - buffer error 0x%08x", CLASSNAME, __func__, omx_err);
+      ofLog(OF_LOG_VERBOSE, "\n%s::%s - buffer error 0x%08x", CLASSNAME, __func__, omx_err);
       return false;
     }
 
@@ -98,7 +98,7 @@ bool COMXVideo::SendDecoderConfig()
     omx_buffer->nFilledLen = m_extrasize;
     if(omx_buffer->nFilledLen > omx_buffer->nAllocLen)
     {
-      printf("\n%s::%s - omx_buffer->nFilledLen > omx_buffer->nAllocLen", CLASSNAME, __func__);
+      ofLog(OF_LOG_VERBOSE, "\n%s::%s - omx_buffer->nFilledLen > omx_buffer->nAllocLen", CLASSNAME, __func__);
       return false;
     }
 
@@ -109,10 +109,10 @@ bool COMXVideo::SendDecoderConfig()
     omx_err = m_omx_decoder.EmptyThisBuffer(omx_buffer);
     if (omx_err != OMX_ErrorNone)
     {
-      printf("\n%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, omx_err);
+      ofLog(OF_LOG_VERBOSE, "\n%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, omx_err);
       return false;
     }else {
-		printf("COMXVideo::SendDecoderConfig m_extradata: %i ", m_extradata); 
+		ofLog(OF_LOG_VERBOSE, "COMXVideo::SendDecoderConfig m_extradata: %i ", m_extradata); 
 	}
 
   }
@@ -120,8 +120,6 @@ bool COMXVideo::SendDecoderConfig()
   
   return true;
 }
-COMXCoreComponent *m_omx_renderStatic;
-OMX_BUFFERHEADERTYPE* eglBufferStatic;
 OMX_ERRORTYPE onFillBufferDone(OMX_HANDLETYPE hComponent,
 							   OMX_PTR pAppData,
 							   OMX_BUFFERHEADERTYPE* pBuffer)
@@ -150,11 +148,9 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglImag
 
 	if(hints.extrasize > 0 && hints.extradata != NULL)
 	{
-	m_extrasize = hints.extrasize;
-	m_extradata = (uint8_t *)malloc(m_extrasize);
-	memcpy(m_extradata, hints.extradata, hints.extrasize);
-	printf("\nm_extrasize::::::::::::::::::::::::::: %u\n", m_extrasize);  
-	printf("\nm_extradata as U::::::::::::::::::::::::::: %u\n", m_extradata);
+		m_extrasize = hints.extrasize;
+		m_extradata = (uint8_t *)malloc(m_extrasize);
+		memcpy(m_extradata, hints.extradata, hints.extrasize);
 	}
 
 	switch (hints.codec)
@@ -259,7 +255,7 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglImag
 	  m_video_codec_name = "omx-vc1";
 	  break;    
 	default:
-	  printf("Vcodec id unknown: %x\n", hints.codec);
+	  ofLog(OF_LOG_VERBOSE, "Video codec id unknown: %x\n", hints.codec);
 	  return false;
 	break;
 	}
@@ -287,27 +283,26 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglImag
 
 	if(m_omx_clock->GetComponent() == NULL)
 	{
-	m_av_clock = NULL;
-	m_omx_clock = NULL;
-	return false;
+		m_av_clock = NULL; 
+		m_omx_clock = NULL;
+		return false; 
 	}
 
 	m_omx_tunnel_decoder.Initialize(&m_omx_decoder, m_omx_decoder.GetOutputPort(), &m_omx_sched, m_omx_sched.GetInputPort());
-
 	m_omx_tunnel_sched.Initialize(&m_omx_sched, m_omx_sched.GetOutputPort(), &m_omx_render, m_omx_render.GetInputPort());
 	m_omx_tunnel_clock.Initialize(m_omx_clock, m_omx_clock->GetInputPort() + 1, &m_omx_sched, m_omx_sched.GetOutputPort() + 1);
 
 	omx_err = m_omx_tunnel_clock.Establish(false);
 	if(omx_err != OMX_ErrorNone)
 	{
-	printf("\nCOMXVideo::Open m_omx_tunnel_clock.Establish\n");
-	return false;
+		ofLog(OF_LOG_VERBOSE, "\nCOMXVideo::Open m_omx_tunnel_clock.Establish\n");
+		return false;
 	}
 
 	omx_err = m_omx_decoder.SetStateForComponent(OMX_StateIdle);
 	if (omx_err != OMX_ErrorNone)
 	{
-		printf("\nCOMXVideo::Open m_omx_decoder.SetStateForComponent\n");
+		ofLog(OF_LOG_VERBOSE, "\nCOMXVideo::Open m_omx_decoder.SetStateForComponent\n");
 		return false;
 	}
 
@@ -334,8 +329,6 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglImag
 		ofLogError() << "m_omx_decoder SET OMX_IndexParamVideoPortFormat FAIL";
 		return false;
 	}
-
-	
 
 	OMX_PARAM_PORTDEFINITIONTYPE portParam;
 	OMX_INIT_STRUCTURE(portParam);
@@ -414,8 +407,6 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglImag
 		return false;
 	}
 
-
-
 	omx_err = m_omx_sched.SetStateForComponent(OMX_StateExecuting);
 	if(omx_err == OMX_ErrorNone)
 	{
@@ -447,12 +438,9 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglImag
 		return false;
 	}
 	
-	
-	
 	omx_err = m_omx_render.UseEGLImage(&eglBuffer, m_omx_render.GetOutputPort(), NULL, eglImage);
 	if(omx_err == OMX_ErrorNone)
 	{
-		eglBufferStatic = eglBuffer;
 		ofLogVerbose() << "m_omx_render UseEGLImage PASS";
 	}else 
 	{
@@ -461,13 +449,12 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglImag
 	}
 
 	
-	
 	if(SendDecoderConfig())
 	{
 		ofLogVerbose() << "SendDecoderConfig PASS";
 	}else 
 	{
-		ofLog(OF_LOG_ERROR, "SendDecoderConfig");
+		ofLog(OF_LOG_ERROR, "SendDecoderConfig FAIL");
 		return false;
 	}
 	
@@ -497,7 +484,7 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglImag
 	m_setStartTimeText  = true;
 
 
-	printf(
+	ofLog(OF_LOG_VERBOSE, 
 	"%s::%s - decoder_component(0x%p), input_port(0x%x), output_port(0x%x)\n",
 	CLASSNAME, __func__, m_omx_decoder.GetComponent(), m_omx_decoder.GetInputPort(), m_omx_decoder.GetOutputPort());
 
@@ -562,15 +549,14 @@ int COMXVideo::Decode(uint8_t *pData, int iSize, double dts, double pts)
       OMX_BUFFERHEADERTYPE *omx_buffer = m_omx_decoder.GetInputBuffer(500);
       if(omx_buffer == NULL)
       {
-        printf("\nOMXVideo::Decode timeout\n");
-        printf("COMXVideo::Decode timeout\n");
+        ofLog(OF_LOG_VERBOSE, "COMXVideo::Decode timeout\n");
         return false;
       }
 
      /* 
-      printf("\nCOMXVideo::Video VDec : pts %lld omx_buffer 0x%08x buffer 0x%08x number %d\n", 
+      ofLog(OF_LOG_VERBOSE, "\nCOMXVideo::Video VDec : pts %lld omx_buffer 0x%08x buffer 0x%08x number %d\n", 
           pts, omx_buffer, omx_buffer->pBuffer, (int)omx_buffer->pAppPrivate);
-      printf("VDec : pts %f omx_buffer 0x%08x buffer 0x%08x number %d\n", 
+      ofLog(OF_LOG_VERBOSE, "VDec : pts %f omx_buffer 0x%08x buffer 0x%08x number %d\n", 
           (float)pts / AV_TIME_BASE, omx_buffer, omx_buffer->pBuffer, (int)omx_buffer->pAppPrivate);*/
       
 
@@ -611,13 +597,12 @@ int COMXVideo::Decode(uint8_t *pData, int iSize, double dts, double pts)
         }
         else
         {
-          printf("\n%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, omx_err);
+          ofLog(OF_LOG_VERBOSE, "\n%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, omx_err);
           nRetry++;
         }
         if(nRetry == 5)
         {
-          printf("\n%s::%s - OMX_EmptyThisBuffer() finaly failed\n", CLASSNAME, __func__);
-          printf("%s::%s - OMX_EmptyThisBuffer() finaly failed\n", CLASSNAME, __func__);
+          ofLog(OF_LOG_VERBOSE, "\n%s::%s - OMX_EmptyThisBuffer() finaly failed\n", CLASSNAME, __func__);
           return false;
         }
       }
@@ -682,7 +667,7 @@ void COMXVideo::WaitCompletion()
   
   if(omx_buffer == NULL)
   {
-    printf("%s::%s - buffer error 0x%08x", CLASSNAME, __func__, omx_err);
+    ofLog(OF_LOG_VERBOSE, "%s::%s - buffer error 0x%08x", CLASSNAME, __func__, omx_err);
     return;
   }
   
@@ -695,7 +680,7 @@ void COMXVideo::WaitCompletion()
   omx_err = m_omx_decoder.EmptyThisBuffer(omx_buffer);
   if (omx_err != OMX_ErrorNone)
   {
-    printf("\n%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, omx_err);
+    ofLog(OF_LOG_VERBOSE, "\n%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, omx_err);
     return;
   }
 

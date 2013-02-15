@@ -1,4 +1,6 @@
 #pragma once
+#include "ofMain.h"
+
 #include <pthread.h>
 
 class OMXThread 

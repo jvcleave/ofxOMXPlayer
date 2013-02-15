@@ -72,7 +72,7 @@
 #
 #   Note: Leave a leading space when adding list items with the += operator
 ################################################################################
-PROJECT_EXCLUSIONS =$(PROJECT_ROOT)/ffmpeg/include%
+PROJECT_EXCLUSIONS =$(PROJECT_ROOT)/addons/ofxOMXPlayer/libs/ffmpeg/include%
 
 ################################################################################
 # PROJECT LINKER FLAGS
@@ -87,14 +87,15 @@ PROJECT_EXCLUSIONS =$(PROJECT_ROOT)/ffmpeg/include%
 # $(PROJECT_ROOT)/bin/libs directory.  The following LDFLAGS tell the linker to
 # add a runtime path to search for those shared libraries, since they aren't 
 # incorporated directly into the final executable application binary.
-# TODO: should this be a default setting?
-#PROJECT_LDFLAGS=-lc -lWFC -L$(PROJECT_ROOT)/ffmpeg/lib -lopenmaxil -lvchiq_arm -lvcos -lrt -lpthread -lavutil -lavcodec -lavformat -lswscale -lpcre
-FFMPEG_LIBS = $(PROJECT_ROOT)/ffmpeg/lib
-UTIL_STATIC=$(FFMPEG_LIBS)/libavutil.a
-CODEC_STATIC=$(FFMPEG_LIBS)/libavcodec.a
-FORMAT_STATIC=$(FFMPEG_LIBS)/libavformat.a
-SCALE_STATIC=$(FFMPEG_LIBS)/libswscale.a
 
+
+FFMPEG_LIBS = $(PROJECT_ROOT)/addons/ofxOMXPlayer/libs/ffmpeg/libs
+FORMAT_STATIC=$(FFMPEG_LIBS)/libavformat.a
+CODEC_STATIC=$(FFMPEG_LIBS)/libavcodec.a
+SCALE_STATIC=$(FFMPEG_LIBS)/libswscale.a
+UTIL_STATIC=$(FFMPEG_LIBS)/libavutil.a
+
+#unused but available
 FILTER_STATIC=$(FFMPEG_LIBS)/libavfilter.a
 POSTPROC_STATIC=$(FFMPEG_LIBS)/libpostproc.a
 DEVICE_STATIC=$(FFMPEG_LIBS)/libavdevice.a
@@ -111,7 +112,29 @@ PROJECT_LDFLAGS=-L$(FFMPEG_LIBS) $(FORMAT_STATIC) $(CODEC_STATIC) $(SCALE_STATIC
 #
 #   Note: Leave a leading space when adding list items with the += operator
 ################################################################################
-# PROJECT_DEFINES = 
+PROJECT_DEFINES += __STDC_CONSTANT_MACROS 
+PROJECT_DEFINES += __STDC_LIMIT_MACROS 
+PROJECT_DEFINES += TARGET_POSIX 
+PROJECT_DEFINES += _LINUX
+#http://en.wikipedia.org/wiki/Position-independent_code 
+PROJECT_DEFINES += PIC 
+#Defining _REENTRANT causes the compiler to use thread safe (i.e. re-entrant) versions of several functions in the C library.
+PROJECT_DEFINES += _REENTRANT 
+PROJECT_DEFINES += _LARGEFILE64_SOURCE 
+PROJECT_DEFINES += _FILE_OFFSET_BITS=64 
+PROJECT_DEFINES += HAVE_OMXLIB 
+PROJECT_DEFINES += USE_EXTERNAL_FFMPEG 
+PROJECT_DEFINES += HAVE_LIBAVCODEC_AVCODEC_H 
+PROJECT_DEFINES += HAVE_LIBAVUTIL_OPT_H 
+PROJECT_DEFINES += HAVE_LIBAVUTIL_MEM_H 
+PROJECT_DEFINES += HAVE_LIBAVUTIL_AVUTIL_H 
+PROJECT_DEFINES += HAVE_LIBAVFORMAT_AVFORMAT_H 
+PROJECT_DEFINES += HAVE_LIBAVFILTER_AVFILTER_H 
+PROJECT_DEFINES += HAVE_LIBSWRESAMPLE_SWRESAMPLE_H 
+PROJECT_DEFINES += OMX 
+PROJECT_DEFINES += OMX_SKIP64BIT 
+PROJECT_DEFINES += USE_EXTERNAL_OMX 
+#PROJECT_DEFINES += TARGET_RASPBERRY_PI 
 
 ################################################################################
 # PROJECT CFLAGS
@@ -128,7 +151,8 @@ PROJECT_LDFLAGS=-L$(FFMPEG_LIBS) $(FORMAT_STATIC) $(CODEC_STATIC) $(SCALE_STATIC
 #
 #   Note: Leave a leading space when adding list items with the += operator
 ################################################################################
-PROJECT_CFLAGS = -I$(PROJECT_ROOT)/ffmpeg/include -std=c++0x -DSTANDALONE -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -DTARGET_POSIX -D_LINUX -fPIC -DPIC -D_REENTRANT -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_CMAKE_CONFIG -D__VIDEOCORE4__ -U_FORTIFY_SOURCE -Wall -DHAVE_OMXLIB -DUSE_EXTERNAL_FFMPEG  -DHAVE_LIBAVCODEC_AVCODEC_H -DHAVE_LIBAVUTIL_OPT_H -DHAVE_LIBAVUTIL_MEM_H -DHAVE_LIBAVUTIL_AVUTIL_H -DHAVE_LIBAVFORMAT_AVFORMAT_H -DHAVE_LIBAVFILTER_AVFILTER_H -DHAVE_LIBSWRESAMPLE_SWRESAMPLE_H -DOMX -DOMX_SKIP64BIT -ftree-vectorize -DUSE_EXTERNAL_OMX -DTARGET_RASPBERRY_PI -DUSE_EXTERNAL_LIBBCM_HOST
+PROJECT_CFLAGS = -I$(PROJECT_ROOT)/addons/ofxOMXPlayer/libs/ffmpeg/include -fPIC -U_FORTIFY_SOURCE -Wall -ftree-vectorize -ftree-vectorize
+ 
 
 ################################################################################
 # PROJECT OPTIMIZATION CFLAGS
