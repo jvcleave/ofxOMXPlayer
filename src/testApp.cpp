@@ -175,7 +175,7 @@ void testApp::draw(){
 
 
 void testApp::exit(){
-	if (isReady) 
+	/*if (isReady) 
 	{
 		m_av_clock->OMXStop();
 		m_av_clock->OMXStateIdle();
@@ -190,10 +190,10 @@ void testApp::exit(){
 	if (eglImage !=NULL) 
 	{
 		eglDestroyImageKHR(display, eglImage);
-	}
+	}*/
 	
-	g_OMX.Deinitialize();
-	g_RBP.Deinitialize();
+	//g_OMX.Deinitialize();
+	//g_RBP.Deinitialize();
 }
 //--------------------------------------------------------------
 void testApp::keyPressed  (int key){

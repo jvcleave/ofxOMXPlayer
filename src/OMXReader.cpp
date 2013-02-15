@@ -401,7 +401,7 @@ OMXPacket *OMXReader::Read()
   //assert(!IsEof());
   if(IsEof())
   {
-	  SeekTime(0, AVSEEK_FLAG_BACKWARD, NULL);
+	  SeekTime(1, AVSEEK_FLAG_BACKWARD, NULL);
   }
   AVPacket  pkt;
   OMXPacket *m_omx_pkt = NULL;

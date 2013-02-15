@@ -70,8 +70,12 @@ unsigned int CFile::Read(void *lpBuf, int64_t uiBufSize)
   if(!m_pFile)
     return 0;
 
+	if (feof(m_pFile))
+	{
+		rewind(m_pFile);
+	}
   ret = fread(lpBuf, 1, uiBufSize, m_pFile);
-
+		
   return ret;
 }
 

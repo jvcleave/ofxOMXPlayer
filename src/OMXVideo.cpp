@@ -688,6 +688,7 @@ void COMXVideo::WaitCompletion()
   while(true)
   {
     if(m_omx_render.IsEOS())
+		//ofExit(0);
       break;
 
     OMXClock::OMXSleep(50);
