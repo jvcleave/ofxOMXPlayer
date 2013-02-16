@@ -37,50 +37,51 @@ void ofxOMXPlayer::loadMovie(string filepath)
 	if(omxReader.Open(moviePath.c_str(), doDumpFormat))
 	{
 		
-		ofLogVerbose() << "omxReader successfully opened moviePath : " << moviePath;
+		ofLogVerbose() << "omxReader open moviePath PASS: " << moviePath;
 		hasVideo     = omxReader.VideoStreamCount();
 		if (hasVideo) 
 		{
+			ofLogVerbose() << "Video streams detection PASS";
+			
 			bool hasAudio = false; //not implemented yet
 			if(clock->OMXInitialize(hasVideo, hasAudio))
 			{
-				ofLogVerbose() << "clock Init success";
+				ofLogVerbose() << "clock Init PASS";
 				
 				omxReader.GetHints(OMXSTREAM_VIDEO, streamInfo);
 				videoWidth	= streamInfo.width;
 				videoHeight	= streamInfo.height;
-
+				ofLogVerbose() << "SET videoWidth: " << videoWidth;
+				ofLogVerbose() << "SET videoHeight: " << videoHeight;	
 				generateEGLImage();
 				bool didOpenVideo = omxPlayerVideo.Open(streamInfo, clock, eglImage);
-				if(streamInfo.nb_frames>0 && omxPlayerVideo.GetFPS()>0)
-				{
-					duration = streamInfo.nb_frames / omxPlayerVideo.GetFPS();
-					ofLogVerbose() << "duration: " << duration;
-				}
-				
-				
-
 				if (didOpenVideo) 
 				{
-					ofLogVerbose() << "Opened video!";
+					if(streamInfo.nb_frames>0 && omxPlayerVideo.GetFPS()>0)
+					{
+						duration = streamInfo.nb_frames / omxPlayerVideo.GetFPS();
+						ofLogVerbose() << "duration SET: " << duration;
+					}
+					
+					ofLogVerbose() << "Opened video PASS";
 					isReady  = true;
 					
 				}else 
 				{
-					ofLogError() << "could not open video";
+					ofLogError() << "Opened video FAIL";
 				}
 				
 			}else 
 			{
-				ofLogError() << "clock could not init";
+				ofLogError() << "clock Init FAIL";
 			}
 		}else 
 		{
-			ofLogError() << "No Video detected";
+			ofLogError() << "Video streams detection FAIL";
 		}
 	}else 
 	{
-		ofLogError() << "omxReader could not open file: " << moviePath;
+		ofLogError() << "omxReader open moviePath FAIL: "  << moviePath;
 	}
 	
 }
@@ -91,8 +92,7 @@ void ofxOMXPlayer::generateEGLImage()
 	ofAppEGLWindow *appEGLWindow = (ofAppEGLWindow *) ofGetWindowPtr();
 	display = appEGLWindow->getEglDisplay();
 	context = appEGLWindow->getEglContext();
-	ofLogVerbose() << "videoWidth: " << videoWidth;
-	ofLogVerbose() << "videoHeight: " << videoHeight;
+
 	
 	tex.allocate(videoWidth, videoHeight, GL_RGBA);
 	tex.getTextureData().bFlipTexture = true;
@@ -101,10 +101,13 @@ void ofxOMXPlayer::generateEGLImage()
 	//textureSource.setTextureWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 	textureID = tex.getTextureData().textureID;
 	
-	
+	//TODO - should be a way to use ofPixels for the getPixels() functions?
 	glEnable(GL_TEXTURE_2D);
 	
-	
+	//pixels = new ofPixels();
+	//pixels->allocate(videoWidth, videoHeight, GL_RGBA);
+	//pixels->set(0xff);
+	//tex.bind();
 	// setup first texture
 	int dataSize = videoWidth * videoHeight * 4;
 	
@@ -137,8 +140,7 @@ void ofxOMXPlayer::generateEGLImage()
 	{
 		ofLogVerbose()	<< "Create EGLImage PASS";
 	}
-	pixels = new ofPixels();
-	pixels->allocate(videoWidth, videoHeight, OF_PIXELS_RGBA);
+
 }
 
 //---------------------------------------------------------------------------

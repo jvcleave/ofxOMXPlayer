@@ -4,6 +4,7 @@
 bool doShader = true;
 bool isPaused = false;
 bool doTestPausing = true;
+bool DO_HARD_EXIT = true;
 //--------------------------------------------------------------
 void testApp::setup()
 {
@@ -123,9 +124,15 @@ void testApp::updateFbo()
 
 void testApp::exit()
 {
+	if(DO_HARD_EXIT)
+	{
+		ofLogVerbose() << "testApp::exiting hard";
+		atexit(0);
+	}else 
+	{
+		omxPlayer.close();
+	}
 	
-	shader.unload();
-	omxPlayer.close();
 }
 //--------------------------------------------------------------
 void testApp::keyPressed  (int key){
