@@ -33,8 +33,8 @@ void COMXStreamInfo::Clear()
   level    = 0;
   profile  = 0;
   ptsinvalid = false;
-
-
+	duration = 0.0;
+	nb_frames = 0;
   framesize  = 0;
   syncword   = 0;
 }

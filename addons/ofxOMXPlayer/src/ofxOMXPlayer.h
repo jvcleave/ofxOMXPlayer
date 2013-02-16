@@ -27,18 +27,19 @@ public:
 	//bool 				isFrameNew();
 	unsigned char * 	getPixels();
 	ofPixelsRef			getPixelsRef();
-	/*float 				getPosition();
-	float 				getSpeed();
+//	float 				getPosition();
+//	float 				getSpeed();
+	float				duration;
 	float 				getDuration();
-	bool				getIsMovieDone();
+//	bool				getIsMovieDone();
 	
-	void 				setPosition(float pct);
-	void 				setVolume(float volume); // 0..1
-	void 				setLoopState(ofLoopType state);
-	ofLoopType			getLoopState();
-	void   				setSpeed(float speed);
-	void				setFrame(int frame);  // frame 0 = first frame...
-	*/
+//	void 				setPosition(float pct);
+//	void 				setVolume(float volume); // 0..1
+//	void 				setLoopState(ofLoopType state);
+//	ofLoopType			getLoopState();
+//	void   				setSpeed(float speed);
+//	void				setFrame(int frame);  // frame 0 = first frame...
+	
 	ofTexture &			getTextureReference();
 	void 				draw(float x, float y, float w, float h);
 	void 				draw(float x, float y);

@@ -698,7 +698,8 @@ bool OMXReader::GetHints(AVStream *stream, COMXStreamInfo *hints)
   hints->width         = stream->codec->width;
   hints->height        = stream->codec->height;
   hints->profile       = stream->codec->profile;
-
+  hints->duration       = stream->duration;
+	hints->nb_frames = stream->nb_frames;
   if(stream->codec->codec_type == AVMEDIA_TYPE_VIDEO)
   {
     hints->fpsrate       = stream->r_frame_rate.num;

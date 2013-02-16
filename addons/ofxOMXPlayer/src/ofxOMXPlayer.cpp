@@ -22,6 +22,7 @@ ofxOMXPlayer::ofxOMXPlayer()
 	playerTex = NULL;
 	pixels = NULL;
 	m_Pause = false;
+	duration = 0.0;
 	
 }
 void ofxOMXPlayer::loadMovie(string filepath)
@@ -48,10 +49,17 @@ void ofxOMXPlayer::loadMovie(string filepath)
 				omxReader.GetHints(OMXSTREAM_VIDEO, streamInfo);
 				videoWidth	= streamInfo.width;
 				videoHeight	= streamInfo.height;
-				
+
 				generateEGLImage();
 				bool didOpenVideo = omxPlayerVideo.Open(streamInfo, clock, eglImage);
+				if(streamInfo.nb_frames>0 && omxPlayerVideo.GetFPS()>0)
+				{
+					duration = streamInfo.nb_frames / omxPlayerVideo.GetFPS();
+					ofLogVerbose() << "duration: " << duration;
+				}
 				
+				
+
 				if (didOpenVideo) 
 				{
 					ofLogVerbose() << "Opened video!";
@@ -232,6 +240,12 @@ void ofxOMXPlayer::draw(float _x, float _y)
 	getTextureReference().draw(_x, _y);
 }
 
+//---------------------------------------------------------------------------
+float ofxOMXPlayer::getDuration(){
+	
+	
+	return duration;
+}
 //----------------------------------------------------------
 float ofxOMXPlayer::getWidth()
 {
