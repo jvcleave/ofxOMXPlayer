@@ -1430,7 +1430,7 @@ OMX_ERRORTYPE COMXCoreComponent::DecoderEventHandlerCallback(
 
 	if (eEvent == OMX_EventPortSettingsChanged ) 
 	{
-		ofLogVerbose() << "OMX_EventPortSettingsChanged!!!!!!!!!!!!!!!!!!!!!!!!!";
+		ofLogVerbose() << "OMX_EventPortSettingsChanged at ofGetElapsedTimeMillis: " << ofGetElapsedTimeMillis();
 	}
   COMXCoreComponent *ctx = static_cast<COMXCoreComponent*>(pAppData);
   return ctx->DecoderEventHandler(hComponent, pAppData, eEvent, nData1, nData2, pEventData);

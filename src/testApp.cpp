@@ -2,8 +2,11 @@
 
 
 bool doShader = true;
-bool isPaused = false;
-bool doTestPausing = true;
+bool doPause = false;
+bool doTestPausing = false;
+int pauseTestCounter = 0;
+bool doTestStop = true;
+bool doTestPlay = true;
 bool DO_HARD_EXIT = true;
 //--------------------------------------------------------------
 void testApp::setup()
@@ -20,7 +23,9 @@ void testApp::setup()
 		ofEnableAlphaBlending();
 	}
 	
-	
+/* to get these videos run command:
+ * wget -r -nd -P /home/pi/videos http://www.jvcref.com/files/PI/video/
+*/
 	string videoPath = "/opt/vc/src/hello_pi/hello_video/test.h264";
 	videoPath = "/home/pi/videos/";
 	
@@ -44,7 +49,7 @@ void testApp::setup()
 	//videoPath += "trailer_400p.ogg";
 	//videoPath += "big_buck_bunny_trailer_480p.webm";
 	
-//	videoPath += "super8_vimeo_480x270.mp4"; //download at http://vimeo.com/37754816
+//	videoPath += "super8_vimeo_480x270.mp4";
 	
 	
 	omxPlayer.loadMovie(videoPath);
@@ -53,7 +58,7 @@ void testApp::setup()
 //--------------------------------------------------------------
 void testApp::update()
 {
-	if(!omxPlayer.isReady)
+	if(!omxPlayer.isPlaying())
 	{
 		return;
 	}
@@ -68,7 +73,7 @@ void testApp::update()
 
 //--------------------------------------------------------------
 void testApp::draw(){
-	if(!omxPlayer.isReady)
+	if(!omxPlayer.isPlaying())
 	{
 		return;
 	}
@@ -82,11 +87,33 @@ void testApp::draw(){
 		omxPlayer.draw(0, 0, omxPlayer.getWidth()/4, omxPlayer.getHeight()/4);
 	}
 	//test Pausing
-	if (ofGetFrameNum() % 300 == 0) 
+	int millisecondsBeforeWeSeeSomething = 4000;
+	if (doTestPausing && ofGetElapsedTimeMillis()> millisecondsBeforeWeSeeSomething) 
 	{
-		isPaused = !isPaused;
-		ofLogVerbose() << "Setting isPaused to " << isPaused;
-		omxPlayer.setPaused(isPaused);
+		if (ofGetFrameNum() % 300 == 0) 
+		{
+			doPause = !doPause;
+			ofLogVerbose() << "Setting doPause to " << doPause;
+			omxPlayer.setPaused(doPause);
+			if (doTestStop) //give a few pauses then stop player
+			{
+				pauseTestCounter++; 
+				if (pauseTestCounter == 3) 
+				{
+					omxPlayer.stop();
+					if (doTestPlay) 
+					{
+						ofSleepMillis(2000);
+						omxPlayer.play();
+						doTestPausing = false;
+						doPause = false;
+						ofLogVerbose() << "testing over";
+					}
+				}
+			}
+			
+		}
+		
 	}
 	stringstream info;
 	
@@ -95,7 +122,7 @@ void testApp::draw(){
 	if (doTestPausing)
 	{
 		info << "\nPAUSED: ";
-		if (isPaused) 
+		if (doPause) 
 		{
 			info << "TRUE";
 		}else 

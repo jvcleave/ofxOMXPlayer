@@ -1,17 +1,7 @@
-/*
- *  ofxOMXPlayer.cpp
- *  openFrameworksLib
- *
- *  Created by jason van cleave on 2/15/13.
- *  Copyright 2013 jasonvancleave.com. All rights reserved.
- *
- */
-
 #include "ofxOMXPlayer.h"
 
 ofxOMXPlayer::ofxOMXPlayer()
 {
-	isReady = false;
 	videoWidth = 0;
 	videoHeight =0;
 	isMPEG               = false;
@@ -21,7 +11,8 @@ ofxOMXPlayer::ofxOMXPlayer()
 	clock = NULL;
 	playerTex = NULL;
 	pixels = NULL;
-	m_Pause = false;
+	bPaused = false;
+	bPlaying = false;
 	duration = 0.0;
 	
 }
@@ -47,29 +38,8 @@ void ofxOMXPlayer::loadMovie(string filepath)
 			if(clock->OMXInitialize(hasVideo, hasAudio))
 			{
 				ofLogVerbose() << "clock Init PASS";
+				openPlayer();
 				
-				omxReader.GetHints(OMXSTREAM_VIDEO, streamInfo);
-				videoWidth	= streamInfo.width;
-				videoHeight	= streamInfo.height;
-				ofLogVerbose() << "SET videoWidth: " << videoWidth;
-				ofLogVerbose() << "SET videoHeight: " << videoHeight;	
-				generateEGLImage();
-				bool didOpenVideo = omxPlayerVideo.Open(streamInfo, clock, eglImage);
-				if (didOpenVideo) 
-				{
-					if(streamInfo.nb_frames>0 && omxPlayerVideo.GetFPS()>0)
-					{
-						duration = streamInfo.nb_frames / omxPlayerVideo.GetFPS();
-						ofLogVerbose() << "duration SET: " << duration;
-					}
-					
-					ofLogVerbose() << "Opened video PASS";
-					isReady  = true;
-					
-				}else 
-				{
-					ofLogError() << "Opened video FAIL";
-				}
 				
 			}else 
 			{
@@ -85,6 +55,30 @@ void ofxOMXPlayer::loadMovie(string filepath)
 	}
 	
 }
+void ofxOMXPlayer::openPlayer()
+{
+	omxReader.GetHints(OMXSTREAM_VIDEO, streamInfo);
+	videoWidth	= streamInfo.width;
+	videoHeight	= streamInfo.height;
+	ofLogVerbose() << "SET videoWidth: " << videoWidth;
+	ofLogVerbose() << "SET videoHeight: " << videoHeight;	
+	generateEGLImage();
+	bPlaying = omxPlayerVideo.Open(streamInfo, clock, eglImage);
+	if (isPlaying()) 
+	{
+		if(streamInfo.nb_frames>0 && omxPlayerVideo.GetFPS()>0)
+		{
+			duration = streamInfo.nb_frames / omxPlayerVideo.GetFPS();
+			ofLogVerbose() << "duration SET: " << duration;
+		}
+		
+		ofLogVerbose() << "Opened video PASS";					
+	}else 
+	{
+		ofLogError() << "Opened video FAIL";
+	}
+}
+
 void ofxOMXPlayer::generateEGLImage()
 {
 	ofDisableArbTex();
@@ -103,11 +97,7 @@ void ofxOMXPlayer::generateEGLImage()
 	
 	//TODO - should be a way to use ofPixels for the getPixels() functions?
 	glEnable(GL_TEXTURE_2D);
-	
-	//pixels = new ofPixels();
-	//pixels->allocate(videoWidth, videoHeight, GL_RGBA);
-	//pixels->set(0xff);
-	//tex.bind();
+
 	// setup first texture
 	int dataSize = videoWidth * videoHeight * 4;
 	
@@ -140,7 +130,8 @@ void ofxOMXPlayer::generateEGLImage()
 	{
 		ofLogVerbose()	<< "Create EGLImage PASS";
 	}
-
+	/*pixels = new ofPixels();
+	pixels->allocate(videoWidth, videoHeight, GL_RGBA);*/
 }
 
 //---------------------------------------------------------------------------
@@ -156,7 +147,7 @@ ofTexture & ofxOMXPlayer::getTextureReference(){
 
 void ofxOMXPlayer::update()
 {
-	if(!isReady)
+	if(!isPlaying())
 	{
 		return;
 	}
@@ -186,18 +177,27 @@ void ofxOMXPlayer::update()
 }
 //--------------------------------------------------------
 void ofxOMXPlayer::play(){
-	
+	ofLogVerbose() << "TODO: not sure what to do with this - reopen the player?";
+	/*clock->SetSpeed(OMX_PLAYSPEED_NORMAL);
+	clock->OMXStateExecute();
+	clock->OMXStart();
+	bPlaying = openPlayer();*/
 }
 
 //--------------------------------------------------------
-void ofxOMXPlayer::stop(){
-	
+void ofxOMXPlayer::stop()
+{
+	clock->OMXStop();
+	clock->OMXStateIdle();
+	omxPlayerVideo.Close();
+	bPlaying = false;
+	ofLogVerbose() << "ofxOMXPlayer::stop called";
 }
 
 //---------------------------------------------------------------------------
 void ofxOMXPlayer::setPaused(bool _bPause){
-	m_Pause = _bPause;
-	if(m_Pause)
+	bPaused = _bPause;
+	if(bPaused)
 	{
 		omxPlayerVideo.SetSpeed(OMX_PLAYSPEED_PAUSE);
 		clock->OMXPause();
@@ -220,7 +220,7 @@ unsigned char * ofxOMXPlayer::getPixels(){
 
 //---------------------------------------------------------------------------
 ofPixelsRef ofxOMXPlayer::getPixelsRef(){
-	if (pixels ==NULL) 
+	if (pixels == NULL) 
 	{
 		//TODO figure this out
 		ofLogError() << "probably going to crash";
@@ -231,14 +231,14 @@ ofPixelsRef ofxOMXPlayer::getPixelsRef(){
 //------------------------------------
 void ofxOMXPlayer::draw(float _x, float _y, float _w, float _h)
 {
-	if(!isReady) return;
+	if(!isPlaying()) return;
 	getTextureReference().draw(_x, _y, _w, _h);	
 }
 
 //------------------------------------
 void ofxOMXPlayer::draw(float _x, float _y)
 {
-	if(!isReady) return;
+	if(!isPlaying()) return;
 	getTextureReference().draw(_x, _y);
 }
 
@@ -260,13 +260,22 @@ float ofxOMXPlayer::getHeight()
 	return videoHeight;
 }
 
+//----------------------------------------------------------
+bool ofxOMXPlayer::isPaused()
+{
+	return bPaused;
+}
+
+//----------------------------------------------------------
+bool ofxOMXPlayer::isPlaying(){
+	return bPlaying;
+}
+
 void ofxOMXPlayer::close()
 {
-	if(isReady) 
+	if(isPlaying()) 
 	 {
-		 clock->OMXStop();
-		 clock->OMXStateIdle();
-		 omxPlayerVideo.Close();
+		  stop();
 	 }
 	 if(packet)
 	 {
@@ -282,4 +291,5 @@ void ofxOMXPlayer::close()
 
 	omxCore.Deinitialize();
 	rbp.Deinitialize();
+	ofLogVerbose() << "reached end of ofxOMXPlayer::close";
 }

@@ -73,6 +73,7 @@ unsigned int CFile::Read(void *lpBuf, int64_t uiBufSize)
 //ENABLES TEMPORARY LOOPING
 	if (feof(m_pFile))
 	{
+		printf("Looping file in CFile::Read");
 		rewind(m_pFile);
 	}
   ret = fread(lpBuf, 1, uiBufSize, m_pFile);

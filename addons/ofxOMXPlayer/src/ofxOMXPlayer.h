@@ -61,9 +61,9 @@ public:
 	float 				getHeight();
 	float 				getWidth();
 	
-//	bool				isPaused();
+	bool				isPaused();
 //	bool				isLoaded();
-//	bool				isPlaying();
+	bool				isPlaying();
 	
 	CRBP                  rbp;
 	COMXCore              omxCore;
@@ -79,13 +79,12 @@ public:
 	
 	DllBcmHost        bcmHost;
 	
-	bool isReady;
 	
 	OMXPacket* packet;
 	
 	GLuint textureID;
-	bool m_Pause;
-	
+	bool bPaused;
+	bool bPlaying;
 	
 	int videoWidth;
 	int videoHeight;
@@ -95,6 +94,7 @@ public:
 	EGLImageKHR eglImage;
 	
 	void generateEGLImage();
+	void openPlayer();
 	ofPixels* pixels;
 	void close();
 private:
