@@ -14,6 +14,7 @@ ofxOMXPlayer::ofxOMXPlayer()
 	bPaused = false;
 	bPlaying = false;
 	duration = 0.0;
+	nFrames = 0;
 	
 }
 void ofxOMXPlayer::loadMovie(string filepath)
@@ -68,6 +69,7 @@ void ofxOMXPlayer::openPlayer()
 	{
 		if(streamInfo.nb_frames>0 && omxPlayerVideo.GetFPS()>0)
 		{
+			nFrames = streamInfo.nb_frames;
 			duration = streamInfo.nb_frames / omxPlayerVideo.GetFPS();
 			ofLogVerbose() << "duration SET: " << duration;
 		}
@@ -248,6 +250,36 @@ float ofxOMXPlayer::getDuration(){
 	
 	return duration;
 }
+double startpts = 0;
+void ofxOMXPlayer::setPosition(float pct)
+{
+	if (!isPlaying()) 
+	{
+		return;
+	}
+	
+	//int m_seek_pos = 0;\
+
+	ofLogVerbose() << "pct: " << pct;
+	ofLogVerbose() << "duration: " << duration;
+	ofLogVerbose() << "omxPlayerVideo.GetFPS(): " << omxPlayerVideo.GetFPS();
+	float maxPoints = (float)duration*(float)omxPlayerVideo.GetFPS();
+	ofLogVerbose() << "maxPoints: " << maxPoints;
+	
+	float m_seek_pos = ofMap(pct, 0.0f, 100.0f, 0.0f, maxPoints);
+	
+	ofLogVerbose() << "m_seek_pos: " << m_seek_pos;
+	
+	ofLog(OF_LOG_VERBOSE, "\nSeeking start of video to %f\n", m_seek_pos);
+	omxReader.SeekTime(m_seek_pos, 0, &startpts);  // from seconds to DVD_TIME_BASE
+}
+
+
+//------------------------------------
+int ofxOMXPlayer::getTotalNumFrames(){
+	return nFrames;
+}
+
 //----------------------------------------------------------
 float ofxOMXPlayer::getWidth()
 {
@@ -292,4 +324,17 @@ void ofxOMXPlayer::close()
 	omxCore.Deinitialize();
 	rbp.Deinitialize();
 	ofLogVerbose() << "reached end of ofxOMXPlayer::close";
+}
+
+double ofxOMXPlayer::getMediaTime()
+{
+	double mediaTime = 0.0;
+	if(isPlaying()) 
+	{
+		mediaTime =  clock->OMXMediaTime();
+	}
+	
+	return mediaTime;
+
+	
 }

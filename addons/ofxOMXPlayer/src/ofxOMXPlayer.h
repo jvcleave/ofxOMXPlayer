@@ -33,7 +33,7 @@ public:
 	float 				getDuration();
 //	bool				getIsMovieDone();
 	
-//	void 				setPosition(float pct);
+	void 				setPosition(float pct);
 //	void 				setVolume(float volume); // 0..1
 //	void 				setLoopState(ofLoopType state);
 //	ofLoopType			getLoopState();
@@ -95,6 +95,7 @@ public:
 	
 	void generateEGLImage();
 	void openPlayer();
+	double				getMediaTime();
 	ofPixels* pixels;
 	void close();
 private:
@@ -103,6 +104,6 @@ private:
 	ofTexture * playerTex; // a seperate texture that may be optionally implemented by the player to avoid excessive pixel copying.
 	ofPixelFormat internalPixelFormat;
 	string moviePath;
-	
+	int nFrames;
 };
 

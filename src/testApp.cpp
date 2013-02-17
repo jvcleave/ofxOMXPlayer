@@ -4,10 +4,14 @@
 bool doShader = true;
 bool doPause = false;
 bool doTestPausing = false;
-int pauseTestCounter = 0;
-bool doTestStop = true;
-bool doTestPlay = true;
+//pausing needed for stop/play testing
+	int pauseTestCounter = 0;
+	bool doTestStop = true;
+	bool doTestPlay = true;
+
 bool DO_HARD_EXIT = true;
+
+bool doTestSeeking = false; //needs work
 //--------------------------------------------------------------
 void testApp::setup()
 {
@@ -115,13 +119,24 @@ void testApp::draw(){
 		}
 		
 	}
+	if (doTestSeeking) 
+	{
+		if (ofGetElapsedTimeMillis()> millisecondsBeforeWeSeeSomething)
+		{
+			if (ofGetFrameNum() % 50 == 0) 
+			{
+				omxPlayer.setPosition(ofRandom(1.0f, 100.0f));
+			}
+		}
+		
+	}
 	stringstream info;
 	
 	info << "APP FPS: "+ ofToString(ofGetFrameRate());
 	
 	if (doTestPausing)
 	{
-		info << "\nPAUSED: ";
+		info << "\n" <<" PAUSED: ";
 		if (doPause) 
 		{
 			info << "TRUE";
@@ -130,6 +145,10 @@ void testApp::draw(){
 			info << "FALSE";
 		}	
 	}
+	info <<"\n" <<	"MEDIA TIME: "			<< omxPlayer.getMediaTime();
+	info <<"\n" <<	"DIMENSIONS: "			<< omxPlayer.getWidth()<<"x"<<omxPlayer.getHeight();
+	info <<"\n" <<	"DURATION: "			<< omxPlayer.getDuration();
+	info <<"\n" <<	"TOTAL FRAMES: "		<< omxPlayer.getTotalNumFrames();
 	
 	ofDrawBitmapStringHighlight(info.str(), 200, 200, ofColor::black, ofColor::yellow);
 
