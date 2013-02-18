@@ -25,6 +25,7 @@ class testApp : public ofBaseApp{
 	ofShader shader;
 	ofFbo fbo;
 	void updateFbo();
+	bool doShader;
 
 };
 

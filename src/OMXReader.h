@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ofMain.h"
+
 #include "DllAvUtil.h"
 #include "DllAvFormat.h"
 #include "DllAvCodec.h"
@@ -102,37 +104,39 @@ protected:
   bool                      m_seek;
 private:
 public:
-  OMXReader();
-  ~OMXReader();
-  bool Open(std::string filename, bool dump_format);
-  void ClearStreams();
-  bool Close();
-  //void FlushRead();
-  bool SeekTime(int64_t seek_ms, int seek_flags, double *startpts);
-  AVMediaType PacketType(OMXPacket *pkt);
-  OMXPacket *Read();
-  void Process();
-  bool GetStreams();
-  void AddStream(int id);
-  bool IsActive(int stream_index);
-  bool IsActive(OMXStreamType type, int stream_index);
-  bool GetHints(AVStream *stream, COMXStreamInfo *hints);
-  bool GetHints(OMXStreamType type, unsigned int index, COMXStreamInfo &hints);
-  bool GetHints(OMXStreamType type, COMXStreamInfo &hints);
-  bool IsEof();
-  int  AudioStreamCount() { return m_audio_count; };
-  int  VideoStreamCount() { return m_video_count; };
-  bool SetActiveStream(OMXStreamType type, unsigned int index);
-  static void FreePacket(OMXPacket *pkt);
-  static OMXPacket *AllocPacket(int size);
-  void SetSpeed(int iSpeed);
-  void UpdateCurrentPTS();
-  double ConvertTimestamp(int64_t pts, int den, int num);
-  double ConvertTimestamp(int64_t pts, AVRational *time_base);
-  int GetAudioIndex() { return (m_audio_index >= 0) ? m_streams[m_audio_index].index : -1; };
-  int GetStreamLength();
-  static double NormalizeFrameduration(double frameduration);
-  bool IsMpegVideo() { return m_bMpeg; };
-  std::string GetStreamCodecName(AVStream *stream);
-  int GetSourceBitrate();
+	OMXReader();
+	~OMXReader();
+	bool Open(std::string filename, bool dump_format);
+	void ClearStreams();
+	bool Close();
+	//void FlushRead();
+	bool SeekTime(int64_t seek_ms, int seek_flags, double *startpts);
+	AVMediaType PacketType(OMXPacket *pkt);
+	OMXPacket *Read();
+	void Process();
+	bool GetStreams();
+	void AddStream(int id);
+	bool IsActive(int stream_index);
+	bool IsActive(OMXStreamType type, int stream_index);
+	bool GetHints(AVStream *stream, COMXStreamInfo *hints);
+	bool GetHints(OMXStreamType type, unsigned int index, COMXStreamInfo &hints);
+	bool GetHints(OMXStreamType type, COMXStreamInfo &hints);
+	bool IsEof();
+	int  AudioStreamCount() { return m_audio_count; };
+	int  VideoStreamCount() { return m_video_count; };
+	bool SetActiveStream(OMXStreamType type, unsigned int index);
+	static void FreePacket(OMXPacket *pkt);
+	static OMXPacket *AllocPacket(int size);
+	void SetSpeed(int iSpeed);
+	void UpdateCurrentPTS();
+	double ConvertTimestamp(int64_t pts, int den, int num);
+	double ConvertTimestamp(int64_t pts, AVRational *time_base);
+	int GetAudioIndex() { return (m_audio_index >= 0) ? m_streams[m_audio_index].index : -1; };
+	int GetStreamLength();
+	static double NormalizeFrameduration(double frameduration);
+	bool IsMpegVideo() { return m_bMpeg; };
+	std::string GetStreamCodecName(AVStream *stream);
+	int GetSourceBitrate();
+	ofLoopType			currentLoopState;
+
 };

@@ -401,7 +401,30 @@ OMXPacket *OMXReader::Read()
   //assert(!IsEof());
   if(IsEof())
   {
-	  SeekTime(1, AVSEEK_FLAG_BACKWARD, NULL);
+	  //SeekTime(1, AVSEEK_FLAG_BACKWARD, NULL);
+	  /*switch (currentLoopState) 
+	   {
+	   case OF_LOOP_NORMAL:
+	   {
+	   ofLogVerbose() << "OMXReader::Read Applying OF_LOOP_NORMAL";
+	   m_eof = false;
+	   SeekTime(0.0, AVSEEK_FLAG_BACKWARD, NULL);
+	   break; 
+	   }
+	   case OF_LOOP_PALINDROME:
+	   {
+	   ofLogVerbose() << "OMXReader::Read OF_LOOP_PALINDROME Not Implemented";
+	   break;
+	   }
+	   case OF_LOOP_NONE:
+	   {
+	   break;
+	   }
+	   default:
+	   {
+	   break;
+	   }  
+	   }*/
   }
   AVPacket  pkt;
   OMXPacket *m_omx_pkt = NULL;

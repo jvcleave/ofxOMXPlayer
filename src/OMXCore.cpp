@@ -623,7 +623,7 @@ OMX_ERRORTYPE COMXCoreComponent::AllocInputBuffers(bool use_buffers /* = false *
     buffer->nOffset         = 0;
     buffer->pAppPrivate     = (void*)i;  
     m_omx_input_buffers.push_back(buffer);
-	 ofLog(OF_LOG_VERBOSE, "BUFFER SIZE %d", m_omx_input_buffers.size());
+	  //ofLog(OF_LOG_VERBOSE, "BUFFER SIZE %d", m_omx_input_buffers.size());
     m_omx_input_avaliable.push(buffer);
   }
 

@@ -27,7 +27,7 @@ public:
 	//bool 				isFrameNew();
 	unsigned char * 	getPixels();
 	ofPixelsRef			getPixelsRef();
-//	float 				getPosition();
+	float 				getPosition();
 //	float 				getSpeed();
 	float				duration;
 	float 				getDuration();
@@ -35,8 +35,8 @@ public:
 	
 	void 				setPosition(float pct);
 //	void 				setVolume(float volume); // 0..1
-//	void 				setLoopState(ofLoopType state);
-//	ofLoopType			getLoopState();
+	void 				setLoopState(ofLoopType state);
+	ofLoopType			getLoopState();
 //	void   				setSpeed(float speed);
 //	void				setFrame(int frame);  // frame 0 = first frame...
 	

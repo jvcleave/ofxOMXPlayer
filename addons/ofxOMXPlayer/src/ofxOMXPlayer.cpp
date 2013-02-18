@@ -243,14 +243,18 @@ void ofxOMXPlayer::draw(float _x, float _y)
 	if(!isPlaying()) return;
 	getTextureReference().draw(_x, _y);
 }
-
+//---------------------------------------------------------------------------
+float ofxOMXPlayer::getPosition(){
+	//TODO: check if behavior is the same
+	return getMediaTime();
+}
 //---------------------------------------------------------------------------
 float ofxOMXPlayer::getDuration(){
 	
 	
 	return duration;
 }
-double startpts = 0;
+
 void ofxOMXPlayer::setPosition(float pct)
 {
 	if (!isPlaying()) 
@@ -258,23 +262,32 @@ void ofxOMXPlayer::setPosition(float pct)
 		return;
 	}
 	
-	//int m_seek_pos = 0;\
+	//int m_seek_pos = 0;
 
 	ofLogVerbose() << "pct: " << pct;
 	ofLogVerbose() << "duration: " << duration;
 	ofLogVerbose() << "omxPlayerVideo.GetFPS(): " << omxPlayerVideo.GetFPS();
-	float maxPoints = (float)duration*(float)omxPlayerVideo.GetFPS();
+	float maxPoints = duration*(float)omxPlayerVideo.GetFPS();
 	ofLogVerbose() << "maxPoints: " << maxPoints;
 	
-	float m_seek_pos = ofMap(pct, 0.0f, 100.0f, 0.0f, maxPoints);
+	float m_seek_pos = ofMap(pct, 0.0f, 100.0f, 0.0f, getMediaTime());
 	
 	ofLogVerbose() << "m_seek_pos: " << m_seek_pos;
-	
+	double startpts;
 	ofLog(OF_LOG_VERBOSE, "\nSeeking start of video to %f\n", m_seek_pos);
-	omxReader.SeekTime(m_seek_pos, 0, &startpts);  // from seconds to DVD_TIME_BASE
+	omxReader.SeekTime(m_seek_pos, AVSEEK_FLAG_BACKWARD, &startpts);  // from seconds to DVD_TIME_BASE
+	ofLogVerbose() << "SEEK RESULT: " << startpts;
+}
+void ofxOMXPlayer::setLoopState(ofLoopType state){
+	
+
+omxReader.currentLoopState = state;
 }
 
-
+//---------------------------------------------------------------------------
+ofLoopType ofxOMXPlayer::getLoopState(){
+	return omxReader.currentLoopState;
+}
 //------------------------------------
 int ofxOMXPlayer::getTotalNumFrames(){
 	return nFrames;

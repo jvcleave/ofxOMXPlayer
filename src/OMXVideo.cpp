@@ -313,11 +313,11 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglImag
 
 	if (hints.fpsscale > 0 && hints.fpsrate > 0)
 	{
-		//formatType.xFramerate = (long long)(1<<16)*hints.fpsrate / hints.fpsscale;
+		formatType.xFramerate = (long long)(1<<16)*hints.fpsrate / hints.fpsscale;
 	}
 	else
 	{
-		//formatType.xFramerate = 25 * (1<<16);
+		formatType.xFramerate = 25 * (1<<16);
 	}
 
 	omx_err = m_omx_decoder.SetParameter(OMX_IndexParamVideoPortFormat, &formatType);
@@ -346,7 +346,7 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglImag
 	portParam.nPortIndex = m_omx_decoder.GetInputPort();
 	// JVC: I think numVideoBuffers can be probed for an optimal amount
 	// omxplayer uses 60 but maybe that takes away GPU memory for other operations?
-	int numVideoBuffers = 30;
+	int numVideoBuffers = 60;
 	portParam.nBufferCountActual = numVideoBuffers; 
 
 	portParam.format.video.nFrameWidth  = m_decoded_width;
@@ -364,7 +364,7 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglImag
 
 
 	// Alloc buffers for the omx intput port.
-	omx_err = m_omx_decoder.AllocInputBuffers(false);
+	omx_err = m_omx_decoder.AllocInputBuffers(true);
 	if(omx_err == OMX_ErrorNone)
 	{
 		ofLogVerbose() << "m_omx_decoder AllocInputBuffers PASS";
