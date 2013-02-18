@@ -1,20 +1,25 @@
 #include "ofMain.h"
-#include "testApp.h"
-#ifdef TARGET_OPENGLES
-#include "ofGLES2Renderer.h"
+
+#define USE_DEVELOP_APP
+
+#ifdef USE_DEVELOP_APP
+	#include "developApp.h"
+#warning "!!!!!!! YOU ARE USING THE developApp WHEN YOU PROBABLY WANT THE testApp !!!!!!!!"
+#else
+	#include "testApp.h"
 #endif
+
+#include "ofGLES2Renderer.h"
+
 //========================================================================
 int main( ){
-
 	ofSetLogLevel(OF_LOG_VERBOSE);
-	#ifdef TARGET_OPENGLES
 	ofSetCurrentRenderer(ofPtr<ofBaseRenderer>(new ofGLES2Renderer()));
+	ofSetupOpenGL(1280,720, OF_WINDOW);
+
+	#ifdef USE_DEVELOP_APP
+		ofRunApp( new developApp());
+	#else
+		ofRunApp( new testApp());
 	#endif
-	ofSetupOpenGL(1280,720, OF_WINDOW);			// <-------- setup the GL context
-
-	// this kicks off the running of my app
-	// can be OF_WINDOW or OF_FULLSCREEN
-	// pass in width and height too:
-	ofRunApp( new testApp());
-
 }

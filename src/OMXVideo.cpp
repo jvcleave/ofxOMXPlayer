@@ -58,7 +58,6 @@
 #define OMX_THEORA_DECODER      OMX_VIDEO_DECODER
 #define OMX_MJPEG_DECODER       OMX_VIDEO_DECODER
 
-#define MAX_TEXT_LENGTH 1024
 
 COMXVideo::COMXVideo()
 {
@@ -361,7 +360,43 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglImag
 		ofLog(OF_LOG_ERROR, "m_omx_decoder SET OMX_IndexParamPortDefinition FAIL omx_err(0x%08x)\n", omx_err);
 		return false;
 	}
+	
+	// broadcom omx entension:
+	// When enabled, the timestamp fifo mode will change the way incoming timestamps are associated with output images.
+	// In this mode the incoming timestamps get used without re-ordering on output images
+	OMX_PARAM_BRCMVIDEODECODEERRORCONCEALMENTTYPE concanParam;
+	OMX_INIT_STRUCTURE(concanParam);
+	concanParam.bStartWithValidFrame = OMX_FALSE;
+	
+	omx_err = m_omx_decoder.SetParameter(OMX_IndexParamBrcmVideoDecodeErrorConcealment, &concanParam);
+	if(omx_err == OMX_ErrorNone)
+	{
+		ofLogVerbose()	<< "m_omx_decoder OMX_IndexParamBrcmVideoDecodeErrorConcealment PASS";
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "m_omx_decoder OMX_IndexParamBrcmVideoDecodeErrorConcealment FAIL omx_err(0x%08x)\n", omx_err);
+		return false;
+	}
+	
+	if(NaluFormatStartCodes(hints.codec, m_extradata, m_extrasize))
+	{
+		OMX_NALSTREAMFORMATTYPE nalStreamFormat;
+		OMX_INIT_STRUCTURE(nalStreamFormat);
+		nalStreamFormat.nPortIndex = m_omx_decoder.GetInputPort();
+		nalStreamFormat.eNaluFormat = OMX_NaluFormatOneNaluPerBuffer;
+		
+		omx_err = m_omx_decoder.SetParameter((OMX_INDEXTYPE)OMX_IndexParamNalStreamFormatSelect, &nalStreamFormat);
+		if (omx_err == OMX_ErrorNone)
+		{
+			ofLogVerbose()	<< "Open OMX_IndexParamNalStreamFormatSelect PASS";
+		}else 
+		{
+			ofLog(OF_LOG_ERROR, "Open OMX_IndexParamNalStreamFormatSelect FAIL (0%08x)\n", omx_err);
+			return false;
+		}
 
+	}
+	
 
 	// Alloc buffers for the omx intput port.
 	omx_err = m_omx_decoder.AllocInputBuffers(true);
@@ -493,6 +528,21 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglImag
 
 	m_first_frame   = true;
 	return true;
+}
+
+bool COMXVideo::NaluFormatStartCodes(enum CodecID codec, uint8_t *in_extradata, int in_extrasize)
+{
+	switch(codec)
+	{
+		case CODEC_ID_H264:
+			if (in_extrasize < 7 || in_extradata == NULL)
+				return true;
+			// valid avcC atom data always starts with the value 1 (version), otherwise annexb
+			else if ( *in_extradata != 1 )
+				return true;
+		default: break;
+	}
+	return false;    
 }
 
 void COMXVideo::Close()

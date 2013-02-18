@@ -138,5 +138,5 @@ public:
 	std::string GetStreamCodecName(AVStream *stream);
 	int GetSourceBitrate();
 	ofLoopType			currentLoopState;
-
+	static bool g_abort;
 };

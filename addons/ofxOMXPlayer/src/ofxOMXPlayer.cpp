@@ -192,6 +192,7 @@ void ofxOMXPlayer::stop()
 	clock->OMXStop();
 	clock->OMXStateIdle();
 	omxPlayerVideo.Close();
+	//omxPlayerVideo.WaitCompletion();
 	bPlaying = false;
 	ofLogVerbose() << "ofxOMXPlayer::stop called";
 }
@@ -319,20 +320,23 @@ bool ofxOMXPlayer::isPlaying(){
 void ofxOMXPlayer::close()
 {
 	if(isPlaying()) 
-	 {
-		  stop();
-	 }
-	 if(packet)
-	 {
-		 omxReader.FreePacket(packet);
-		 packet = NULL;
-	 }	
-		omxReader.Close();
-
-	 if (eglImage !=NULL) 
-	 {
-		 eglDestroyImageKHR(display, eglImage);
-	 }
+	{
+		stop();
+	}
+	//OMXReader::g_abort = true;
+	omxReader.Close();
+	
+	if(packet)
+	{
+		omxReader.FreePacket(packet);
+		packet = NULL;
+	}	
+	
+		
+	if (eglImage !=NULL)  
+	{
+		eglDestroyImageKHR(display, eglImage);
+	}
 
 	omxCore.Deinitialize();
 	rbp.Deinitialize();

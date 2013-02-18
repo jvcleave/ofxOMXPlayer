@@ -24,6 +24,7 @@ public:
 
 	// Required overrides
 	bool SendDecoderConfig();
+	bool NaluFormatStartCodes(enum CodecID codec, uint8_t *in_extradata, int in_extrasize);
 	bool Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglImage_);
 	void Close(void);
 	unsigned int GetFreeSpace();

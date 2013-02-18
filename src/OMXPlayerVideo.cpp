@@ -7,27 +7,29 @@
 
 #include "linux/XMemUtils.h"
 
-#define MAX_DATA_SIZE    10 * 1024 * 1024
+//#define MAX_DATA_SIZE    40 * 1024 * 1024
 
 OMXPlayerVideo::OMXPlayerVideo()
 {
-  m_open          = false;
-  m_stream_id     = -1;
-  m_pStream       = NULL;
-  m_av_clock      = NULL;
-  m_decoder       = NULL;
-  m_fps           = 25.0f;
-  m_flush         = false;
-  m_cached_size   = 0;
-  m_iVideoDelay   = 0;
-  m_pts           = 0;
-  m_syncclock     = true;
-  m_speed         = DVD_PLAYSPEED_NORMAL;
-
-  pthread_cond_init(&m_packet_cond, NULL);
-  pthread_cond_init(&m_picture_cond, NULL);
-  pthread_mutex_init(&m_lock, NULL);
-  pthread_mutex_init(&m_lock_decoder, NULL);
+	m_open          = false;
+	m_stream_id     = -1;
+	m_pStream       = NULL;
+	m_av_clock      = NULL;
+	m_decoder       = NULL;
+	m_fps           = 25.0f;
+	m_flush         = false;
+	m_cached_size   = 0;
+	m_iVideoDelay   = 0;
+	m_pts           = 0;
+	m_syncclock     = true;
+	m_speed         = DVD_PLAYSPEED_NORMAL;
+	int multiplier	= 128; //omxplayer default is 10
+	maxDataSize		= multiplier * 1024 * 1024;
+		
+	pthread_cond_init(&m_packet_cond, NULL);
+	pthread_cond_init(&m_picture_cond, NULL);
+	pthread_mutex_init(&m_lock, NULL);
+	pthread_mutex_init(&m_lock_decoder, NULL);
 }
 
 OMXPlayerVideo::~OMXPlayerVideo()
@@ -42,25 +44,21 @@ OMXPlayerVideo::~OMXPlayerVideo()
 
 void OMXPlayerVideo::Lock()
 {
-  if(m_use_thread)
     pthread_mutex_lock(&m_lock);
 }
 
 void OMXPlayerVideo::UnLock()
 {
-  if(m_use_thread)
     pthread_mutex_unlock(&m_lock);
 }
 
 void OMXPlayerVideo::LockDecoder()
 {
-  if(m_use_thread)
     pthread_mutex_lock(&m_lock_decoder);
 }
 
 void OMXPlayerVideo::UnLockDecoder()
 {
-  if(m_use_thread)
     pthread_mutex_unlock(&m_lock_decoder);
 }
 
@@ -68,43 +66,46 @@ void OMXPlayerVideo::UnLockDecoder()
 bool OMXPlayerVideo::Open(COMXStreamInfo &hints, OMXClock *av_clock, EGLImageKHR eglImage_)
 {
 	eglImage = eglImage_;
-	printf("OMXPlayerVideo::Open\n");
+	ofLogVerbose() << "OMXPlayerVideo::maxDataSize may need to be reduced for 256 boards, memory intensive apps";
+
   if (!m_dllAvUtil.Load() || !m_dllAvCodec.Load() || !m_dllAvFormat.Load() || !av_clock)
-    return false;
-  
-  if(ThreadHandle())
-    Close();
-
-  m_dllAvFormat.av_register_all();
-
-  m_hints       = hints;
-  m_av_clock    = av_clock;
-  m_fps         = 25.0f;
-  m_frametime   = 0;
-  m_iCurrentPts = DVD_NOPTS_VALUE;
-  m_bAbort      = false;
-  m_use_thread  = true;
-  m_flush       = false;
-  m_cached_size = 0;
-  m_iVideoDelay = 0;
-  m_pts         = 0;
-  m_syncclock   = true;
-  m_speed       = DVD_PLAYSPEED_NORMAL;
-
-  m_FlipTimeStamp = m_av_clock->GetAbsoluteClock();
-
-  if(!OpenDecoder())
   {
-    Close();
-    return false;
+	  return false;
   }
 
-  if(m_use_thread)
-    Create();
+	if(ThreadHandle())
+	{
+		Close();
+	}
 
-  m_open        = true;
+	m_dllAvFormat.av_register_all();
 
-  return true;
+	m_hints       = hints;
+	m_av_clock    = av_clock;
+	m_fps         = 25.0f;
+	m_frametime   = 0;
+	m_iCurrentPts = DVD_NOPTS_VALUE;
+	m_bAbort      = false;
+	m_flush       = false;
+	m_cached_size = 0;
+	m_iVideoDelay = 0;
+	m_pts         = 0;
+	m_syncclock   = true;
+	m_speed       = DVD_PLAYSPEED_NORMAL;
+	m_FlipTimeStamp = m_av_clock->GetAbsoluteClock();
+
+	if(!OpenDecoder())
+	{
+		Close();
+		return false;
+	}
+
+	Create();
+	
+
+	m_open        = true;
+
+	return true;
 }
 
 bool OMXPlayerVideo::Close()
@@ -196,11 +197,11 @@ void OMXPlayerVideo::Output(double pts)
   m_FlipTimeStamp += max(0.0, iSleepTime);
   m_FlipTimeStamp += iFrameDuration;
 
-  while(m_av_clock->GetAbsoluteClock(false) < (iCurrentClock + iSleepTime + DVD_MSEC_TO_TIME(500)) )
+  if(m_av_clock->GetAbsoluteClock(false) < (iCurrentClock + iSleepTime + DVD_MSEC_TO_TIME(500)) )
   {
-    OMXClock::OMXSleep(10);
+	  return;
   }
-
+	
   
  /* printf("iPlayingClock %f iCurrentClock %f iClockSleep %f iFrameSleep %f iFrameDuration %f WaitAbsolut %f m_FlipTimeStamp %f pts %f\n", 
       iPlayingClock / DVD_TIME_BASE, iCurrentClock  / DVD_TIME_BASE,
@@ -335,7 +336,7 @@ bool OMXPlayerVideo::AddPacket(OMXPacket *pkt)
   if(m_bStop || m_bAbort)
     return ret;
 
-  if((m_cached_size + pkt->size) < MAX_DATA_SIZE)
+  if((m_cached_size + pkt->size) < maxDataSize)
   {
     Lock();
     m_cached_size += pkt->size;

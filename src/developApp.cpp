@@ -1,27 +1,22 @@
 #include "developApp.h"
 
-
+void developApp::onCharacterReceived(ofxPipeListenerEventData& e)
+{
+	keyPressed((int)e.character);
+}
 //--------------------------------------------------------------
 void developApp::setup()
 {
 	doShader = false;
 	doPause = false;
-	doTestSeeking = false; //needs work
-	doTestPausing = false;
-	//pausing needed for stop/play testing
-		pauseTestCounter = 0;
-		doTestStop = true;
-		doTestPlay = true;
-	
-	
-	ofSetLogLevel(OF_LOG_VERBOSE);
+	//ofSetLogLevel(OF_LOG_VERBOSE); set in main.cpp
 	if (doShader) 
 	{
 		shader.load("PostProcessing.vert", "PostProcessing.frag", "");
 		
 		fbo.allocate(ofGetWidth(), ofGetHeight());
 		fbo.begin();
-		ofClear(0, 0, 0, 0);
+			ofClear(0, 0, 0, 0);
 		fbo.end();
 		ofEnableAlphaBlending();
 	}
@@ -52,12 +47,13 @@ void developApp::setup()
 	//videoPath += "trailer_400p.ogg";
 	//videoPath += "big_buck_bunny_trailer_480p.webm";
 	
-	//	videoPath += "super8_vimeo_480x270.mp4";
+//	videoPath += "super8_vimeo_480x270.mp4";
 	videoPath += "TimecodedSwans_MpegStreamClip480x270.mov";
 	
 	
 	
 	omxPlayer.loadMovie(videoPath);
+	pipeReader.start(this);
 }
 
 //--------------------------------------------------------------
@@ -67,7 +63,6 @@ void developApp::update()
 	{
 		return;
 	}
-	
 	omxPlayer.update();
 	
 	if (doShader) 
@@ -94,60 +89,17 @@ void developApp::draw(){
 		omxPlayer.draw(0, 0, omxPlayer.getWidth()/4, omxPlayer.getHeight()/4);
 	}
 	
-	//test Pausing
-	int millisecondsBeforeWeSeeSomething = 4000;
-	if (doTestPausing && ofGetElapsedTimeMillis()> millisecondsBeforeWeSeeSomething) 
-	{
-		if (ofGetFrameNum() % 300 == 0) 
-		{
-			doPause = !doPause;
-			ofLogVerbose() << "Setting doPause to " << doPause;
-			omxPlayer.setPaused(doPause);
-			if (doTestStop) //give a few pauses then stop player
-			{
-				pauseTestCounter++; 
-				if (pauseTestCounter == 3) 
-				{
-					omxPlayer.stop();
-					if (doTestPlay) 
-					{
-						ofSleepMillis(2000);
-						omxPlayer.play();
-						doTestPausing = false;
-						doPause = false;
-						ofLogVerbose() << "testing over";
-					}
-				}
-			}
-			
-		}
-		
-	}
-	if (doTestSeeking) 
-	{
-		if (ofGetElapsedTimeMillis()> millisecondsBeforeWeSeeSomething)
-		{
-			if (ofGetFrameNum() % 50 == 0) 
-			{
-				omxPlayer.setPosition(ofRandom(1.0f, 100.0f));
-			}
-		}
-		
-	}
 	stringstream info;
 	
 	info << "APP FPS: "+ ofToString(ofGetFrameRate());
 	
-	if (doTestPausing)
+	info << "\n" <<" PAUSED: ";
+	if (doPause) 
 	{
-		info << "\n" <<" PAUSED: ";
-		if (doPause) 
-		{
-			info << "TRUE";
-		}else 
-		{
-			info << "FALSE";
-		}	
+		info << "TRUE";
+	}else 
+	{
+		info << "FALSE";
 	}
 	info <<"\n" <<	"MEDIA TIME: "			<< omxPlayer.getMediaTime();
 	info <<"\n" <<	"DIMENSIONS: "			<< omxPlayer.getWidth()<<"x"<<omxPlayer.getHeight();
@@ -174,20 +126,56 @@ void developApp::updateFbo()
 
 void developApp::exit()
 {
-	bool DO_HARD_EXIT = true;
+	bool DO_HARD_EXIT = false;
 	if(DO_HARD_EXIT)
 	{
 		ofLogVerbose() << "developApp::exiting hard";
 		atexit(0);
 	}else 
 	{
+		doShader = false;
+		ofSleepMillis(20);
 		omxPlayer.close();
 	}
 	
 }
 //--------------------------------------------------------------
 void developApp::keyPressed  (int key){
-	
+	switch (key) 
+	{
+		case 'p':
+		{
+			
+			doPause = !doPause;
+			ofLogVerbose() << "SENDING PAUSE STATE: " << doPause;
+			omxPlayer.setPaused(doPause);
+			break;
+		}
+		case 's': //Seek testing
+		{
+			float randomSeekPercentage = ofRandom(1.0f, 100.0f);
+			ofLogVerbose() << "SENDING SEEK VALUE: " << randomSeekPercentage;
+			omxPlayer.setPosition(randomSeekPercentage);
+			break;
+		}
+		case '1':
+		{
+			ofLogVerbose() << "SENDING PLAY COMMAND";
+			omxPlayer.play();
+			break;
+		}
+		case '2':
+		{
+			ofLogVerbose() << "SENDING STOP COMMAND";
+			omxPlayer.stop();
+			break;
+		}		
+
+		default:
+		{
+			break;
+		}	
+	}
 	
 }
 

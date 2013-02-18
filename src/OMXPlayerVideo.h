@@ -37,7 +37,6 @@ protected:
 	float                     m_fps;
 	double                    m_frametime;
 	bool                      m_bAbort;
-	bool                      m_use_thread;
 	bool                      m_flush;
 	unsigned int              m_cached_size;
 	double                    m_iVideoDelay;
@@ -72,5 +71,6 @@ public:
 	void  WaitCompletion();
 	void SetSpeed(int iSpeed);
 	EGLImageKHR eglImage;
+	int maxDataSize;
 };
 

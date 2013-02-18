@@ -2,8 +2,9 @@
 
 #include "ofMain.h"
 #include "ofxOMXPlayer.h"
+#include "PipeReader.h"
 
-class developApp : public ofBaseApp{
+class developApp : public ofBaseApp, public ofxPipeListener{
 	
 public:
 	
@@ -20,7 +21,8 @@ public:
 	void mouseReleased(int x, int y, int button);
 	void windowResized(int w, int h);
 	void dragEvent(ofDragInfo dragInfo);
-	void gotMessage(ofMessage msg);		
+	void gotMessage(ofMessage msg);	
+	
 	ofxOMXPlayer omxPlayer;
 	ofShader shader;
 	ofFbo fbo;
@@ -28,10 +30,9 @@ public:
 	
 	bool doShader;
 	bool doPause;
-	bool doTestPausing;
-	int pauseTestCounter;
-	bool doTestStop;
-	bool doTestPlay;
-	bool doTestSeeking;
+	
+	//allows key commands via Shell via ofxPipeListener
+	PipeReader pipeReader;
+	void onCharacterReceived(ofxPipeListenerEventData& e);
 };
 
