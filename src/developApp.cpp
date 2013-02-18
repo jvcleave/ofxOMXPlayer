@@ -7,7 +7,7 @@ void developApp::onCharacterReceived(ofxPipeListenerEventData& e)
 //--------------------------------------------------------------
 void developApp::setup()
 {
-	doShader = false;
+	doShader = true;
 	doPause = false;
 	//ofSetLogLevel(OF_LOG_VERBOSE); set in main.cpp
 	if (doShader) 
@@ -21,37 +21,21 @@ void developApp::setup()
 		ofEnableAlphaBlending();
 	}
 	
-	/* to get these videos run command:
-	 * wget -r -nd -P /home/pi/videos http://www.jvcref.com/files/PI/video/
+	/* to get the videos I am testing run command:
+	 * $wget -r -nd -P /home/pi/videos http://www.jvcref.com/files/PI/video/
 	 */
 	string videoPath = "/opt/vc/src/hello_pi/hello_video/test.h264";
-	videoPath = "/home/pi/videos/";
 	
-	//	videoPath += "fingers_photo_jpeg.mov";
-	//	videoPath += "fingers_sorenson.mov";
-	//	videoPath += "fingers.mp4";
-	//	videoPath += "london_320x180.mp4";
-	//	videoPath += "london_320x240.mov";
-	//	videoPath += "sorted_1280x720.mp4";
-	//	videoPath += "1_g1_1280x720.mp4";
-	//	videoPath += "1_g1_480x270.mp4";
-	//	videoPath += "London_1920x1080.mov";
-	//	videoPath += "London_480x270_MpegStreamClip.mov";
-	//	videoPath += "Cars720p_MpegStreamClip.mov";
-	
-	//from http://www.cnx-software.com/2013/01/26/raspberry-pi-now-has-experimental-support-for-vp6-vp8-mjpeg-and-ogg-theora-video-codecs/
-	//P1020080.MOV kinda works - will try fix above later
-	
-	//videoPath += "P1020080.MOV";
-	//videoPath += "trailer_VP6.flv";
-	//videoPath += "trailer_400p.ogg";
-	//videoPath += "big_buck_bunny_trailer_480p.webm";
-	
-//	videoPath += "super8_vimeo_480x270.mp4";
-	videoPath += "TimecodedSwans_MpegStreamClip480x270.mov";
-	
-	
-	
+	//this will let us just grab a video without recompiling
+	ofDirectory currentVideoDirectory("/home/pi/videos/current");
+	if (currentVideoDirectory.exists()) 
+	{
+		currentVideoDirectory.listDir();
+		vector<ofFile> files = currentVideoDirectory.getFiles();
+		videoPath = files[0].path();
+		ofLogVerbose() << "using videoPath : " << videoPath;
+		
+	}
 	omxPlayer.loadMovie(videoPath);
 	pipeReader.start(this);
 }
