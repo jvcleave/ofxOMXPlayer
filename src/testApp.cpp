@@ -4,6 +4,7 @@
 void testApp::setup()
 {
 	ofSetLogLevel(OF_LOG_VERBOSE);
+	ofEnableAlphaBlending();
 	doShader = true;
 	if (doShader) 
 	{
@@ -13,7 +14,7 @@ void testApp::setup()
 		fbo.begin();
 		ofClear(0, 0, 0, 0);
 		fbo.end();
-		ofEnableAlphaBlending();
+		
 	}
 	string videoPath = "/opt/vc/src/hello_pi/hello_video/test.h264";
 	omxPlayer.loadMovie(videoPath);

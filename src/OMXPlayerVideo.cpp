@@ -23,7 +23,7 @@ OMXPlayerVideo::OMXPlayerVideo()
 	m_pts           = 0;
 	m_syncclock     = true;
 	m_speed         = DVD_PLAYSPEED_NORMAL;
-	int multiplier	= 128; //omxplayer default is 10
+	int multiplier	= 40; //omxplayer default is 10
 	maxDataSize		= multiplier * 1024 * 1024;
 		
 	pthread_cond_init(&m_packet_cond, NULL);
