@@ -38,8 +38,8 @@ class OMXReader;
 
 typedef struct OMXPacket
 {
-  double    pts; // pts in DVD_TIME_BASE
-  double    dts; // dts in DVD_TIME_BASE
+  double    pts; // Presentation timestamp in DVD_TIME_BASE
+  double    dts; // Decompression timestamp in DVD_TIME_BASE
   double    now; // dts in DVD_TIME_BASE
   double    duration; // duration in DVD_TIME_BASE if available
   int       size;

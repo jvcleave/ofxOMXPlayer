@@ -39,6 +39,9 @@ public:
 	void WaitCompletion();
 	EGLImageKHR eglImage;
 	OMX_BUFFERHEADERTYPE* eglBuffer;
+	char debugInfoBuffer [128];
+	string debugInfo;
+	bool doDebugging;
 protected:
 	// Video format
 	bool              m_drop_state;

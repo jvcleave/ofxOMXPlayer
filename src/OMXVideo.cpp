@@ -70,6 +70,8 @@ COMXVideo::COMXVideo()
 	m_video_codec_name  = "";
 	m_first_frame       = true;
 	eglBuffer = NULL;
+	debugInfo = "";
+	doDebugging = false;
 }
 
 COMXVideo::~COMXVideo()
@@ -605,12 +607,19 @@ int COMXVideo::Decode(uint8_t *pData, int iSize, double dts, double pts)
         ofLog(OF_LOG_VERBOSE, "COMXVideo::Decode timeout\n");
         return false;
       }
+		if(doDebugging)
+		{
+			sprintf(debugInfoBuffer,
+					"DECODER: Presentation timestamp %f \n\
+					buffer 0x%08x #%d\n",
+					pts,
+					omx_buffer->pBuffer,
+					(int)omx_buffer->pAppPrivate);
+			
+			debugInfo = (string)debugInfoBuffer;
+		}
 
-     /* 
-      ofLog(OF_LOG_VERBOSE, "\nCOMXVideo::Video VDec : pts %lld omx_buffer 0x%08x buffer 0x%08x number %d\n", 
-          pts, omx_buffer, omx_buffer->pBuffer, (int)omx_buffer->pAppPrivate);
-      ofLog(OF_LOG_VERBOSE, "VDec : pts %f omx_buffer 0x%08x buffer 0x%08x number %d\n", 
-          (float)pts / AV_TIME_BASE, omx_buffer, omx_buffer->pBuffer, (int)omx_buffer->pAppPrivate);*/
+
       
 
       omx_buffer->nFlags = 0;

@@ -28,7 +28,7 @@ public:
 	unsigned char * 	getPixels();
 	ofPixelsRef			getPixelsRef();
 	float 				getPosition();
-//	float 				getSpeed();
+	int 				getSpeed();
 	float				duration;
 	float 				getDuration();
 //	bool				getIsMovieDone();
@@ -37,7 +37,8 @@ public:
 //	void 				setVolume(float volume); // 0..1
 	void 				setLoopState(ofLoopType state);
 	ofLoopType			getLoopState();
-//	void   				setSpeed(float speed);
+	int					speed;
+	void   				setSpeed(int rate);
 //	void				setFrame(int frame);  // frame 0 = first frame...
 	
 	ofTexture &			getTextureReference();
@@ -93,11 +94,13 @@ public:
 	EGLContext context;
 	EGLImageKHR eglImage;
 	
+	string getVideoDebugInfo();
 	void generateEGLImage();
 	void openPlayer();
-	double				getMediaTime();
+	double getMediaTime();
 	ofPixels* pixels;
 	void close();
+	bool doVideoDebugging;
 private:
 	
 	ofTexture tex;

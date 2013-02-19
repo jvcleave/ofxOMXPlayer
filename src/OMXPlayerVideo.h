@@ -33,7 +33,7 @@ protected:
 	pthread_mutex_t           m_lock;
 	pthread_mutex_t           m_lock_decoder;
 	OMXClock                  *m_av_clock;
-	COMXVideo                 *m_decoder;
+	
 	float                     m_fps;
 	double                    m_frametime;
 	bool                      m_bAbort;
@@ -49,6 +49,8 @@ protected:
 	void UnLock();
 	void LockDecoder();
 	void UnLockDecoder();
+	char debugInfoBuffer [1024];
+	
 
 private:
 public:
@@ -70,7 +72,12 @@ public:
 	unsigned int GetCached() { return m_cached_size; };
 	void  WaitCompletion();
 	void SetSpeed(int iSpeed);
+	int GetSpeed(){return m_speed;};
 	EGLImageKHR eglImage;
 	int maxDataSize;
+	COMXVideo                 *m_decoder;
+	string debugInfo;
+	bool doDebugging;
+	double lastFrameDuration;
 };
 

@@ -1,6 +1,6 @@
 #include "ofMain.h"
 
-#define USE_DEVELOP_APP
+//#define USE_DEVELOP_APP
 
 #ifdef USE_DEVELOP_APP
 	#include "developApp.h"

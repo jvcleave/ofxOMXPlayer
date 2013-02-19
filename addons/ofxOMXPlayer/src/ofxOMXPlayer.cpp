@@ -15,7 +15,12 @@ ofxOMXPlayer::ofxOMXPlayer()
 	bPlaying = false;
 	duration = 0.0;
 	nFrames = 0;
-	
+	doVideoDebugging = true;
+	if (doVideoDebugging) 
+	{
+		omxPlayerVideo.doDebugging = true;
+	}
+	speed = 0;
 }
 void ofxOMXPlayer::loadMovie(string filepath)
 {
@@ -31,6 +36,7 @@ void ofxOMXPlayer::loadMovie(string filepath)
 		
 		ofLogVerbose() << "omxReader open moviePath PASS: " << moviePath;
 		hasVideo     = omxReader.VideoStreamCount();
+		
 		if (hasVideo) 
 		{
 			ofLogVerbose() << "Video streams detection PASS";
@@ -67,6 +73,8 @@ void ofxOMXPlayer::openPlayer()
 	bPlaying = omxPlayerVideo.Open(streamInfo, clock, eglImage);
 	if (isPlaying()) 
 	{
+		speed = clock->OMXPlaySpeed();
+		ofLogVerbose() << "speed : " <<speed;
 		if(streamInfo.nb_frames>0 && omxPlayerVideo.GetFPS()>0)
 		{
 			nFrames = streamInfo.nb_frames;
@@ -93,8 +101,6 @@ void ofxOMXPlayer::generateEGLImage()
 	tex.allocate(videoWidth, videoHeight, GL_RGBA);
 	tex.getTextureData().bFlipTexture = true;
 	tex.setTextureWrap(GL_REPEAT, GL_REPEAT);
-	//textureSource.setTextureMinMagFilter(GL_NEAREST, GL_NEAREST);
-	//textureSource.setTextureWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 	textureID = tex.getTextureData().textureID;
 	
 	//TODO - should be a way to use ofPixels for the getPixels() functions?
@@ -244,6 +250,30 @@ void ofxOMXPlayer::draw(float _x, float _y)
 	if(!isPlaying()) return;
 	getTextureReference().draw(_x, _y);
 }
+string ofxOMXPlayer::getVideoDebugInfo()
+{
+	if (!doVideoDebugging) 
+	{
+		return "doVideoDebugging not enabled";
+	}
+	if (omxPlayerVideo.m_decoder != NULL) 
+	{
+		return omxPlayerVideo.m_decoder->debugInfo + "\n" + omxPlayerVideo.debugInfo;
+	}
+	return "NO INFO YET";
+}
+
+int ofxOMXPlayer::getSpeed(){
+	return speed;
+}
+//--------------------------------------------------------------------
+void ofxOMXPlayer::setSpeed(int rate){
+	speed = rate;
+	omxReader.SetSpeed(speed);
+	clock->OMXSpeed(speed);
+	//omxPlayerVideo.SetSpeed(speed*1000);
+}
+
 //---------------------------------------------------------------------------
 float ofxOMXPlayer::getPosition(){
 	//TODO: check if behavior is the same
@@ -251,8 +281,6 @@ float ofxOMXPlayer::getPosition(){
 }
 //---------------------------------------------------------------------------
 float ofxOMXPlayer::getDuration(){
-	
-	
 	return duration;
 }
 
@@ -265,19 +293,59 @@ void ofxOMXPlayer::setPosition(float pct)
 	
 	//int m_seek_pos = 0;
 
-	ofLogVerbose() << "pct: " << pct;
+	/*ofLogVerbose() << "pct: " << pct;
 	ofLogVerbose() << "duration: " << duration;
 	ofLogVerbose() << "omxPlayerVideo.GetFPS(): " << omxPlayerVideo.GetFPS();
 	float maxPoints = duration*(float)omxPlayerVideo.GetFPS();
 	ofLogVerbose() << "maxPoints: " << maxPoints;
 	
-	float m_seek_pos = ofMap(pct, 0.0f, 100.0f, 0.0f, getMediaTime());
+	float m_seek_pos = ofMap(pct, 0.0f, 100.0f, 0.0f, maxPoints);
 	
 	ofLogVerbose() << "m_seek_pos: " << m_seek_pos;
 	double startpts;
 	ofLog(OF_LOG_VERBOSE, "\nSeeking start of video to %f\n", m_seek_pos);
 	omxReader.SeekTime(m_seek_pos, AVSEEK_FLAG_BACKWARD, &startpts);  // from seconds to DVD_TIME_BASE
-	ofLogVerbose() << "SEEK RESULT: " << startpts;
+	ofLogVerbose() << "SEEK RESULT: " << startpts;*/
+	double m_incr = 60.0;
+	double startpts = 0;
+	if(m_incr != 0)
+    {
+		int    seek_flags   = 0;
+		double seek_pos     = 0;
+		double pts          = 0;
+		
+
+		//clock->OMXStop();
+		
+		pts = clock->GetPTS();
+		
+		seek_pos = (pts / DVD_TIME_BASE) + m_incr;
+		seek_flags = m_incr < 0.0f ? AVSEEK_FLAG_BACKWARD : 0;
+		
+		seek_pos *= 1000.0f;
+		
+		m_incr = 0;
+		
+		//if()
+//		{
+//			/*omxPlayerVideo.Flush();
+//			if(packet)
+//			{
+//				omxReader.FreePacket(packet);
+//				packet = NULL;
+//			}*/
+//		}
+		
+		//omxPlayerVideo.Close();
+		//omxPlayerVideo.Open(streamInfo, clock, eglImage);
+		omxReader.SeekTime(seek_pos, seek_flags, &startpts);
+		//clock->SetPTS(startpts);
+		clock->OMXStart(startpts);
+		//clock->OMXStart(startpts);
+    }
+	
+	
+	
 }
 void ofxOMXPlayer::setLoopState(ofLoopType state){
 	
@@ -288,6 +356,11 @@ omxReader.currentLoopState = state;
 //---------------------------------------------------------------------------
 ofLoopType ofxOMXPlayer::getLoopState(){
 	return omxReader.currentLoopState;
+}
+
+//------------------------------------
+int ofxOMXPlayer::getCurrentFrame(){
+	return (int)(omxPlayerVideo.GetCurrentPTS()/ DVD_TIME_BASE)*omxPlayerVideo.GetFPS();
 }
 //------------------------------------
 int ofxOMXPlayer::getTotalNumFrames(){

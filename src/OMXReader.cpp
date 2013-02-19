@@ -314,7 +314,10 @@ bool OMXReader::SeekTime(int64_t seek_ms, int seek_flags, double *startpts)
   if (m_pFormatContext->start_time != (int64_t)AV_NOPTS_VALUE)
     seek_pts += m_pFormatContext->start_time;
 
-  /* seek behind eof */
+  // seek behind eof 
+	ofLogVerbose() << "GetStreamLength(): " << GetStreamLength();
+	ofLogVerbose() << "(seek_pts / AV_TIME_BASE): " << (seek_pts / AV_TIME_BASE);
+
   if((seek_pts / AV_TIME_BASE) > (GetStreamLength()  / 1000))
   {
     m_eof = true;
@@ -332,11 +335,11 @@ bool OMXReader::SeekTime(int64_t seek_ms, int seek_flags, double *startpts)
 
   if(m_iCurrentPts == DVD_NOPTS_VALUE)
   {
-    printf("\nOMXReader::SeekTime - unknown position after seek");
+    ofLogVerbose() << "OMXReader::SeekTime - unknown position after seek";
   }
   else
   {
-    printf("\nOMXReader::SeekTime - seek ended up on time %d",(int)(m_iCurrentPts / DVD_TIME_BASE * 1000));
+    ofLog(OF_LOG_VERBOSE, "\nOMXReader::SeekTime - seek ended up on time %d",(int)(m_iCurrentPts / DVD_TIME_BASE * 1000));
   }
 
   if(startpts)

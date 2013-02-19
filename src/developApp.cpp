@@ -7,7 +7,7 @@ void developApp::onCharacterReceived(ofxPipeListenerEventData& e)
 //--------------------------------------------------------------
 void developApp::setup()
 {
-	doShader = true;
+	doShader = false;
 	doPause = false;
 	//ofSetLogLevel(OF_LOG_VERBOSE); set in main.cpp
 	if (doShader) 
@@ -32,10 +32,12 @@ void developApp::setup()
 	{
 		currentVideoDirectory.listDir();
 		vector<ofFile> files = currentVideoDirectory.getFiles();
-		videoPath = files[0].path();
-		ofLogVerbose() << "using videoPath : " << videoPath;
-		
+		if (files.size()>0) 
+		{
+			videoPath = files[0].path();
+		}		
 	}
+	ofLogVerbose() << "using videoPath : " << videoPath;
 	omxPlayer.loadMovie(videoPath);
 	pipeReader.start(this);
 }
@@ -89,7 +91,20 @@ void developApp::draw(){
 	info <<"\n" <<	"DIMENSIONS: "			<< omxPlayer.getWidth()<<"x"<<omxPlayer.getHeight();
 	info <<"\n" <<	"DURATION: "			<< omxPlayer.getDuration();
 	info <<"\n" <<	"TOTAL FRAMES: "		<< omxPlayer.getTotalNumFrames();
+	info <<"\n" <<	"CURRENT FRAME: "		<< omxPlayer.getCurrentFrame();
+	info <<"\n" <<	"PLAYER SPEED "			<< omxPlayer.getSpeed();
+
+	info <<"\n" <<	omxPlayer.getVideoDebugInfo() << endl;
 	
+	info <<"\n" <<	"KEYS:";
+	info <<"\n" <<	"p to toggle Pause";
+	info <<"\n" <<	"r to Seek to Random Point";
+	info <<"\n" <<	"1 to send Play command";
+	info <<"\n" <<	"2 to send Stop command";
+	info <<"\n" <<	"q to send firstFrame()";
+	info <<"\n" <<	"a to send previousFrame()";
+	info <<"\n" <<	"s to send nextFrame()";
+	info <<"\n" <<	"u to increment speed";
 	ofDrawBitmapStringHighlight(info.str(), 200, 200, ofColor::black, ofColor::yellow);
 	
 	
@@ -110,7 +125,7 @@ void developApp::updateFbo()
 
 void developApp::exit()
 {
-	bool DO_HARD_EXIT = false;
+	bool DO_HARD_EXIT = true;
 	if(DO_HARD_EXIT)
 	{
 		ofLogVerbose() << "developApp::exiting hard";
@@ -135,7 +150,7 @@ void developApp::keyPressed  (int key){
 			omxPlayer.setPaused(doPause);
 			break;
 		}
-		case 's': //Seek testing
+		case 'r': //Seek testing
 		{
 			float randomSeekPercentage = ofRandom(1.0f, 100.0f);
 			ofLogVerbose() << "SENDING SEEK VALUE: " << randomSeekPercentage;
@@ -153,8 +168,32 @@ void developApp::keyPressed  (int key){
 			ofLogVerbose() << "SENDING STOP COMMAND";
 			omxPlayer.stop();
 			break;
-		}		
-
+		}
+		case 'q': //firstFrame
+		{
+			ofLogVerbose() << "firstFrame";
+			//omxPlayer.firstFrame();
+			break;
+		}
+		case 'a': //previousFrame
+		{
+			ofLogVerbose() << "previousFrame";
+			//omxPlayer.previousFrame();
+			break;
+		}
+		case 's': //nextFrame
+		{
+			ofLogVerbose() << "nextFrame";
+			//omxPlayer.nextFrame();
+			break;
+		}
+		case 'u': //setSpeed
+		{
+			ofLogVerbose() << "setSpeed";
+			omxPlayer.setSpeed(omxPlayer.getSpeed()*2);
+			break;
+		}
+			
 		default:
 		{
 			break;
