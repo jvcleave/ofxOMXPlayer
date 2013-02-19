@@ -750,9 +750,10 @@ void COMXVideo::WaitCompletion()
   while(true)
   {
     if(m_omx_render.IsEOS())
-		//ofExit(0);
-      break;
-
+	{
+		ofLogVerbose() << "OMXVideo reached End of Stream";
+		 break;
+	}
     OMXClock::OMXSleep(50);
   }
 

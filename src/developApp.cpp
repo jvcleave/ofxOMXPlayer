@@ -92,6 +92,7 @@ void developApp::draw(){
 	info <<"\n" <<	"DURATION: "			<< omxPlayer.getDuration();
 	info <<"\n" <<	"TOTAL FRAMES: "		<< omxPlayer.getTotalNumFrames();
 	info <<"\n" <<	"CURRENT FRAME: "		<< omxPlayer.getCurrentFrame();
+	info <<"\n" <<	"REMAINING FRAMES: "	<< omxPlayer.getTotalNumFrames() - omxPlayer.getCurrentFrame();
 	info <<"\n" <<	"PLAYER SPEED "			<< omxPlayer.getSpeed();
 
 	info <<"\n" <<	omxPlayer.getVideoDebugInfo() << endl;

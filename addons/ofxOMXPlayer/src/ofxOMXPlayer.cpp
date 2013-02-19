@@ -198,7 +198,6 @@ void ofxOMXPlayer::stop()
 	clock->OMXStop();
 	clock->OMXStateIdle();
 	omxPlayerVideo.Close();
-	//omxPlayerVideo.WaitCompletion();
 	bPlaying = false;
 	ofLogVerbose() << "ofxOMXPlayer::stop called";
 }

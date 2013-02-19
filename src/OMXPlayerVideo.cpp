@@ -315,49 +315,61 @@ void OMXPlayerVideo::Process()
 
   m_pts = 0;
 
-  while(!m_bStop && !m_bAbort)
-  {
-    Lock();
-    if(m_packets.empty())
-      pthread_cond_wait(&m_packet_cond, &m_lock);
-    UnLock();
+	while(!m_bStop && !m_bAbort)
+	{
+		Lock();
+		if(m_packets.empty())
+		{
+			pthread_cond_wait(&m_packet_cond, &m_lock);
+		}
+		UnLock();
 
-    if(m_bAbort)
-      break;
+		if(m_bAbort)
+		{
+			break;
+		}
 
-    Lock();
-    if(m_flush && omx_pkt)
-    {
-      OMXReader::FreePacket(omx_pkt);
-      omx_pkt = NULL;
-      m_flush = false;
-    }
-    else if(!omx_pkt && !m_packets.empty())
-    {
-      omx_pkt = m_packets.front();
-      m_cached_size -= omx_pkt->size;
-      m_packets.pop_front();
-    }
-    UnLock();
+		Lock();
+		if(m_flush && omx_pkt)
+		{
+			OMXReader::FreePacket(omx_pkt);
+			omx_pkt = NULL;
+			m_flush = false;
+		}
+		else
+		{
+			if(!omx_pkt && !m_packets.empty())
+			{
+				omx_pkt = m_packets.front();
+				m_cached_size -= omx_pkt->size;
+				m_packets.pop_front();
+			}
+		}
+		UnLock();
 
-    LockDecoder();
-    if(m_flush && omx_pkt)
-    {
-      OMXReader::FreePacket(omx_pkt);
-      omx_pkt = NULL;
-      m_flush = false;
-    }
-    else if(omx_pkt && Decode(omx_pkt))
-    {
-      OMXReader::FreePacket(omx_pkt);
-      omx_pkt = NULL;
-    }
-    UnLockDecoder();
-    
-  }
+		LockDecoder();
+		if(m_flush && omx_pkt)
+		{
+			OMXReader::FreePacket(omx_pkt);
+			omx_pkt = NULL;
+			m_flush = false;
+		}
+		else 
+		{
+			if(omx_pkt && Decode(omx_pkt))
+			{
+				OMXReader::FreePacket(omx_pkt);
+				omx_pkt = NULL;
+			}
+		}
+		UnLockDecoder();
 
-  if(omx_pkt)
-    OMXReader::FreePacket(omx_pkt);
+	}
+
+	if(omx_pkt)
+	{
+		OMXReader::FreePacket(omx_pkt);
+	}
 }
 
 
@@ -406,86 +418,100 @@ bool OMXPlayerVideo::AddPacket(OMXPacket *pkt)
 
 bool OMXPlayerVideo::OpenDecoder()
 {
-  if (m_hints.fpsrate && m_hints.fpsscale)
-    m_fps = DVD_TIME_BASE / OMXReader::NormalizeFrameduration((double)DVD_TIME_BASE * m_hints.fpsscale / m_hints.fpsrate);
-  else
-    m_fps = 25;
-
-  if( m_fps > 100 || m_fps < 5 )
-  {
-    printf("Invalid framerate %d, using forced 25fps and just trust timestamps\n", (int)m_fps);
-    m_fps = 25;
-  }
-
-  m_frametime = (double)DVD_TIME_BASE / m_fps;
-
-  m_decoder = new COMXVideo();
-  if(!m_decoder->Open(m_hints, m_av_clock, eglImage))
-  {
-	if (doDebugging) 
+	if (m_hints.fpsrate && m_hints.fpsscale)
 	{
-		m_decoder->doDebugging = true;
+		m_fps = DVD_TIME_BASE / OMXReader::NormalizeFrameduration((double)DVD_TIME_BASE * m_hints.fpsscale / m_hints.fpsrate);
+	}else
+	{
+		m_fps = 25;
 	}
-    CloseDecoder();
-    return false;
-  }
-  else
-  {
-    printf("Video codec %s width %d height %d profile %d fps %f\n",
-        m_decoder->GetDecoderName().c_str() , m_hints.width, m_hints.height, m_hints.profile, m_fps);
-  }
 
-  if(m_av_clock)
-    m_av_clock->SetRefreshRate(m_fps);
+	if( m_fps > 100 || m_fps < 5 )
+	{
+		ofLog(OF_LOG_VERBOSE, "OMXPlayerVideo::OpenDecoder: Invalid framerate %d, using forced 25fps and just trust timestamps\n", (int)m_fps);
+		m_fps = 25;
+	}
 
-  return true;
+	m_frametime = (double)DVD_TIME_BASE / m_fps;
+
+	m_decoder = new COMXVideo();
+	if(!m_decoder->Open(m_hints, m_av_clock, eglImage))
+	{
+		CloseDecoder();
+		return false;
+	}
+	else
+	{
+		if (doDebugging) 
+		{
+			m_decoder->doDebugging = true;
+		}
+	  
+		ofLog(OF_LOG_VERBOSE, "Video codec %s width %d height %d profile %d fps %f\n",
+			  m_decoder->GetDecoderName().c_str() , m_hints.width, m_hints.height, m_hints.profile, m_fps);
+	}
+
+	if(m_av_clock)
+	{
+		m_av_clock->SetRefreshRate(m_fps);
+	}
+	
+	return true;
 }
 
 bool OMXPlayerVideo::CloseDecoder()
 {
   if(m_decoder)
-    delete m_decoder;
-  m_decoder   = NULL;
+  {
+	  delete m_decoder;
+	  m_decoder = NULL;
+  }
+  
   return true;
 }
 
-int  OMXPlayerVideo::GetDecoderBufferSize()
+int OMXPlayerVideo::GetDecoderBufferSize()
 {
-  if(m_decoder)
-    return m_decoder->GetInputBufferSize();
-  else
-    return 0;
+	if(m_decoder)
+	{
+		return m_decoder->GetInputBufferSize();
+	}
+	return 0;
 }
 
-int  OMXPlayerVideo::GetDecoderFreeSpace()
+int OMXPlayerVideo::GetDecoderFreeSpace()
 {
-  if(m_decoder)
-    return m_decoder->GetFreeSpace();
-  else
-    return 0;
+	if(m_decoder)
+	{
+	  return m_decoder->GetFreeSpace();
+	}
+	return 0;
 }
 
 void OMXPlayerVideo::WaitCompletion()
 {
-  if(!m_decoder)
-    return;
+	if(!m_decoder)
+	{
+		return;
+	}
 
-  while(true)
-  {
-    Lock();
-    if(m_packets.empty())
-    {
-      UnLock();
-      break;
-    }
-    UnLock();
-    OMXClock::OMXSleep(50);
-  }
+	while(true)
+	{
+		Lock();
+		if(m_packets.empty())
+		{
+			ofLogVerbose() << "packets empty";
+			UnLock();
+			break;
+		}
+		UnLock();
+		OMXClock::OMXSleep(50);
+	}
 
-  m_decoder->WaitCompletion();
+	m_decoder->WaitCompletion();
 }
 
 void OMXPlayerVideo::SetSpeed(int speed)
 {
-  m_speed = speed;
+	m_speed = speed;
 }
