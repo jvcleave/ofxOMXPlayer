@@ -7,7 +7,7 @@ void developApp::onCharacterReceived(ofxPipeListenerEventData& e)
 //--------------------------------------------------------------
 void developApp::setup()
 {
-	doShader = false;
+	doShader = true;
 	doPause = false;
 	//ofSetLogLevel(OF_LOG_VERBOSE); set in main.cpp
 	ofEnableAlphaBlending();

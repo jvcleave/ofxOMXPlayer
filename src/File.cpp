@@ -78,7 +78,7 @@ unsigned int CFile::Read(void *lpBuf, int64_t uiBufSize)
 #ifdef FILE_LOOPING_HACK_ENABLED
 	if (feof(m_pFile))
 	{
-		//cout << "End of file in CFile::Read" << endl;
+		cout << "Looping via FILE_LOOPING_HACK in CFile::Read" << endl;
 		rewind(m_pFile);
 	}
 #endif	

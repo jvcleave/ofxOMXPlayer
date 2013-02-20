@@ -92,71 +92,41 @@ bool OMXReader::Open(std::string filename, bool dump_format)
   AVInputFormat *iformat  = NULL;
   unsigned char *buffer   = NULL;
   unsigned int  flags     = READ_TRUNCATED | READ_BITRATE | READ_CHUNKED;
-#ifndef STANDALONE
-  if( CFileItem(m_filename, false).IsInternetStream() )
-    flags |= READ_CACHED;
-#endif
-
-  if(m_filename.substr(0, 8) == "shout://" )
-    m_filename.replace(0, 8, "http://");
-
-  if(m_filename.substr(0,6) == "mms://" || m_filename.substr(0,7) == "mmsh://" || m_filename.substr(0,7) == "mmst://" || m_filename.substr(0,7) == "mmsu://" ||
-      m_filename.substr(0,7) == "http://" || 
-      m_filename.substr(0,7) == "rtmp://" || m_filename.substr(0,6) == "udp://" ||
-      m_filename.substr(0,7) == "rtsp://" )
-  {
-    // ffmpeg dislikes the useragent from AirPlay urls
-    //int idx = m_filename.Find("|User-Agent=AppleCoreMedia");
-    size_t idx = m_filename.find("|");
-    if(idx != string::npos)
-      m_filename = m_filename.substr(0, idx);
-
-    result = m_dllAvFormat.avformat_open_input(&m_pFormatContext, m_filename.c_str(), iformat, NULL);
-    if(result < 0)
-    {
-      printf("\nCOMXPlayer::OpenFile - avformat_open_input %s ", m_filename.c_str());
-      Close();
-      return false;
-    }
-  }
-  else
-  {
-    m_pFile = new CFile();
-
-    if (!m_pFile->Open(m_filename, flags))
-    {
-      printf("\nCOMXPlayer::OpenFile - %s ", m_filename.c_str());
-      Close();
-      return false;
-    }
-
-    buffer = (unsigned char*)m_dllAvUtil.av_malloc(FFMPEG_FILE_BUFFER_SIZE);
-    m_ioContext = m_dllAvFormat.avio_alloc_context(buffer, FFMPEG_FILE_BUFFER_SIZE, 0, m_pFile, dvd_file_read, NULL, dvd_file_seek);
-    m_ioContext->max_packet_size = 6144;
-    if(m_ioContext->max_packet_size)
-      m_ioContext->max_packet_size *= FFMPEG_FILE_BUFFER_SIZE / m_ioContext->max_packet_size;
-
-    if(m_pFile->IoControl(IOCTRL_SEEK_POSSIBLE, NULL) == 0)
-      m_ioContext->seekable = 0;
-
-    m_dllAvFormat.av_probe_input_buffer(m_ioContext, &iformat, m_filename.c_str(), NULL, 0, 0);
-
-    if(!iformat)
-    {
-      printf("\nCOMXPlayer::OpenFile - av_probe_input_buffer %s ", m_filename.c_str());
-      Close();
-      return false;
-    }
-
-    m_pFormatContext     = m_dllAvFormat.avformat_alloc_context();
-    m_pFormatContext->pb = m_ioContext;
-    result = m_dllAvFormat.avformat_open_input(&m_pFormatContext, m_filename.c_str(), iformat, NULL);
-    if(result < 0)
-    {
-      Close();
-      return false;
-    }
-  }
+	m_pFile = new CFile();
+	
+	if (!m_pFile->Open(m_filename, flags))
+	{
+		printf("\nCOMXPlayer::OpenFile - %s ", m_filename.c_str());
+		Close();
+		return false;
+	}
+	
+	buffer = (unsigned char*)m_dllAvUtil.av_malloc(FFMPEG_FILE_BUFFER_SIZE);
+	m_ioContext = m_dllAvFormat.avio_alloc_context(buffer, FFMPEG_FILE_BUFFER_SIZE, 0, m_pFile, dvd_file_read, NULL, dvd_file_seek);
+	m_ioContext->max_packet_size = 6144;
+	if(m_ioContext->max_packet_size)
+		m_ioContext->max_packet_size *= FFMPEG_FILE_BUFFER_SIZE / m_ioContext->max_packet_size;
+	
+	if(m_pFile->IoControl(IOCTRL_SEEK_POSSIBLE, NULL) == 0)
+		m_ioContext->seekable = 0;
+	
+	m_dllAvFormat.av_probe_input_buffer(m_ioContext, &iformat, m_filename.c_str(), NULL, 0, 0);
+	
+	if(!iformat)
+	{
+		printf("\nCOMXPlayer::OpenFile - av_probe_input_buffer %s ", m_filename.c_str());
+		Close();
+		return false;
+	}
+	
+	m_pFormatContext     = m_dllAvFormat.avformat_alloc_context();
+	m_pFormatContext->pb = m_ioContext;
+	result = m_dllAvFormat.avformat_open_input(&m_pFormatContext, m_filename.c_str(), iformat, NULL);
+	if(result < 0)
+	{
+		Close();
+		return false;
+	}
 
   // set the interrupt callback, appeared in libavformat 53.15.0
   m_pFormatContext->interrupt_callback = int_cb;

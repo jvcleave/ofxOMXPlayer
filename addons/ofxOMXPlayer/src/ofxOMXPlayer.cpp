@@ -16,7 +16,7 @@ ofxOMXPlayer::ofxOMXPlayer()
 	duration = 0.0;
 	nFrames = 0;
 	doVideoDebugging = false;
-	doLooping = false;
+	doLooping = true;
 	if (doVideoDebugging) 
 	{
 		omxPlayerVideo.doDebugging = true;
@@ -170,6 +170,7 @@ void ofxOMXPlayer::update()
 		{
 			if (!omxPlayerVideo.GetCached())
 			{
+				ofLogVerbose() << "looping via doLooping option";
 				omxPlayerVideo.Flush();
 				omxPlayerVideo.UnFlush();
 				packet = omxReader.Read(true);
