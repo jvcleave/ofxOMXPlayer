@@ -2,27 +2,25 @@
 
 ofxOMXPlayer::ofxOMXPlayer()
 {
-	videoWidth = 0;
-	videoHeight =0;
-	isMPEG               = false;
-	hasVideo           = false;
-	packet = NULL;
-	moviePath = "moviePath is undefined";
-	clock = NULL;
-	playerTex = NULL;
-	pixels = NULL;
-	bPaused = false;
-	bPlaying = false;
-	duration = 0.0;
-	nFrames = 0;
-	doVideoDebugging = false;
-	doLooping = true;
+	videoWidth			= 0;
+	videoHeight			= 0;
+	isMPEG				= false;
+	hasVideo			= false;
+	packet				= NULL;
+	moviePath			= "moviePath is undefined";
+	clock				= NULL;
+	playerTex			= NULL;
+	bPlaying			= false;
+	duration			= 0.0;
+	nFrames				= 0;
+	doVideoDebugging	= false;
+	doLooping			= true;
 	if (doVideoDebugging) 
 	{
-		omxPlayerVideo.doDebugging = true;
+		omxPlayerVideo.doDebugging = true; //this can cause a string error, probably thread safe issue
 	}
-	speed = 0;
 }
+
 void ofxOMXPlayer::loadMovie(string filepath)
 {
 	moviePath = filepath; 
@@ -69,19 +67,31 @@ void ofxOMXPlayer::openPlayer()
 	videoWidth	= streamInfo.width;
 	videoHeight	= streamInfo.height;
 	ofLogVerbose() << "SET videoWidth: " << videoWidth;
-	ofLogVerbose() << "SET videoHeight: " << videoHeight;	
+	ofLogVerbose() << "SET videoHeight: " << videoHeight;
+
 	generateEGLImage();
 	bPlaying = omxPlayerVideo.Open(streamInfo, clock, eglImage);
 	if (isPlaying()) 
 	{
-		speed = clock->OMXPlaySpeed();
-		ofLogVerbose() << "speed : " <<speed;
+		ofLogVerbose() << "streamInfo.nb_frames " << streamInfo.nb_frames;
+		ofLogVerbose() << "omxPlayerVideo.GetFPS(): " << omxPlayerVideo.GetFPS();
+		
 		if(streamInfo.nb_frames>0 && omxPlayerVideo.GetFPS()>0)
 		{
 			nFrames = streamInfo.nb_frames;
 			duration = streamInfo.nb_frames / omxPlayerVideo.GetFPS();
 			ofLogVerbose() << "duration SET: " << duration;
+		}else 
+		{
+			//file is weird (like test.h264) and has no reported frames
+			//enable File looping hack if looping enabled;
+			
+			if (doLooping) 
+			{
+				omxReader.enableFileLoopinghack();
+			}
 		}
+
 		
 		ofLogVerbose() << "Opened video PASS";	
 		
@@ -140,13 +150,11 @@ void ofxOMXPlayer::generateEGLImage()
 	{
 		ofLogVerbose()	<< "Create EGLImage PASS";
 	}
-	/*pixels = new ofPixels();
-	pixels->allocate(videoWidth, videoHeight, GL_RGBA);*/
 }
 
-//---------------------------------------------------------------------------
-//for getting a reference to the texture
-ofTexture & ofxOMXPlayer::getTextureReference(){
+
+ofTexture & ofxOMXPlayer::getTextureReference()
+{
 	if(playerTex == NULL){
 		return tex;
 	}
@@ -184,9 +192,6 @@ void ofxOMXPlayer::update()
 		}
 	}
 
-	
-	
-	
 	if(packet && omxReader.IsActive(OMXSTREAM_VIDEO, packet->stream_index))
     {
 		if(omxPlayerVideo.AddPacket(packet))
@@ -207,7 +212,8 @@ void ofxOMXPlayer::update()
 
 }
 //--------------------------------------------------------
-void ofxOMXPlayer::play(){
+void ofxOMXPlayer::play()
+{
 	ofLogVerbose() << "TODO: not sure what to do with this - reopen the player?";
 	/*clock->SetSpeed(OMX_PLAYSPEED_NORMAL);
 	clock->OMXStateExecute();
@@ -215,7 +221,6 @@ void ofxOMXPlayer::play(){
 	bPlaying = openPlayer();*/
 }
 
-//--------------------------------------------------------
 void ofxOMXPlayer::stop()
 {
 	clock->OMXStop();
@@ -225,10 +230,9 @@ void ofxOMXPlayer::stop()
 	ofLogVerbose() << "ofxOMXPlayer::stop called";
 }
 
-//---------------------------------------------------------------------------
-void ofxOMXPlayer::setPaused(bool _bPause){
-	bPaused = _bPause;
-	if(bPaused)
+void ofxOMXPlayer::setPaused(bool doPause)
+{
+	if(doPause)
 	{
 		omxPlayerVideo.SetSpeed(OMX_PLAYSPEED_PAUSE);
 		clock->OMXPause();
@@ -240,38 +244,18 @@ void ofxOMXPlayer::setPaused(bool _bPause){
 
 			
 }
-
-//---------------------------------------------------------------------------
-unsigned char * ofxOMXPlayer::getPixels(){
-	if( pixels != NULL ){
-		return pixels->getPixels();
-	}
-	return NULL;	
-}
-
-//---------------------------------------------------------------------------
-ofPixelsRef ofxOMXPlayer::getPixelsRef(){
-	if (pixels == NULL) 
-	{
-		//TODO figure this out
-		ofLogError() << "probably going to crash";
-	}
-	return *pixels;
-}
-
-//------------------------------------
-void ofxOMXPlayer::draw(float _x, float _y, float _w, float _h)
+void ofxOMXPlayer::draw(float x, float y, float width, float height)
 {
 	if(!isPlaying()) return;
-	getTextureReference().draw(_x, _y, _w, _h);	
+	getTextureReference().draw(x, y, width, height);	
 }
 
-//------------------------------------
-void ofxOMXPlayer::draw(float _x, float _y)
+void ofxOMXPlayer::draw(float x, float y)
 {
 	if(!isPlaying()) return;
-	getTextureReference().draw(_x, _y);
+	getTextureReference().draw(x, y);
 }
+
 string ofxOMXPlayer::getVideoDebugInfo()
 {
 	if (!doVideoDebugging) 
@@ -285,130 +269,55 @@ string ofxOMXPlayer::getVideoDebugInfo()
 	return "NO INFO YET";
 }
 
-int ofxOMXPlayer::getSpeed(){
-	return speed;
-}
-//--------------------------------------------------------------------
-void ofxOMXPlayer::setSpeed(int rate){
-	speed = rate;
-	omxReader.SetSpeed(speed);
-	clock->OMXSpeed(speed);
-	//omxPlayerVideo.SetSpeed(speed*1000);
-}
-
-//---------------------------------------------------------------------------
-float ofxOMXPlayer::getPosition(){
-	//TODO: check if behavior is the same
-	return getMediaTime();
-}
-//---------------------------------------------------------------------------
-float ofxOMXPlayer::getDuration(){
+float ofxOMXPlayer::getDuration()
+{
 	return duration;
 }
-
-void ofxOMXPlayer::setPosition(float pct)
+//inaccurate, I believe as it is referring to decoded frames which can be 
+//ahead of rendered frames
+int ofxOMXPlayer::getCurrentFrame()
 {
-	if (!isPlaying()) 
-	{
-		return;
-	}
-	
-	//int m_seek_pos = 0;
-
-	/*ofLogVerbose() << "pct: " << pct;
-	ofLogVerbose() << "duration: " << duration;
-	ofLogVerbose() << "omxPlayerVideo.GetFPS(): " << omxPlayerVideo.GetFPS();
-	float maxPoints = duration*(float)omxPlayerVideo.GetFPS();
-	ofLogVerbose() << "maxPoints: " << maxPoints;
-	
-	float m_seek_pos = ofMap(pct, 0.0f, 100.0f, 0.0f, maxPoints);
-	
-	ofLogVerbose() << "m_seek_pos: " << m_seek_pos;
-	double startpts;
-	ofLog(OF_LOG_VERBOSE, "\nSeeking start of video to %f\n", m_seek_pos);
-	omxReader.SeekTime(m_seek_pos, AVSEEK_FLAG_BACKWARD, &startpts);  // from seconds to DVD_TIME_BASE
-	ofLogVerbose() << "SEEK RESULT: " << startpts;*/
-	double m_incr = 60.0;
-	double startpts = 0;
-	if(m_incr != 0)
-    {
-		int    seek_flags   = 0;
-		double seek_pos     = 0;
-		double pts          = 0;
-		
-
-		//clock->OMXStop();
-		
-		pts = clock->GetPTS();
-		
-		seek_pos = (pts / DVD_TIME_BASE) + m_incr;
-		seek_flags = m_incr < 0.0f ? AVSEEK_FLAG_BACKWARD : 0;
-		
-		seek_pos *= 1000.0f;
-		
-		m_incr = 0;
-		
-		//if()
-//		{
-//			/*omxPlayerVideo.Flush();
-//			if(packet)
-//			{
-//				omxReader.FreePacket(packet);
-//				packet = NULL;
-//			}*/
-//		}
-		
-		//omxPlayerVideo.Close();
-		//omxPlayerVideo.Open(streamInfo, clock, eglImage);
-		omxReader.SeekTime(seek_pos, seek_flags, &startpts);
-		//clock->SetPTS(startpts);
-		clock->OMXStart(startpts);
-		//clock->OMXStart(startpts);
-    }
-	
-	
-	
-}
-void ofxOMXPlayer::setLoopState(ofLoopType state){
-	
-
-omxReader.currentLoopState = state;
-}
-
-//---------------------------------------------------------------------------
-ofLoopType ofxOMXPlayer::getLoopState(){
-	return omxReader.currentLoopState;
-}
-
-//------------------------------------
-int ofxOMXPlayer::getCurrentFrame(){
 	return (int)(omxPlayerVideo.GetCurrentPTS()/ DVD_TIME_BASE)*omxPlayerVideo.GetFPS();
 }
-//------------------------------------
-int ofxOMXPlayer::getTotalNumFrames(){
+
+int ofxOMXPlayer::getTotalNumFrames()
+{
 	return nFrames;
 }
 
-//----------------------------------------------------------
 float ofxOMXPlayer::getWidth()
 {
 	return videoWidth;
 }
 
-//----------------------------------------------------------
 float ofxOMXPlayer::getHeight()
 {
 	return videoHeight;
 }
 
-//----------------------------------------------------------
-bool ofxOMXPlayer::isPaused()
+double ofxOMXPlayer::getMediaTime()
 {
-	return bPaused;
+	double mediaTime = 0.0;
+	if(isPlaying()) 
+	{
+		mediaTime =  clock->OMXMediaTime();
+	}
+	
+	return mediaTime;
 }
 
-//----------------------------------------------------------
-bool ofxOMXPlayer::isPlaying(){
+bool ofxOMXPlayer::isPaused()
+{
+	if (!clock) 
+	{
+		ofLogVerbose() << "No clock for pause state inquiry";
+		return false;
+	}
+	return clock->OMXIsPaused();
+}
+
+bool ofxOMXPlayer::isPlaying()
+{
 	return bPlaying;
 }
 
@@ -427,7 +336,6 @@ void ofxOMXPlayer::close()
 		packet = NULL;
 	}	
 	
-		
 	if (eglImage !=NULL)  
 	{
 		eglDestroyImageKHR(display, eglImage);
@@ -436,17 +344,4 @@ void ofxOMXPlayer::close()
 	omxCore.Deinitialize();
 	rbp.Deinitialize();
 	ofLogVerbose() << "reached end of ofxOMXPlayer::close";
-}
-
-double ofxOMXPlayer::getMediaTime()
-{
-	double mediaTime = 0.0;
-	if(isPlaying()) 
-	{
-		mediaTime =  clock->OMXMediaTime();
-	}
-	
-	return mediaTime;
-
-	
 }

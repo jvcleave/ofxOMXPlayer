@@ -94,19 +94,13 @@ void developApp::draw(){
 	info <<"\n" <<	"TOTAL FRAMES: "		<< omxPlayer.getTotalNumFrames();
 	info <<"\n" <<	"CURRENT FRAME: "		<< omxPlayer.getCurrentFrame();
 	info <<"\n" <<	"REMAINING FRAMES: "	<< omxPlayer.getTotalNumFrames() - omxPlayer.getCurrentFrame();
-	info <<"\n" <<	"PLAYER SPEED "			<< omxPlayer.getSpeed();
 
 	info <<"\n" <<	omxPlayer.getVideoDebugInfo() << endl;
 	
 	info <<"\n" <<	"KEYS:";
 	info <<"\n" <<	"p to toggle Pause";
-	info <<"\n" <<	"r to Seek to Random Point";
 	info <<"\n" <<	"1 to send Play command";
 	info <<"\n" <<	"2 to send Stop command";
-	info <<"\n" <<	"q to send firstFrame()";
-	info <<"\n" <<	"a to send previousFrame()";
-	info <<"\n" <<	"s to send nextFrame()";
-	info <<"\n" <<	"u to increment speed";
 	ofDrawBitmapStringHighlight(info.str(), 60, 60, ofColor(0, 0, 0, 90), ofColor::yellow);
 	
 	
@@ -152,13 +146,6 @@ void developApp::keyPressed  (int key){
 			omxPlayer.setPaused(doPause);
 			break;
 		}
-		case 'r': //Seek testing
-		{
-			float randomSeekPercentage = ofRandom(1.0f, 100.0f);
-			ofLogVerbose() << "SENDING SEEK VALUE: " << randomSeekPercentage;
-			omxPlayer.setPosition(randomSeekPercentage);
-			break;
-		}
 		case '1':
 		{
 			ofLogVerbose() << "SENDING PLAY COMMAND";
@@ -169,30 +156,6 @@ void developApp::keyPressed  (int key){
 		{
 			ofLogVerbose() << "SENDING STOP COMMAND";
 			omxPlayer.stop();
-			break;
-		}
-		case 'q': //firstFrame
-		{
-			ofLogVerbose() << "firstFrame";
-			//omxPlayer.firstFrame();
-			break;
-		}
-		case 'a': //previousFrame
-		{
-			ofLogVerbose() << "previousFrame";
-			//omxPlayer.previousFrame();
-			break;
-		}
-		case 's': //nextFrame
-		{
-			ofLogVerbose() << "nextFrame";
-			//omxPlayer.nextFrame();
-			break;
-		}
-		case 'u': //setSpeed
-		{
-			ofLogVerbose() << "setSpeed";
-			omxPlayer.setSpeed(omxPlayer.getSpeed()*2);
 			break;
 		}
 			

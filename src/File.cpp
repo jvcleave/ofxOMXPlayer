@@ -17,9 +17,10 @@ using namespace std;
 //*********************************************************************************************
 CFile::CFile()
 {
-  m_pFile = NULL;
-  m_flags = 0;
-  m_iLength = 0;
+	m_pFile = NULL;
+	m_flags = 0;
+	m_iLength = 0;
+	doLoopFile = false;
 }
 
 //*********************************************************************************************
@@ -61,11 +62,7 @@ bool CFile::Exists(const CStdString& strFileName, bool bUseCache /* = true */)
 
   return true;
 }
-#define FILE_LOOPING_HACK_ENABLED
-#warning !!!!!!!!!!!!!!!!!!!!!!!!!!!
-#warning FILE LOOPING HACK IS ENABLED
-#warning WORKS WELL WITH TEST.H264
-#warning !!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 unsigned int CFile::Read(void *lpBuf, int64_t uiBufSize)
 {
 	unsigned int ret = 0;
@@ -75,13 +72,16 @@ unsigned int CFile::Read(void *lpBuf, int64_t uiBufSize)
 		return 0;
 	}
 	
-#ifdef FILE_LOOPING_HACK_ENABLED
-	if (feof(m_pFile))
+	if (doLoopFile) 
 	{
-		cout << "Looping via FILE_LOOPING_HACK in CFile::Read" << endl;
-		rewind(m_pFile);
+		if (feof(m_pFile))
+		{
+			cout << "Looping via doLoopFile in CFile::Read" << endl;
+			rewind(m_pFile);
+		}
 	}
-#endif	
+	
+
 	ret = fread(lpBuf, 1, uiBufSize, m_pFile);
 		
 	return ret;

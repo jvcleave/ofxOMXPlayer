@@ -31,24 +31,25 @@ typedef enum {
 class CFile
 {
 public:
-  CFile();
-  ~CFile();
+	CFile();
+	~CFile();
 
-  bool Open(const CStdString& strFileName, unsigned int flags = 0);
-  bool OpenForWrite(const CStdString& strFileName, bool bOverWrite);
-  unsigned int Read(void* lpBuf, int64_t uiBufSize);
-  int Write(const void* lpBuf, int64_t uiBufSize);
-  int64_t Seek(int64_t iFilePosition, int iWhence = SEEK_SET);
-  int64_t GetPosition();
-  int64_t GetLength();
-  void Close();
-  static bool Exists(const CStdString& strFileName, bool bUseCache = true);
-  int GetChunkSize() { return 6144 /*FFMPEG_FILE_BUFFER_SIZE*/; };
-  int IoControl(EIoControl request, void* param);
+	bool Open(const CStdString& strFileName, unsigned int flags = 0);
+	bool OpenForWrite(const CStdString& strFileName, bool bOverWrite);
+	unsigned int Read(void* lpBuf, int64_t uiBufSize);
+	int Write(const void* lpBuf, int64_t uiBufSize);
+	int64_t Seek(int64_t iFilePosition, int iWhence = SEEK_SET);
+	int64_t GetPosition();
+	int64_t GetLength();
+	void Close();
+	static bool Exists(const CStdString& strFileName, bool bUseCache = true);
+	int GetChunkSize() { return 6144 /*FFMPEG_FILE_BUFFER_SIZE*/; };
+	int IoControl(EIoControl request, void* param);
+	bool doLoopFile;
 private:
-  unsigned int m_flags;
-  FILE  *m_pFile;
-  int64_t m_iLength;
+	unsigned int m_flags;
+	FILE  *m_pFile;
+	int64_t m_iLength;
 };
 
 };

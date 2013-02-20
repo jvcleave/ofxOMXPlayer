@@ -211,6 +211,14 @@ void OMXReader::ClearStreams()
   m_program     = UINT_MAX;
 }
 
+void OMXReader::enableFileLoopinghack()
+{
+	if(m_pFile)
+	{
+		m_pFile->doLoopFile = true;
+	}
+}
+
 bool OMXReader::Close()
 {
   if (m_pFormatContext)
