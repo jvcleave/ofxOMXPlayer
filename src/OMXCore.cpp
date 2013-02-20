@@ -1607,7 +1607,11 @@ OMX_ERRORTYPE COMXCoreComponent::DecoderEventHandler(
      ofLog(OF_LOG_VERBOSE, "\n%s::%s %s - OMX_EventBufferFlag(input)\n", CLASSNAME, __func__, ctx->GetName().c_str());
       #endif
       if(nData2 & OMX_BUFFERFLAG_EOS)
-        ctx->m_eos = true;
+	  {
+		  ofLogVerbose() << "OMX_EventBufferFlag::OMX_BUFFERFLAG_EOS RECEIVED";
+		  ctx->m_eos = true;
+	  }
+       
     break;
     case OMX_EventPortSettingsChanged:
       #if defined(OMX_DEBUG_EVENTHANDLER)

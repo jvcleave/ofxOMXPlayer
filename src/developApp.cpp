@@ -10,6 +10,7 @@ void developApp::setup()
 	doShader = false;
 	doPause = false;
 	//ofSetLogLevel(OF_LOG_VERBOSE); set in main.cpp
+	ofEnableAlphaBlending();
 	if (doShader) 
 	{
 		shader.load("PostProcessing.vert", "PostProcessing.frag", "");
@@ -18,7 +19,7 @@ void developApp::setup()
 		fbo.begin();
 			ofClear(0, 0, 0, 0);
 		fbo.end();
-		ofEnableAlphaBlending();
+		
 	}
 	
 	/* to get the videos I am testing run command:
@@ -72,7 +73,7 @@ void developApp::draw(){
 	}else 
 	{
 		omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
-		omxPlayer.draw(0, 0, omxPlayer.getWidth()/4, omxPlayer.getHeight()/4);
+		//omxPlayer.draw(0, 0, omxPlayer.getWidth()/4, omxPlayer.getHeight()/4);
 	}
 	
 	stringstream info;
@@ -106,7 +107,7 @@ void developApp::draw(){
 	info <<"\n" <<	"a to send previousFrame()";
 	info <<"\n" <<	"s to send nextFrame()";
 	info <<"\n" <<	"u to increment speed";
-	ofDrawBitmapStringHighlight(info.str(), 200, 200, ofColor::black, ofColor::yellow);
+	ofDrawBitmapStringHighlight(info.str(), 60, 60, ofColor(0, 0, 0, 90), ofColor::yellow);
 	
 	
 }

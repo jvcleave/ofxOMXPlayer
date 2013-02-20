@@ -101,6 +101,7 @@ public:
 	ofPixels* pixels;
 	void close();
 	bool doVideoDebugging;
+	bool doLooping;
 private:
 	
 	ofTexture tex;

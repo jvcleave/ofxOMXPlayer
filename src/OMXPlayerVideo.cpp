@@ -392,7 +392,10 @@ void OMXPlayerVideo::Flush()
   UnLockDecoder();
   UnLock();
 }
-
+void OMXPlayerVideo::UnFlush()
+{
+	m_flush = false;
+}
 bool OMXPlayerVideo::AddPacket(OMXPacket *pkt)
 {
   bool ret = false;
@@ -500,7 +503,7 @@ void OMXPlayerVideo::WaitCompletion()
 		Lock();
 		if(m_packets.empty())
 		{
-			ofLogVerbose() << "packets empty";
+			//ofLogVerbose() << "packets empty"; //maybe crashing with string err
 			UnLock();
 			break;
 		}

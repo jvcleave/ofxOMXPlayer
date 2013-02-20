@@ -4,7 +4,6 @@
 #include "utils/StdString.h"
 
 #include "File.h"
-
 using namespace XFILE;
 using namespace std;
 
@@ -62,22 +61,30 @@ bool CFile::Exists(const CStdString& strFileName, bool bUseCache /* = true */)
 
   return true;
 }
-
+#define FILE_LOOPING_HACK_ENABLED
+#warning !!!!!!!!!!!!!!!!!!!!!!!!!!!
+#warning FILE LOOPING HACK IS ENABLED
+#warning WORKS WELL WITH TEST.H264
+#warning !!!!!!!!!!!!!!!!!!!!!!!!!!!
 unsigned int CFile::Read(void *lpBuf, int64_t uiBufSize)
 {
-  unsigned int ret = 0;
+	unsigned int ret = 0;
 
-  if(!m_pFile)
-    return 0;
-	//LOOPING HACK
+	if(!m_pFile)
+	{
+		return 0;
+	}
+	
+#ifdef FILE_LOOPING_HACK_ENABLED
 	if (feof(m_pFile))
 	{
-		printf("Looping file in CFile::Read");
+		//cout << "End of file in CFile::Read" << endl;
 		rewind(m_pFile);
 	}
-  ret = fread(lpBuf, 1, uiBufSize, m_pFile);
+#endif	
+	ret = fread(lpBuf, 1, uiBufSize, m_pFile);
 		
-  return ret;
+	return ret;
 }
 
 //*********************************************************************************************

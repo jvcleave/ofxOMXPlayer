@@ -112,7 +112,7 @@ public:
 	//void FlushRead();
 	bool SeekTime(int64_t seek_ms, int seek_flags, double *startpts);
 	AVMediaType PacketType(OMXPacket *pkt);
-	OMXPacket *Read();
+	OMXPacket *Read(bool doRestart);
 	void Process();
 	bool GetStreams();
 	void AddStream(int id);

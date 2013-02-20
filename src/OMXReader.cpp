@@ -358,11 +358,18 @@ AVMediaType OMXReader::PacketType(OMXPacket *pkt)
   return m_pFormatContext->streams[pkt->stream_index]->codec->codec_type;
 }
 
-OMXPacket *OMXReader::Read()
+OMXPacket *OMXReader::Read(bool doRestart)
 {
   //assert(!IsEof());
   if(IsEof())
   {
+	  if (doRestart)
+	  {
+		  m_eof = false;
+		  Open(m_filename, false);
+		  return NULL;
+	  }
+	 
 	  //SeekTime(1, AVSEEK_FLAG_BACKWARD, NULL);
 	  /*switch (currentLoopState) 
 	   {
@@ -856,6 +863,11 @@ void OMXReader::UpdateCurrentPTS()
   for(unsigned int i = 0; i < m_pFormatContext->nb_streams; i++)
   {
     AVStream *stream = m_pFormatContext->streams[i];
+	  if (stream) 
+	  {
+		  ofLogVerbose() << "stream->cur_dts: " << stream->cur_dts;
+		  ofLogVerbose() << "stream->first_dts: " <<  stream->first_dts;
+	  }
     if(stream && stream->cur_dts != (int64_t)AV_NOPTS_VALUE)
     {
       //double ts = ConvertTimestamp(stream->cur_dts, stream->time_base.den, stream->time_base.num);

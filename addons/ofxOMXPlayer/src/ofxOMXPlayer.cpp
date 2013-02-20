@@ -15,7 +15,8 @@ ofxOMXPlayer::ofxOMXPlayer()
 	bPlaying = false;
 	duration = 0.0;
 	nFrames = 0;
-	doVideoDebugging = true;
+	doVideoDebugging = false;
+	doLooping = false;
 	if (doVideoDebugging) 
 	{
 		omxPlayerVideo.doDebugging = true;
@@ -82,7 +83,8 @@ void ofxOMXPlayer::openPlayer()
 			ofLogVerbose() << "duration SET: " << duration;
 		}
 		
-		ofLogVerbose() << "Opened video PASS";					
+		ofLogVerbose() << "Opened video PASS";	
+		
 	}else 
 	{
 		ofLogError() << "Opened video FAIL";
@@ -159,11 +161,30 @@ void ofxOMXPlayer::update()
 	{
 		return;
 	}
-	
-	if(!packet)
+	if (doLooping) 
 	{
-		packet = omxReader.Read();
+		if (!omxReader.IsEof())
+		{
+			packet = omxReader.Read(false);
+		}else 
+		{
+			if (!omxPlayerVideo.GetCached())
+			{
+				omxPlayerVideo.Flush();
+				omxPlayerVideo.UnFlush();
+				packet = omxReader.Read(true);
+			}
+		}
+	}else 
+	{
+		if(!packet)
+		{
+			packet = omxReader.Read(false);
+		}
 	}
+
+	
+	
 	
 	if(packet && omxReader.IsActive(OMXSTREAM_VIDEO, packet->stream_index))
     {
@@ -182,6 +203,7 @@ void ofxOMXPlayer::update()
 			packet = NULL;
 		}
 	}
+
 }
 //--------------------------------------------------------
 void ofxOMXPlayer::play(){

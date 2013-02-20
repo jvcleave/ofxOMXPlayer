@@ -647,8 +647,10 @@ int COMXVideo::Decode(uint8_t *pData, int iSize, double dts, double pts)
       demuxer_content += omx_buffer->nFilledLen;
 
       if(demuxer_bytes == 0)
-        omx_buffer->nFlags |= OMX_BUFFERFLAG_ENDOFFRAME;
-
+	  {
+		  omx_buffer->nFlags |= OMX_BUFFERFLAG_ENDOFFRAME;
+	  }
+		
       int nRetry = 0;
       while(true)
       {
