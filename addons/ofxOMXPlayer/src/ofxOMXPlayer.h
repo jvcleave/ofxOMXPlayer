@@ -11,7 +11,7 @@ extern "C"
 
 #include "RBP.h"
 #include "OMXClock.h"
-#include "OMXPlayerVideo.h"
+#include "OMXEGLImagePlayer.h"
 
 
 class ofxOMXPlayer 
@@ -67,7 +67,7 @@ private:
 	COMXCore              omxCore;
 	OMXClock * clock;
 	
-	OMXPlayerVideo    omxPlayerVideo;
+	OMXEGLImagePlayer    videoPlayer;
 	OMXReader         omxReader;
 	
 	COMXStreamInfo    streamInfo;

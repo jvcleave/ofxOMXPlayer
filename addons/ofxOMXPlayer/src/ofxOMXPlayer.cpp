@@ -17,7 +17,7 @@ ofxOMXPlayer::ofxOMXPlayer()
 	doLooping			= true;
 	if (doVideoDebugging) 
 	{
-		omxPlayerVideo.doDebugging = true; //this can cause a string error, probably thread safe issue
+		videoPlayer.doDebugging = true; //this can cause a string error, probably thread safe issue
 	}
 }
 
@@ -70,16 +70,16 @@ void ofxOMXPlayer::openPlayer()
 	ofLogVerbose() << "SET videoHeight: " << videoHeight;
 
 	generateEGLImage();
-	bPlaying = omxPlayerVideo.Open(streamInfo, clock, eglImage);
+	bPlaying = videoPlayer.Open(streamInfo, clock, eglImage);
 	if (isPlaying()) 
 	{
 		ofLogVerbose() << "streamInfo.nb_frames " << streamInfo.nb_frames;
-		ofLogVerbose() << "omxPlayerVideo.GetFPS(): " << omxPlayerVideo.GetFPS();
+		ofLogVerbose() << "videoPlayer.GetFPS(): " << videoPlayer.GetFPS();
 		
-		if(streamInfo.nb_frames>0 && omxPlayerVideo.GetFPS()>0)
+		if(streamInfo.nb_frames>0 && videoPlayer.GetFPS()>0)
 		{
 			nFrames = streamInfo.nb_frames;
-			duration = streamInfo.nb_frames / omxPlayerVideo.GetFPS();
+			duration = streamInfo.nb_frames / videoPlayer.GetFPS();
 			ofLogVerbose() << "duration SET: " << duration;
 		}else 
 		{
@@ -176,11 +176,11 @@ void ofxOMXPlayer::update()
 			packet = omxReader.Read(false);
 		}else 
 		{
-			if (!omxPlayerVideo.GetCached())
+			if (!videoPlayer.GetCached())
 			{
 				ofLogVerbose() << "looping via doLooping option";
-				omxPlayerVideo.Flush();
-				omxPlayerVideo.UnFlush();
+				videoPlayer.Flush();
+				videoPlayer.UnFlush();
 				packet = omxReader.Read(true);
 			}
 		}
@@ -194,7 +194,7 @@ void ofxOMXPlayer::update()
 
 	if(packet && omxReader.IsActive(OMXSTREAM_VIDEO, packet->stream_index))
     {
-		if(omxPlayerVideo.AddPacket(packet))
+		if(videoPlayer.AddPacket(packet))
 		{
 			packet = NULL;
 		}else 
@@ -225,7 +225,7 @@ void ofxOMXPlayer::stop()
 {
 	clock->OMXStop();
 	clock->OMXStateIdle();
-	omxPlayerVideo.Close();
+	videoPlayer.Close();
 	bPlaying = false;
 	ofLogVerbose() << "ofxOMXPlayer::stop called";
 }
@@ -234,11 +234,11 @@ void ofxOMXPlayer::setPaused(bool doPause)
 {
 	if(doPause)
 	{
-		omxPlayerVideo.SetSpeed(OMX_PLAYSPEED_PAUSE);
+		videoPlayer.SetSpeed(OMX_PLAYSPEED_PAUSE);
 		clock->OMXPause();
 	}else 
 	{
-		omxPlayerVideo.SetSpeed(OMX_PLAYSPEED_NORMAL);
+		videoPlayer.SetSpeed(OMX_PLAYSPEED_NORMAL);
 		clock->OMXResume();
 	}
 
@@ -262,9 +262,9 @@ string ofxOMXPlayer::getVideoDebugInfo()
 	{
 		return "doVideoDebugging not enabled";
 	}
-	if (omxPlayerVideo.m_decoder != NULL) 
+	if (videoPlayer.m_decoder != NULL) 
 	{
-		return omxPlayerVideo.m_decoder->debugInfo + "\n" + omxPlayerVideo.debugInfo;
+		return videoPlayer.m_decoder->debugInfo + "\n" + videoPlayer.debugInfo;
 	}
 	return "NO INFO YET";
 }
@@ -277,7 +277,7 @@ float ofxOMXPlayer::getDuration()
 //ahead of rendered frames
 int ofxOMXPlayer::getCurrentFrame()
 {
-	return (int)(omxPlayerVideo.GetCurrentPTS()/ DVD_TIME_BASE)*omxPlayerVideo.GetFPS();
+	return (int)(videoPlayer.GetCurrentPTS()/ DVD_TIME_BASE)*videoPlayer.GetFPS();
 }
 
 int ofxOMXPlayer::getTotalNumFrames()
