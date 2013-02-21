@@ -29,4 +29,5 @@ See addons/ofxOMXPlayer/libs/omxplayer/COPYING for license details inherited fro
 Thanks to OtherCrashOverride for helping me figure out the linking issue to enable callbacks
 https://github.com/OtherCrashOverride
 
-
+Included shader from
+http://www.iquilezles.org/apps/shadertoy/?p=Postpro

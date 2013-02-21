@@ -1,13 +1,5 @@
 #pragma once
 
-#if (defined HAVE_CONFIG_H) && (!defined WIN32)
-  #include "config.h"
-#endif
-#ifndef __GNUC__
-#pragma warning(push)
-#pragma warning(disable:4244)
-#endif
-
 extern "C" {
 #include <bcm_host.h>
 }

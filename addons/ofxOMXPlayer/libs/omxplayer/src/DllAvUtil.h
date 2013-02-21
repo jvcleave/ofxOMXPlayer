@@ -21,9 +21,6 @@
  *
  */
 
-/*#if (defined HAVE_CONFIG_H) && (!defined WIN32)
-  #include "config.h"
-#endif*/
 #include "DynamicDll.h"
 
 
@@ -32,44 +29,30 @@
 #pragma warning(disable:4244)
 #endif
 
-extern "C" {
-#if (defined USE_EXTERNAL_FFMPEG)
-  #if (defined HAVE_LIBAVUTIL_AVUTIL_H)
-    #include <libavutil/avutil.h>
-    #include <libavutil/crc.h>
-    #include <libavutil/fifo.h>
-    // for LIBAVCODEC_VERSION_INT:
-    #include <libavcodec/avcodec.h>
-  #elif (defined HAVE_FFMPEG_AVUTIL_H)
-    #include <ffmpeg/avutil.h>
-    #include <ffmpeg/crc.h>
-    #include <ffmpeg/fifo.h>
-    // for LIBAVCODEC_VERSION_INT:
-    #include <ffmpeg/avcodec.h>
-  #endif
-  #if defined(HAVE_LIBAVUTIL_OPT_H)
-    #include <libavutil/opt.h>
-  #elif defined(HAVE_LIBAVCODEC_AVCODEC_H)
-    #include <libavcodec/opt.h>
-  #else
-    #include <ffmpeg/opt.h>
-  #endif
-  #if defined(HAVE_LIBAVUTIL_MEM_H)
-    #include <libavutil/mem.h>
-  #else
-    #include <ffmpeg/mem.h>
-  #endif
-  #if (defined HAVE_LIBAVUTIL_MATHEMATICS_H)
-    #include <libavutil/mathematics.h>
-  #endif
-#else
-  #include "libavutil/avutil.h"
-  #include "libavutil/audioconvert.h"
-  #include "libavutil/crc.h"
-  #include "libavutil/opt.h"
-  #include "libavutil/mem.h"
-  #include "libavutil/fifo.h"
-  #include "libavutil/samplefmt.h"
+extern "C"
+{
+#if (defined HAVE_LIBAVUTIL_AVUTIL_H)
+	#include <libavutil/avutil.h>
+	#include <libavutil/crc.h>
+	#include <libavutil/fifo.h>
+	// for LIBAVCODEC_VERSION_INT:
+	#include <libavcodec/avcodec.h>
+#endif
+	
+#if defined(HAVE_LIBAVUTIL_OPT_H)
+	#include <libavutil/opt.h>
+#endif
+	
+#if defined(HAVE_LIBAVCODEC_AVCODEC_H)
+	#include <libavcodec/opt.h>
+#endif
+	
+#if defined(HAVE_LIBAVUTIL_MEM_H)
+	#include <libavutil/mem.h>
+#endif
+	
+#if (defined HAVE_LIBAVUTIL_MATHEMATICS_H)
+	#include <libavutil/mathematics.h>
 #endif
 }
 
@@ -110,7 +93,6 @@ public:
   virtual void av_log_set_level(int level) = 0;
 };
 
-#if defined (USE_EXTERNAL_FFMPEG) || (defined TARGET_DARWIN)
 // Use direct layer
 class DllAvUtilBase : public DllDynamic, DllAvUtilInterface
 {
@@ -154,70 +136,6 @@ public:
    }
    virtual void Unload() {}
 };
-
-#else
-
-class DllAvUtilBase : public DllDynamic, DllAvUtilInterface
-{
-  DECLARE_DLL_WRAPPER(DllAvUtilBase, DLL_PATH_LIBAVUTIL)
-
-  LOAD_SYMBOLS()
-
-  DEFINE_METHOD1(void, av_log_set_callback, (void (*p1)(void*, int, const char*, va_list)))
-  DEFINE_METHOD1(void*, av_malloc, (unsigned int p1))
-  DEFINE_METHOD1(void*, av_mallocz, (unsigned int p1))
-  DEFINE_METHOD2(void*, av_realloc, (void *p1, unsigned int p2))
-  DEFINE_METHOD1(void, av_free, (void *p1))
-  DEFINE_METHOD1(void, av_freep, (void *p1))
-  DEFINE_METHOD4(int64_t, av_rescale_rnd, (int64_t p1, int64_t p2, int64_t p3, enum AVRounding p4));
-  DEFINE_METHOD3(int64_t, av_rescale_q, (int64_t p1, AVRational p2, AVRational p3));
-  DEFINE_METHOD1(const AVCRC*, av_crc_get_table, (AVCRCId p1))
-  DEFINE_METHOD4(uint32_t, av_crc, (const AVCRC *p1, uint32_t p2, const uint8_t *p3, size_t p4));
-  DEFINE_METHOD4(int, av_opt_set, (void *p1, const char *p2, const char *p3, int p4));
-  DEFINE_METHOD1(AVFifoBuffer*, av_fifo_alloc, (unsigned int p1))
-  DEFINE_METHOD1(void, av_fifo_free, (AVFifoBuffer *p1))
-  DEFINE_METHOD1(void, av_fifo_reset, (AVFifoBuffer *p1))
-  DEFINE_METHOD1(int, av_fifo_size, (AVFifoBuffer *p1))
-  DEFINE_METHOD4(int, av_fifo_generic_read, (AVFifoBuffer *p1, void *p2, int p3, void (*p4)(void*, void*, int)))
-  DEFINE_METHOD4(int, av_fifo_generic_write, (AVFifoBuffer *p1, void *p2, int p3, int (*p4)(void*, void*, int)))
-  DEFINE_METHOD1(char*, av_strdup, (const char *p1))
-  DEFINE_METHOD1(int, av_get_bytes_per_sample, (enum AVSampleFormat p1))
-  DEFINE_METHOD4(AVDictionaryEntry *, av_dict_get, (AVDictionary *p1, const char *p2, const AVDictionaryEntry *p3, int p4))
-  DEFINE_METHOD4(int, av_dict_set, (AVDictionary **p1, const char *p2, const char *p3, int p4));
-  DEFINE_METHOD5(int, av_samples_get_buffer_size, (int *p1, int p2, int p3, enum AVSampleFormat p4, int p5))
-  DEFINE_METHOD1(int64_t, av_get_default_channel_layout, (int p1))
-  DEFINE_METHOD1(void, av_log_set_level, (int p1))
-
-  public:
-  BEGIN_METHOD_RESOLVE()
-    RESOLVE_METHOD(av_log_set_callback)
-    RESOLVE_METHOD(av_malloc)
-    RESOLVE_METHOD(av_mallocz)
-    RESOLVE_METHOD(av_realloc)
-    RESOLVE_METHOD(av_free)
-    RESOLVE_METHOD(av_freep)
-    RESOLVE_METHOD(av_rescale_rnd)
-    RESOLVE_METHOD(av_rescale_q)
-    RESOLVE_METHOD(av_crc_get_table)
-    RESOLVE_METHOD(av_crc)
-    RESOLVE_METHOD(av_opt_set)
-    RESOLVE_METHOD(av_fifo_alloc)
-    RESOLVE_METHOD(av_fifo_free)
-    RESOLVE_METHOD(av_fifo_reset)
-    RESOLVE_METHOD(av_fifo_size)
-    RESOLVE_METHOD(av_fifo_generic_read)
-    RESOLVE_METHOD(av_fifo_generic_write)
-    RESOLVE_METHOD(av_strdup)
-    RESOLVE_METHOD(av_get_bytes_per_sample)
-    RESOLVE_METHOD(av_dict_get)
-    RESOLVE_METHOD(av_dict_set)
-    RESOLVE_METHOD(av_samples_get_buffer_size)
-    RESOLVE_METHOD(av_get_default_channel_layout)
-    RESOLVE_METHOD(av_log_set_level)
-  END_METHOD_RESOLVE()
-};
-
-#endif
 
 class DllAvUtil : public DllAvUtilBase
 {
