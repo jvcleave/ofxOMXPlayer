@@ -31,29 +31,15 @@
 
 extern "C"
 {
-#if (defined HAVE_LIBAVUTIL_AVUTIL_H)
-	#include <libavutil/avutil.h>
-	#include <libavutil/crc.h>
-	#include <libavutil/fifo.h>
-	// for LIBAVCODEC_VERSION_INT:
-	#include <libavcodec/avcodec.h>
-#endif
-	
-#if defined(HAVE_LIBAVUTIL_OPT_H)
-	#include <libavutil/opt.h>
-#endif
-	
-#if defined(HAVE_LIBAVCODEC_AVCODEC_H)
-	#include <libavcodec/opt.h>
-#endif
-	
-#if defined(HAVE_LIBAVUTIL_MEM_H)
-	#include <libavutil/mem.h>
-#endif
-	
-#if (defined HAVE_LIBAVUTIL_MATHEMATICS_H)
-	#include <libavutil/mathematics.h>
-#endif
+#include <libavutil/avutil.h>
+#include <libavutil/crc.h>
+#include <libavutil/fifo.h>
+// for LIBAVCODEC_VERSION_INT:
+#include <libavcodec/avcodec.h>
+#include <libavutil/opt.h>
+#include <libavcodec/opt.h>
+#include <libavutil/mem.h>
+
 }
 
 #ifndef __GNUC__

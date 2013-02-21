@@ -30,7 +30,7 @@
 #define _LARGEFILE64_SOURCE
 #endif
 
-#undef _FILE_OFFSET_BITS
+//#undef _FILE_OFFSET_BITS
 #define _FILE_OFFSET_BITS 64
 
 #include <sys/types.h>
