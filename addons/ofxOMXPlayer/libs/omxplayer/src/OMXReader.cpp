@@ -967,3 +967,47 @@ std::string OMXReader::GetStreamCodecName(AVStream *stream)
 
   return strStreamName;
 }
+
+
+std::string OMXReader::GetCodecName(OMXStreamType type)
+{
+	std::string strStreamName;
+	
+	Lock();
+	switch (type)
+	{
+		case OMXSTREAM_AUDIO:
+			if(m_audio_index != -1)
+				strStreamName = m_streams[m_audio_index].codec_name;
+			break;
+		case OMXSTREAM_VIDEO:
+			if(m_video_index != -1)
+				strStreamName = m_streams[m_video_index].codec_name;
+			break;
+		/*case OMXSTREAM_SUBTITLE:
+			if(m_subtitle_index != -1)
+				strStreamName = m_streams[m_subtitle_index].codec_name;
+			break;*/
+		default:
+			break;
+	}
+	UnLock();
+	
+	return strStreamName;
+}
+
+std::string OMXReader::GetCodecName(OMXStreamType type, unsigned int index)
+{
+	std::string strStreamName = "";
+	
+	for(int i = 0; i < MAX_STREAMS; i++)
+	{
+		if(m_streams[i].type == type &&  m_streams[i].index == index)
+		{
+			strStreamName = m_streams[i].codec_name;
+			break;
+		}
+	}
+	
+	return strStreamName;
+}

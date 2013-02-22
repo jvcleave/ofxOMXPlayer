@@ -139,4 +139,9 @@ public:
 	int GetSourceBitrate();
 	static bool g_abort;
 	void enableFileLoopinghack();
+	
+	
+	std::string GetCodecName(OMXStreamType type);
+	std::string GetCodecName(OMXStreamType type, unsigned int index);
+	
 };
