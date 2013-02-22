@@ -62,6 +62,7 @@ public:
 	bool doVideoDebugging;
 	bool doLooping;
 	void threadedFunction();
+	bool isThreaded;
 private:
 	
 	CRBP                  rbp;

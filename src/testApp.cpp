@@ -17,6 +17,19 @@ void testApp::setup()
 		
 	}
 	string videoPath = "/opt/vc/src/hello_pi/hello_video/test.h264";
+	
+	//this will let us just grab a video without recompiling
+	ofDirectory currentVideoDirectory("/home/pi/videos/current");
+	if (currentVideoDirectory.exists()) 
+	{
+		currentVideoDirectory.listDir();
+		vector<ofFile> files = currentVideoDirectory.getFiles();
+		if (files.size()>0) 
+		{
+			videoPath = files[0].path();
+		}		
+	}
+	
 	omxPlayer.loadMovie(videoPath);
 }
 
@@ -27,8 +40,11 @@ void testApp::update()
 	{
 		return;
 	}
+	if (!omxPlayer.isThreaded)
+	{
+		omxPlayer.update();
+	}
 	
-	omxPlayer.update();
 	
 	if (doShader) 
 	{

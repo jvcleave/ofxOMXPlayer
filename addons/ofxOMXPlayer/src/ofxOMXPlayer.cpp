@@ -15,6 +15,7 @@ ofxOMXPlayer::ofxOMXPlayer()
 	nFrames				= 0;
 	doVideoDebugging	= false;
 	doLooping			= true;
+	isThreaded		= false;
 	if (doVideoDebugging) 
 	{
 		videoPlayer.doDebugging = true; //this can cause a string error, probably thread safe issue
@@ -81,8 +82,11 @@ void ofxOMXPlayer::openPlayer()
 			nFrames = streamInfo.nb_frames;
 			duration = streamInfo.nb_frames / videoPlayer.GetFPS();
 			ofLogVerbose() << "duration SET: " << duration;
+			isThreaded = true;
+			
 		}else 
 		{
+			
 			//file is weird (like test.h264) and has no reported frames
 			//enable File looping hack if looping enabled;
 			
@@ -91,7 +95,16 @@ void ofxOMXPlayer::openPlayer()
 				omxReader.enableFileLoopinghack();
 			}
 		}
-		startThread(false, true);
+		if (isThreaded) 
+		{
+			ofLogVerbose() << "ofxOMXPlayer THREADING ENABLED";
+			startThread(false, true);
+		}else 
+		{
+			ofLogVerbose() << "ofxOMXPlayer THREADING DISABLED";
+		}
+
+		
 		
 		ofLogVerbose() << "Opened video PASS";	
 		
