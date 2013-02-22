@@ -742,15 +742,19 @@ void OMXEGLImage::WaitCompletion()
     ofLog(OF_LOG_VERBOSE, "\n%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, omx_err);
     return;
   }
+	
 
-
+	
   while(true)
   {
+	
     if(m_omx_render.IsEOS())
 	{
 		ofLogVerbose() << "OMXVideo reached End of Stream";
-		 break;
-	}
+		m_omx_render.SetEOS(false);
+		break;
+
+	} 
     OMXClock::OMXSleep(50);
   }
 

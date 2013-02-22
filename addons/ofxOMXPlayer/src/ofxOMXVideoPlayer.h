@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ofMain.h"
-#include "ofAppEGLWindow.h"
 
 extern "C" 
 {
@@ -11,13 +10,13 @@ extern "C"
 
 #include "RBP.h"
 #include "OMXClock.h"
-#include "OMXEGLImagePlayer.h"
+#include "OMXPlayerVideo.h"
 
 
-class ofxOMXPlayer : public ofThread
+class ofxOMXVideoPlayer : public ofThread
 {
 public:
-	ofxOMXPlayer();
+	ofxOMXVideoPlayer();
 	void loadMovie(string filepath);
 	void update();
 	
@@ -30,9 +29,6 @@ public:
 	void 				setPosition(float pct);
 //	void 				setVolume(float volume); // 0..1
 	
-	ofTexture &			getTextureReference();
-	void 				draw(float x, float y, float w, float h);
-	void 				draw(float x, float y);
 	
 	void 				setPaused(bool doPause);
 	
@@ -46,20 +42,13 @@ public:
 	bool				isPaused();
 	bool				isPlaying();
 		
-	GLuint textureID;
 
 	int videoWidth;
 	int videoHeight;
 	
-
-	EGLImageKHR eglImage;
-	
-	string getVideoDebugInfo();
-	void generateEGLImage();
 	void openPlayer();
-	double getMediaTime();
 	void close();
-	bool doVideoDebugging;
+	double getMediaTime();
 	bool doLooping;
 	void threadedFunction();
 private:
@@ -68,7 +57,7 @@ private:
 	COMXCore              omxCore;
 	OMXClock * clock;
 	
-	OMXEGLImagePlayer    videoPlayer;
+	OMXPlayerVideo    videoPlayer;
 	OMXReader         omxReader;
 	
 	COMXStreamInfo    streamInfo;
@@ -81,13 +70,8 @@ private:
 	
 	OMXPacket* packet;
 	
-	ofTexture tex;
-	ofTexture * playerTex; // a seperate texture that may be optionally implemented by the player to avoid excessive pixel copying.
-	ofPixelFormat internalPixelFormat;
 	string moviePath;
-	int nFrames;
 	bool bPlaying;
-	EGLDisplay display;
-	EGLContext context;
+	int nFrames;
 };
 

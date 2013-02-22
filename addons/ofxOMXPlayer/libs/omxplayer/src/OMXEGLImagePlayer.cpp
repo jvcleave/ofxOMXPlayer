@@ -394,7 +394,11 @@ void OMXEGLImagePlayer::Flush()
 }
 void OMXEGLImagePlayer::UnFlush()
 {
-	m_flush = false;
+	Lock();
+	LockDecoder();
+		m_flush = false;
+	UnLockDecoder();
+	UnLock();
 }
 bool OMXEGLImagePlayer::AddPacket(OMXPacket *pkt)
 {

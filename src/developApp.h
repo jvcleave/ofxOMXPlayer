@@ -2,6 +2,8 @@
 
 #include "ofMain.h"
 #include "ofxOMXPlayer.h"
+#include "ofxOMXVideoPlayer.h"
+
 #include "PipeReader.h"
 
 class developApp : public ofBaseApp, public ofxPipeListener{
@@ -24,15 +26,22 @@ public:
 	void gotMessage(ofMessage msg);	
 	
 	ofxOMXPlayer omxPlayer;
+	ofxOMXVideoPlayer omxVideoPlayer;
 	ofShader shader;
 	ofFbo fbo;
 	void updateFbo();
 	
 	bool doShader;
 	bool doPause;
+	bool doTextures;
 	
+	void initOMXPlayer();
+	void updateTexturePlayer();
 	//allows key commands via Shell via ofxPipeListener
 	PipeReader pipeReader;
 	void onCharacterReceived(ofxPipeListenerEventData& e);
+	
+	void initVideoPlayer();
+	string videoPath;
 };
 

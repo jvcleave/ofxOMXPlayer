@@ -379,7 +379,10 @@ COMXCoreComponent::~COMXCoreComponent()
 
   delete m_DllOMX;
 }
-
+void COMXCoreComponent::SetEOS(bool isEndofStream)
+{
+	m_eos = isEndofStream;
+}
 void COMXCoreComponent::Lock()
 {
   pthread_mutex_lock(&m_lock);

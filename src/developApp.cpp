@@ -4,28 +4,15 @@ void developApp::onCharacterReceived(ofxPipeListenerEventData& e)
 {
 	keyPressed((int)e.character);
 }
+bool usingTexturePlayer = false;
 //--------------------------------------------------------------
 void developApp::setup()
 {
-	doShader = true;
-	doPause = false;
-	//ofSetLogLevel(OF_LOG_VERBOSE); set in main.cpp
-	ofEnableAlphaBlending();
-	if (doShader) 
-	{
-		shader.load("PostProcessing.vert", "PostProcessing.frag", "");
-		
-		fbo.allocate(ofGetWidth(), ofGetHeight());
-		fbo.begin();
-			ofClear(0, 0, 0, 0);
-		fbo.end();
-		
-	}
-	
+	videoPath = "/opt/vc/src/hello_pi/hello_video/test.h264";
 	/* to get the videos I am testing run command:
 	 * $wget -r -nd -P /home/pi/videos http://www.jvcref.com/files/PI/video/
 	 */
-	string videoPath = "/opt/vc/src/hello_pi/hello_video/test.h264";
+	
 	
 	//this will let us just grab a video without recompiling
 	ofDirectory currentVideoDirectory("/home/pi/videos/current");
@@ -39,30 +26,70 @@ void developApp::setup()
 		}		
 	}
 	ofLogVerbose() << "using videoPath : " << videoPath;
-	omxPlayer.loadMovie(videoPath);
+	
+	doTextures = true;
+	doShader = false;
+	doPause = false;
+	if (doShader || doTextures) 
+	{
+		usingTexturePlayer = true;
+		initOMXPlayer();
+	}else 
+	{
+		initVideoPlayer();
+	}
+
 	pipeReader.start(this);
 }
+void developApp::initVideoPlayer()
+{
+	omxVideoPlayer.loadMovie(videoPath);
+}
+void developApp::initOMXPlayer()
+{
+	//ofSetLogLevel(OF_LOG_VERBOSE); set in main.cpp
+	ofEnableAlphaBlending();
+	if (doShader) 
+	{
+		shader.load("PostProcessing.vert", "PostProcessing.frag", "");
+		
+		fbo.allocate(ofGetWidth(), ofGetHeight());
+		fbo.begin();
+		ofClear(0, 0, 0, 0);
+		fbo.end();
+		
+	}
+	
 
+	omxPlayer.loadMovie(videoPath);
+}
 //--------------------------------------------------------------
 void developApp::update()
+{
+	if (usingTexturePlayer) 
+	{
+		updateTexturePlayer();
+	}else
+	{
+		//omxVideoPlayer.update();
+	}
+}
+void developApp::updateTexturePlayer()
 {
 	if(!omxPlayer.isPlaying())
 	{
 		return;
 	}
-	omxPlayer.update();
+	//omxPlayer.update();
 	
 	if (doShader) 
 	{
 		updateFbo();
 	}
-	
-	
 }
-
 //--------------------------------------------------------------
 void developApp::draw(){
-	if(!omxPlayer.isPlaying())
+	if(!omxPlayer.isPlaying() && !usingTexturePlayer)
 	{
 		return;
 	}

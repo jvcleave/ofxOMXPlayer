@@ -1,6 +1,6 @@
-#include "ofxOMXPlayer.h"
+#include "ofxOMXVideoPlayer.h"
 
-ofxOMXPlayer::ofxOMXPlayer()
+ofxOMXVideoPlayer::ofxOMXVideoPlayer()
 {
 	videoWidth			= 0;
 	videoHeight			= 0;
@@ -9,19 +9,13 @@ ofxOMXPlayer::ofxOMXPlayer()
 	packet				= NULL;
 	moviePath			= "moviePath is undefined";
 	clock				= NULL;
-	playerTex			= NULL;
 	bPlaying			= false;
 	duration			= 0.0;
 	nFrames				= 0;
-	doVideoDebugging	= false;
-	doLooping			= true;
-	if (doVideoDebugging) 
-	{
-		videoPlayer.doDebugging = true; //this can cause a string error, probably thread safe issue
-	}
+	doLooping  = true;
 }
 
-void ofxOMXPlayer::loadMovie(string filepath)
+void ofxOMXVideoPlayer::loadMovie(string filepath)
 {
 	moviePath = filepath; 
 	rbp.Initialize();
@@ -61,7 +55,7 @@ void ofxOMXPlayer::loadMovie(string filepath)
 	}
 	
 }
-void ofxOMXPlayer::openPlayer()
+void ofxOMXVideoPlayer::openPlayer()
 {
 	omxReader.GetHints(OMXSTREAM_VIDEO, streamInfo);
 	videoWidth	= streamInfo.width;
@@ -69,8 +63,7 @@ void ofxOMXPlayer::openPlayer()
 	ofLogVerbose() << "SET videoWidth: " << videoWidth;
 	ofLogVerbose() << "SET videoHeight: " << videoHeight;
 
-	generateEGLImage();
-	bPlaying = videoPlayer.Open(streamInfo, clock, eglImage);
+	bPlaying = videoPlayer.Open(streamInfo, clock, false, false, false, true, 0.0);
 	if (isPlaying()) 
 	{
 		ofLogVerbose() << "streamInfo.nb_frames " << streamInfo.nb_frames;
@@ -91,9 +84,12 @@ void ofxOMXPlayer::openPlayer()
 				omxReader.enableFileLoopinghack();
 			}
 		}
-		startThread(false, true);
+		clock->SetSpeed(DVD_PLAYSPEED_NORMAL);
+		clock->OMXStateExecute();
+		clock->OMXStart();
 		
 		ofLogVerbose() << "Opened video PASS";	
+		startThread(false, true);
 		
 	}else 
 	{
@@ -101,76 +97,16 @@ void ofxOMXPlayer::openPlayer()
 	}
 }
 
-void ofxOMXPlayer::generateEGLImage()
-{
-	ofDisableArbTex();
-	
-	ofAppEGLWindow *appEGLWindow = (ofAppEGLWindow *) ofGetWindowPtr();
-	display = appEGLWindow->getEglDisplay();
-	context = appEGLWindow->getEglContext();
-
-	
-	tex.allocate(videoWidth, videoHeight, GL_RGBA);
-	tex.getTextureData().bFlipTexture = true;
-	tex.setTextureWrap(GL_REPEAT, GL_REPEAT);
-	textureID = tex.getTextureData().textureID;
-	
-	//TODO - should be a way to use ofPixels for the getPixels() functions?
-	glEnable(GL_TEXTURE_2D);
-
-	// setup first texture
-	int dataSize = videoWidth * videoHeight * 4;
-	
-	GLubyte* pixelData = new GLubyte [dataSize];
-	
-	
-    memset(pixelData, 0xff, dataSize);  // white texture, opaque
-	
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, videoWidth, videoHeight, 0,
-				 GL_RGBA, GL_UNSIGNED_BYTE, pixelData);
-	
-	delete[] pixelData;
-	
-	
-	// Create EGL Image
-	eglImage = eglCreateImageKHR(
-								 display,
-								 context,
-								 EGL_GL_TEXTURE_2D_KHR,
-								 (EGLClientBuffer)textureID,
-								 0);
-    glDisable(GL_TEXTURE_2D);
-	if (eglImage == EGL_NO_IMAGE_KHR)
-	{
-		ofLogError()	<< "Create EGLImage FAIL";
-		return;
-	}
-	else
-	{
-		ofLogVerbose()	<< "Create EGLImage PASS";
-	}
-}
-
-
-ofTexture & ofxOMXPlayer::getTextureReference()
-{
-	if(playerTex == NULL){
-		return tex;
-	}
-	else{
-		return *playerTex;
-	}
-}
-void ofxOMXPlayer::threadedFunction()
+void ofxOMXVideoPlayer::threadedFunction()
 {
 	while (isThreadRunning()) 
 	{
 		update();
 	}
 }
-void ofxOMXPlayer::update()
+void ofxOMXVideoPlayer::update()
 {
+	
 	if(!isPlaying())
 	{
 		return;
@@ -182,30 +118,12 @@ void ofxOMXPlayer::update()
 			packet = omxReader.Read(false);
 		}else 
 		{
-			double startpts;
 			if (!videoPlayer.GetCached())
 			{
 				ofLogVerbose() << "looping via doLooping option";
-				videoPlayer.WaitCompletion();
-				if(omxReader.SeekTime(0 * 1000.0f, 0, &startpts))
-				{
-					videoPlayer.Flush();
-					if(packet)
-					{
-						omxReader.FreePacket(packet);
-						packet = NULL;
-					}
-					
-					if(startpts != DVD_NOPTS_VALUE)
-					{
-						clock->OMXUpdateClock(startpts);
-						
-					}
-					videoPlayer.UnFlush();	
-				}
-				
-				
-				//packet = omxReader.Read(true);
+				videoPlayer.Flush();
+				videoPlayer.UnFlush();
+				packet = omxReader.Read(true);
 			}
 		}
 	}else 
@@ -236,7 +154,7 @@ void ofxOMXPlayer::update()
 
 }
 //--------------------------------------------------------
-void ofxOMXPlayer::play()
+void ofxOMXVideoPlayer::play()
 {
 	ofLogVerbose() << "TODO: not sure what to do with this - reopen the player?";
 	/*clock->SetSpeed(OMX_PLAYSPEED_NORMAL);
@@ -245,16 +163,16 @@ void ofxOMXPlayer::play()
 	bPlaying = openPlayer();*/
 }
 
-void ofxOMXPlayer::stop()
+void ofxOMXVideoPlayer::stop()
 {
 	clock->OMXStop();
 	clock->OMXStateIdle();
 	videoPlayer.Close();
 	bPlaying = false;
-	ofLogVerbose() << "ofxOMXPlayer::stop called";
+	ofLogVerbose() << "ofxOMXVideoPlayer::stop called";
 }
 
-void ofxOMXPlayer::setPaused(bool doPause)
+void ofxOMXVideoPlayer::setPaused(bool doPause)
 {
 	if(doPause)
 	{
@@ -268,58 +186,34 @@ void ofxOMXPlayer::setPaused(bool doPause)
 
 			
 }
-void ofxOMXPlayer::draw(float x, float y, float width, float height)
-{
-	if(!isPlaying()) return;
-	getTextureReference().draw(x, y, width, height);	
-}
 
-void ofxOMXPlayer::draw(float x, float y)
-{
-	if(!isPlaying()) return;
-	getTextureReference().draw(x, y);
-}
-
-string ofxOMXPlayer::getVideoDebugInfo()
-{
-	if (!doVideoDebugging) 
-	{
-		return "doVideoDebugging not enabled";
-	}
-	if (videoPlayer.m_decoder != NULL) 
-	{
-		return videoPlayer.m_decoder->debugInfo + "\n" + videoPlayer.debugInfo;
-	}
-	return "NO INFO YET";
-}
-
-float ofxOMXPlayer::getDuration()
+float ofxOMXVideoPlayer::getDuration()
 {
 	return duration;
 }
 //inaccurate, I believe as it is referring to decoded frames which can be 
 //ahead of rendered frames
-int ofxOMXPlayer::getCurrentFrame()
+int ofxOMXVideoPlayer::getCurrentFrame()
 {
 	return (int)(videoPlayer.GetCurrentPTS()/ DVD_TIME_BASE)*videoPlayer.GetFPS();
 }
 
-int ofxOMXPlayer::getTotalNumFrames()
+int ofxOMXVideoPlayer::getTotalNumFrames()
 {
 	return nFrames;
 }
 
-float ofxOMXPlayer::getWidth()
+float ofxOMXVideoPlayer::getWidth()
 {
 	return videoWidth;
 }
 
-float ofxOMXPlayer::getHeight()
+float ofxOMXVideoPlayer::getHeight()
 {
 	return videoHeight;
 }
 
-double ofxOMXPlayer::getMediaTime()
+double ofxOMXVideoPlayer::getMediaTime()
 {
 	double mediaTime = 0.0;
 	if(isPlaying()) 
@@ -330,7 +224,7 @@ double ofxOMXPlayer::getMediaTime()
 	return mediaTime;
 }
 
-bool ofxOMXPlayer::isPaused()
+bool ofxOMXVideoPlayer::isPaused()
 {
 	if (!clock) 
 	{
@@ -340,12 +234,12 @@ bool ofxOMXPlayer::isPaused()
 	return clock->OMXIsPaused();
 }
 
-bool ofxOMXPlayer::isPlaying()
+bool ofxOMXVideoPlayer::isPlaying()
 {
 	return bPlaying;
 }
 
-void ofxOMXPlayer::close()
+void ofxOMXVideoPlayer::close()
 {
 	if(isPlaying()) 
 	{
@@ -360,12 +254,8 @@ void ofxOMXPlayer::close()
 		packet = NULL;
 	}	
 	
-	if (eglImage !=NULL)  
-	{
-		eglDestroyImageKHR(display, eglImage);
-	}
 
 	omxCore.Deinitialize();
 	rbp.Deinitialize();
-	ofLogVerbose() << "reached end of ofxOMXPlayer::close";
+	ofLogVerbose() << "reached end of ofxOMXVideoPlayer::close";
 }
