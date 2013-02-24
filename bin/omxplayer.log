@@ -1,0 +1,89 @@
+﻿00:00:00 T:0   DEBUG: DllBcm: Using omx system library
+00:00:00 T:0   DEBUG: DllOMX: Using omx system library
+00:00:00 T:0   DEBUG: DllAvFormat: Using libavformat system library
+00:00:00 T:0   DEBUG: DllAvUtilBase: Using libavutil system library
+00:00:00 T:0   DEBUG: DllAvCodec: Using libavcodec system library
+00:00:00 T:0   DEBUG: DllAvFormat: Using libavformat system library
+00:00:00 T:0   DEBUG: DllOMX: Using omx system library
+00:00:00 T:0   DEBUG: COMXCoreComponent::Initialize OMX.broadcom.clock input port 80 output port 81
+00:00:00 T:0   DEBUG: DllAvUtilBase: Using libavutil system library
+00:00:00 T:0   DEBUG: DllAvCodec: Using libavcodec system library
+00:00:00 T:0   DEBUG: DllAvFormat: Using libavformat system library
+00:00:00 T:0   DEBUG: DllOMX: Using omx system library
+00:00:00 T:0   DEBUG: Previous line repeats 5 times.
+00:00:00 T:0   DEBUG: COMXCoreComponent::Initialize OMX.broadcom.video_decode input port 130 output port 131
+00:00:00 T:0   DEBUG: DllOMX: Using omx system library
+00:00:00 T:0   DEBUG: COMXCoreComponent::Initialize OMX.broadcom.video_render input port 90 output port 90
+00:00:00 T:0   DEBUG: DllOMX: Using omx system library
+00:00:00 T:0   DEBUG: COMXCoreComponent::Initialize OMX.broadcom.video_scheduler input port 10 output port 11
+00:00:00 T:0   DEBUG: DllOMX: Using omx system library
+00:00:00 T:0   DEBUG: COMXCoreComponent::Initialize OMX.broadcom.text_scheduler input port 150 output port 151
+00:00:00 T:0   DEBUG: COMXCoreComponent::AllocInputBuffers component(OMX.broadcom.video_decode) - port(130), nBufferCountMin(1), nBufferCountActual(60), nBufferSize(81920), nBufferAlignmen(16)
+00:00:00 T:0   DEBUG: COMXCoreComponent::AllocInputBuffers component(OMX.broadcom.text_scheduler) - port(150), nBufferCountMin(1), nBufferCountActual(100), nBufferSize(1024), nBufferAlignmen(16)
+00:00:00 T:0   DEBUG: COMXCoreComponent::AllocOutputBuffers component(OMX.broadcom.text_scheduler) - port(151), nBufferCountMin(1), nBufferCountActual(1), nBufferSize(1024) nBufferAlignmen(16)
+00:00:00 T:0   DEBUG: COMXVideo::Open - decoder_component(0x0x1810598), input_port(0x82), output_port(0x83) deinterlace 0 hdmiclocksync 0
+00:00:00 T:0   DEBUG: OMXThread::Create - Thread with id -1294969760 started
+00:00:00 T:0   DEBUG: DllAvUtilBase: Using libavutil system library
+00:00:00 T:0   DEBUG: DllAvCodec: Using libavcodec system library
+00:00:00 T:0   DEBUG: DllAvFormat: Using libavformat system library
+00:00:00 T:0   DEBUG: DllAvUtilBase: Using libavutil system library
+00:00:00 T:0   DEBUG: DllAvCodec: Using libavcodec system library
+00:00:00 T:0   DEBUG: DllOMX: Using omx system library
+00:00:00 T:0   DEBUG: Previous line repeats 2 times.
+00:00:00 T:0   DEBUG: DllAvUtilBase: Using libavutil system library
+00:00:00 T:0    INFO: CPCMRemap: I channel map: FL,FR
+00:00:00 T:0   DEBUG: pcm->nPortIndex     : 0
+00:00:00 T:0   DEBUG: pcm->eNumData       : 0
+00:00:00 T:0   DEBUG: pcm->eEndian        : 1
+00:00:00 T:0   DEBUG: pcm->bInterleaved   : 1
+00:00:00 T:0   DEBUG: pcm->nBitPerSample  : 16
+00:00:00 T:0   DEBUG: pcm->ePCMMode       : 0
+00:00:00 T:0   DEBUG: pcm->nChannels      : 2
+00:00:00 T:0   DEBUG: pcm->nSamplingRate  : 48000
+00:00:00 T:0   DEBUG: OMX_AUDIO_ChannelLF
+00:00:00 T:0   DEBUG: OMX_AUDIO_ChannelRF
+00:00:00 T:0   DEBUG: pcm->nPortIndex     : 0
+00:00:00 T:0   DEBUG: pcm->eNumData       : 0
+00:00:00 T:0   DEBUG: pcm->eEndian        : 1
+00:00:00 T:0   DEBUG: pcm->bInterleaved   : 1
+00:00:00 T:0   DEBUG: pcm->nBitPerSample  : 16
+00:00:00 T:0   DEBUG: pcm->ePCMMode       : 0
+00:00:00 T:0   DEBUG: pcm->nChannels      : 2
+00:00:00 T:0   DEBUG: pcm->nSamplingRate  : 48000
+00:00:00 T:0   DEBUG: OMX_AUDIO_ChannelLF
+00:00:00 T:0   DEBUG: OMX_AUDIO_ChannelRF
+00:00:00 T:0   DEBUG: DllOMX: Using omx system library
+00:00:00 T:0   DEBUG: COMXCoreComponent::Initialize OMX.broadcom.audio_render input port 100 output port 100
+00:00:00 T:0   DEBUG: DllOMX: Using omx system library
+00:00:00 T:0   DEBUG: COMXCoreComponent::Initialize OMX.broadcom.audio_decode input port 120 output port 121
+00:00:00 T:0   DEBUG: DllOMX: Using omx system library
+00:00:00 T:0   DEBUG: COMXCoreComponent::Initialize OMX.broadcom.audio_mixer input port 232 output port 231
+00:00:00 T:0   DEBUG: COMXCoreComponent::AllocInputBuffers component(OMX.broadcom.audio_decode) - port(120), nBufferCountMin(4), nBufferCountActual(62), nBufferSize(6144), nBufferAlignmen(16)
+00:00:00 T:0   DEBUG: COMXAudio::Initialize Ouput bps 16 samplerate 48000 channels 2 device local buffer size 384000 bytes per second 192000 passthrough 0 hwdecode 0
+00:00:00 T:0   DEBUG: COMXAudio::Initialize Input bps 16 samplerate 48000 channels 2 device local buffer size 384000 bytes per second 192000 passthrough 0 hwdecode 0
+00:00:00 T:0   DEBUG: OMXThread::Create - Thread with id -1303358368 started
+00:00:00 T:0   DEBUG: pcm->nPortIndex     : 232
+00:00:00 T:0   DEBUG: pcm->eNumData       : 0
+00:00:00 T:0   DEBUG: pcm->eEndian        : 1
+00:00:00 T:0   DEBUG: pcm->bInterleaved   : 1
+00:00:00 T:0   DEBUG: pcm->nBitPerSample  : 16
+00:00:00 T:0   DEBUG: pcm->ePCMMode       : 0
+00:00:00 T:0   DEBUG: pcm->nChannels      : 2
+00:00:00 T:0   DEBUG: pcm->nSamplingRate  : 48000
+00:00:00 T:0   DEBUG: OMX_AUDIO_ChannelLF
+00:00:00 T:0   DEBUG: OMX_AUDIO_ChannelRF
+00:00:00 T:0   DEBUG: pcm->nPortIndex     : 100
+00:00:00 T:0   DEBUG: pcm->eNumData       : 0
+00:00:00 T:0   DEBUG: pcm->eEndian        : 1
+00:00:00 T:0   DEBUG: pcm->bInterleaved   : 1
+00:00:00 T:0   DEBUG: pcm->nBitPerSample  : 16
+00:00:00 T:0   DEBUG: pcm->ePCMMode       : 0
+00:00:00 T:0   DEBUG: pcm->nChannels      : 2
+00:00:00 T:0   DEBUG: pcm->nSamplingRate  : 48000
+00:00:00 T:0   DEBUG: OMX_AUDIO_ChannelLF
+00:00:00 T:0   DEBUG: OMX_AUDIO_ChannelRF
+00:00:00 T:0   DEBUG: OMXThread::Run - Exited thread with  id -1294969760
+00:00:00 T:0   DEBUG: OMXThread::StopThread - Thread stopped
+00:00:00 T:0   DEBUG: OMXThread::Run - Exited thread with  id -1303358368
+00:00:00 T:0   DEBUG: OMXThread::StopThread - Thread stopped
+00:00:00 T:0   ERROR: COMXCoreComponent::DecoderEventHandler OMX.broadcom.audio_mixer - OMX_ErrorPortUnpopulated port 0, cannot parse input stream
