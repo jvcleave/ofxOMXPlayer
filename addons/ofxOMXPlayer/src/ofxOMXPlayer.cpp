@@ -6,6 +6,7 @@ ofxOMXPlayer::ofxOMXPlayer()
 	videoHeight			= 0;
 	isMPEG				= false;
 	hasVideo			= false;
+	hasAudio			= false;
 	packet				= NULL;
 	moviePath			= "moviePath is undefined";
 	clock				= NULL;
@@ -16,6 +17,7 @@ ofxOMXPlayer::ofxOMXPlayer()
 	doVideoDebugging	= false;
 	doLooping			= true;
 	isThreaded		= false;
+	m_buffer_empty = true;
 	if (doVideoDebugging) 
 	{
 		videoPlayer.doDebugging = true; //this can cause a string error, probably thread safe issue
@@ -36,12 +38,19 @@ void ofxOMXPlayer::loadMovie(string filepath)
 		
 		ofLogVerbose() << "omxReader open moviePath PASS: " << moviePath;
 		hasVideo     = omxReader.VideoStreamCount();
-		
+		int audioStreamCount	 = omxReader.AudioStreamCount();
+		if (audioStreamCount>0) 
+		{
+			hasAudio = true;
+			ofLogVerbose() << "HAS AUDIO";
+		}else 
+		{
+			ofLogVerbose() << "NO AUDIO";
+		}
 		if (hasVideo) 
 		{
 			ofLogVerbose() << "Video streams detection PASS";
 			
-			bool hasAudio = false; //not implemented yet
 			if(clock->OMXInitialize(hasVideo, hasAudio))
 			{
 				ofLogVerbose() << "clock Init PASS";
@@ -65,6 +74,8 @@ void ofxOMXPlayer::loadMovie(string filepath)
 void ofxOMXPlayer::openPlayer()
 {
 	omxReader.GetHints(OMXSTREAM_VIDEO, streamInfo);
+	omxReader.GetHints(OMXSTREAM_AUDIO, audioStreamInfo);
+
 	videoWidth	= streamInfo.width;
 	videoHeight	= streamInfo.height;
 	ofLogVerbose() << "SET videoWidth: " << videoWidth;
@@ -72,6 +83,23 @@ void ofxOMXPlayer::openPlayer()
 
 	generateEGLImage();
 	bPlaying = videoPlayer.Open(streamInfo, clock, eglImage);
+	string deviceString			= "omx:local";
+	bool m_passthrough			= false;
+	int m_use_hw_audio			= false;
+	bool m_boost_on_downmix		= false;
+	bool m_thread_player		= true;
+	bool didAudioOpen = m_player_audio.Open(audioStreamInfo, clock, &omxReader, deviceString, 
+											m_passthrough, m_use_hw_audio,
+											m_boost_on_downmix, m_thread_player);
+	if (didAudioOpen) 
+	{
+		ofLogVerbose() << " AUDIO PLAYER OPEN PASS";
+	}else
+	{
+		ofLogVerbose() << " AUDIO PLAYER OPEN FAIL";
+		
+	}
+	
 	if (isPlaying()) 
 	{
 		ofLogVerbose() << "streamInfo.nb_frames " << streamInfo.nb_frames;
@@ -188,21 +216,50 @@ void ofxOMXPlayer::update()
 	{
 		return;
 	}
-	if (doLooping) 
+	if (doLooping && !packet) 
 	{
 		if (!omxReader.IsEof())
 		{
 			packet = omxReader.Read(false);
 		}else 
 		{
-			double startpts;
-			if (!videoPlayer.GetCached())
+			/*if (!hasPrintedEOF) {
+				hasPrintedEOF = true;
+				ofLogVerbose() << "READER IS EOF";
+			}*/
+			bool isAudioCacheEmpty = true;
+			if (hasAudio) 
 			{
+				if (doVideoDebugging) 
+				{
+					ofLogVerbose() << "Audio Cache size: " << m_player_audio.GetCached();
+				}
+					
+				isAudioCacheEmpty = m_player_audio.GetCached()>0;
+			}
+			if (doVideoDebugging) 
+			{
+				ofLogVerbose() << "Video Cache size: " << videoPlayer.GetCached();
+
+			}
+			if (!isAudioCacheEmpty && !videoPlayer.GetCached())
+			{
+				double startpts;
+				
+				
 				ofLogVerbose() << "looping via doLooping option";
+				if (hasAudio) 
+				{
+					m_player_audio.WaitCompletion();
+				}
 				videoPlayer.WaitCompletion();
 				if(omxReader.SeekTime(0 * 1000.0f, 0, &startpts))
 				{
 					videoPlayer.Flush();
+					if(hasAudio)
+					{
+						m_player_audio.Flush();
+					}
 					if(packet)
 					{
 						omxReader.FreePacket(packet);
@@ -240,12 +297,24 @@ void ofxOMXPlayer::update()
 		}
 	}else 
 	{
+		if(hasAudio && packet && packet->codec_type == AVMEDIA_TYPE_AUDIO)
+		{
+			if(m_player_audio.AddPacket(packet))
+			{
+				packet = NULL;
+			}
+			else
+			{
+				OMXClock::OMXSleep(10);
+			}
+		}
 		if(packet)
 		{
 			omxReader.FreePacket(packet);
 			packet = NULL;
 		}
 	}
+	
 
 }
 //--------------------------------------------------------

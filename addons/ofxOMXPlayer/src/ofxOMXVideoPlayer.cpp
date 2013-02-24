@@ -6,6 +6,7 @@ ofxOMXVideoPlayer::ofxOMXVideoPlayer()
 	videoHeight			= 0;
 	isMPEG				= false;
 	hasVideo			= false;
+	hasAudio			= false;
 	packet				= NULL;
 	moviePath			= "moviePath is undefined";
 	clock				= NULL;
@@ -132,8 +133,7 @@ void ofxOMXVideoPlayer::threadedFunction()
 	}
 }
 bool hasPrintedEOF = false;
-unsigned int audioCache = 0;
-unsigned int videoCache = 0;
+
 void ofxOMXVideoPlayer::update()
 {
 	
@@ -152,11 +152,10 @@ void ofxOMXVideoPlayer::update()
 				hasPrintedEOF = true;
 				ofLogVerbose() << "READER IS EOF";
 			}
-			audioCache = m_player_audio.GetCached();
-			videoCache = videoPlayer.GetCached();
-			ofLogVerbose() << "audioCache: " << audioCache;
-			ofLogVerbose() << "videoCache: " << videoCache;
-			if (!audioCache && !videoCache)
+
+			ofLogVerbose() << "Audio Cache size: " << m_player_audio.GetCached();
+			ofLogVerbose() << "Video Cache size: " << videoPlayer.GetCached();
+			if (!m_player_audio.GetCached() && !videoPlayer.GetCached())
 			{
 				double startpts;
 
