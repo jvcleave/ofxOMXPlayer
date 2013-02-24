@@ -497,6 +497,8 @@ int OMXEGLImagePlayer::GetDecoderFreeSpace()
 
 void OMXEGLImagePlayer::WaitCompletion()
 {
+	ofLogVerbose() << "OMXEGLImagePlayer::WaitCompletion";
+
 	if(!m_decoder)
 	{
 		return;

@@ -718,6 +718,7 @@ int OMXEGLImage::GetInputBufferSize()
 
 void OMXEGLImage::WaitCompletion()
 {
+	ofLogVerbose() << "OMXEGLImage::WaitCompletion";
   if(!m_is_open)
     return;
 

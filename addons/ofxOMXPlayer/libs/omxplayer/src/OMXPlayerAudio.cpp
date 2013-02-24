@@ -670,6 +670,7 @@ double OMXPlayerAudio::GetCacheTime()
 
 void OMXPlayerAudio::WaitCompletion()
 {
+ofLogVerbose() << "OMXPlayerAudio::WaitCompletion";
   if(!m_decoder)
     return;
 

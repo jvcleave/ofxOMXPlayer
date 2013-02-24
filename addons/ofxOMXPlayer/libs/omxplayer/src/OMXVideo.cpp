@@ -833,6 +833,7 @@ int COMXVideo::GetInputBufferSize()
 
 void COMXVideo::WaitCompletion()
 {
+	ofLogVerbose() << "COMXVideo::WaitCompletion";
   if(!m_is_open)
     return;
 

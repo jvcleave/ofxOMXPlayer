@@ -131,6 +131,9 @@ void ofxOMXVideoPlayer::threadedFunction()
 		update();
 	}
 }
+bool hasPrintedEOF = false;
+unsigned int audioCache = 0;
+unsigned int videoCache = 0;
 void ofxOMXVideoPlayer::update()
 {
 	
@@ -138,18 +141,26 @@ void ofxOMXVideoPlayer::update()
 	{
 		return;
 	}
-	if (doLooping) 
+	if (doLooping && !packet) 
 	{
 		if (!omxReader.IsEof())
 		{
 			packet = omxReader.Read(false);
 		}else 
 		{
-			
-			
-			double startpts;
-			if (!m_player_audio.GetCached() && !videoPlayer.GetCached())
+			if (!hasPrintedEOF) {
+				hasPrintedEOF = true;
+				ofLogVerbose() << "READER IS EOF";
+			}
+			audioCache = m_player_audio.GetCached();
+			videoCache = videoPlayer.GetCached();
+			ofLogVerbose() << "audioCache: " << audioCache;
+			ofLogVerbose() << "videoCache: " << videoCache;
+			if (!audioCache && !videoCache)
 			{
+				double startpts;
+
+				
 				ofLogVerbose() << "looping via doLooping option";
 				if (hasAudio) 
 				{
@@ -203,9 +214,13 @@ void ofxOMXVideoPlayer::update()
 		if(hasAudio && packet && packet->codec_type == AVMEDIA_TYPE_AUDIO)
 		{
 			if(m_player_audio.AddPacket(packet))
+			{
 				packet = NULL;
+			}
 			else
+			{
 				OMXClock::OMXSleep(10);
+			}
 		}
 		if(packet)
 		{

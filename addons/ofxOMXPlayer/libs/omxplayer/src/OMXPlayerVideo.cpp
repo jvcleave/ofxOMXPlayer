@@ -443,6 +443,8 @@ int  OMXPlayerVideo::GetDecoderFreeSpace()
 
 void OMXPlayerVideo::WaitCompletion()
 {
+	ofLogVerbose() << "OMXPlayerVideo::WaitCompletion";
+
   if(!m_decoder)
     return;
 
