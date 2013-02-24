@@ -658,43 +658,72 @@ bool OMXReader::IsActive(OMXStreamType type, int stream_index)
 
 bool OMXReader::GetHints(AVStream *stream, COMXStreamInfo *hints)
 {
-  if(!hints || !stream)
-    return false;
+	if(!hints || !stream)
+	{
+	  return false;
+	}
 
-  hints->codec         = stream->codec->codec_id;
-  hints->extradata     = stream->codec->extradata;
-  hints->extrasize     = stream->codec->extradata_size;
+	hints->codec         = stream->codec->codec_id;
+	hints->extradata     = stream->codec->extradata;
+	hints->extrasize     = stream->codec->extradata_size;
 
-  hints->width         = stream->codec->width;
-  hints->height        = stream->codec->height;
-  hints->profile       = stream->codec->profile;
-  hints->duration       = stream->duration;
-	hints->nb_frames = stream->nb_frames;
-  if(stream->codec->codec_type == AVMEDIA_TYPE_VIDEO)
-  {
-    hints->fpsrate       = stream->r_frame_rate.num;
-    hints->fpsscale      = stream->r_frame_rate.den;
+	hints->width         = stream->codec->width;
+	hints->height        = stream->codec->height;
+	hints->profile       = stream->codec->profile;
+	
+	//AUDIO
+	hints->channels      = stream->codec->channels;
+	hints->samplerate    = stream->codec->sample_rate;
+	hints->blockalign    = stream->codec->block_align;
+	hints->bitrate       = stream->codec->bit_rate;
+	hints->bitspersample = stream->codec->bits_per_coded_sample;
+	if(hints->bitspersample == 0)
+	{
+		hints->bitspersample = 16;
+	}
 
-    if(stream->r_frame_rate.num && stream->r_frame_rate.den)
-    {
-      hints->fpsrate      = stream->r_frame_rate.num;
-      hints->fpsscale     = stream->r_frame_rate.den;
-    }
-    else
-    {
-      hints->fpsscale     = 0;
-      hints->fpsrate      = 0;
-    }
+	
+	
+	if(stream->codec->codec_type == AVMEDIA_TYPE_VIDEO)
+	{
+		//CUSTOM
+		hints->duration		= stream->duration;
+		hints->nb_frames	= stream->nb_frames;
+		
+		hints->fpsrate		= stream->r_frame_rate.num;
+		hints->fpsscale		= stream->r_frame_rate.den;
 
-    if (stream->sample_aspect_ratio.num != 0)
-      hints->aspect = av_q2d(stream->sample_aspect_ratio) * stream->codec->width / stream->codec->height;
-    else if (stream->codec->sample_aspect_ratio.num != 0)
-      hints->aspect = av_q2d(stream->codec->sample_aspect_ratio) * stream->codec->width / stream->codec->height;
-    else
-      hints->aspect = 0.0f;
-    if (m_bAVI && stream->codec->codec_id == CODEC_ID_H264)
-      hints->ptsinvalid = true;
-  }
+		if(stream->r_frame_rate.num && stream->r_frame_rate.den)
+		{
+			hints->fpsrate		= stream->r_frame_rate.num;
+			hints->fpsscale		= stream->r_frame_rate.den;
+		}
+		else
+		{
+			hints->fpsscale     = 0;
+			hints->fpsrate      = 0;
+		}
+
+		if (stream->sample_aspect_ratio.num != 0)
+		{
+			hints->aspect = av_q2d(stream->sample_aspect_ratio) * stream->codec->width / stream->codec->height;
+
+		}else 
+		{
+			if (stream->codec->sample_aspect_ratio.num != 0)
+			{
+				hints->aspect = av_q2d(stream->codec->sample_aspect_ratio) * stream->codec->width / stream->codec->height;
+			}else 
+			{
+				hints->aspect = 0.0f;
+			}
+
+		}
+		if (m_bAVI && stream->codec->codec_id == CODEC_ID_H264)
+		{
+			hints->ptsinvalid = true;
+		}
+	}
 
   return true;
 }

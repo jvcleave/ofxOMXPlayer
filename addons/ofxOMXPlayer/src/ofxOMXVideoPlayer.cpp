@@ -29,12 +29,20 @@ void ofxOMXVideoPlayer::loadMovie(string filepath)
 		
 		ofLogVerbose() << "omxReader open moviePath PASS: " << moviePath;
 		hasVideo     = omxReader.VideoStreamCount();
-		
+		int audioStreamCount	 = omxReader.AudioStreamCount();
+		if (audioStreamCount>0) 
+		{
+			hasAudio = true;
+			ofLogVerbose() << "HAS AUDIO";
+		}else 
+		{
+			ofLogVerbose() << "NO AUDIO";
+		}
+
 		if (hasVideo) 
 		{
 			ofLogVerbose() << "Video streams detection PASS";
 			
-			bool hasAudio = false; //not implemented yet
 			if(clock->OMXInitialize(hasVideo, hasAudio))
 			{
 				ofLogVerbose() << "clock Init PASS";
@@ -58,12 +66,30 @@ void ofxOMXVideoPlayer::loadMovie(string filepath)
 void ofxOMXVideoPlayer::openPlayer()
 {
 	omxReader.GetHints(OMXSTREAM_VIDEO, streamInfo);
+	omxReader.GetHints(OMXSTREAM_AUDIO, audioStreamInfo);
 	videoWidth	= streamInfo.width;
 	videoHeight	= streamInfo.height;
 	ofLogVerbose() << "SET videoWidth: " << videoWidth;
 	ofLogVerbose() << "SET videoHeight: " << videoHeight;
 
 	bPlaying = videoPlayer.Open(streamInfo, clock, false, false, false, true, 0.0);
+	string deviceString			= "omx:local";
+	bool m_passthrough			= false;
+	int m_use_hw_audio			= false;
+	bool m_boost_on_downmix		= false;
+	bool m_thread_player		= true;
+	bool didAudioOpen = m_player_audio.Open(audioStreamInfo, clock, &omxReader, deviceString, 
+											m_passthrough, m_use_hw_audio,
+											m_boost_on_downmix, m_thread_player);
+	if (didAudioOpen) 
+	{
+		ofLogVerbose() << " AUDIO PLAYER OPEN PASS";
+	}else
+	{
+		ofLogVerbose() << " AUDIO PLAYER OPEN FAIL";
+
+	}
+
 	if (isPlaying()) 
 	{
 		ofLogVerbose() << "streamInfo.nb_frames " << streamInfo.nb_frames;

@@ -11,6 +11,7 @@ extern "C"
 #include "RBP.h"
 #include "OMXClock.h"
 #include "OMXPlayerVideo.h"
+#include "OMXPlayerAudio.h"
 
 
 class ofxOMXVideoPlayer : public ofThread
@@ -53,19 +54,21 @@ public:
 	void threadedFunction();
 private:
 	
-	CRBP                  rbp;
-	COMXCore              omxCore;
+	CRBP rbp;
+	COMXCore omxCore;
 	OMXClock * clock;
 	
-	OMXPlayerVideo    videoPlayer;
-	OMXReader         omxReader;
+	OMXPlayerVideo videoPlayer;
+	OMXPlayerAudio m_player_audio;
+
+	OMXReader omxReader;
 	
-	COMXStreamInfo    streamInfo;
-	
+	COMXStreamInfo streamInfo;
+	COMXStreamInfo audioStreamInfo;
 	bool isMPEG;
 	bool hasVideo;
-	
-	DllBcmHost        bcmHost;
+	bool hasAudio;
+	DllBcmHost bcmHost;
 	
 	
 	OMXPacket* packet;
