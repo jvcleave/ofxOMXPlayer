@@ -6,6 +6,10 @@ $ killall -9 ofxOMXPlayer
 
 if it hangs (usually on exit)
 
+Now with Audio!
+This was only tested with the audio via the headphone jack with this tweak:
+https://gist.github.com/jvcleave/4972661
+
 test videos here:
 http://www.jvcref.com/files/PI/video/
 
