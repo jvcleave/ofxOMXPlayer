@@ -355,7 +355,11 @@ void OMXPlayerVideo::Flush()
 }
 void OMXPlayerVideo::UnFlush()
 {
-  m_flush = false;
+	Lock();
+	LockDecoder();
+		m_flush = false;
+	UnLockDecoder();
+	UnLock();
 }
 bool OMXPlayerVideo::AddPacket(OMXPacket *pkt)
 {

@@ -68,6 +68,8 @@ private:
 	bool isMPEG;
 	bool hasVideo;
 	bool hasAudio;
+	bool              m_buffer_empty;
+
 	DllBcmHost bcmHost;
 	
 	
