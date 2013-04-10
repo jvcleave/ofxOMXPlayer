@@ -1,5 +1,7 @@
 STATUS: IN DEVELOPMENT
 
+USAGE: This is not currently setup to run in the addons folder. Clone into openFrameworks/apps/myApps/ofxOMXPlayer
+
 keep open a second terminal and run 
 
 $ killall -9 ofxOMXPlayer
