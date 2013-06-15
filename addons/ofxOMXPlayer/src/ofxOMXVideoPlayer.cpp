@@ -75,7 +75,7 @@ void ofxOMXVideoPlayer::openPlayer()
 	ofLogVerbose() << "SET videoHeight: " << videoHeight;
 
 	bPlaying = videoPlayer.Open(streamInfo, clock, false, false, false, true, 0.0);
-	string deviceString			= "omx:local";
+	string deviceString			= "omx:hdmi";
 	bool m_passthrough			= false;
 	int m_use_hw_audio			= false;
 	bool m_boost_on_downmix		= false;
@@ -117,7 +117,7 @@ void ofxOMXVideoPlayer::openPlayer()
 		clock->OMXStart();
 		
 		ofLogVerbose() << "Opened video PASS";	
-		startThread(false, true);
+		startThread(false, false);
 		
 	}else 
 	{

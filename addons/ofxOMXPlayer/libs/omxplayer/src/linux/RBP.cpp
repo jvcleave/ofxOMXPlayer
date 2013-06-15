@@ -42,14 +42,14 @@ bool CRBP::Initialize()
   if(!m_initialized)
     return false;
 
-  m_DllBcmHost->bcm_host_init();
+  //m_DllBcmHost->bcm_host_init();
 
   return true;
 }
 
 void CRBP::Deinitialize()
 {
-  m_DllBcmHost->bcm_host_deinit();
+  //m_DllBcmHost->bcm_host_deinit();
 
   if(m_initialized)
     m_DllBcmHost->Unload();
