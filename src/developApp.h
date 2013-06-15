@@ -4,9 +4,9 @@
 #include "ofxOMXPlayer.h"
 #include "ofxOMXVideoPlayer.h"
 
-#include "PipeReader.h"
+#include "ConsoleListener.h"
 
-class developApp : public ofBaseApp, public ofxPipeListener{
+class developApp : public ofBaseApp, public SSHKeyListener{
 	
 public:
 	
@@ -37,9 +37,10 @@ public:
 	
 	void initOMXPlayer();
 	void updateTexturePlayer();
-	//allows key commands via Shell via ofxPipeListener
-	PipeReader pipeReader;
-	void onCharacterReceived(ofxPipeListenerEventData& e);
+	
+	//allows key commands via Shell
+	void onCharacterReceived(SSHKeyListenerEventData& e);
+	ConsoleListener consoleListener;
 	
 	void initVideoPlayer();
 	string videoPath;

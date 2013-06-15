@@ -1,6 +1,6 @@
 #include "developApp.h"
 
-void developApp::onCharacterReceived(ofxPipeListenerEventData& e)
+void developApp::onCharacterReceived(SSHKeyListenerEventData& e)
 {
 	keyPressed((int)e.character);
 }
@@ -39,7 +39,7 @@ void developApp::setup()
 		initVideoPlayer();
 	}
 
-	pipeReader.start(this);
+	consoleListener.setup(this);
 }
 void developApp::initVideoPlayer()
 {
@@ -155,7 +155,7 @@ void developApp::updateFbo()
 
 void developApp::exit()
 {
-	bool DO_HARD_EXIT = true;
+	bool DO_HARD_EXIT = false;
 	if(DO_HARD_EXIT)
 	{
 		ofLogVerbose() << "developApp::exiting hard";
@@ -170,6 +170,9 @@ void developApp::exit()
 }
 //--------------------------------------------------------------
 void developApp::keyPressed  (int key){
+	
+	ofLogVerbose() << key << "received!";
+	
 	switch (key) 
 	{
 		case 'p':
