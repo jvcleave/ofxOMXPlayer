@@ -21,13 +21,7 @@ ofxOMXVideoPlayer::ofxOMXVideoPlayer()
 	didAudioOpen = false;
 	hasClosed = false;
 }
-ofxOMXVideoPlayer::~ofxOMXVideoPlayer()
-{
-	if (!hasClosed) 
-	{
-		close();
-	}
-}
+
 void ofxOMXVideoPlayer::loadMovie(string filepath)
 {
 	moviePath = filepath; 
@@ -358,17 +352,22 @@ bool ofxOMXVideoPlayer::isPlaying()
 void ofxOMXVideoPlayer::close()
 {
 	m_stop = true;
-	
 	stopThread();
+	if(!m_stop)
+	{
+		ofLogVerbose("ofxOMXVideoPlayer") << "waiting completion";
+		if(hasAudio)
+			m_player_audio.WaitCompletion();
+		else if(hasVideo)
+			videoPlayer.WaitCompletion();
+	}
+	
 	
 	clock->OMXStop();
 	clock->OMXStateIdle();
 	
 	videoPlayer.Close();
-	if(didAudioOpen) 
-	{
-		m_player_audio.Close();
-	}
+	m_player_audio.Close();
 	
 	if(packet)
 	{
@@ -381,6 +380,6 @@ void ofxOMXVideoPlayer::close()
 	
 	omxCore.Deinitialize();
 	rbp.Deinitialize();
-	ofLogVerbose() << "reached end of ofxOMXVideoPlayer::close";
+	ofLogVerbose() << "reached end of ofxOMXPlayer::close";
 	hasClosed = true;
 }

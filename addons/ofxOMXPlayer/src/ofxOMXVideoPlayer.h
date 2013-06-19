@@ -18,7 +18,6 @@ class ofxOMXVideoPlayer: public ofThread
 {
 public:
 	ofxOMXVideoPlayer();
-	~ofxOMXVideoPlayer();
 	void loadMovie(string filepath);
 	
 	void 				play();
@@ -52,6 +51,7 @@ public:
 	double getMediaTime();
 	bool doLooping;
 	void threadedFunction();
+	bool m_stop;
 private:
 	
 	CRBP rbp;
@@ -78,7 +78,7 @@ private:
 	string moviePath;
 	bool bPlaying;
 	int nFrames;
-	bool m_stop;
+	
 	double loop_offset;
 	double startpts;
 	bool hasClosed;

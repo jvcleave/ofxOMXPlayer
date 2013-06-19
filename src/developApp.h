@@ -43,5 +43,7 @@ public:
 	
 	void initVideoPlayer();
 	string videoPath;
+	void closePlayers();
+	bool isClosing;
 };
 

@@ -19,7 +19,6 @@ class ofxOMXPlayer : public ofThread
 {
 public:
 	ofxOMXPlayer();
-	~ofxOMXPlayer();
 	void loadMovie(string filepath);
 	
 	void 				play();
@@ -64,6 +63,7 @@ public:
 	bool doLooping;
 	void threadedFunction();
 	bool isThreaded;
+	bool m_stop;
 private:
 	
 	CRBP                  rbp;
@@ -96,7 +96,7 @@ private:
 	EGLDisplay display;
 	EGLContext context;
 	
-	bool m_stop;
+	
 	double loop_offset;
 	double startpts;
 	bool hasClosed;
