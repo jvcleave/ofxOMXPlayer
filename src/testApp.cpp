@@ -40,10 +40,6 @@ void testApp::update()
 	{
 		return;
 	}
-	if (!omxPlayer.isThreaded)
-	{
-		omxPlayer.update();
-	}
 	
 	
 	if (doShader) 

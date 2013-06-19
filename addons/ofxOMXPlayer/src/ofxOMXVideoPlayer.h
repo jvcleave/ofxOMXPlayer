@@ -19,7 +19,6 @@ class ofxOMXVideoPlayer: public ofThread
 public:
 	ofxOMXVideoPlayer();
 	void loadMovie(string filepath);
-	void update();
 	
 	void 				play();
 	void 				stop();
@@ -78,5 +77,9 @@ private:
 	string moviePath;
 	bool bPlaying;
 	int nFrames;
+	bool m_stop;
+	double loop_offset;
+	double startpts;
+
 };
 

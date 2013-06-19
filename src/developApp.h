@@ -36,7 +36,6 @@ public:
 	bool doTextures;
 	
 	void initOMXPlayer();
-	void updateTexturePlayer();
 	
 	//allows key commands via Shell
 	void onCharacterReceived(SSHKeyListenerEventData& e);

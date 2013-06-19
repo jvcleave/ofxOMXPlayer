@@ -20,7 +20,6 @@ class ofxOMXPlayer : public ofThread
 public:
 	ofxOMXPlayer();
 	void loadMovie(string filepath);
-	void update();
 	
 	void 				play();
 	void 				stop();
@@ -95,5 +94,10 @@ private:
 	bool bPlaying;
 	EGLDisplay display;
 	EGLContext context;
+	
+	bool m_stop;
+	double loop_offset;
+	double startpts;
+
 };
 

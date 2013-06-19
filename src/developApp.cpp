@@ -27,8 +27,8 @@ void developApp::setup()
 	}
 	ofLogVerbose() << "using videoPath : " << videoPath;
 	
-	doTextures = true;
-	doShader = true;
+	doTextures = false;
+	doShader = false;
 	doPause = false;
 	if (doShader || doTextures) 
 	{
@@ -66,34 +66,15 @@ void developApp::initOMXPlayer()
 //--------------------------------------------------------------
 void developApp::update()
 {
-	if (usingTexturePlayer) 
+	if(omxPlayer.isPlaying())
 	{
-		updateTexturePlayer();
-	}else
-	{
-		
-		//omxVideoPlayer.update();
-		
-		//
+		if (usingTexturePlayer && doShader) 
+		{
+			updateFbo();
+		}
 	}
 }
-void developApp::updateTexturePlayer()
-{
-	if(!omxPlayer.isPlaying())
-	{
-		return;
-	}
-	if (!omxPlayer.isThreaded) 
-	{
-		omxPlayer.update();
-	}
-	//
-	
-	if (doShader) 
-	{
-		updateFbo();
-	}
-}
+
 //--------------------------------------------------------------
 void developApp::draw(){
 	if(!omxPlayer.isPlaying() && !usingTexturePlayer)
