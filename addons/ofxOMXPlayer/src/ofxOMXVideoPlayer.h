@@ -18,6 +18,7 @@ class ofxOMXVideoPlayer: public ofThread
 {
 public:
 	ofxOMXVideoPlayer();
+	~ofxOMXVideoPlayer();
 	void loadMovie(string filepath);
 	
 	void 				play();
@@ -80,6 +81,8 @@ private:
 	bool m_stop;
 	double loop_offset;
 	double startpts;
+	bool hasClosed;
+	bool didAudioOpen;
 
 };
 

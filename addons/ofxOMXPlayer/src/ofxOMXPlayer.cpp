@@ -25,8 +25,17 @@ ofxOMXPlayer::ofxOMXPlayer()
 		videoPlayer.doDebugging = true; //this can cause a string error, probably thread safe issue
 	}
 	m_stop = false;
+	hasClosed = false;
+	didAudioOpen = false;
 }
-
+ofxOMXPlayer::~ofxOMXPlayer()
+{
+	ofLogVerbose() << "~ofxOMXPlayer";
+	if (!hasClosed) 
+	{
+		close();
+	}
+}
 void ofxOMXPlayer::loadMovie(string filepath)
 {
 	moviePath = filepath; 
@@ -91,7 +100,7 @@ void ofxOMXPlayer::openPlayer()
 	int m_use_hw_audio			= false;
 	bool m_boost_on_downmix		= false;
 	bool m_thread_player		= true;
-	bool didAudioOpen = m_player_audio.Open(audioStreamInfo, clock, &omxReader, deviceString, 
+	didAudioOpen = m_player_audio.Open(audioStreamInfo, clock, &omxReader, deviceString, 
 											m_passthrough, m_use_hw_audio,
 											m_boost_on_downmix, m_thread_player);
 	if (didAudioOpen) 
@@ -249,9 +258,15 @@ void ofxOMXPlayer::threadedFunction()
 				}
 			}
 			
-			if(m_player_audio.Error())
+			if (hasAudio) 
 			{
-				printf("audio player error. emergency exit!!!\n");
+				if(m_player_audio.Error())
+				{
+					ofLog(OF_LOG_ERROR, "audio player error. emergency exit!!!\n");
+					m_stop = true;
+					close();
+					ofExit(0);
+				}
 			}
 			
 			/* when the audio buffer runs under 0.1 seconds we buffer up */
@@ -337,11 +352,11 @@ void ofxOMXPlayer::play()
 
 void ofxOMXPlayer::stop()
 {
-	clock->OMXStop();
+	/*clock->OMXStop();
 	clock->OMXStateIdle();
 	videoPlayer.Close();
 	bPlaying = false;
-	ofLogVerbose() << "ofxOMXPlayer::stop called";
+	ofLogVerbose() << "ofxOMXPlayer::stop called";*/
 }
 
 void ofxOMXPlayer::setPaused(bool doPause)
@@ -440,23 +455,24 @@ void ofxOMXPlayer::close()
 	m_stop = true;
 	
 	stopThread();
-	/*if(hasAudio)
-		m_player_audio.WaitCompletion();
-    else if(hasVideo)
-		videoPlayer.WaitCompletion();*/
 	
-	if(isPlaying()) 
+	clock->OMXStop();
+	clock->OMXStateIdle();
+	
+	videoPlayer.Close();
+	if(didAudioOpen) 
 	{
-		stop();
+		m_player_audio.Close();
 	}
-	//OMXReader::g_abort = true;
-	omxReader.Close();
 	
 	if(packet)
 	{
 		omxReader.FreePacket(packet);
 		packet = NULL;
-	}	
+	}
+	
+	omxReader.Close();
+	
 	
 	if (eglImage !=NULL)  
 	{
@@ -466,4 +482,5 @@ void ofxOMXPlayer::close()
 	omxCore.Deinitialize();
 	rbp.Deinitialize();
 	ofLogVerbose() << "reached end of ofxOMXPlayer::close";
+	hasClosed = true;
 }

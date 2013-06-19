@@ -18,8 +18,16 @@ ofxOMXVideoPlayer::ofxOMXVideoPlayer()
 	m_stop = false;
 	loop_offset = 0;
 	startpts              = 0;
+	didAudioOpen = false;
+	hasClosed = false;
 }
-
+ofxOMXVideoPlayer::~ofxOMXVideoPlayer()
+{
+	if (!hasClosed) 
+	{
+		close();
+	}
+}
 void ofxOMXVideoPlayer::loadMovie(string filepath)
 {
 	moviePath = filepath; 
@@ -89,7 +97,7 @@ void ofxOMXVideoPlayer::openPlayer()
 	int m_use_hw_audio			= false;
 	bool m_boost_on_downmix		= false;
 	bool m_thread_player		= true;
-	bool didAudioOpen = m_player_audio.Open(audioStreamInfo, clock, &omxReader, deviceString, 
+	didAudioOpen = m_player_audio.Open(audioStreamInfo, clock, &omxReader, deviceString, 
 											m_passthrough, m_use_hw_audio,
 											m_boost_on_downmix, m_thread_player);
 	if (didAudioOpen) 
@@ -177,10 +185,17 @@ void ofxOMXVideoPlayer::threadedFunction()
 				}
 			}
 			
-			if(m_player_audio.Error())
+			if (hasAudio) 
 			{
-				printf("audio player error. emergency exit!!!\n");
+				if(m_player_audio.Error())
+				{
+					ofLog(OF_LOG_ERROR, "audio player error. emergency exit!!!\n");
+					m_stop = true;
+					close();
+					ofExit(0);
+				}
 			}
+			
 			
 			/* when the audio buffer runs under 0.1 seconds we buffer up */
 			if(hasAudio)
@@ -343,22 +358,29 @@ bool ofxOMXVideoPlayer::isPlaying()
 void ofxOMXVideoPlayer::close()
 {
 	m_stop = true;
+	
 	stopThread();
-	if(isPlaying()) 
+	
+	clock->OMXStop();
+	clock->OMXStateIdle();
+	
+	videoPlayer.Close();
+	if(didAudioOpen) 
 	{
-		stop();
+		m_player_audio.Close();
 	}
-	//OMXReader::g_abort = true;
 	
 	if(packet)
 	{
 		omxReader.FreePacket(packet);
 		packet = NULL;
-	}	
+	}
+	
 	omxReader.Close();
 	
-
+	
 	omxCore.Deinitialize();
 	rbp.Deinitialize();
 	ofLogVerbose() << "reached end of ofxOMXVideoPlayer::close";
+	hasClosed = true;
 }

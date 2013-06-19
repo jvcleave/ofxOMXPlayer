@@ -90,7 +90,7 @@ void testApp::draw(){
 
 void testApp::exit()
 {
-	bool DO_HARD_EXIT = true;
+	bool DO_HARD_EXIT = false;
 	if(DO_HARD_EXIT)
 	{
 		ofLogVerbose() << "testApp::exiting hard";

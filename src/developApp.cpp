@@ -136,16 +136,13 @@ void developApp::updateFbo()
 
 void developApp::exit()
 {
-	bool DO_HARD_EXIT = false;
-	if(DO_HARD_EXIT)
-	{
-		ofLogVerbose() << "developApp::exiting hard";
-		atexit(0);
-	}else 
+	if(usingTexturePlayer)
 	{
 		doShader = false;
-		ofSleepMillis(20);
 		omxPlayer.close();
+	}else 
+	{
+		omxVideoPlayer.close();
 	}
 	
 }
