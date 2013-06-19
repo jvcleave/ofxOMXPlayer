@@ -29,10 +29,6 @@
 #include <sys/time.h>
 #include <inttypes.h>
 
-#ifdef CLASSNAME
-#undef CLASSNAME
-#endif
-#define CLASSNAME "OMXEGLImage"
 
 
 
@@ -90,7 +86,7 @@ bool OMXEGLImage::SendDecoderConfig()
 
     if(omx_buffer == NULL)
     {
-      ofLog(OF_LOG_VERBOSE, "\n%s::%s - buffer error 0x%08x", CLASSNAME, __func__, omx_err);
+      ofLog(OF_LOG_VERBOSE, "\n%s::%s - buffer error 0x%08x", "OMXEGLImage", __func__, omx_err);
       return false;
     }
 
@@ -98,7 +94,7 @@ bool OMXEGLImage::SendDecoderConfig()
     omx_buffer->nFilledLen = m_extrasize;
     if(omx_buffer->nFilledLen > omx_buffer->nAllocLen)
     {
-      ofLog(OF_LOG_VERBOSE, "\n%s::%s - omx_buffer->nFilledLen > omx_buffer->nAllocLen", CLASSNAME, __func__);
+      ofLog(OF_LOG_VERBOSE, "\n%s::%s - omx_buffer->nFilledLen > omx_buffer->nAllocLen", "OMXEGLImage", __func__);
       return false;
     }
 
@@ -109,7 +105,7 @@ bool OMXEGLImage::SendDecoderConfig()
     omx_err = m_omx_decoder.EmptyThisBuffer(omx_buffer);
     if (omx_err != OMX_ErrorNone)
     {
-      ofLog(OF_LOG_VERBOSE, "\n%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, omx_err);
+      ofLog(OF_LOG_VERBOSE, "\n%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", "OMXEGLImage", __func__, omx_err);
       return false;
     }else {
 		ofLog(OF_LOG_VERBOSE, "OMXEGLImage::SendDecoderConfig m_extradata: %i ", m_extradata); 
@@ -525,7 +521,7 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglIm
 
 	ofLog(OF_LOG_VERBOSE, 
 	"%s::%s - decoder_component(0x%p), input_port(0x%x), output_port(0x%x)\n",
-	CLASSNAME, __func__, m_omx_decoder.GetComponent(), m_omx_decoder.GetInputPort(), m_omx_decoder.GetOutputPort());
+	"OMXEGLImage", __func__, m_omx_decoder.GetComponent(), m_omx_decoder.GetInputPort(), m_omx_decoder.GetOutputPort());
 
 	m_first_frame   = true;
 	return true;
@@ -660,12 +656,12 @@ int OMXEGLImage::Decode(uint8_t *pData, int iSize, double dts, double pts)
         }
         else
         {
-          ofLog(OF_LOG_VERBOSE, "\n%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, omx_err);
+          ofLog(OF_LOG_VERBOSE, "\n%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", "OMXEGLImage", __func__, omx_err);
           nRetry++;
         }
         if(nRetry == 5)
         {
-          ofLog(OF_LOG_VERBOSE, "\n%s::%s - OMX_EmptyThisBuffer() finaly failed\n", CLASSNAME, __func__);
+          ofLog(OF_LOG_VERBOSE, "\n%s::%s - OMX_EmptyThisBuffer() finaly failed\n", "OMXEGLImage", __func__);
           return false;
         }
       }
@@ -731,7 +727,7 @@ void OMXEGLImage::WaitCompletion()
   
   if(omx_buffer == NULL)
   {
-    ofLog(OF_LOG_VERBOSE, "%s::%s - buffer error 0x%08x", CLASSNAME, __func__, omx_err);
+    ofLog(OF_LOG_VERBOSE, "%s::%s - buffer error 0x%08x", "OMXEGLImage", __func__, omx_err);
     return;
   }
   
@@ -744,7 +740,7 @@ void OMXEGLImage::WaitCompletion()
   omx_err = m_omx_decoder.EmptyThisBuffer(omx_buffer);
   if (omx_err != OMX_ErrorNone)
   {
-    ofLog(OF_LOG_VERBOSE, "\n%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, omx_err);
+    ofLog(OF_LOG_VERBOSE, "\n%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", "OMXEGLImage", __func__, omx_err);
     return;
   }
 	

@@ -10,35 +10,37 @@ ofxOMXPlayer::ofxOMXPlayer()
 	packet				= NULL;
 	moviePath			= "moviePath is undefined";
 	clock				= NULL;
-	playerTex			= NULL;
 	bPlaying			= false;
 	duration			= 0.0;
 	nFrames				= 0;
 	doVideoDebugging	= false;
 	doLooping			= true;
-	isThreaded		= false;
-	m_buffer_empty = true;
+	m_buffer_empty		= true;
 	loop_offset = 0;
 	startpts              = 0;
 	if (doVideoDebugging) 
 	{
-		videoPlayer.doDebugging = true; //this can cause a string error, probably thread safe issue
+		//videoPlayer->doDebugging = true; //this can cause a string error, probably thread safe issue
 	}
 	m_stop = false;
-	hasClosed = false;
 	didAudioOpen = false;
+	didVideoPlayerOpen = false;
+	isTextureEnabled = false;
 }
 
 
-void ofxOMXPlayer::loadMovie(string filepath)
+void ofxOMXPlayer::setup(ofxOMXPlayerSettings settings_)
 {
-	moviePath = filepath; 
+	settings = settings_;
+	moviePath = settings.videoPath; 
+	isTextureEnabled = settings.enableTexture;
+	
 	rbp.Initialize();
 	omxCore.Initialize();
 	
 	clock = new OMXClock(); 
 	bool doDumpFormat = false;
-
+	
 	if(omxReader.Open(moviePath.c_str(), doDumpFormat))
 	{
 		
@@ -62,7 +64,6 @@ void ofxOMXPlayer::loadMovie(string filepath)
 				ofLogVerbose() << "clock Init PASS";
 				openPlayer();
 				
-				
 			}else 
 			{
 				ofLogError() << "clock Init FAIL";
@@ -75,8 +76,12 @@ void ofxOMXPlayer::loadMovie(string filepath)
 	{
 		ofLogError() << "omxReader open moviePath FAIL: "  << moviePath;
 	}
+
+	
 	
 }
+
+
 void ofxOMXPlayer::openPlayer()
 {
 	omxReader.GetHints(OMXSTREAM_VIDEO, streamInfo);
@@ -87,14 +92,33 @@ void ofxOMXPlayer::openPlayer()
 	ofLogVerbose() << "SET videoWidth: " << videoWidth;
 	ofLogVerbose() << "SET videoHeight: " << videoHeight;
 
-	generateEGLImage();
-	bPlaying = videoPlayer.Open(streamInfo, clock, eglImage);
-	string deviceString			= "omx:hdmi";
+	if (isTextureEnabled) 
+	{
+		generateEGLImage();
+		videoPlayer = new OMXEGLImagePlayer();
+		didVideoPlayerOpen = videoPlayer->Open(streamInfo, clock, eglImage);
+	}else 
+	{
+		videoPlayer = new OMXPlayerVideo();
+		bool deinterlace = false;
+		bool mpeg = false;
+		bool hdmi_clock_sync = true;
+		bool use_thread = true;
+		float display_aspect = 1.0;
+		
+		didVideoPlayerOpen = videoPlayer->Open(streamInfo, clock, deinterlace, mpeg, hdmi_clock_sync, use_thread, display_aspect);
+	}
+
+	string deviceString = "omx:hdmi";
+	if (!settings.useHDMIForAudio)
+	{
+		deviceString = "omx:local";
+	}
 	bool m_passthrough			= false;
 	int m_use_hw_audio			= false;
 	bool m_boost_on_downmix		= false;
 	bool m_thread_player		= true;
-	didAudioOpen = m_player_audio.Open(audioStreamInfo, clock, &omxReader, deviceString, 
+	didAudioOpen = audioPlayer.Open(audioStreamInfo, clock, &omxReader, deviceString, 
 											m_passthrough, m_use_hw_audio,
 											m_boost_on_downmix, m_thread_player);
 	if (didAudioOpen) 
@@ -109,15 +133,13 @@ void ofxOMXPlayer::openPlayer()
 	if (isPlaying()) 
 	{
 		ofLogVerbose() << "streamInfo.nb_frames " << streamInfo.nb_frames;
-		ofLogVerbose() << "videoPlayer.GetFPS(): " << videoPlayer.GetFPS();
+		ofLogVerbose() << "videoPlayer->GetFPS(): " << videoPlayer->GetFPS();
 		
-		if(streamInfo.nb_frames>0 && videoPlayer.GetFPS()>0)
+		if(streamInfo.nb_frames>0 && videoPlayer->GetFPS()>0)
 		{
 			nFrames = streamInfo.nb_frames;
-			duration = streamInfo.nb_frames / videoPlayer.GetFPS();
-			ofLogVerbose() << "duration SET: " << duration;
-			isThreaded = true;
-			
+			duration = streamInfo.nb_frames / videoPlayer->GetFPS();
+			ofLogVerbose() << "duration SET: " << duration;			
 		}else 
 		{
 			
@@ -129,16 +151,7 @@ void ofxOMXPlayer::openPlayer()
 				omxReader.enableFileLoopinghack();
 			}
 		}
-		if (isThreaded) 
-		{
-			ofLogVerbose() << "ofxOMXPlayer THREADING ENABLED";
-			startThread(false, true);
-		}else 
-		{
-			ofLogVerbose() << "ofxOMXPlayer THREADING DISABLED";
-		}
-
-		
+		startThread(false, false);
 		
 		ofLogVerbose() << "Opened video PASS";	
 		
@@ -202,12 +215,7 @@ void ofxOMXPlayer::generateEGLImage()
 
 ofTexture & ofxOMXPlayer::getTextureReference()
 {
-	if(playerTex == NULL){
-		return tex;
-	}
-	else{
-		return *playerTex;
-	}
+	return tex;
 }
 void ofxOMXPlayer::threadedFunction()
 {
@@ -216,25 +224,23 @@ void ofxOMXPlayer::threadedFunction()
 		struct timespec starttime, endtime;
 		while(!m_stop)
 		{
-			
-						
-			printf("V : %8.02f %8d %8d A : %8.02f %8.02f Cv : %8d Ca : %8d                            \r",
-				   clock->OMXMediaTime(), videoPlayer.GetDecoderBufferSize(),
-				   videoPlayer.GetDecoderFreeSpace(), m_player_audio.GetCurrentPTS() / DVD_TIME_BASE, 
-				   m_player_audio.GetDelay(), videoPlayer.GetCached(), m_player_audio.GetCached());
+			/*printf("V : %8.02f %8d %8d A : %8.02f %8.02f Cv : %8d Ca : %8d                            \r",
+			 clock->OMXMediaTime(), videoPlayer->GetDecoderBufferSize(),
+			 videoPlayer->GetDecoderFreeSpace(), audioPlayer.GetCurrentPTS() / DVD_TIME_BASE, 
+			 audioPlayer.GetDelay(), videoPlayer->GetCached(), audioPlayer.GetCached());*/
 			
 			if(omxReader.IsEof() && !packet)
 			{
-				if (!m_player_audio.GetCached() && !videoPlayer.GetCached())
+				if (!audioPlayer.GetCached() && !videoPlayer->GetCached())
 				{
 					if (doLooping)
 					{
 						
 						omxReader.SeekTime(0 * 1000.0f, AVSEEK_FLAG_BACKWARD, &startpts);
 						if(hasAudio)
-							loop_offset = m_player_audio.GetCurrentPTS() /* + DVD_MSEC_TO_TIME(0) */;
+							loop_offset = audioPlayer.GetCurrentPTS() /* + DVD_MSEC_TO_TIME(0) */;
 						else if(hasVideo)
-							loop_offset = videoPlayer.GetCurrentPTS();
+							loop_offset = videoPlayer->GetCurrentPTS();
 						// printf("Loop offset : %8.02f\n", loop_offset / DVD_TIME_BASE);  
 						
 					}
@@ -254,7 +260,7 @@ void ofxOMXPlayer::threadedFunction()
 			
 			if (hasAudio) 
 			{
-				if(m_player_audio.Error())
+				if(audioPlayer.Error())
 				{
 					ofLog(OF_LOG_ERROR, "audio player error. emergency exit!!!\n");
 					m_stop = true;
@@ -266,7 +272,7 @@ void ofxOMXPlayer::threadedFunction()
 			/* when the audio buffer runs under 0.1 seconds we buffer up */
 			if(hasAudio)
 			{
-				if(m_player_audio.GetDelay() < 0.1f && !m_buffer_empty)
+				if(audioPlayer.GetDelay() < 0.1f && !m_buffer_empty)
 				{
 					if(!clock->OMXIsPaused())
 					{
@@ -276,7 +282,7 @@ void ofxOMXPlayer::threadedFunction()
 						clock_gettime(CLOCK_REALTIME, &starttime);
 					}
 				}
-				if(m_player_audio.GetDelay() > (AUDIO_BUFFER_SECONDS * 0.75f) && m_buffer_empty)
+				if(audioPlayer.GetDelay() > (AUDIO_BUFFER_SECONDS * 0.75f) && m_buffer_empty)
 				{
 					if(clock->OMXIsPaused())
 					{
@@ -309,14 +315,14 @@ void ofxOMXPlayer::threadedFunction()
 			
 			if(hasVideo && packet && omxReader.IsActive(OMXSTREAM_VIDEO, packet->stream_index))
 			{
-				if(videoPlayer.AddPacket(packet))
+				if(videoPlayer->AddPacket(packet))
 					packet = NULL;
 				else
 					OMXClock::OMXSleep(10);
 			}
 			else if(hasAudio && packet && packet->codec_type == AVMEDIA_TYPE_AUDIO)
 			{
-				if(m_player_audio.AddPacket(packet))
+				if(audioPlayer.AddPacket(packet))
 					packet = NULL;
 				else
 					OMXClock::OMXSleep(10);
@@ -348,47 +354,55 @@ void ofxOMXPlayer::stop()
 {
 	/*clock->OMXStop();
 	clock->OMXStateIdle();
-	videoPlayer.Close();
+	videoPlayer->Close();
 	bPlaying = false;
 	ofLogVerbose() << "ofxOMXPlayer::stop called";*/
 }
 
 void ofxOMXPlayer::setPaused(bool doPause)
 {
-	if(doPause)
+	/*if(doPause)
 	{
-		videoPlayer.SetSpeed(OMX_PLAYSPEED_PAUSE);
+		videoPlayer->SetSpeed(OMX_PLAYSPEED_PAUSE);
 		clock->OMXPause();
 	}else 
 	{
-		videoPlayer.SetSpeed(OMX_PLAYSPEED_NORMAL);
+		videoPlayer->SetSpeed(OMX_PLAYSPEED_NORMAL);
 		clock->OMXResume();
-	}
+	}*/
 
 			
 }
 void ofxOMXPlayer::draw(float x, float y, float width, float height)
 {
 	if(!isPlaying()) return;
+	if (isTextureEnabled) 
+	{
+		return;
+	}
 	getTextureReference().draw(x, y, width, height);	
 }
 
 void ofxOMXPlayer::draw(float x, float y)
 {
 	if(!isPlaying()) return;
+	if (isTextureEnabled) 
+	{
+		return;
+	}
 	getTextureReference().draw(x, y);
 }
 
 string ofxOMXPlayer::getVideoDebugInfo()
 {
-	if (!doVideoDebugging) 
+	/*if (!doVideoDebugging) 
 	{
 		return "doVideoDebugging not enabled";
 	}
-	if (videoPlayer.m_decoder != NULL) 
+	if (videoPlayer->m_decoder != NULL) 
 	{
-		return videoPlayer.m_decoder->debugInfo + "\n" + videoPlayer.debugInfo;
-	}
+		return videoPlayer->m_decoder->debugInfo + "\n" + videoPlayer->debugInfo;
+	}*/
 	return "NO INFO YET";
 }
 
@@ -400,7 +414,7 @@ float ofxOMXPlayer::getDuration()
 //ahead of rendered frames
 int ofxOMXPlayer::getCurrentFrame()
 {
-	return (int)(videoPlayer.GetCurrentPTS()/ DVD_TIME_BASE)*videoPlayer.GetFPS();
+	return (int)(videoPlayer->GetCurrentPTS()/ DVD_TIME_BASE)*videoPlayer->GetFPS();
 }
 
 int ofxOMXPlayer::getTotalNumFrames()
@@ -431,12 +445,12 @@ double ofxOMXPlayer::getMediaTime()
 
 bool ofxOMXPlayer::isPaused()
 {
-	if (!clock) 
+	/*if (!clock) 
 	{
 		ofLogVerbose() << "No clock for pause state inquiry";
 		return false;
 	}
-	return clock->OMXIsPaused();
+	return clock->OMXIsPaused();*/
 }
 
 bool ofxOMXPlayer::isPlaying()
@@ -449,17 +463,17 @@ void ofxOMXPlayer::close()
 	if(!m_stop)
 	{
 		if(hasAudio)
-			m_player_audio.WaitCompletion();
+			audioPlayer.WaitCompletion();
 		else if(hasVideo)
-			videoPlayer.WaitCompletion();
+			videoPlayer->WaitCompletion();
 	}
 	
 	
 	clock->OMXStop();
 	clock->OMXStateIdle();
 	
-	videoPlayer.Close();
-	m_player_audio.Close();
+	videoPlayer->Close();
+	audioPlayer.Close();
 	
 	if(packet)
 	{
@@ -478,5 +492,4 @@ void ofxOMXPlayer::close()
 	omxCore.Deinitialize();
 	rbp.Deinitialize();
 	ofLogVerbose() << "reached end of ofxOMXPlayer::close";
-	hasClosed = true;
 }

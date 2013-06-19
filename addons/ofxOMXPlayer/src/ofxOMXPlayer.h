@@ -12,14 +12,33 @@ extern "C"
 #include "RBP.h"
 #include "OMXClock.h"
 #include "OMXEGLImagePlayer.h"
+#include "OMXPlayerVideo.h"
 #include "OMXPlayerAudio.h"
+
+struct ofxOMXPlayerSettings 
+{
+	ofxOMXPlayerSettings()
+	{
+		videoPath = "";
+		useHDMIForAudio = true;
+		enableTexture = true;
+	}
+	string videoPath;
+	bool enableTexture;
+	bool useHDMIForAudio;
+	
+	
+};
 
 
 class ofxOMXPlayer : public ofThread
 {
 public:
 	ofxOMXPlayer();
-	void loadMovie(string filepath);
+	void setup(ofxOMXPlayerSettings settings_);
+	ofxOMXPlayerSettings settings;
+	
+	void loadMovie();
 	
 	void 				play();
 	void 				stop();
@@ -28,7 +47,7 @@ public:
 	float 				getDuration();
 	
 	void 				setPosition(float pct);
-//	void 				setVolume(float volume); // 0..1
+	void 				setVolume(float volume); // 0..1
 	
 	ofTexture &			getTextureReference();
 	void 				draw(float x, float y, float w, float h);
@@ -62,20 +81,21 @@ public:
 	bool doVideoDebugging;
 	bool doLooping;
 	void threadedFunction();
-	bool isThreaded;
 	bool m_stop;
+	bool isTextureEnabled;
+	bool didVideoPlayerOpen;
 private:
 	
 	CRBP                  rbp;
 	COMXCore              omxCore;
 	OMXClock * clock;
 	
-	OMXEGLImagePlayer    videoPlayer;
-	OMXPlayerAudio m_player_audio;
-	OMXReader         omxReader;
+	OMXVideoPlayer*		videoPlayer;
+	OMXPlayerAudio		audioPlayer;
+	OMXReader			omxReader;
 	
-	COMXStreamInfo streamInfo;
-	COMXStreamInfo audioStreamInfo;
+	COMXStreamInfo		streamInfo;
+	COMXStreamInfo		audioStreamInfo;
 	
 	bool isMPEG;
 	bool hasVideo;
@@ -88,7 +108,6 @@ private:
 	OMXPacket* packet;
 	
 	ofTexture tex;
-	ofTexture * playerTex; // a seperate texture that may be optionally implemented by the player to avoid excessive pixel copying.
 	ofPixelFormat internalPixelFormat;
 	string moviePath;
 	int nFrames;
@@ -99,7 +118,6 @@ private:
 	
 	double loop_offset;
 	double startpts;
-	bool hasClosed;
 	bool didAudioOpen;
 };
 

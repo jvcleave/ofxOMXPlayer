@@ -30,7 +30,11 @@ void testApp::setup()
 		}		
 	}
 	
-	omxPlayer.loadMovie(videoPath);
+	
+	ofxOMXPlayerSettings settings;
+	settings.videoPath = videoPath;
+	
+	omxPlayer.setup(settings);
 }
 
 //--------------------------------------------------------------
@@ -90,15 +94,12 @@ void testApp::draw(){
 
 void testApp::exit()
 {
-	bool DO_HARD_EXIT = false;
-	if(DO_HARD_EXIT)
-	{
-		ofLogVerbose() << "testApp::exiting hard";
-		atexit(0);
-	}else 
-	{
-		omxPlayer.close();
-	}
+	omxPlayer.lock();
+	omxPlayer.m_stop = true;
+	omxPlayer.unlock();
+	omxPlayer.waitForThread(true);
+	
+	omxPlayer.close();
 	
 }
 //--------------------------------------------------------------

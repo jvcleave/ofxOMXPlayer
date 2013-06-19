@@ -4,10 +4,10 @@ void developApp::onCharacterReceived(SSHKeyListenerEventData& e)
 {
 	keyPressed((int)e.character);
 }
-bool usingTexturePlayer = false;
 //--------------------------------------------------------------
 void developApp::setup()
 {
+	usingTexturePlayer =  false;
 	videoPath = "/opt/vc/src/hello_pi/hello_video/test.h264";
 	/* to get the videos I am testing run command:
 	 * $wget -r -nd -P /home/pi/videos http://www.jvcref.com/files/PI/video/
@@ -27,25 +27,27 @@ void developApp::setup()
 	}
 	ofLogVerbose() << "using videoPath : " << videoPath;
 	
-	doTextures = false;
+	doTextures = true;
 	doShader = false;
-	doPause = false;
 	if (doShader || doTextures) 
 	{
 		usingTexturePlayer = true;
-		initOMXPlayer();
+		createTexturePlayer();
 	}else 
 	{
-		initVideoPlayer();
+		createNonTexturePlayer();
 	}
 	isClosing = false;
 	consoleListener.setup(this);
 }
-void developApp::initVideoPlayer()
+void developApp::createNonTexturePlayer()
 {
-	omxVideoPlayer.loadMovie(videoPath);
+	ofxOMXPlayerSettings settings;
+	settings.videoPath = videoPath;
+	settings.enableTexture = false;
+	omxPlayer.setup(settings);
 }
-void developApp::initOMXPlayer()
+void developApp::createTexturePlayer()
 {
 	//ofSetLogLevel(OF_LOG_VERBOSE); set in main.cpp
 	ofEnableAlphaBlending();
@@ -59,13 +61,17 @@ void developApp::initOMXPlayer()
 		fbo.end();
 		
 	}
-	
-
-	omxPlayer.loadMovie(videoPath);
+	ofxOMXPlayerSettings settings;
+	settings.videoPath = videoPath;
+	omxPlayer.setup(settings);
 }
 //--------------------------------------------------------------
 void developApp::update()
 {
+	if (!usingTexturePlayer) 
+	{
+		return;
+	}
 	if(omxPlayer.isPlaying())
 	{
 		if (usingTexturePlayer && doShader) 
@@ -80,7 +86,11 @@ void developApp::draw(){
 	if (isClosing) {
 		return;
 	}
-	if(!omxPlayer.isPlaying() && !usingTexturePlayer)
+	if (!usingTexturePlayer) 
+	{
+		return;
+	}
+	if(!omxPlayer.isPlaying())
 	{
 		return;
 	}
@@ -98,14 +108,7 @@ void developApp::draw(){
 	
 	info << "APP FPS: "+ ofToString(ofGetFrameRate());
 	
-	info << "\n" <<" PAUSED: ";
-	if (doPause) 
-	{
-		info << "TRUE";
-	}else 
-	{
-		info << "FALSE";
-	}
+	
 	info <<"\n" <<	"MEDIA TIME: "			<< omxPlayer.getMediaTime();
 	info <<"\n" <<	"DIMENSIONS: "			<< omxPlayer.getWidth()<<"x"<<omxPlayer.getHeight();
 	info <<"\n" <<	"DURATION: "			<< omxPlayer.getDuration();
@@ -141,32 +144,15 @@ void developApp::updateFbo()
 	fbo.end();
 }
 
-void developApp::closePlayers()
-{
-	isClosing = true;
-	if(usingTexturePlayer)
-	{
-		omxPlayer.lock();
-		omxPlayer.m_stop = true;
-		omxPlayer.unlock();
-		omxPlayer.waitForThread(true);
-		
-		
-		doShader = false;
-		omxPlayer.close();
-	}else 
-	{
-		omxVideoPlayer.lock();
-		omxVideoPlayer.m_stop = true;
-		omxVideoPlayer.unlock();
-		omxVideoPlayer.waitForThread(true);
-		
-		omxVideoPlayer.close();
-	}
-}
 void developApp::exit()
 {
-	closePlayers();
+	isClosing = true;
+	omxPlayer.lock();
+	omxPlayer.m_stop = true;
+	omxPlayer.unlock();
+	omxPlayer.waitForThread(true);
+	
+	omxPlayer.close();
 	
 }
 //--------------------------------------------------------------
@@ -176,21 +162,7 @@ void developApp::keyPressed  (int key){
 	
 	switch (key) 
 	{
-		case 'c':
-		{
-			closePlayers();
-			break;
-		}
-			
-
-		case 'p':
-		{
-			
-			doPause = !doPause;
-			ofLogVerbose() << "SENDING PAUSE STATE: " << doPause;
-			omxPlayer.setPaused(doPause);
-			break;
-		}
+		
 		case '1':
 		{
 			ofLogVerbose() << "SENDING PLAY COMMAND";

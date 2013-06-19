@@ -12,8 +12,6 @@
 
 
 
-#define CLASSNAME "OMXEGLImage"
-
 class DllAvUtil;
 class DllAvFormat;
 class OMXEGLImage

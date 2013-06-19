@@ -2,7 +2,6 @@
 
 #include "ofMain.h"
 #include "ofxOMXPlayer.h"
-#include "ofxOMXVideoPlayer.h"
 
 #include "ConsoleListener.h"
 
@@ -26,24 +25,22 @@ public:
 	void gotMessage(ofMessage msg);	
 	
 	ofxOMXPlayer omxPlayer;
-	ofxOMXVideoPlayer omxVideoPlayer;
 	ofShader shader;
 	ofFbo fbo;
 	void updateFbo();
 	
 	bool doShader;
-	bool doPause;
 	bool doTextures;
-	
-	void initOMXPlayer();
-	
+		
 	//allows key commands via Shell
 	void onCharacterReceived(SSHKeyListenerEventData& e);
 	ConsoleListener consoleListener;
 	
-	void initVideoPlayer();
 	string videoPath;
-	void closePlayers();
 	bool isClosing;
+	bool usingTexturePlayer;
+	
+	void createNonTexturePlayer();
+	void createTexturePlayer();
 };
 
