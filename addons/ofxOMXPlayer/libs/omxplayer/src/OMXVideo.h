@@ -93,4 +93,5 @@ protected:
   bool              m_deinterlace;
   bool              m_hdmi_clock_sync;
   bool              m_first_frame;
+	bool m_syncclock;
 };

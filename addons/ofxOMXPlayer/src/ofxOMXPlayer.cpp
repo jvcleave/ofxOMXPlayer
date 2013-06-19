@@ -207,9 +207,96 @@ void ofxOMXPlayer::threadedFunction()
 {
 	while (isThreadRunning()) 
 	{
-		update();
+		struct timespec starttime, endtime;
+		while(true)
+		{
+			if(m_player_audio.Error())
+			{
+				printf("audio player error. emergency exit!!!\n");
+			}
+			
+			printf("V : %8.02f %8d %8d A : %8.02f %8.02f Cv : %8d Ca : %8d                            \r",
+				   clock->OMXMediaTime(), videoPlayer.GetDecoderBufferSize(),
+				   videoPlayer.GetDecoderFreeSpace(), m_player_audio.GetCurrentPTS() / DVD_TIME_BASE, 
+				   m_player_audio.GetDelay(), videoPlayer.GetCached(), m_player_audio.GetCached());
+			
+			if(omxReader.IsEof() && !packet)
+			{
+				if (!m_player_audio.GetCached() && !videoPlayer.GetCached())
+					break;
+				
+				// Abort audio buffering, now we're on our own
+				if (m_buffer_empty)
+					clock->OMXResume();
+				
+				OMXClock::OMXSleep(10);
+				continue;
+			}
+			
+			/* when the audio buffer runs under 0.1 seconds we buffer up */
+			if(hasAudio)
+			{
+				if(m_player_audio.GetDelay() < 0.1f && !m_buffer_empty)
+				{
+					if(!clock->OMXIsPaused())
+					{
+						clock->OMXPause();
+						//printf("buffering start\n");
+						m_buffer_empty = true;
+						clock_gettime(CLOCK_REALTIME, &starttime);
+					}
+				}
+				if(m_player_audio.GetDelay() > (AUDIO_BUFFER_SECONDS * 0.75f) && m_buffer_empty)
+				{
+					if(clock->OMXIsPaused())
+					{
+						clock->OMXResume();
+						//printf("buffering end\n");
+						m_buffer_empty = false;
+					}
+				}
+				if(m_buffer_empty)
+				{
+					clock_gettime(CLOCK_REALTIME, &endtime);
+					if((endtime.tv_sec - starttime.tv_sec) > 1)
+					{
+						m_buffer_empty = false;
+						clock->OMXResume();
+						//printf("buffering timed out\n");
+					}
+				}
+			}
+			
+			if(!packet)
+				packet = omxReader.Read(false);
+			
+			if(hasVideo && packet && omxReader.IsActive(OMXSTREAM_VIDEO, packet->stream_index))
+			{
+				if(videoPlayer.AddPacket(packet))
+					packet = NULL;
+				else
+					OMXClock::OMXSleep(10);
+			}
+			else if(hasAudio && packet && packet->codec_type == AVMEDIA_TYPE_AUDIO)
+			{
+				if(m_player_audio.AddPacket(packet))
+					packet = NULL;
+				else
+					OMXClock::OMXSleep(10);
+			}
+			else
+			{
+				if(packet)
+				{
+					omxReader.FreePacket(packet);
+					packet = NULL;
+				}
+			}
+		}
+		
 	}
 }
+
 void ofxOMXPlayer::update()
 {
 	if(!isPlaying())

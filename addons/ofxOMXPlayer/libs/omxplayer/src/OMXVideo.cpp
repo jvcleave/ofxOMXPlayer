@@ -353,7 +353,7 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, float display_aspec
   }
 
   portParam.nPortIndex = m_omx_decoder.GetInputPort();
-	int videoBuffers = 60;
+int videoBuffers = 80;
   portParam.nBufferCountActual = videoBuffers;
 
   portParam.format.video.nFrameWidth  = m_decoded_width;

@@ -14,7 +14,7 @@ extern "C"
 #include "OMXPlayerAudio.h"
 
 
-class ofxOMXVideoPlayer : public ofThread
+class ofxOMXVideoPlayer: public ofThread
 {
 public:
 	ofxOMXVideoPlayer();

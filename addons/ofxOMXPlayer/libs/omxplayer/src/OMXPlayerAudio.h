@@ -1,6 +1,6 @@
 #pragma once
-
 #include "ofMain.h"
+
 
 #include "DllAvUtil.h"
 #include "DllAvFormat.h"
@@ -13,6 +13,8 @@
 #include "OMXClock.h"
 #include "OMXStreamInfo.h"
 #include "OMXAudio.h"
+
+
 #include "OMXAudioCodecOMX.h"
 
 #include "OMXThread.h"

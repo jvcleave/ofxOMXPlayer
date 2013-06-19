@@ -843,6 +843,7 @@ void OMXClock::AddTimeSpecNano(struct timespec &time, uint64_t nanoseconds)
 
 void OMXClock::OMXSleep(unsigned int dwMilliSeconds)
 {
+	//ofLogVerbose() << "sleeping " << dwMilliSeconds;
   struct timespec req;
   req.tv_sec = dwMilliSeconds / 1000;
   req.tv_nsec = (dwMilliSeconds % 1000) * 1000000;

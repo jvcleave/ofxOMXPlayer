@@ -320,8 +320,8 @@ bool OMXPlayerAudio::Decode(OMXPacket *pkt)
      old_bitrate           != new_bitrate ||
      m_hints.bitspersample != pkt->hints.bitspersample)
   {
-    printf("C : %d %d %d %d %d\n", m_hints.codec, m_hints.channels, m_hints.samplerate, m_hints.bitrate, m_hints.bitspersample);
-    printf("N : %d %d %d %d %d\n", pkt->hints.codec, channels, pkt->hints.samplerate, pkt->hints.bitrate, pkt->hints.bitspersample);
+    ofLog(OF_LOG_VERBOSE, "C : %d %d %d %d %d\n", m_hints.codec, m_hints.channels, m_hints.samplerate, m_hints.bitrate, m_hints.bitspersample);
+     ofLog(OF_LOG_VERBOSE, "N : %d %d %d %d %d\n", pkt->hints.codec, channels, pkt->hints.samplerate, pkt->hints.bitrate, pkt->hints.bitspersample);
 
     m_av_clock->OMXPause();
 
@@ -386,7 +386,7 @@ bool OMXPlayerAudio::Decode(OMXPacket *pkt)
 
         if(ret != decoded_size)
         {
-          printf("error ret %d decoded_size %d\n", ret, decoded_size);
+          ofLog(OF_LOG_VERBOSE, "error ret %d decoded_size %d\n", ret, decoded_size);
         }
 
         int n = (m_hints.channels * m_hints.bitspersample * m_hints.samplerate)>>3;
@@ -631,12 +631,12 @@ bool OMXPlayerAudio::OpenDecoder()
   {
     if(m_passthrough)
     {
-      printf("Audio codec %s channels %d samplerate %d bitspersample %d\n",
+      ofLog(OF_LOG_VERBOSE, "Audio codec %s channels %d samplerate %d bitspersample %d\n",
         m_codec_name.c_str(), 2, m_hints.samplerate, m_hints.bitspersample);
     }
     else
     {
-      printf("Audio codec %s channels %d samplerate %d bitspersample %d\n",
+      ofLog(OF_LOG_VERBOSE, "Audio codec %s channels %d samplerate %d bitspersample %d\n",
         m_codec_name.c_str(), m_hints.channels, m_hints.samplerate, m_hints.bitspersample);
     }
   }

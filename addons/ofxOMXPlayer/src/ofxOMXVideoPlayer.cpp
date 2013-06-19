@@ -73,8 +73,14 @@ void ofxOMXVideoPlayer::openPlayer()
 	videoHeight	= streamInfo.height;
 	ofLogVerbose() << "SET videoWidth: " << videoWidth;
 	ofLogVerbose() << "SET videoHeight: " << videoHeight;
+	
+	bool deinterlace = false;
+	bool mpeg = false;
+	bool hdmi_clock_sync = true;
+	bool use_thread = true;
+	float display_aspect = 0.0;
 
-	bPlaying = videoPlayer.Open(streamInfo, clock, false, false, false, true, 0.0);
+	bPlaying = videoPlayer.Open(streamInfo, clock, deinterlace, mpeg, hdmi_clock_sync, use_thread, display_aspect);
 	string deviceString			= "omx:hdmi";
 	bool m_passthrough			= false;
 	int m_use_hw_audio			= false;
@@ -129,7 +135,93 @@ void ofxOMXVideoPlayer::threadedFunction()
 {
 	while (isThreadRunning()) 
 	{
-		update();
+		struct timespec starttime, endtime;
+		while(true)
+		{
+			if(m_player_audio.Error())
+			{
+				printf("audio player error. emergency exit!!!\n");
+			}
+			
+			printf("V : %8.02f %8d %8d A : %8.02f %8.02f Cv : %8d Ca : %8d                            \r",
+				   clock->OMXMediaTime(), videoPlayer.GetDecoderBufferSize(),
+				   videoPlayer.GetDecoderFreeSpace(), m_player_audio.GetCurrentPTS() / DVD_TIME_BASE, 
+				   m_player_audio.GetDelay(), videoPlayer.GetCached(), m_player_audio.GetCached());
+			
+			if(omxReader.IsEof() && !packet)
+			{
+				if (!m_player_audio.GetCached() && !videoPlayer.GetCached())
+					break;
+				
+				// Abort audio buffering, now we're on our own
+				if (m_buffer_empty)
+					clock->OMXResume();
+				
+				OMXClock::OMXSleep(10);
+				continue;
+			}
+			
+			/* when the audio buffer runs under 0.1 seconds we buffer up */
+			if(hasAudio)
+			{
+				if(m_player_audio.GetDelay() < 0.1f && !m_buffer_empty)
+				{
+					if(!clock->OMXIsPaused())
+					{
+						clock->OMXPause();
+						//printf("buffering start\n");
+						m_buffer_empty = true;
+						clock_gettime(CLOCK_REALTIME, &starttime);
+					}
+				}
+				if(m_player_audio.GetDelay() > (AUDIO_BUFFER_SECONDS * 0.75f) && m_buffer_empty)
+				{
+					if(clock->OMXIsPaused())
+					{
+						clock->OMXResume();
+						//printf("buffering end\n");
+						m_buffer_empty = false;
+					}
+				}
+				if(m_buffer_empty)
+				{
+					clock_gettime(CLOCK_REALTIME, &endtime);
+					if((endtime.tv_sec - starttime.tv_sec) > 1)
+					{
+						m_buffer_empty = false;
+						clock->OMXResume();
+						//printf("buffering timed out\n");
+					}
+				}
+			}
+			
+			if(!packet)
+				packet = omxReader.Read(false);
+			
+			if(hasVideo && packet && omxReader.IsActive(OMXSTREAM_VIDEO, packet->stream_index))
+			{
+				if(videoPlayer.AddPacket(packet))
+					packet = NULL;
+				else
+					OMXClock::OMXSleep(10);
+			}
+			else if(hasAudio && packet && packet->codec_type == AVMEDIA_TYPE_AUDIO)
+			{
+				if(m_player_audio.AddPacket(packet))
+					packet = NULL;
+				else
+					OMXClock::OMXSleep(10);
+			}
+			else
+			{
+				if(packet)
+				{
+					omxReader.FreePacket(packet);
+					packet = NULL;
+				}
+			}
+		}
+		
 	}
 }
 bool hasPrintedEOF = false;
@@ -201,25 +293,19 @@ void ofxOMXVideoPlayer::update()
 
 	if(packet && omxReader.IsActive(OMXSTREAM_VIDEO, packet->stream_index))
     {
-		if(videoPlayer.AddPacket(packet))
+		videoPlayer.AddPacket(packet);
+		packet = NULL;
+		if(packet)
 		{
+			omxReader.FreePacket(packet);
 			packet = NULL;
-		}else 
-		{
-			OMXClock::OMXSleep(10);
 		}
 	}else 
 	{
 		if(hasAudio && packet && packet->codec_type == AVMEDIA_TYPE_AUDIO)
 		{
-			if(m_player_audio.AddPacket(packet))
-			{
-				packet = NULL;
-			}
-			else
-			{
-				OMXClock::OMXSleep(10);
-			}
+			m_player_audio.AddPacket(packet);
+			packet = NULL;
 		}
 		if(packet)
 		{
@@ -227,7 +313,7 @@ void ofxOMXVideoPlayer::update()
 			packet = NULL;
 		}
 	}
-	struct timespec starttime, endtime;
+	//struct timespec starttime, endtime;
 
 	/* when the audio buffer runs under 0.1 seconds we buffer up */
    /* if(hasAudio)
@@ -263,7 +349,7 @@ void ofxOMXVideoPlayer::update()
 			}
 		}
     }*/
-	
+	  	
 }
 //--------------------------------------------------------
 void ofxOMXVideoPlayer::play()
@@ -277,9 +363,11 @@ void ofxOMXVideoPlayer::play()
 
 void ofxOMXVideoPlayer::stop()
 {
+	//stopThread();
 	clock->OMXStop();
 	clock->OMXStateIdle();
 	videoPlayer.Close();
+	m_player_audio.Close();
 	bPlaying = false;
 	ofLogVerbose() << "ofxOMXVideoPlayer::stop called";
 }
@@ -358,13 +446,13 @@ void ofxOMXVideoPlayer::close()
 		stop();
 	}
 	//OMXReader::g_abort = true;
-	omxReader.Close();
 	
 	if(packet)
 	{
 		omxReader.FreePacket(packet);
 		packet = NULL;
 	}	
+	omxReader.Close();
 	
 
 	omxCore.Deinitialize();

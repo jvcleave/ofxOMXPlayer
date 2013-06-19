@@ -79,9 +79,13 @@ bool OMXEGLImage::SendDecoderConfig()
 {
   OMX_ERRORTYPE omx_err   = OMX_ErrorNone;
 
+	
   /* send decoder config */
   if(m_extrasize > 0 && m_extradata != NULL)
   {
+	  ofLogVerbose(__FUNCTION__) << "m_extrasize: " << m_extrasize;
+	  ofLogVerbose(__FUNCTION__) << "m_extradata: " << m_extradata;
+	  
     OMX_BUFFERHEADERTYPE *omx_buffer = m_omx_decoder.GetInputBuffer();
 
     if(omx_buffer == NULL)
@@ -361,7 +365,7 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglIm
 	// broadcom omx entension:
 	// When enabled, the timestamp fifo mode will change the way incoming timestamps are associated with output images.
 	// In this mode the incoming timestamps get used without re-ordering on output images
-	/*OMX_PARAM_BRCMVIDEODECODEERRORCONCEALMENTTYPE concanParam;
+	OMX_PARAM_BRCMVIDEODECODEERRORCONCEALMENTTYPE concanParam;
 	OMX_INIT_STRUCTURE(concanParam);
 	concanParam.bStartWithValidFrame = OMX_FALSE;
 	
@@ -392,7 +396,7 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglIm
 			return false;
 		}
 
-	}*/
+	}
 	
 
 	// Alloc buffers for the omx intput port.
