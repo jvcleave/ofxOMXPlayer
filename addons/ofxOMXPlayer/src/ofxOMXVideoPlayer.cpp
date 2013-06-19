@@ -351,11 +351,8 @@ bool ofxOMXVideoPlayer::isPlaying()
 
 void ofxOMXVideoPlayer::close()
 {
-	m_stop = true;
-	stopThread();
 	if(!m_stop)
 	{
-		ofLogVerbose("ofxOMXVideoPlayer") << "waiting completion";
 		if(hasAudio)
 			m_player_audio.WaitCompletion();
 		else if(hasVideo)
@@ -380,6 +377,6 @@ void ofxOMXVideoPlayer::close()
 	
 	omxCore.Deinitialize();
 	rbp.Deinitialize();
-	ofLogVerbose() << "reached end of ofxOMXPlayer::close";
+	ofLogVerbose() << "reached end of ofxOMXVideoPlayer::close";
 	hasClosed = true;
 }

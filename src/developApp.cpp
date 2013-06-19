@@ -27,7 +27,7 @@ void developApp::setup()
 	}
 	ofLogVerbose() << "using videoPath : " << videoPath;
 	
-	doTextures = true;
+	doTextures = false;
 	doShader = false;
 	doPause = false;
 	if (doShader || doTextures) 
@@ -156,10 +156,10 @@ void developApp::closePlayers()
 		omxPlayer.close();
 	}else 
 	{
-		/*omxVideoPlayer.lock();
+		omxVideoPlayer.lock();
 		omxVideoPlayer.m_stop = true;
 		omxVideoPlayer.unlock();
-		omxPlayer.waitForThread(true);*/
+		omxVideoPlayer.waitForThread(true);
 		
 		omxVideoPlayer.close();
 	}
