@@ -89,7 +89,7 @@ void ofxOMXVideoPlayer::openPlayer()
 	bool mpeg = false;
 	bool hdmi_clock_sync = true;
 	bool use_thread = true;
-	float display_aspect = 0.0;
+	float display_aspect = 1.0;
 
 	bPlaying = videoPlayer.Open(streamInfo, clock, deinterlace, mpeg, hdmi_clock_sync, use_thread, display_aspect);
 	string deviceString			= "omx:hdmi";

@@ -15,7 +15,7 @@
 int main( ){
 	ofSetLogLevel(OF_LOG_VERBOSE);
 	ofSetCurrentRenderer(ofPtr<ofBaseRenderer>(new ofGLES2Renderer()));
-	ofSetupOpenGL(1280,720, OF_WINDOW);
+	ofSetupOpenGL(1280, 720, OF_WINDOW);
 
 	#ifdef USE_DEVELOP_APP
 		ofRunApp( new developApp());

@@ -8,6 +8,7 @@ bool usingTexturePlayer = false;
 //--------------------------------------------------------------
 void developApp::setup()
 {
+	//ofSetVerticalSync(true);
 	videoPath = "/opt/vc/src/hello_pi/hello_video/test.h264";
 	/* to get the videos I am testing run command:
 	 * $wget -r -nd -P /home/pi/videos http://www.jvcref.com/files/PI/video/
@@ -27,8 +28,8 @@ void developApp::setup()
 	}
 	ofLogVerbose() << "using videoPath : " << videoPath;
 	
-	doTextures = false;
-	doShader = false;
+	doTextures = true;
+	doShader = true;
 	doPause = false;
 	if (doShader || doTextures) 
 	{
@@ -139,9 +140,11 @@ void developApp::exit()
 	if(usingTexturePlayer)
 	{
 		doShader = false;
+		ofSleepMillis(20);
 		omxPlayer.close();
 	}else 
 	{
+		ofSleepMillis(20);
 		omxVideoPlayer.close();
 	}
 	
