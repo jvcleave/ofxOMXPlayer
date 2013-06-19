@@ -363,7 +363,6 @@ void ofxOMXVideoPlayer::play()
 
 void ofxOMXVideoPlayer::stop()
 {
-	//stopThread();
 	clock->OMXStop();
 	clock->OMXStateIdle();
 	videoPlayer.Close();
@@ -441,6 +440,7 @@ bool ofxOMXVideoPlayer::isPlaying()
 
 void ofxOMXVideoPlayer::close()
 {
+	stopThread();
 	if(isPlaying()) 
 	{
 		stop();

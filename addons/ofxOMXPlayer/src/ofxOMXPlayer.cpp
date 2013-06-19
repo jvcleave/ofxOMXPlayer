@@ -83,7 +83,7 @@ void ofxOMXPlayer::openPlayer()
 
 	generateEGLImage();
 	bPlaying = videoPlayer.Open(streamInfo, clock, eglImage);
-	string deviceString			= "omx:hdmi";
+	string deviceString			= "omx:local";
 	bool m_passthrough			= false;
 	int m_use_hw_audio			= false;
 	bool m_boost_on_downmix		= false;
@@ -516,6 +516,7 @@ bool ofxOMXPlayer::isPlaying()
 
 void ofxOMXPlayer::close()
 {
+	stopThread();
 	if(isPlaying()) 
 	{
 		stop();
