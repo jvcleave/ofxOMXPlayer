@@ -1,145 +1,24 @@
-#include "OMXEGLImagePlayer.h"
+/*
+ *  OMXVideoPlayer.cpp
+ *  openFrameworksLib
+ *
+ *  Created by jason van cleave on 6/19/13.
+ *  Copyright 2013 jasonvancleave.com. All rights reserved.
+ *
+ */
 
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/time.h>
 
+#if 0
+#include "OMXVideoPlayer.h"
 
-#include "linux/XMemUtils.h"
-
-
-OMXEGLImagePlayer::OMXEGLImagePlayer()
+OMXVideoPlayer::OMXVideoPlayer()
 {
-	m_open          = false;
-	m_stream_id     = -1;
-	m_pStream       = NULL;
-	m_av_clock      = NULL;
-	m_decoder       = NULL;
-	m_fps           = 25.0f;
-	m_flush         = false;
-	m_cached_size   = 0;
-	m_iVideoDelay   = 0;
-	m_pts           = 0;
-	m_syncclock     = true;
-	m_speed         = DVD_PLAYSPEED_NORMAL;
-	//doDebugging = false;
-	ofLogVerbose() << "OMXEGLImagePlayer CONSTRUCT";
 	pthread_cond_init(&m_packet_cond, NULL);
 	pthread_cond_init(&m_picture_cond, NULL);
 	pthread_mutex_init(&m_lock, NULL);
 	pthread_mutex_init(&m_lock_decoder, NULL);
 }
-
-
-
-
-bool OMXEGLImagePlayer::Open(COMXStreamInfo &hints, OMXClock *av_clock, EGLImageKHR eglImage_)
-{
-	ofLogVerbose(__func__) << " OMXEGLImagePlayer Open";
-
-	eglImage = eglImage_;
-	ofLogVerbose() << "OMXEGLImagePlayer::maxDataSize may need to be reduced for 256 boards, memory intensive apps";
-
-  if (!m_dllAvUtil.Load() || !m_dllAvCodec.Load() || !m_dllAvFormat.Load() || !av_clock)
-  {
-	  return false;
-  }
-
-	if(ThreadHandle())
-	{
-		Close();
-	}
-
-	m_dllAvFormat.av_register_all();
-
-	m_hints       = hints;
-	m_av_clock    = av_clock;
-	m_fps         = 25.0f;
-	m_frametime   = 0;
-	m_iCurrentPts = DVD_NOPTS_VALUE;
-	m_bAbort      = false;
-	m_flush       = false;
-	m_cached_size = 0;
-	m_iVideoDelay = 0;
-	m_pts         = 0;
-	m_syncclock   = true;
-	m_speed       = DVD_PLAYSPEED_NORMAL;
-	m_FlipTimeStamp = m_av_clock->GetAbsoluteClock();
-
-	if(!OpenDecoder())
-	{
-		Close();
-		return false;
-	}
-
-	Create();
-	
-
-	m_open        = true;
-
-	return true;
-}
-
-
-/*void OMXEGLImagePlayer::UnFlush()
-{
-	Lock();
-	LockDecoder();
-		m_flush = false;
-	UnLockDecoder();
-	UnLock();
-}*/
-
-
-bool OMXEGLImagePlayer::OpenDecoder()
-{
-	if (m_hints.fpsrate && m_hints.fpsscale)
-	{
-		m_fps = DVD_TIME_BASE / OMXReader::NormalizeFrameduration((double)DVD_TIME_BASE * m_hints.fpsscale / m_hints.fpsrate);
-	}else
-	{
-		m_fps = 25;
-	}
-
-	if( m_fps > 100 || m_fps < 5 )
-	{
-		ofLog(OF_LOG_VERBOSE, "OpenDecoder: Invalid framerate %d, using forced 25fps and just trust timestamps\n", (int)m_fps);
-		m_fps = 25;
-	}
-
-	m_frametime = (double)DVD_TIME_BASE / m_fps;
-
-	eglImageDecoder = new OMXEGLImage();
-	
-	if(!eglImageDecoder->Open(m_hints, m_av_clock, eglImage))
-	{
-		m_decoder = (OMXDecoder*)eglImageDecoder;
-		CloseDecoder();
-		return false;
-	}
-	else
-		m_decoder = (OMXDecoder*)eglImageDecoder;
-	{
-		ofLog(OF_LOG_VERBOSE, "Video codec %s width %d height %d profile %d fps %f\n",
-			  m_decoder->GetDecoderName().c_str() , m_hints.width, m_hints.height, m_hints.profile, m_fps);
-	}
-
-	if(m_av_clock)
-	{
-		m_av_clock->SetRefreshRate(m_fps);
-	}
-	
-	return true;
-}
-
-
-/*void OMXEGLImagePlayer::SetSpeed(int speed)
-{
-	m_speed = speed;
-}*/
-
-
-OMXEGLImagePlayer::~OMXEGLImagePlayer()
+OMXVideoPlayer::~OMXVideoPlayer()
 {
 	Close();
 	
@@ -149,74 +28,32 @@ OMXEGLImagePlayer::~OMXEGLImagePlayer()
 	pthread_mutex_destroy(&m_lock_decoder);
 }
 
-void OMXEGLImagePlayer::Lock()
+
+
+
+void OMXVideoPlayer::Lock()
 {
     pthread_mutex_lock(&m_lock);
 }
 
-void OMXEGLImagePlayer::UnLock()
+void OMXVideoPlayer::UnLock()
 {
     pthread_mutex_unlock(&m_lock);
 }
 
-void OMXEGLImagePlayer::LockDecoder()
+void OMXVideoPlayer::LockDecoder()
 {
     pthread_mutex_lock(&m_lock_decoder);
 }
 
-void OMXEGLImagePlayer::UnLockDecoder()
+void OMXVideoPlayer::UnLockDecoder()
 {
     pthread_mutex_unlock(&m_lock_decoder);
 }
 
-bool OMXEGLImagePlayer::Decode(OMXPacket *pkt)
-{
-	if(!pkt)
-	{
-		return false;
-	}
-	
-	bool ret = false;
-	
-	if((unsigned long)m_decoder->GetFreeSpace() < pkt->size)
-	{
-		OMXClock::OMXSleep(10);
-	}
-	
-	if (pkt->dts == DVD_NOPTS_VALUE && pkt->pts == DVD_NOPTS_VALUE)
-	{
-		pkt->pts = m_pts;
-	}else 
-	{
-		if (pkt->pts == DVD_NOPTS_VALUE)
-		{
-			pkt->pts = pkt->dts;
-		}
-	}
-	
-	if(pkt->pts != DVD_NOPTS_VALUE)
-	{
-		m_pts = pkt->pts;
-		m_pts += m_iVideoDelay;
-	}
-	
-	if((unsigned long)m_decoder->GetFreeSpace() > pkt->size)
-	{
-		
-		m_decoder->Decode(pkt->data, pkt->size, m_pts, m_pts);
-		
-		m_av_clock->SetVideoClock(m_pts);
-		
-		Output(m_pts);
-		
-		ret = true;
-	}
-	
-	return ret;
-}
 
 
-void OMXEGLImagePlayer::Output(double pts)
+void OMXVideoPlayer::Output(double pts)
 {
 	
 	if(m_syncclock)
@@ -323,16 +160,16 @@ void OMXEGLImagePlayer::Output(double pts)
 	
 	//ofLogVerbose() << debugInfo;
 	//EGL WAY - try the while first
-	if(m_av_clock->GetAbsoluteClock(false) < (iCurrentClock + iSleepTime + DVD_MSEC_TO_TIME(500)) )
+	/*if(m_av_clock->GetAbsoluteClock(false) < (iCurrentClock + iSleepTime + DVD_MSEC_TO_TIME(500)) )
 	 {
 	 //ofLogVerbose() << "OMXEGLImagePlayer::Output returning early";
 	 return;
-	 }
+	 }*/
 	
-	/*while(m_av_clock->GetAbsoluteClock(false) < (iCurrentClock + iSleepTime + DVD_MSEC_TO_TIME(500)) )
+	while(m_av_clock->GetAbsoluteClock(false) < (iCurrentClock + iSleepTime + DVD_MSEC_TO_TIME(500)) )
 	{
 		OMXClock::OMXSleep(10);
-	}*/
+	}
   	
 	
 	m_av_clock->WaitAbsoluteClock((iCurrentClock + iSleepTime));
@@ -345,7 +182,7 @@ void OMXEGLImagePlayer::Output(double pts)
 }
 
 
-bool OMXEGLImagePlayer::AddPacket(OMXPacket *pkt)
+bool OMXVideoPlayer::AddPacket(OMXPacket *pkt)
 {
 	bool ret = false;
 	
@@ -368,32 +205,8 @@ bool OMXEGLImagePlayer::AddPacket(OMXPacket *pkt)
 	return ret;
 }
 
-void OMXEGLImagePlayer::Flush()
-{
-	Lock();
-	LockDecoder();
-	m_flush = true;
-	while (!m_packets.empty())
-	{
-		OMXPacket *pkt = m_packets.front(); 
-		m_packets.pop_front();
-		OMXReader::FreePacket(pkt);
-	}
-	
-	m_iCurrentPts = DVD_NOPTS_VALUE;
-	m_cached_size = 0;
-	
-	if(m_decoder)
-	{
-		m_decoder->Reset();
-	}
-	
-	m_syncclock = true;
-	UnLockDecoder();
-	UnLock();
-}
 
-void OMXEGLImagePlayer::Process()
+void OMXVideoPlayer::Process()
 {
 	OMXPacket *omx_pkt = NULL;
 	
@@ -456,36 +269,10 @@ void OMXEGLImagePlayer::Process()
 	}
 }
 
-bool OMXEGLImagePlayer::CloseDecoder()
-{
-	if(m_decoder)
-	{
-		delete m_decoder;
-		m_decoder = NULL;
-	}
-	
-	return true;
-}
 
-int OMXEGLImagePlayer::GetDecoderBufferSize()
-{
-	if(m_decoder)
-	{
-		return m_decoder->GetInputBufferSize();
-	}
-	return 0;
-}
 
-int OMXEGLImagePlayer::GetDecoderFreeSpace()
-{
-	if(m_decoder)
-	{
-		return m_decoder->GetFreeSpace();
-	}
-	return 0;
-}
 
-bool OMXEGLImagePlayer::Close()
+bool OMXVideoPlayer::Close()
 {
 	m_bAbort  = true;
 	m_flush   = true;
@@ -517,29 +304,4 @@ bool OMXEGLImagePlayer::Close()
 	
 	return true;
 }
-
-void OMXEGLImagePlayer::WaitCompletion()
-{
-	ofLogVerbose(__func__) << "OMXEGLImagePlayer WaitCompletion";
-	
-	if(!m_decoder)
-	{
-		return;
-	}
-	
-	while(true)
-	{
-		Lock();
-		if(m_packets.empty())
-		{
-			//ofLogVerbose() << "packets empty"; //maybe crashing with string err
-			UnLock();
-			break;
-		}
-		UnLock();
-		OMXClock::OMXSleep(50);
-	}
-	
-	m_decoder->WaitCompletion();
-}
-
+#endif

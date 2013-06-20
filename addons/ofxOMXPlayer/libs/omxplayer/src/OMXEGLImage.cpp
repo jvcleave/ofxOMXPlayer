@@ -32,30 +32,11 @@
 
 
 
-#define OMX_VIDEO_DECODER       "OMX.broadcom.video_decode"
-#define OMX_H264BASE_DECODER    OMX_VIDEO_DECODER
-#define OMX_H264MAIN_DECODER    OMX_VIDEO_DECODER
-#define OMX_H264HIGH_DECODER    OMX_VIDEO_DECODER
-#define OMX_MPEG4_DECODER       OMX_VIDEO_DECODER
-#define OMX_MSMPEG4V1_DECODER   OMX_VIDEO_DECODER
-#define OMX_MSMPEG4V2_DECODER   OMX_VIDEO_DECODER
-#define OMX_MSMPEG4V3_DECODER   OMX_VIDEO_DECODER
-#define OMX_MPEG4EXT_DECODER    OMX_VIDEO_DECODER
-#define OMX_MPEG2V_DECODER      OMX_VIDEO_DECODER
-#define OMX_VC1_DECODER         OMX_VIDEO_DECODER
-#define OMX_WMV3_DECODER        OMX_VIDEO_DECODER
-#define OMX_VP6_DECODER         OMX_VIDEO_DECODER
-#define OMX_VP8_DECODER         OMX_VIDEO_DECODER
-#define OMX_THEORA_DECODER      OMX_VIDEO_DECODER
-#define OMX_MJPEG_DECODER       OMX_VIDEO_DECODER
-
-
 OMXEGLImage::OMXEGLImage()
 {
 	m_is_open           = false;
 	m_Pause             = false;
 	m_setStartTime      = true;
-	m_setStartTimeText  = true;
 	m_extradata         = NULL;
 	m_extrasize         = 0;
 	m_video_codec_name  = "";
@@ -516,7 +497,6 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglIm
 	m_is_open           = true;
 	m_drop_state        = false;
 	m_setStartTime      = true;
-	m_setStartTimeText  = true;
 
 
 	ofLog(OF_LOG_VERBOSE, 

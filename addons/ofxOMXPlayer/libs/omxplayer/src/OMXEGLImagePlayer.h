@@ -28,7 +28,8 @@ public:
 	//void SetSpeed(int iSpeed);
 	//int GetSpeed(){return m_speed;};
 	EGLImageKHR eglImage;
-	OMXEGLImage                 *m_decoder;
+	OMXDecoder*					m_decoder;
+	OMXEGLImage*				eglImageDecoder;
 	//string debugInfo;
 	//bool doDebugging;
 	

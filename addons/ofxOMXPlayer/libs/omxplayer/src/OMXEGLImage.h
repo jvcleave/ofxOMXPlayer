@@ -2,19 +2,9 @@
 
 #include "ofMain.h"
 
-#include "OMXCore.h"
-#include "OMXStreamInfo.h"
+#include "OMXDecoder.h"
 
-#include <IL/OMX_Video.h>
-
-#include "OMXClock.h"
-#include "OMXReader.h"
-
-
-
-class DllAvUtil;
-class DllAvFormat;
-class OMXEGLImage
+class OMXEGLImage : public OMXDecoder
 {
 public:
 	OMXEGLImage();
@@ -40,34 +30,12 @@ public:
 	char debugInfoBuffer [128];
 	string debugInfo;
 	bool doDebugging;
-protected:
-	// Video format
-	bool              m_drop_state;
-	unsigned int      m_decoded_width;
-	unsigned int      m_decoded_height;
 
-	OMX_VIDEO_CODINGTYPE m_codingType;
 
-	COMXCoreComponent m_omx_decoder;
-	COMXCoreComponent m_omx_render;
-	COMXCoreComponent m_omx_sched;
-	COMXCoreComponent *m_omx_clock;
-	OMXClock           *m_av_clock;
 
-	COMXCoreTunel     m_omx_tunnel_decoder;
-	COMXCoreTunel     m_omx_tunnel_clock;
-	COMXCoreTunel     m_omx_tunnel_sched;
-	bool              m_is_open;
 
-	bool              m_Pause;
-	bool              m_setStartTime;
-	bool              m_setStartTimeText;
 
-	uint8_t           *m_extradata;
-	int               m_extrasize;
+	
 
-	std::string       m_video_codec_name;
-
-	bool              m_first_frame;
-
+	
 };
