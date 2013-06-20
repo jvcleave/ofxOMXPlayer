@@ -320,16 +320,16 @@ void OMXEGLImagePlayer::Output(double pts)
 	
 	//ofLogVerbose() << debugInfo;
 	//EGL WAY - try the while first
-	/*if(m_av_clock->GetAbsoluteClock(false) < (iCurrentClock + iSleepTime + DVD_MSEC_TO_TIME(500)) )
+	if(m_av_clock->GetAbsoluteClock(false) < (iCurrentClock + iSleepTime + DVD_MSEC_TO_TIME(500)) )
 	 {
 	 //ofLogVerbose() << "OMXEGLImagePlayer::Output returning early";
 	 return;
-	 }*/
+	 }
 	
-	while(m_av_clock->GetAbsoluteClock(false) < (iCurrentClock + iSleepTime + DVD_MSEC_TO_TIME(500)) )
+	/*while(m_av_clock->GetAbsoluteClock(false) < (iCurrentClock + iSleepTime + DVD_MSEC_TO_TIME(500)) )
 	{
 		OMXClock::OMXSleep(10);
-	}
+	}*/
   	
 	
 	m_av_clock->WaitAbsoluteClock((iCurrentClock + iSleepTime));
@@ -517,7 +517,7 @@ bool OMXEGLImagePlayer::Close()
 
 void OMXEGLImagePlayer::WaitCompletion()
 {
-	ofLogVerbose() << "WaitCompletion";
+	ofLogVerbose(__func__) << "OMXEGLImagePlayer WaitCompletion";
 	
 	if(!m_decoder)
 	{

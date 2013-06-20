@@ -7,6 +7,7 @@ void developApp::onCharacterReceived(SSHKeyListenerEventData& e)
 //--------------------------------------------------------------
 void developApp::setup()
 {
+	isClosing = false;
 	usingTexturePlayer =  false;
 	videoPath = "/opt/vc/src/hello_pi/hello_video/test.h264";
 	/* to get the videos I am testing run command:
@@ -28,7 +29,7 @@ void developApp::setup()
 	ofLogVerbose() << "using videoPath : " << videoPath;
 	
 	doTextures = true;
-	doShader = false;
+	doShader = true;
 	if (doShader || doTextures) 
 	{
 		usingTexturePlayer = true;
@@ -37,11 +38,13 @@ void developApp::setup()
 	{
 		createNonTexturePlayer();
 	}
-	isClosing = false;
+	
 	consoleListener.setup(this);
+	ofHideCursor();
 }
 void developApp::createNonTexturePlayer()
 {
+	ofLogVerbose() << "createNonTexturePlayer";
 	ofxOMXPlayerSettings settings;
 	settings.videoPath = videoPath;
 	settings.enableTexture = false;
@@ -146,6 +149,7 @@ void developApp::updateFbo()
 
 void developApp::exit()
 {
+	ofLogVerbose() << "developApp::exit";
 	isClosing = true;
 	omxPlayer.lock();
 	omxPlayer.m_stop = true;

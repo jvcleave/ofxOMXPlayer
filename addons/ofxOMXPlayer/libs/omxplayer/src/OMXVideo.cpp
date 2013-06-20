@@ -63,6 +63,7 @@ COMXVideo::COMXVideo()
   m_deinterlace       = false;
   m_hdmi_clock_sync   = false;
   m_first_frame       = true;
+	ofLogVerbose() << "COMXVideo CONSTRUCT";
 }
 
 COMXVideo::~COMXVideo()
@@ -353,7 +354,7 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, float display_aspec
   }
 
   portParam.nPortIndex = m_omx_decoder.GetInputPort();
-int videoBuffers = 80;
+	int videoBuffers = 60;
   portParam.nBufferCountActual = videoBuffers;
 
   portParam.format.video.nFrameWidth  = m_decoded_width;
