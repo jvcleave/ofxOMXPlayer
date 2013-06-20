@@ -16,7 +16,7 @@ private:
   static void *Run(void *arg);
 public:
   OMXThread();
-  ~OMXThread();
+  virtual ~OMXThread();
   bool Create();
   virtual void Process() = 0;
   bool Running();

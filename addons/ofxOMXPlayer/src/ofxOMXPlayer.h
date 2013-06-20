@@ -84,11 +84,15 @@ public:
 	bool m_stop;
 	bool isTextureEnabled;
 	bool didVideoPlayerOpen;
+	
 private:
 	
 	CRBP                  rbp;
 	COMXCore              omxCore;
 	OMXClock * clock;
+	
+	OMXPlayerVideo* nonEglPlayer;
+	OMXEGLImagePlayer* eglPlayer;
 	
 	OMXVideoPlayer*		videoPlayer;
 	OMXPlayerAudio		audioPlayer;

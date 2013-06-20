@@ -26,6 +26,7 @@ ofxOMXPlayer::ofxOMXPlayer()
 	didAudioOpen = false;
 	didVideoPlayerOpen = false;
 	isTextureEnabled = false;
+	videoPlayer = NULL;
 }
 
 
@@ -33,6 +34,7 @@ void ofxOMXPlayer::setup(ofxOMXPlayerSettings settings_)
 {
 	settings = settings_;
 	moviePath = settings.videoPath; 
+	ofLogVerbose() << "moviePath is " << moviePath;
 	isTextureEnabled = settings.enableTexture;
 	
 	rbp.Initialize();
@@ -95,20 +97,25 @@ void ofxOMXPlayer::openPlayer()
 	if (isTextureEnabled) 
 	{
 		generateEGLImage();
-		videoPlayer = new OMXEGLImagePlayer();
-		didVideoPlayerOpen = videoPlayer->Open(streamInfo, clock, eglImage);
+		OMXEGLImagePlayer* eglPlayer = new OMXEGLImagePlayer();
+		didVideoPlayerOpen = eglPlayer->Open(streamInfo, clock, eglImage);
+		videoPlayer = (OMXVideoPlayer*)eglPlayer;
+		
+		
 	}else 
 	{
-		videoPlayer = new OMXPlayerVideo();
+		OMXPlayerVideo* nonEglPlayer = new OMXPlayerVideo();
 		bool deinterlace = false;
 		bool mpeg = false;
 		bool hdmi_clock_sync = true;
 		bool use_thread = true;
 		float display_aspect = 1.0;
 		
-		didVideoPlayerOpen = videoPlayer->Open(streamInfo, clock, deinterlace, mpeg, hdmi_clock_sync, use_thread, display_aspect);
+		didVideoPlayerOpen = nonEglPlayer->Open(streamInfo, clock, deinterlace, mpeg, hdmi_clock_sync, use_thread, display_aspect);
+		videoPlayer = (OMXVideoPlayer*)nonEglPlayer;
+		
 	}
-
+	bPlaying = didVideoPlayerOpen;
 	string deviceString = "omx:hdmi";
 	if (!settings.useHDMIForAudio)
 	{
@@ -224,10 +231,10 @@ void ofxOMXPlayer::threadedFunction()
 		struct timespec starttime, endtime;
 		while(!m_stop)
 		{
-			/*printf("V : %8.02f %8d %8d A : %8.02f %8.02f Cv : %8d Ca : %8d                            \r",
+			printf("V : %8.02f %8d %8d A : %8.02f %8.02f Cv : %8d Ca : %8d                            \r",
 			 clock->OMXMediaTime(), videoPlayer->GetDecoderBufferSize(),
 			 videoPlayer->GetDecoderFreeSpace(), audioPlayer.GetCurrentPTS() / DVD_TIME_BASE, 
-			 audioPlayer.GetDelay(), videoPlayer->GetCached(), audioPlayer.GetCached());*/
+			 audioPlayer.GetDelay(), videoPlayer->GetCached(), audioPlayer.GetCached());
 			
 			if(omxReader.IsEof() && !packet)
 			{
@@ -376,7 +383,7 @@ void ofxOMXPlayer::setPaused(bool doPause)
 void ofxOMXPlayer::draw(float x, float y, float width, float height)
 {
 	if(!isPlaying()) return;
-	if (isTextureEnabled) 
+	if (!isTextureEnabled) 
 	{
 		return;
 	}
@@ -386,7 +393,7 @@ void ofxOMXPlayer::draw(float x, float y, float width, float height)
 void ofxOMXPlayer::draw(float x, float y)
 {
 	if(!isPlaying()) return;
-	if (isTextureEnabled) 
+	if (!isTextureEnabled) 
 	{
 		return;
 	}
@@ -466,7 +473,7 @@ void ofxOMXPlayer::close()
 			audioPlayer.WaitCompletion();
 		else if(hasVideo)
 			videoPlayer->WaitCompletion();
-	}
+	} 
 	
 	
 	clock->OMXStop();
@@ -491,5 +498,7 @@ void ofxOMXPlayer::close()
 
 	omxCore.Deinitialize();
 	rbp.Deinitialize();
+	delete videoPlayer;
+	videoPlayer = NULL;
 	ofLogVerbose() << "reached end of ofxOMXPlayer::close";
 }
