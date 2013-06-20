@@ -8,7 +8,7 @@
  */
 
 
-#if 0
+
 #include "OMXVideoPlayer.h"
 
 OMXVideoPlayer::OMXVideoPlayer()
@@ -51,7 +51,76 @@ void OMXVideoPlayer::UnLockDecoder()
     pthread_mutex_unlock(&m_lock_decoder);
 }
 
+bool OMXVideoPlayer::Decode(OMXPacket *pkt)
+{
+	if(!pkt)
+	{
+		return false;
+	}
+	
+	bool ret = false;
+	
+	if((unsigned long)m_decoder->GetFreeSpace() < pkt->size)
+	{
+		OMXClock::OMXSleep(10);
+	}
+	
+	if (pkt->dts == DVD_NOPTS_VALUE && pkt->pts == DVD_NOPTS_VALUE)
+	{
+		pkt->pts = m_pts;
+	}else 
+	{
+		if (pkt->pts == DVD_NOPTS_VALUE)
+		{
+			pkt->pts = pkt->dts;
+		}
+	}
+	
+	if(pkt->pts != DVD_NOPTS_VALUE)
+	{
+		m_pts = pkt->pts;
+		m_pts += m_iVideoDelay;
+	}
+	
+	if((unsigned long)m_decoder->GetFreeSpace() > pkt->size)
+	{
+		
+		m_decoder->Decode(pkt->data, pkt->size, m_pts, m_pts);
+		
+		m_av_clock->SetVideoClock(m_pts);
+		
+		Output(m_pts);
+		
+		ret = true;
+	}
+	
+	return ret;
+}
 
+void OMXVideoPlayer::Flush()
+{
+	Lock();
+	LockDecoder();
+	m_flush = true;
+	while (!m_packets.empty())
+	{
+		OMXPacket *pkt = m_packets.front(); 
+		m_packets.pop_front();
+		OMXReader::FreePacket(pkt);
+	}
+	
+	m_iCurrentPts = DVD_NOPTS_VALUE;
+	m_cached_size = 0;
+	
+	if(m_decoder)
+	{
+		m_decoder->Reset();
+	}
+	
+	m_syncclock = true;
+	UnLockDecoder();
+	UnLock();
+}
 
 void OMXVideoPlayer::Output(double pts)
 {
@@ -269,9 +338,40 @@ void OMXVideoPlayer::Process()
 	}
 }
 
+bool OMXVideoPlayer::CloseDecoder()
+{
+	if(m_decoder)
+	{
+		delete m_decoder;
+	}
+	m_decoder   = NULL;
+	return true;
+}
 
-
-
+void OMXVideoPlayer::WaitCompletion()
+{
+	ofLogVerbose(__func__) << "OMXVideoPlayer WaitCompletion";
+	
+	if(!m_decoder)
+	{
+		return;
+	}
+	
+	while(true)
+	{
+		Lock();
+		if(m_packets.empty())
+		{
+			//ofLogVerbose() << "packets empty"; //maybe crashing with string err
+			UnLock();
+			break;
+		}
+		UnLock();
+		OMXClock::OMXSleep(50);
+	}
+	
+	m_decoder->WaitCompletion();
+}
 bool OMXVideoPlayer::Close()
 {
 	m_bAbort  = true;
@@ -304,4 +404,3 @@ bool OMXVideoPlayer::Close()
 	
 	return true;
 }
-#endif
