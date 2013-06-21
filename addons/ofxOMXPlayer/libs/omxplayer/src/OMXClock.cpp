@@ -27,32 +27,33 @@ bool    OMXClock::m_ismasterclock;
 
 OMXClock::OMXClock()
 {
-  m_dllAvFormat.Load();
+	m_dllAvFormat.Load();
 
-  m_video_clock = DVD_NOPTS_VALUE;
-  m_audio_clock = DVD_NOPTS_VALUE;
-  m_has_video   = false;
-  m_has_audio   = false;
-  m_play_speed  = 1;
-  m_pause       = false;
-  m_iCurrentPts = DVD_NOPTS_VALUE;
+	m_video_clock = DVD_NOPTS_VALUE;
+	m_audio_clock = DVD_NOPTS_VALUE;
+	m_has_video   = false;
+	m_has_audio   = false;
+	m_play_speed  = 1;
+	m_pause       = false;
+	ofLogVerbose(__func__) << "m_pause = false";
+	m_iCurrentPts = DVD_NOPTS_VALUE;
 
-  m_systemFrequency = CurrentHostFrequency();
-  m_systemUsed = m_systemFrequency;
-  m_pauseClock = 0;
-  m_bReset = true;
-  m_iDisc = 0;
-  m_maxspeedadjust = 0.0;
-  m_speedadjust = false;
-  m_ismasterclock = true;
-  m_ClockOffset = 0;
-  m_fps = 25.0f;
+	m_systemFrequency = CurrentHostFrequency();
+	m_systemUsed = m_systemFrequency;
+	m_pauseClock = 0;
+	m_bReset = true;
+	m_iDisc = 0;
+	m_maxspeedadjust = 0.0;
+	m_speedadjust = false;
+	m_ismasterclock = true;
+	m_ClockOffset = 0;
+	m_fps = 25.0f;
 
-  pthread_mutex_init(&m_lock, NULL);
+	pthread_mutex_init(&m_lock, NULL);
 
-  CheckSystemClock();
+	CheckSystemClock();
 
-  OMXReset();
+	OMXReset();
 }
 
 OMXClock::~OMXClock()
@@ -293,7 +294,7 @@ bool OMXClock::OMXInitialize(bool has_video, bool has_audio)
   omx_err = OMX_SetConfig(m_omx_clock.GetComponent(), OMX_IndexConfigTimeClockState, &clock);
   if(omx_err != OMX_ErrorNone)
   {
-    printf("\nOMXClock::Initialize error setting OMX_IndexConfigTimeClockState\n");
+    ofLog(OF_LOG_VERBOSE, "\nOMXClock::Initialize error setting OMX_IndexConfigTimeClockState\n");
     return false;
   }
 
@@ -308,7 +309,7 @@ bool OMXClock::OMXInitialize(bool has_video, bool has_audio)
   omx_err = OMX_SetConfig(m_omx_clock.GetComponent(), OMX_IndexConfigTimeActiveRefClock, &refClock);
   if(omx_err != OMX_ErrorNone)
   {
-    printf("\nOMXClock::Initialize error setting OMX_IndexConfigTimeCurrentAudioReference\n");
+    ofLog(OF_LOG_VERBOSE, "\nOMXClock::Initialize error setting OMX_IndexConfigTimeCurrentAudioReference\n");
     return false;
   }
 
@@ -337,7 +338,7 @@ bool OMXClock::OMXStatePause(bool lock /* = true */)
     omx_err = m_omx_clock.SetStateForComponent(OMX_StatePause);
     if (omx_err != OMX_ErrorNone)
     {
-      printf("\nOMXClock::StatePause m_omx_clock.SetStateForComponent\n");
+      ofLog(OF_LOG_VERBOSE, "\nOMXClock::StatePause m_omx_clock.SetStateForComponent\n");
       if(lock)
         UnLock();
       return false;
@@ -364,7 +365,7 @@ bool OMXClock::OMXStateExecute(bool lock /* = true */)
     omx_err = m_omx_clock.SetStateForComponent(OMX_StateExecuting);
     if (omx_err != OMX_ErrorNone)
     {
-      printf("\nOMXClock::StateExecute m_omx_clock.SetStateForComponent\n");
+      ofLog(OF_LOG_VERBOSE, "\nOMXClock::StateExecute m_omx_clock.SetStateForComponent\n");
       if(lock)
         UnLock();
       return false;
@@ -420,7 +421,7 @@ bool  OMXClock::OMXStop(bool lock /* = true */)
   omx_err = OMX_SetConfig(m_omx_clock.GetComponent(), OMX_IndexConfigTimeClockState, &clock);
   if(omx_err != OMX_ErrorNone)
   {
-    printf("\nOMXClock::Stop error setting OMX_IndexConfigTimeClockState\n");
+    ofLog(OF_LOG_VERBOSE, "\nOMXClock::Stop error setting OMX_IndexConfigTimeClockState\n");
     if(lock)
       UnLock();
     return false;
@@ -449,7 +450,7 @@ bool OMXClock::OMXStart(bool lock /* = true */)
   omx_err = OMX_SetConfig(m_omx_clock.GetComponent(), OMX_IndexConfigTimeClockState, &clock);
   if(omx_err != OMX_ErrorNone)
   {
-    printf("\nOMXClock::Start error setting OMX_IndexConfigTimeClockState\n");
+    ofLog(OF_LOG_VERBOSE, "\nOMXClock::Start error setting OMX_IndexConfigTimeClockState\n");
     if(lock)
       UnLock();
     return false;
@@ -493,7 +494,7 @@ bool OMXClock::OMXReset(bool lock /* = true */)
     omx_err = OMX_SetConfig(m_omx_clock.GetComponent(), OMX_IndexConfigTimeClockState, &clock);
     if(omx_err != OMX_ErrorNone)
     {
-      printf("\nOMXClock::Reset error setting OMX_IndexConfigTimeClockState\n");
+      ofLog(OF_LOG_VERBOSE, "\nOMXClock::Reset error setting OMX_IndexConfigTimeClockState\n");
     if(lock)
       UnLock();
       return false;
@@ -526,7 +527,7 @@ double OMXClock::OMXWallTime(bool lock /* = true */)
   omx_err = m_omx_clock.GetConfig(OMX_IndexConfigTimeCurrentWallTime, &timeStamp);
   if(omx_err != OMX_ErrorNone)
   {
-    printf("\nOMXClock::WallTime error getting OMX_IndexConfigTimeCurrentWallTime\n");
+    ofLog(OF_LOG_VERBOSE, "\nOMXClock::WallTime error getting OMX_IndexConfigTimeCurrentWallTime\n");
     if(lock)
       UnLock();
     return 0;
@@ -558,7 +559,7 @@ double OMXClock::OMXMediaTime(bool lock /* = true */)
   omx_err = m_omx_clock.GetConfig(OMX_IndexConfigTimeCurrentMediaTime, &timeStamp);
   if(omx_err != OMX_ErrorNone)
   {
-    printf("\nOMXClock::MediaTime error getting OMX_IndexConfigTimeCurrentMediaTime\n");
+    ofLog(OF_LOG_VERBOSE, "\nOMXClock::MediaTime error getting OMX_IndexConfigTimeCurrentMediaTime\n");
     if(lock)
       UnLock();
     return 0;
@@ -573,70 +574,100 @@ double OMXClock::OMXMediaTime(bool lock /* = true */)
 
 bool OMXClock::OMXPause(bool lock /* = true */)
 {
-  if(m_omx_clock.GetComponent() == NULL)
-    return false;
+	if(m_omx_clock.GetComponent() == NULL)
+	{
+	  ofLogError(__func__) << "NO CLOCK - RETURNING";
+	  return false;
+	}
 
-  if(m_pause)
-    return true;
+	if(m_pause)
+	{
+	  ofLogError(__func__) << "m_pause is returning TRUE" << m_pause;
+	  return true;
+	}
 
-  if(lock)
-    Lock();
 
-  OMX_ERRORTYPE omx_err = OMX_ErrorNone;
-  OMX_TIME_CONFIG_SCALETYPE scaleType;
-  OMX_INIT_STRUCTURE(scaleType);
+	if(lock)
+	{
+		Lock();
+	}
 
-  scaleType.xScale = 0; // pause
+	OMX_ERRORTYPE omx_err = OMX_ErrorNone;
+	OMX_TIME_CONFIG_SCALETYPE scaleType;
+	OMX_INIT_STRUCTURE(scaleType);
 
-  omx_err = OMX_SetConfig(m_omx_clock.GetComponent(), OMX_IndexConfigTimeScale, &scaleType);
-  if(omx_err != OMX_ErrorNone)
-  {
-    printf("\nOMXClock::Pause error setting OMX_IndexConfigTimeClockState\n");
-    if(lock)
-      UnLock();
-    return false;
-  }
+	scaleType.xScale = 0; // pause
 
-  m_pause = true;
+	omx_err = OMX_SetConfig(m_omx_clock.GetComponent(), OMX_IndexConfigTimeScale, &scaleType);
+	if(omx_err != OMX_ErrorNone)
+	{
+		ofLog(OF_LOG_ERROR, "OMXClock::OMXPause OMX_SetConfig OMX_IndexConfigTimeScale FAIL omx_err: 0x%08x", omx_err);
+		if(lock)
+		{
+			UnLock();
+		}
+		return false;
+	}else 
+	{
+	  ofLogVerbose(__func__) << "OMXClock::OMXPause setting OMX_IndexConfigTimeClockState PASS";
+	}
 
-  if(lock)
-    UnLock();
 
-  return true;
+	m_pause = true;
+	ofLogVerbose(__func__) << "m_pause = true";
+	
+	if(lock)
+	{
+		UnLock();
+	}
+
+	return true;
 }
 
 bool OMXClock::OMXResume(bool lock /* = true */)
 {
-  if(m_omx_clock.GetComponent() == NULL)
-    return false;
+	if(m_omx_clock.GetComponent() == NULL)
+	{
+		ofLogError(__func__) << "NO CLOCK - RETURNING";
+		return false;
+	}
 
-  if(!m_pause)
-    return true;
+	if(!m_pause)
+	{
+	  ofLogError(__func__) << "m_pause is already false and is returning TRUE" << m_pause;
+	  return true;
+	}
 
-  if(lock)
-    Lock();
+	if(lock)
+	{
+	  Lock();
+	}
 
-  OMX_ERRORTYPE omx_err = OMX_ErrorNone;
-  OMX_TIME_CONFIG_SCALETYPE scaleType;
-  OMX_INIT_STRUCTURE(scaleType);
+	OMX_ERRORTYPE omx_err = OMX_ErrorNone;
+	OMX_TIME_CONFIG_SCALETYPE scaleType;
+	OMX_INIT_STRUCTURE(scaleType);
 
-  scaleType.xScale = (1<<16); // normal speed
+	scaleType.xScale = (1<<16); // normal speed
 
-  omx_err = OMX_SetConfig(m_omx_clock.GetComponent(), OMX_IndexConfigTimeScale, &scaleType);
-  if(omx_err != OMX_ErrorNone)
-  {
-    printf("\nOMXClock::Resume error setting OMX_IndexConfigTimeClockState\n");
-    if(lock)
-      UnLock();
-    return false;
-  }
+	omx_err = OMX_SetConfig(m_omx_clock.GetComponent(), OMX_IndexConfigTimeScale, &scaleType);
+	if(omx_err != OMX_ErrorNone)
+	{
+	  ofLog(OF_LOG_ERROR, "OMXClock::OMXResume OMX_SetConfig OMX_IndexConfigTimeScale FAIL omx_err: 0x%08x", omx_err);
+	  if(lock)
+	  {
+		  UnLock();
+	  }
+	  return false;
+	}
 
-  m_pause = false;
+	m_pause = false;
+	ofLogVerbose(__func__) << "m_pause = false";
+	if(lock)
+	{
+		UnLock();
+	}
 
-  if(lock)
-    UnLock();
-
-  return true;
+	return true;
 }
 
 bool OMXClock::OMXUpdateClock(double pts, bool lock /* = true */)
@@ -658,13 +689,13 @@ bool OMXClock::OMXUpdateClock(double pts, bool lock /* = true */)
   {
     omx_err = OMX_SetConfig(m_omx_clock.GetComponent(), OMX_IndexConfigTimeCurrentAudioReference, &ts);
     if(omx_err != OMX_ErrorNone)
-      printf("\nOMXClock::OMXUpdateClock error setting OMX_IndexConfigTimeCurrentAudioReference\n");
+      ofLog(OF_LOG_VERBOSE, "\nOMXClock::OMXUpdateClock error setting OMX_IndexConfigTimeCurrentAudioReference\n");
   }
   else
   {
     omx_err = OMX_SetConfig(m_omx_clock.GetComponent(), OMX_IndexConfigTimeCurrentVideoReference, &ts);
     if(omx_err != OMX_ErrorNone)
-      printf("\nOMXClock::OMXUpdateClock error setting OMX_IndexConfigTimeCurrentVideoReference\n");
+      ofLog(OF_LOG_VERBOSE, "\nOMXClock::OMXUpdateClock error setting OMX_IndexConfigTimeCurrentVideoReference\n");
   }
 
   if(lock)
@@ -713,7 +744,7 @@ bool OMXClock::OMXWaitStart(double pts, bool lock /* = true */)
   omx_err = OMX_SetConfig(m_omx_clock.GetComponent(), OMX_IndexConfigTimeClockState, &clock);
   if(omx_err != OMX_ErrorNone)
   {
-    printf("\nOMXClock::OMXWaitStart error setting OMX_IndexConfigTimeClockState\n");
+    ofLog(OF_LOG_VERBOSE, "\nOMXClock::OMXWaitStart error setting OMX_IndexConfigTimeClockState\n");
     if(lock)
       UnLock();
     return false;
@@ -744,7 +775,7 @@ bool OMXClock::OMXSpeed(int speed, bool lock /* = true */)
   omx_err = OMX_SetConfig(m_omx_clock.GetComponent(), OMX_IndexConfigTimeScale, &scaleType);
   if(omx_err != OMX_ErrorNone)
   {
-    printf("\nOMXClock::Speed error setting OMX_IndexConfigTimeClockState\n");
+    ofLog(OF_LOG_VERBOSE, "\nOMXClock::Speed error setting OMX_IndexConfigTimeClockState\n");
     if(lock)
       UnLock();
     return false;
@@ -806,7 +837,7 @@ bool OMXClock::HDMIClockSync(bool lock /* = true */)
   omx_err = OMX_SetConfig(m_omx_clock.GetComponent(), OMX_IndexConfigLatencyTarget, &latencyTarget);
   if(omx_err != OMX_ErrorNone)
   {
-    printf("\nOMXClock::Speed error setting OMX_IndexConfigLatencyTarget\n");
+    ofLog(OF_LOG_VERBOSE, "\nOMXClock::Speed error setting OMX_IndexConfigLatencyTarget\n");
     if(lock)
       UnLock();
     return false;

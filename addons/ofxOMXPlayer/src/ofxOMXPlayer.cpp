@@ -106,12 +106,10 @@ void ofxOMXPlayer::openPlayer()
 	{
 		OMXPlayerVideo* nonEglPlayer = new OMXPlayerVideo();
 		bool deinterlace = false;
-		bool mpeg = false;
 		bool hdmi_clock_sync = true;
-		bool use_thread = true;
 		float display_aspect = 1.0;
 		
-		didVideoOpen = nonEglPlayer->Open(videoStreamInfo, clock, deinterlace, mpeg, hdmi_clock_sync, use_thread, display_aspect);
+		didVideoOpen = nonEglPlayer->Open(videoStreamInfo, clock, deinterlace, hdmi_clock_sync, display_aspect);
 		videoPlayer = (OMXPlayerVideoBase*)nonEglPlayer;
 		
 	}
@@ -272,10 +270,10 @@ void ofxOMXPlayer::threadedFunction()
 			else
 			{
 				// Abort audio buffering, now we're on our own
-				if (isBufferEmpty)
+				/*if (isBufferEmpty)
 				{
 					clock->OMXResume();
-				}
+				}*/
 				
 				OMXClock::OMXSleep(10);
 				continue;
@@ -294,7 +292,7 @@ void ofxOMXPlayer::threadedFunction()
 		}
 		
 		/* when the audio buffer runs under 0.1 seconds we buffer up */
-		if(hasAudio)
+		/*if(hasAudio)
 		{
 			if(audioPlayer.GetDelay() < 0.1f && !isBufferEmpty)
 			{
@@ -325,7 +323,7 @@ void ofxOMXPlayer::threadedFunction()
 					//printf("buffering timed out\n");
 				}
 			}
-		}
+		}*/
 		
 		if(!packet)
 		{
@@ -396,11 +394,22 @@ void ofxOMXPlayer::setPaused(bool doPause)
 	bPaused = doPause;
 	if(doPause)
 	{
-
+		videoPlayer->SetSpeed(0);
 		clock->OMXPause();
+		clock->SetSpeed(0);
+		omxReader.SetSpeed(0);
+		audioPlayer.SetSpeed(0);
+		
+		
+		//clock->SetSpeed(DVD_PLAYSPEED_PAUSE);
 	}else 
 	{
+		videoPlayer->SetSpeed(1);
 		clock->OMXResume();
+		clock->SetSpeed(1);
+		omxReader.SetSpeed(1);
+		audioPlayer.SetSpeed(1);
+		
 	}
 
 			
@@ -487,6 +496,8 @@ bool ofxOMXPlayer::isPlaying()
 
 void ofxOMXPlayer::close(ofEventArgs & a)
 {
+	setPaused(true);
+	OMXClock::OMXSleep(500);
 	sleep(1000);
 	ofLogVerbose() << "start ofxOMXPlayer::close";
 	if (isTextureEnabled) 

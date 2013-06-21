@@ -110,7 +110,6 @@ bool OMXPlayerAudio::Open(COMXStreamInfo &hints, OMXClock *av_clock, OMXReader *
   m_boost_on_downmix = boost_on_downmix;
   m_iCurrentPts = DVD_NOPTS_VALUE;
   m_bAbort      = false;
-  m_bMpeg       = m_omx_reader->IsMpegVideo();
   m_use_thread  = use_thread;
   m_flush       = false;
   m_cached_size = 0;
@@ -379,10 +378,7 @@ bool OMXPlayerAudio::Decode(OMXPacket *pkt)
 
         int ret = 0;
 
-        if(m_bMpeg)
-          ret = m_decoder->AddPackets(decoded, decoded_size, DVD_NOPTS_VALUE, DVD_NOPTS_VALUE);
-        else
-          ret = m_decoder->AddPackets(decoded, decoded_size, m_iCurrentPts, m_iCurrentPts);
+        ret = m_decoder->AddPackets(decoded, decoded_size, m_iCurrentPts, m_iCurrentPts);
 
         if(ret != decoded_size)
         {
@@ -398,10 +394,7 @@ bool OMXPlayerAudio::Decode(OMXPacket *pkt)
     }
     else
     {
-      if(m_bMpeg)
-        m_decoder->AddPackets(pkt->data, pkt->size, DVD_NOPTS_VALUE, DVD_NOPTS_VALUE);
-      else
-        m_decoder->AddPackets(pkt->data, pkt->size, m_iCurrentPts, m_iCurrentPts);
+      m_decoder->AddPackets(pkt->data, pkt->size, m_iCurrentPts, m_iCurrentPts);
 
       HandleSyncError(0, m_iCurrentPts);
     }

@@ -84,7 +84,6 @@ protected:
   bool                      m_open;
   std::string               m_filename;
   bool                      m_bAVI;
-  bool                      m_bMpeg;
   XFILE::CFile              *m_pFile;
   AVFormatContext           *m_pFormatContext;
   AVIOContext               *m_ioContext;
@@ -134,7 +133,6 @@ public:
 	int GetAudioIndex() { return (m_audio_index >= 0) ? m_streams[m_audio_index].index : -1; };
 	int GetStreamLength();
 	static double NormalizeFrameduration(double frameduration);
-	bool IsMpegVideo() { return m_bMpeg; };
 	std::string GetStreamCodecName(AVStream *stream);
 	int GetSourceBitrate();
 	static bool g_abort;

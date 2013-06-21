@@ -50,54 +50,52 @@ OMXPlayerVideo::OMXPlayerVideo()
 }
 
 
-bool OMXPlayerVideo::Open(COMXStreamInfo &hints, OMXClock *av_clock, bool deinterlace, bool mpeg, bool hdmi_clock_sync, bool use_thread, float display_aspect)
+bool OMXPlayerVideo::Open(COMXStreamInfo &hints, OMXClock *av_clock, bool deinterlace, bool hdmi_clock_sync, float display_aspect)
 {
 	ofLogVerbose(__func__) << "OMXPlayerVideo Open";
 
-  if (!m_dllAvUtil.Load() || !m_dllAvCodec.Load() || !m_dllAvFormat.Load() || !av_clock)
-    return false;
-  
-  if(ThreadHandle())
-    Close();
+	if (!m_dllAvUtil.Load() || !m_dllAvCodec.Load() || !m_dllAvFormat.Load() || !av_clock)
+	{
+		return false;
+	}
 
-  m_dllAvFormat.av_register_all();
+	if(ThreadHandle())
+	{
+		Close();
+	}
 
-  m_hints       = hints;
-  m_av_clock    = av_clock;
-  m_fps         = 25.0f;
-  m_frametime   = 0;
-  m_Deinterlace = deinterlace;
-  m_display_aspect = display_aspect;
-  m_bMpeg       = mpeg;
-  m_iCurrentPts = DVD_NOPTS_VALUE;
-  m_bAbort      = false;
-  m_use_thread  = use_thread;
-  m_flush       = false;
-  m_cached_size = 0;
-  m_iVideoDelay = 0;
-  m_hdmi_clock_sync = hdmi_clock_sync;
-  m_pts         = 0;
-  m_syncclock   = true;
-  m_speed       = DVD_PLAYSPEED_NORMAL;
+	m_dllAvFormat.av_register_all();
+
+	m_hints       = hints;
+	m_av_clock    = av_clock;
+	m_fps         = 25.0f;
+	m_frametime   = 0;
+	m_Deinterlace = deinterlace;
+	m_display_aspect = display_aspect;
+	m_iCurrentPts = DVD_NOPTS_VALUE;
+	m_bAbort      = false;
+	m_flush       = false;
+	m_cached_size = 0;
+	m_iVideoDelay = 0;
+	m_hdmi_clock_sync = hdmi_clock_sync;
+	m_pts         = 0;
+	m_syncclock   = true;
+	m_speed       = DVD_PLAYSPEED_NORMAL;
 
 
-  m_FlipTimeStamp = m_av_clock->GetAbsoluteClock();
+	m_FlipTimeStamp = m_av_clock->GetAbsoluteClock();
 
-  if(!OpenDecoder())
-  {
-    Close();
-    return false;
-  }
+	if(!OpenDecoder())
+	{
+		Close();
+		return false;
+	}
 
-  if(m_use_thread)
-  {
-	  bool threadCreated = Create();
-	  ofLogVerbose(__func__) << " OMXPlayerVideo threadCreated: " << threadCreated;
-  }
+	Create();
 
-  m_open        = true;
+	m_open        = true;
 
-  return true;
+	return true;
 }
 
 
