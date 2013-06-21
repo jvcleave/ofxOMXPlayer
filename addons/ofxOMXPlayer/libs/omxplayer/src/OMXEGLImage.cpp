@@ -582,7 +582,7 @@ int OMXEGLImage::Decode(uint8_t *pData, int iSize, double dts, double pts)
         ofLog(OF_LOG_VERBOSE, "OMXEGLImage::Decode timeout\n");
         return false;
       }
-		if(doDebugging)
+		/*if(doDebugging)
 		{
 			sprintf(debugInfoBuffer,
 					"DECODER: Presentation timestamp %f \n\
@@ -592,7 +592,7 @@ int OMXEGLImage::Decode(uint8_t *pData, int iSize, double dts, double pts)
 					(int)omx_buffer->pAppPrivate);
 			
 			debugInfo = (string)debugInfoBuffer;
-		}
+		}*/
 
 
       

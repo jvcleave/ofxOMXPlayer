@@ -46,11 +46,9 @@ public:
   void SetDynamicRangeCompression(long drc) { m_drc = drc; }
   int SetPlaySpeed(int iSpeed);
   void WaitCompletion();
-  void SwitchChannels(int iAudioStream, bool bAudioOnAllSpeakers);
 
   void Flush();
   void DoAudioWork();
-  static void EnumerateAudioSinks(AudioSinkList& vAudioSinks, bool passthrough);
 
   void Process();
 

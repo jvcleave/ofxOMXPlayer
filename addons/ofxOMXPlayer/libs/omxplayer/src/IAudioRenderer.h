@@ -48,7 +48,6 @@ public:
   virtual float GetCurrentAttenuation() { return m_remap.GetCurrentAttenuation(); }
   virtual int SetPlaySpeed(int iSpeed) = 0;
   virtual void WaitCompletion() = 0;
-  virtual void SwitchChannels(int iAudioStream, bool bAudioOnAllSpeakers) = 0;
 
 protected:
   CPCMRemap m_remap;

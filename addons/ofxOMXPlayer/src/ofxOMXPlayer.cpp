@@ -238,8 +238,8 @@ void ofxOMXPlayer::threadedFunction()
 {
 	while (isThreadRunning()) 
 	{
-		struct timespec starttime, endtime;
-		/*printf("V : %8.02f %8d %8d A : %8.02f %8.02f Cv : %8d Ca : %8d                            \r",
+		/*struct timespec starttime, endtime;
+		printf("V : %8.02f %8d %8d A : %8.02f %8.02f Cv : %8d Ca : %8d                            \r",
 		 clock->OMXMediaTime(), videoPlayer->GetDecoderBufferSize(),
 		 videoPlayer->GetDecoderFreeSpace(), audioPlayer.GetCurrentPTS() / DVD_TIME_BASE, 
 		 audioPlayer.GetDelay(), videoPlayer->GetCached(), audioPlayer.GetCached());*/

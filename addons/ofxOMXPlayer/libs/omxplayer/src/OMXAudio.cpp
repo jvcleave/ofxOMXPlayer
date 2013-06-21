@@ -328,6 +328,16 @@ bool COMXAudio::Initialize(IAudioCallback* pCallback, const CStdString& device, 
   if(!m_omx_render.Initialize(componentName, OMX_IndexParamAudioInit))
     return false;
 
+  OMX_CONFIG_BOOLEANTYPE configBool;
+  OMX_INIT_STRUCTURE(configBool);
+  configBool.bEnabled = OMX_FALSE;
+
+	omx_err = m_omx_render.SetConfig(OMX_IndexConfigBrcmClockReferenceSource, &configBool);
+	if (omx_err != OMX_ErrorNone)
+	{
+		return false;
+	}
+	
   OMX_CONFIG_BRCMAUDIODESTINATIONTYPE audioDest;
   OMX_INIT_STRUCTURE(audioDest);
   strncpy((char *)audioDest.sName, device.c_str(), strlen(device.c_str()));
@@ -355,8 +365,7 @@ bool COMXAudio::Initialize(IAudioCallback* pCallback, const CStdString& device, 
     omx_err = m_omx_decoder.SetParameter(OMX_IndexParamBrcmDecoderPassThrough, &boolType);
     if(omx_err != OMX_ErrorNone)
     {
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::Initialize - Error OMX_IndexParamBrcmDecoderPassThrough 0x%08x", omx_err);
-      printf("OMX_IndexParamBrcmDecoderPassThrough omx_err(0x%08x)\n", omx_err);
+      ofLog(OF_LOG_ERROR, "COMXAudio::Initialize - Error OMX_IndexParamBrcmDecoderPassThrough 0x%08x", omx_err);
       return false;
     }
   }
@@ -369,7 +378,7 @@ bool COMXAudio::Initialize(IAudioCallback* pCallback, const CStdString& device, 
   omx_err = m_omx_decoder.GetParameter(OMX_IndexParamPortDefinition, &port_param);
   if(omx_err != OMX_ErrorNone)
   {
-    ofLog(OF_LOG_VERBOSE, "COMXAudio::Initialize error get OMX_IndexParamPortDefinition omx_err(0x%08x)\n", omx_err);
+    ofLog(OF_LOG_ERROR, "COMXAudio::Initialize error get OMX_IndexParamPortDefinition omx_err(0x%08x)\n", omx_err);
     return false;
   }
 
@@ -381,7 +390,7 @@ bool COMXAudio::Initialize(IAudioCallback* pCallback, const CStdString& device, 
   omx_err = m_omx_decoder.SetParameter(OMX_IndexParamPortDefinition, &port_param);
   if(omx_err != OMX_ErrorNone)
   {
-    ofLog(OF_LOG_VERBOSE, "COMXAudio::Initialize error set OMX_IndexParamPortDefinition omx_err(0x%08x)\n", omx_err);
+    ofLog(OF_LOG_ERROR, "COMXAudio::Initialize error set OMX_IndexParamPortDefinition omx_err(0x%08x)\n", omx_err);
     return false;
   }
 
@@ -396,7 +405,7 @@ bool COMXAudio::Initialize(IAudioCallback* pCallback, const CStdString& device, 
     omx_err = m_omx_decoder.SetParameter(OMX_IndexParamAudioPortFormat, &formatType);
     if(omx_err != OMX_ErrorNone)
     {
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::Initialize error OMX_IndexParamAudioPortFormat omx_err(0x%08x)\n", omx_err);
+      ofLog(OF_LOG_ERROR, "COMXAudio::Initialize error OMX_IndexParamAudioPortFormat omx_err(0x%08x)\n", omx_err);
       return false;
     }
   }
@@ -412,7 +421,7 @@ bool COMXAudio::Initialize(IAudioCallback* pCallback, const CStdString& device, 
     {
       delete m_av_clock;
       m_av_clock = NULL;
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::Initialize error creating av clock\n");
+      ofLog(OF_LOG_ERROR, "COMXAudio::Initialize error creating av clock");
       return false;
     }
   }
@@ -424,7 +433,7 @@ bool COMXAudio::Initialize(IAudioCallback* pCallback, const CStdString& device, 
   omx_err = m_omx_tunnel_clock.Establish(false);
   if(omx_err != OMX_ErrorNone)
   {
-    ofLog(OF_LOG_VERBOSE, "COMXAudio::Initialize m_omx_tunnel_clock.Establish\n");
+    ofLog(OF_LOG_ERROR, "COMXAudio::Initialize m_omx_tunnel_clock.Establish");
     return false;
   }
 
@@ -433,7 +442,7 @@ bool COMXAudio::Initialize(IAudioCallback* pCallback, const CStdString& device, 
     omx_err = m_omx_clock->SetStateForComponent(OMX_StateExecuting);
     if (omx_err != OMX_ErrorNone)
     {
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::Initialize m_omx_clock.SetStateForComponent\n");
+      ofLog(OF_LOG_ERROR, "COMXAudio::Initialize m_omx_clock.SetStateForComponent");
       return false;
     }
   }
@@ -451,7 +460,7 @@ bool COMXAudio::Initialize(IAudioCallback* pCallback, const CStdString& device, 
   omx_err = m_omx_decoder.AllocInputBuffers();
   if(omx_err != OMX_ErrorNone) 
   {
-    ofLog(OF_LOG_VERBOSE, "COMXAudio::Initialize - Error alloc buffers 0x%08x", omx_err);
+    ofLog(OF_LOG_ERROR, "COMXAudio::Initialize - Error alloc buffers 0x%08x", omx_err);
     return false;
   }
 
@@ -461,13 +470,13 @@ bool COMXAudio::Initialize(IAudioCallback* pCallback, const CStdString& device, 
     omx_err = m_omx_tunnel_decoder.Establish(false);
     if(omx_err != OMX_ErrorNone)
     {
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::Initialize - Error m_omx_tunnel_decoder.Establish 0x%08x", omx_err);
+      ofLog(OF_LOG_ERROR, "COMXAudio::Initialize - Error m_omx_tunnel_decoder.Establish 0x%08x", omx_err);
       return false;
     }
   
     omx_err = m_omx_decoder.SetStateForComponent(OMX_StateExecuting);
     if(omx_err != OMX_ErrorNone) {
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::Initialize - Error setting OMX_StateExecuting 0x%08x", omx_err);
+      ofLog(OF_LOG_ERROR, "COMXAudio::Initialize - Error setting OMX_StateExecuting 0x%08x", omx_err);
       return false;
     }
 
@@ -475,13 +484,13 @@ bool COMXAudio::Initialize(IAudioCallback* pCallback, const CStdString& device, 
     omx_err = m_omx_tunnel_mixer.Establish(false);
     if(omx_err != OMX_ErrorNone)
     {
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::Initialize - Error m_omx_tunnel_decoder.Establish 0x%08x", omx_err);
+      ofLog(OF_LOG_ERROR, "COMXAudio::Initialize - Error m_omx_tunnel_decoder.Establish 0x%08x", omx_err);
       return false;
     }
   
     omx_err = m_omx_mixer.SetStateForComponent(OMX_StateExecuting);
     if(omx_err != OMX_ErrorNone) {
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::Initialize - Error setting OMX_StateExecuting 0x%08x", omx_err);
+      ofLog(OF_LOG_ERROR, "COMXAudio::Initialize - Error setting OMX_StateExecuting 0x%08x", omx_err);
       return false;
     }
   }
@@ -491,13 +500,13 @@ bool COMXAudio::Initialize(IAudioCallback* pCallback, const CStdString& device, 
     omx_err = m_omx_tunnel_decoder.Establish(false);
     if(omx_err != OMX_ErrorNone)
     {
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::Initialize - Error m_omx_tunnel_decoder.Establish 0x%08x", omx_err);
+      ofLog(OF_LOG_ERROR, "COMXAudio::Initialize - Error m_omx_tunnel_decoder.Establish 0x%08x", omx_err);
       return false;
     }
   
     omx_err = m_omx_decoder.SetStateForComponent(OMX_StateExecuting);
     if(omx_err != OMX_ErrorNone) {
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::Initialize - Error setting OMX_StateExecuting 0x%08x", omx_err);
+      ofLog(OF_LOG_ERROR, "COMXAudio::Initialize - Error setting OMX_StateExecuting 0x%08x", omx_err);
       return false;
     }
   }
@@ -505,7 +514,7 @@ bool COMXAudio::Initialize(IAudioCallback* pCallback, const CStdString& device, 
   omx_err = m_omx_render.SetStateForComponent(OMX_StateExecuting);
   if(omx_err != OMX_ErrorNone) 
   {
-    ofLog(OF_LOG_VERBOSE, "COMXAudio::Initialize - Error setting OMX_StateExecuting 0x%08x", omx_err);
+    ofLog(OF_LOG_ERROR, "COMXAudio::Initialize - Error setting OMX_StateExecuting 0x%08x", omx_err);
     return false;
   }
 
@@ -514,7 +523,7 @@ bool COMXAudio::Initialize(IAudioCallback* pCallback, const CStdString& device, 
     OMX_BUFFERHEADERTYPE *omx_buffer = m_omx_decoder.GetInputBuffer();
     if(omx_buffer == NULL)
     {
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::Initialize - buffer error 0x%08x", omx_err);
+      ofLog(OF_LOG_ERROR, "COMXAudio::Initialize - buffer error 0x%08x", omx_err);
       return false;
     }
 
@@ -522,7 +531,7 @@ bool COMXAudio::Initialize(IAudioCallback* pCallback, const CStdString& device, 
     omx_buffer->nFilledLen = sizeof(m_wave_header);
     if(omx_buffer->nFilledLen > omx_buffer->nAllocLen)
     {
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::Initialize - omx_buffer->nFilledLen > omx_buffer->nAllocLen");
+      ofLog(OF_LOG_ERROR, "COMXAudio::Initialize - omx_buffer->nFilledLen > omx_buffer->nAllocLen");
       return false;
     }
     memset((unsigned char *)omx_buffer->pBuffer, 0x0, omx_buffer->nAllocLen);
@@ -532,7 +541,7 @@ bool COMXAudio::Initialize(IAudioCallback* pCallback, const CStdString& device, 
     omx_err = m_omx_decoder.EmptyThisBuffer(omx_buffer);
     if (omx_err != OMX_ErrorNone)
     {
-      ofLog(OF_LOG_VERBOSE, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, omx_err);
+      ofLog(OF_LOG_ERROR, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, omx_err);
       return false;
     }
   } 
@@ -545,7 +554,7 @@ bool COMXAudio::Initialize(IAudioCallback* pCallback, const CStdString& device, 
   
       if(omx_buffer == NULL)
       {
-        ofLog(OF_LOG_VERBOSE, "%s::%s - buffer error 0x%08x", CLASSNAME, __func__, omx_err);
+        ofLog(OF_LOG_ERROR, "%s::%s - buffer error 0x%08x", CLASSNAME, __func__, omx_err);
         return false;
       }
   
@@ -553,7 +562,7 @@ bool COMXAudio::Initialize(IAudioCallback* pCallback, const CStdString& device, 
       omx_buffer->nFilledLen = m_extrasize;
       if(omx_buffer->nFilledLen > omx_buffer->nAllocLen)
       {
-        ofLog(OF_LOG_VERBOSE, "%s::%s - omx_buffer->nFilledLen > omx_buffer->nAllocLen", CLASSNAME, __func__);
+        ofLog(OF_LOG_ERROR, "%s::%s - omx_buffer->nFilledLen > omx_buffer->nAllocLen", CLASSNAME, __func__);
         return false;
       }
 
@@ -564,7 +573,7 @@ bool COMXAudio::Initialize(IAudioCallback* pCallback, const CStdString& device, 
       omx_err = m_omx_decoder.EmptyThisBuffer(omx_buffer);
       if (omx_err != OMX_ErrorNone)
       {
-        ofLog(OF_LOG_VERBOSE, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, omx_err);
+        ofLog(OF_LOG_ERROR, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, omx_err);
         return false;
       }
     }
@@ -768,7 +777,7 @@ bool COMXAudio::SetCurrentVolume(long nVolume)
 
     if(sizeof(mix.coeff)/sizeof(mix.coeff[0]) == 16)
 	{
-		ofLogVerbose() << "Unexpected OMX_CONFIG_BRCMAUDIODOWNMIXCOEFFICIENTS::coeff length";
+		ofLogError() << "Unexpected OMX_CONFIG_BRCMAUDIODOWNMIXCOEFFICIENTS::coeff length";
 	}
         
 
@@ -780,7 +789,7 @@ bool COMXAudio::SetCurrentVolume(long nVolume)
 
     if(omx_err != OMX_ErrorNone)
     {
-      ofLog(OF_LOG_VERBOSE, "%s::%s - error setting OMX_IndexConfigBrcmAudioDownmixCoefficients, error 0x%08x\n",
+      ofLog(OF_LOG_ERROR, "%s::%s - error setting OMX_IndexConfigBrcmAudioDownmixCoefficients, error 0x%08x\n",
                 CLASSNAME, __func__, omx_err);
       return false;
     }
@@ -798,7 +807,7 @@ bool COMXAudio::SetCurrentVolume(long nVolume)
 
     if(omx_err != OMX_ErrorNone)
     {
-      ofLog(OF_LOG_VERBOSE, "%s::%s - error setting OMX_IndexConfigAudioVolume, error 0x%08x\n",
+      ofLog(OF_LOG_ERROR, "%s::%s - error setting OMX_IndexConfigAudioVolume, error 0x%08x\n",
                 CLASSNAME, __func__, omx_err);
       return false;
     }
@@ -824,7 +833,7 @@ unsigned int COMXAudio::AddPackets(const void* data, unsigned int len)
 unsigned int COMXAudio::AddPackets(const void* data, unsigned int len, double dts, double pts)
 {
   if(!m_Initialized) {
-    ofLog(OF_LOG_VERBOSE,"COMXAudio::AddPackets - sanity failed. no valid play handle!");
+    ofLog(OF_LOG_ERROR,"COMXAudio::AddPackets - sanity failed. no valid play handle!");
     return len;
   }
 
@@ -863,8 +872,7 @@ unsigned int COMXAudio::AddPackets(const void* data, unsigned int len, double dt
 
     if(omx_buffer == NULL)
     {
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::Decode timeout\n");
-      printf("COMXAudio::Decode timeout\n");
+      ofLog(OF_LOG_ERROR, "COMXAudio::Decode timeout");
       return len;
     }
 
@@ -930,7 +938,7 @@ unsigned int COMXAudio::AddPackets(const void* data, unsigned int len, double dt
       }
       else
       {
-        ofLog(OF_LOG_VERBOSE, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, omx_err);
+        ofLog(OF_LOG_ERROR, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, omx_err);
         nRetry++;
       }
       if(nRetry == 5)
@@ -963,7 +971,7 @@ unsigned int COMXAudio::AddPackets(const void* data, unsigned int len, double dt
           omx_err = m_omx_decoder.GetParameter(OMX_IndexParamAudioPcm, &m_pcm_input);
           if(omx_err != OMX_ErrorNone)
           {
-            ofLog(OF_LOG_VERBOSE, "COMXAudio::AddPackets error GetParameter 1 omx_err(0x%08x)\n", omx_err);
+            ofLog(OF_LOG_ERROR, "COMXAudio::AddPackets error GetParameter 1 omx_err(0x%08x)\n", omx_err);
           }
         }
 
@@ -972,12 +980,12 @@ unsigned int COMXAudio::AddPackets(const void* data, unsigned int len, double dt
         omx_err = m_omx_mixer.SetParameter(OMX_IndexParamAudioPcm, &m_pcm_input);
         if(omx_err != OMX_ErrorNone)
         {
-          ofLog(OF_LOG_VERBOSE, "COMXAudio::AddPackets error SetParameter 1 omx_err(0x%08x)\n", omx_err);
+          ofLog(OF_LOG_ERROR, "COMXAudio::AddPackets error SetParameter 1 omx_err(0x%08x)\n", omx_err);
         }
         omx_err = m_omx_mixer.GetParameter(OMX_IndexParamAudioPcm, &m_pcm_input);
         if(omx_err != OMX_ErrorNone)
         {
-          ofLog(OF_LOG_VERBOSE, "COMXAudio::AddPackets error GetParameter 2  omx_err(0x%08x)\n", omx_err);
+          ofLog(OF_LOG_ERROR, "COMXAudio::AddPackets error GetParameter 2  omx_err(0x%08x)\n", omx_err);
         }
 
         /* setup mixer output */
@@ -985,24 +993,24 @@ unsigned int COMXAudio::AddPackets(const void* data, unsigned int len, double dt
         omx_err = m_omx_mixer.SetParameter(OMX_IndexParamAudioPcm, &m_pcm_output);
         if(omx_err != OMX_ErrorNone)
         {
-          ofLog(OF_LOG_VERBOSE, "COMXAudio::AddPackets error SetParameter 1 omx_err(0x%08x)\n", omx_err);
+          ofLog(OF_LOG_ERROR, "COMXAudio::AddPackets error SetParameter 1 omx_err(0x%08x)\n", omx_err);
         }
         omx_err = m_omx_mixer.GetParameter(OMX_IndexParamAudioPcm, &m_pcm_output);
         if(omx_err != OMX_ErrorNone)
         {
-          ofLog(OF_LOG_VERBOSE, "COMXAudio::AddPackets error GetParameter 2  omx_err(0x%08x)\n", omx_err);
+          ofLog(OF_LOG_ERROR, "COMXAudio::AddPackets error GetParameter 2  omx_err(0x%08x)\n", omx_err);
         }
 
         m_pcm_output.nPortIndex      = m_omx_render.GetInputPort();
         omx_err = m_omx_render.SetParameter(OMX_IndexParamAudioPcm, &m_pcm_output);
         if(omx_err != OMX_ErrorNone)
         {
-          ofLog(OF_LOG_VERBOSE, "COMXAudio::AddPackets error SetParameter 1 omx_err(0x%08x)\n", omx_err);
+          ofLog(OF_LOG_ERROR, "COMXAudio::AddPackets error SetParameter 1 omx_err(0x%08x)\n", omx_err);
         }
         omx_err = m_omx_render.GetParameter(OMX_IndexParamAudioPcm, &m_pcm_output);
         if(omx_err != OMX_ErrorNone)
         {
-          ofLog(OF_LOG_VERBOSE, "COMXAudio::AddPackets error GetParameter 2  omx_err(0x%08x)\n", omx_err);
+          ofLog(OF_LOG_ERROR, "COMXAudio::AddPackets error GetParameter 2  omx_err(0x%08x)\n", omx_err);
         }
 
         PrintPCM(&m_pcm_input);
@@ -1021,7 +1029,7 @@ unsigned int COMXAudio::AddPackets(const void* data, unsigned int len, double dt
         omx_err = m_omx_render.GetParameter(OMX_IndexParamAudioPortFormat, &formatType);
         if(omx_err != OMX_ErrorNone)
         {
-          ofLog(OF_LOG_VERBOSE, "COMXAudio::AddPackets error OMX_IndexParamAudioPortFormat omx_err(0x%08x)\n", omx_err);
+          ofLog(OF_LOG_ERROR, "COMXAudio::AddPackets error OMX_IndexParamAudioPortFormat omx_err(0x%08x)\n", omx_err);
           assert(0);
         }
 
@@ -1030,7 +1038,7 @@ unsigned int COMXAudio::AddPackets(const void* data, unsigned int len, double dt
         omx_err = m_omx_render.SetParameter(OMX_IndexParamAudioPortFormat, &formatType);
         if(omx_err != OMX_ErrorNone)
         {
-          ofLog(OF_LOG_VERBOSE, "COMXAudio::AddPackets error OMX_IndexParamAudioPortFormat omx_err(0x%08x)\n", omx_err);
+          ofLog(OF_LOG_ERROR, "COMXAudio::AddPackets error OMX_IndexParamAudioPortFormat omx_err(0x%08x)\n", omx_err);
           assert(0);
         }
 
@@ -1158,7 +1166,7 @@ unsigned int COMXAudio::GetAudioRenderingLatency()
   if(omx_err != OMX_ErrorNone)
   {
     ofLog(OF_LOG_VERBOSE, "COMXAudio::GetAudioRenderingLatency: "
-                        "error getting OMX_IndexConfigAudioRenderingLatency\n");
+                        "error getting OMX_IndexConfigAudioRenderingLatency");
     return 0;
   }
 
@@ -1173,7 +1181,6 @@ void COMXAudio::WaitCompletion()
 
   OMX_ERRORTYPE omx_err = OMX_ErrorNone;
   OMX_BUFFERHEADERTYPE *omx_buffer = m_omx_decoder.GetInputBuffer();
-  struct timespec starttime, endtime;
 
   if(omx_buffer == NULL)
   {
@@ -1200,12 +1207,6 @@ void COMXAudio::WaitCompletion()
   {
     if(m_omx_render.IsEOS())
       break;
-    // clock_gettime(CLOCK_REALTIME, &endtime);
-    // if((endtime.tv_sec - starttime.tv_sec) > 2)
-    // {
-    //   ofLog(OF_LOG_VERBOSE, "%s::%s - wait for eos timed out\n", CLASSNAME, __func__);
-    //   break;
-    // }
     OMXClock::OMXSleep(50);
   }
 
@@ -1220,26 +1221,9 @@ void COMXAudio::WaitCompletion()
   return;
 }
 
-void COMXAudio::SwitchChannels(int iAudioStream, bool bAudioOnAllSpeakers)
-{
-    return ;
-}
 
-void COMXAudio::EnumerateAudioSinks(AudioSinkList& vAudioSinks, bool passthrough)
-{
-#ifndef STANDALONE
-  if (!passthrough)
-  {
-    vAudioSinks.push_back(AudioSink(g_localizeStrings.Get(409) + " (OMX)", "omx:default"));
-    vAudioSinks.push_back(AudioSink("analog (OMX)" , "omx:analog"));
-    vAudioSinks.push_back(AudioSink("hdmi (OMX)"   , "omx:hdmi"));
-  }
-  else
-  {
-    vAudioSinks.push_back(AudioSink("hdmi (OMX)"   , "omx:hdmi"));
-  }
-#endif
-}
+
+
 
 bool COMXAudio::SetClock(OMXClock *clock)
 {
@@ -1256,16 +1240,16 @@ void COMXAudio::SetCodingType(CodecID codec)
   switch(codec)
   { 
     case CODEC_ID_DTS:
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::SetCodingType OMX_AUDIO_CodingDTS\n");
+      ofLog(OF_LOG_VERBOSE, "COMXAudio::SetCodingType OMX_AUDIO_CodingDTS");
       m_eEncoding = OMX_AUDIO_CodingDTS;
       break;
     case CODEC_ID_AC3:
     case CODEC_ID_EAC3:
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::SetCodingType OMX_AUDIO_CodingDDP\n");
+      ofLog(OF_LOG_VERBOSE, "COMXAudio::SetCodingType OMX_AUDIO_CodingDDP");
       m_eEncoding = OMX_AUDIO_CodingDDP;
       break;
     default:
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::SetCodingType OMX_AUDIO_CodingPCM\n");
+      ofLog(OF_LOG_VERBOSE, "COMXAudio::SetCodingType OMX_AUDIO_CodingPCM");
       m_eEncoding = OMX_AUDIO_CodingPCM;
       break;
   } 
@@ -1277,35 +1261,35 @@ bool COMXAudio::CanHWDecode(CodecID codec)
   { 
     /*
     case CODEC_ID_VORBIS:
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::CanHWDecode OMX_AUDIO_CodingVORBIS\n");
+      ofLog(OF_LOG_VERBOSE, "COMXAudio::CanHWDecode OMX_AUDIO_CodingVORBIS");
       m_eEncoding = OMX_AUDIO_CodingVORBIS;
       m_HWDecode = true;
       break;
     case CODEC_ID_AAC:
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::CanHWDecode OMX_AUDIO_CodingAAC\n");
+      ofLog(OF_LOG_VERBOSE, "COMXAudio::CanHWDecode OMX_AUDIO_CodingAAC");
       m_eEncoding = OMX_AUDIO_CodingAAC;
       m_HWDecode = true;
       break;
     */
     case CODEC_ID_MP2:
     case CODEC_ID_MP3:
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::CanHWDecode OMX_AUDIO_CodingMP3\n");
+      ofLog(OF_LOG_VERBOSE, "COMXAudio::CanHWDecode OMX_AUDIO_CodingMP3");
       m_eEncoding = OMX_AUDIO_CodingMP3;
       m_HWDecode = true;
       break;
     case CODEC_ID_DTS:
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::CanHWDecode OMX_AUDIO_CodingDTS\n");
+      ofLog(OF_LOG_VERBOSE, "COMXAudio::CanHWDecode OMX_AUDIO_CodingDTS");
       m_eEncoding = OMX_AUDIO_CodingDTS;
       m_HWDecode = true;
       break;
     case CODEC_ID_AC3:
     case CODEC_ID_EAC3:
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::CanHWDecode OMX_AUDIO_CodingDDP\n");
+      ofLog(OF_LOG_VERBOSE, "COMXAudio::CanHWDecode OMX_AUDIO_CodingDDP");
       m_eEncoding = OMX_AUDIO_CodingDDP;
       m_HWDecode = true;
       break;
     default:
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::CanHWDecode OMX_AUDIO_CodingPCM\n");
+      ofLog(OF_LOG_VERBOSE, "COMXAudio::CanHWDecode OMX_AUDIO_CodingPCM");
       m_eEncoding = OMX_AUDIO_CodingPCM;
       m_HWDecode = false;
       break;
@@ -1322,26 +1306,26 @@ bool COMXAudio::HWDecode(CodecID codec)
   { 
     /*
     case CODEC_ID_VORBIS:
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::HWDecode CODEC_ID_VORBIS\n");
+      ofLog(OF_LOG_VERBOSE, "COMXAudio::HWDecode CODEC_ID_VORBIS");
       ret = true;
       break;
     case CODEC_ID_AAC:
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::HWDecode CODEC_ID_AAC\n");
+      ofLog(OF_LOG_VERBOSE, "COMXAudio::HWDecode CODEC_ID_AAC");
       ret = true;
       break;
     */
     case CODEC_ID_MP2:
     case CODEC_ID_MP3:
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::HWDecode CODEC_ID_MP2 / CODEC_ID_MP3\n");
+      ofLog(OF_LOG_VERBOSE, "COMXAudio::HWDecode CODEC_ID_MP2 / CODEC_ID_MP3");
       ret = true;
       break;
     case CODEC_ID_DTS:
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::HWDecode CODEC_ID_DTS\n");
+      ofLog(OF_LOG_VERBOSE, "COMXAudio::HWDecode CODEC_ID_DTS");
       ret = true;
       break;
     case CODEC_ID_AC3:
     case CODEC_ID_EAC3:
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::HWDecode CODEC_ID_AC3 / CODEC_ID_EAC3\n");
+      ofLog(OF_LOG_VERBOSE, "COMXAudio::HWDecode CODEC_ID_AC3 / CODEC_ID_EAC3");
       ret = true;
       break;
     default:
@@ -1359,31 +1343,31 @@ void COMXAudio::PrintChannels(OMX_AUDIO_CHANNELTYPE eChannelMapping[])
     switch(eChannelMapping[i])
     {
       case OMX_AUDIO_ChannelLF:
-        ofLog(OF_LOG_VERBOSE, "OMX_AUDIO_ChannelLF\n");
+        ofLog(OF_LOG_VERBOSE, "OMX_AUDIO_ChannelLF");
         break;
       case OMX_AUDIO_ChannelRF:
-        ofLog(OF_LOG_VERBOSE, "OMX_AUDIO_ChannelRF\n");
+        ofLog(OF_LOG_VERBOSE, "OMX_AUDIO_ChannelRF");
         break;
       case OMX_AUDIO_ChannelCF:
-        ofLog(OF_LOG_VERBOSE, "OMX_AUDIO_ChannelCF\n");
+        ofLog(OF_LOG_VERBOSE, "OMX_AUDIO_ChannelCF");
         break;
       case OMX_AUDIO_ChannelLS:
-        ofLog(OF_LOG_VERBOSE, "OMX_AUDIO_ChannelLS\n");
+        ofLog(OF_LOG_VERBOSE, "OMX_AUDIO_ChannelLS");
         break;
       case OMX_AUDIO_ChannelRS:
-        ofLog(OF_LOG_VERBOSE, "OMX_AUDIO_ChannelRS\n");
+        ofLog(OF_LOG_VERBOSE, "OMX_AUDIO_ChannelRS");
         break;
       case OMX_AUDIO_ChannelLFE:
-        ofLog(OF_LOG_VERBOSE, "OMX_AUDIO_ChannelLFE\n");
+        ofLog(OF_LOG_VERBOSE, "OMX_AUDIO_ChannelLFE");
         break;
       case OMX_AUDIO_ChannelCS:
-        ofLog(OF_LOG_VERBOSE, "OMX_AUDIO_ChannelCS\n");
+        ofLog(OF_LOG_VERBOSE, "OMX_AUDIO_ChannelCS");
         break;
       case OMX_AUDIO_ChannelLR:
-        ofLog(OF_LOG_VERBOSE, "OMX_AUDIO_ChannelLR\n");
+        ofLog(OF_LOG_VERBOSE, "OMX_AUDIO_ChannelLR");
         break;
       case OMX_AUDIO_ChannelRR:
-        ofLog(OF_LOG_VERBOSE, "OMX_AUDIO_ChannelRR\n");
+        ofLog(OF_LOG_VERBOSE, "OMX_AUDIO_ChannelRR");
         break;
       case OMX_AUDIO_ChannelNone:
       case OMX_AUDIO_ChannelKhronosExtensions:
