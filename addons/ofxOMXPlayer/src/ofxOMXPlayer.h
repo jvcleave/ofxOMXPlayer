@@ -91,8 +91,8 @@ private:
 	COMXCore              omxCore;
 	OMXClock * clock;
 	
-	OMXPlayerVideo* nonEglPlayer;
-	OMXEGLImagePlayer* eglPlayer;
+	OMXPlayerVideo*		nonEglPlayer;
+	OMXEGLImagePlayer*	eglPlayer;
 	
 	OMXVideoPlayer*		videoPlayer;
 	OMXPlayerAudio		audioPlayer;

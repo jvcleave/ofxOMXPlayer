@@ -29,8 +29,6 @@ OMXVideoPlayer::~OMXVideoPlayer()
 }
 
 
-
-
 void OMXVideoPlayer::Lock()
 {
     pthread_mutex_lock(&m_lock);
@@ -362,7 +360,6 @@ void OMXVideoPlayer::WaitCompletion()
 		Lock();
 		if(m_packets.empty())
 		{
-			//ofLogVerbose() << "packets empty"; //maybe crashing with string err
 			UnLock();
 			break;
 		}
@@ -372,6 +369,7 @@ void OMXVideoPlayer::WaitCompletion()
 	
 	m_decoder->WaitCompletion();
 }
+
 bool OMXVideoPlayer::Close()
 {
 	m_bAbort  = true;

@@ -1,12 +1,3 @@
-/*
- *  OMXVideoPlayer.h
- *  openFrameworksLib
- *
- *  Created by jason van cleave on 6/19/13.
- *  Copyright 2013 jasonvancleave.com. All rights reserved.
- *
- */
-
 #pragma once
 #include "ofMain.h"
 
@@ -58,7 +49,7 @@ public:
 	bool Decode(OMXPacket *pkt);
 	void Process();
 	void Flush();
-	//void UnFlush();
+
 	bool AddPacket(OMXPacket *pkt);
 	virtual bool OpenDecoder() =0;
 	bool CloseDecoder();
@@ -68,18 +59,11 @@ public:
 	double GetFPS() { return m_fps; };
 	unsigned int GetCached() { return m_cached_size; };
 	void  WaitCompletion();
+	
 	void Lock();
 	void UnLock();
 	void LockDecoder();
 	void UnLockDecoder();
 	
-	/*virtual bool AddPacket(OMXPacket *pkt) =0;
-	virtual double GetCurrentPTS() =0;
-	virtual double GetFPS() =0;
-	virtual void  WaitCompletion() =0;
-	virtual bool Close() =0;
-	virtual int  GetDecoderBufferSize() =0;
-	virtual int  GetDecoderFreeSpace() =0;
-	virtual unsigned int GetCached() =0;
-	//virtual void Process() = 0;*/
+	
 };

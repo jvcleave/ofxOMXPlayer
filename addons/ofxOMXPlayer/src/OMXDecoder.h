@@ -35,7 +35,7 @@ class OMXDecoder
 {
 public:
 	OMXDecoder(){
-		ofLogVerbose() << "OMXVideoPlayer created";
+		ofLogVerbose() << "OMXDecoder created";
 	};
 	virtual ~OMXDecoder()
 	{
@@ -50,9 +50,9 @@ public:
 	COMXCoreComponent	m_omx_render;
 	COMXCoreComponent	m_omx_sched;
 
-	COMXCoreTunel     m_omx_tunnel_decoder;
-	COMXCoreTunel     m_omx_tunnel_clock;
-	COMXCoreTunel     m_omx_tunnel_sched;
+	COMXCoreTunel		m_omx_tunnel_decoder;
+	COMXCoreTunel		m_omx_tunnel_clock;
+	COMXCoreTunel		m_omx_tunnel_sched;
 	
 	
 	bool				m_is_open;
@@ -68,7 +68,6 @@ public:
 	int					m_extrasize;
 	
 	string				m_video_codec_name;
-	
 	
 	bool				m_first_frame;
 
