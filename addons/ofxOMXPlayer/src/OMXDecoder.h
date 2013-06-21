@@ -34,55 +34,57 @@ class DllAvFormat;
 class OMXDecoder
 {
 public:
-	OMXDecoder(){
+	OMXDecoder()
+	{
 		ofLogVerbose() << "OMXDecoder created";
 	};
 	virtual ~OMXDecoder()
 	{
 		ofLogVerbose() << "~OMXDecoder"; 
 	};
-	
+
 	OMX_VIDEO_CODINGTYPE m_codingType;
-	
-	COMXCoreComponent*	m_omx_clock;
-	OMXClock*			m_av_clock;
-	COMXCoreComponent	m_omx_decoder;
-	COMXCoreComponent	m_omx_render;
-	COMXCoreComponent	m_omx_sched;
 
-	COMXCoreTunel		m_omx_tunnel_decoder;
-	COMXCoreTunel		m_omx_tunnel_clock;
-	COMXCoreTunel		m_omx_tunnel_sched;
-	
-	
-	bool				m_is_open;
-	
-	bool				m_Pause;
-	bool				m_setStartTime;
-	
-	bool				m_drop_state;
-	unsigned int		m_decoded_width;
-	unsigned int		m_decoded_height;
-	
-	uint8_t*			m_extradata;
-	int					m_extrasize;
-	
-	string				m_video_codec_name;
-	
-	bool				m_first_frame;
+	COMXCoreComponent*		m_omx_clock;
+	OMXClock*				m_av_clock;
+	COMXCoreComponent		m_omx_decoder;
+	COMXCoreComponent		m_omx_render;
+	COMXCoreComponent		m_omx_sched;
+
+	COMXCoreTunel			m_omx_tunnel_decoder;
+	COMXCoreTunel			m_omx_tunnel_clock;
+	COMXCoreTunel			m_omx_tunnel_sched;
+
+
+	bool					m_is_open;
+
+	bool					m_Pause;
+	bool					m_setStartTime;
+
+	bool					m_drop_state;
+	unsigned int			m_decoded_width;
+	unsigned int			m_decoded_height;
+
+	uint8_t*				m_extradata;
+	int						m_extrasize;
+
+	string					m_video_codec_name;
+
+	bool					m_first_frame;
 
 	
-	virtual void Close(void)=0;
-	virtual unsigned int GetFreeSpace()=0;
-	virtual unsigned int GetSize()=0;
-	virtual int  Decode(uint8_t *pData, int iSize, double dts, double pts)=0;
-	virtual void Reset(void)=0;;
-	virtual void SetDropState(bool bDrop)=0;
-	virtual bool Pause()=0;
-	virtual bool Resume()=0;
-	virtual std::string GetDecoderName()=0;
-	virtual int GetInputBufferSize()=0;
-	virtual void WaitCompletion()=0;
 	
+	virtual void			SetDropState(bool bDrop)=0;
+	virtual int				Decode(uint8_t *pData, int iSize, double dts, double pts)=0;
+	
+	virtual bool			Pause()=0;
+	virtual bool			Resume()=0;
+	virtual unsigned int	GetFreeSpace()=0;
+	virtual unsigned int	GetSize()=0;
+	virtual string			GetDecoderName()=0;
+	virtual int				GetInputBufferSize()=0;
+	virtual void			WaitCompletion()=0;
+	virtual void			Reset()=0;
+	virtual void			Close()=0;
 	
 };

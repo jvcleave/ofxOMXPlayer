@@ -94,12 +94,12 @@ void testApp::draw(){
 
 void testApp::exit()
 {
-	omxPlayer.lock();
+	/*omxPlayer.lock();
 	omxPlayer.m_stop = true;
 	omxPlayer.unlock();
 	omxPlayer.waitForThread(true);
 	
-	omxPlayer.close();
+	omxPlayer.close();*/
 	
 }
 //--------------------------------------------------------------

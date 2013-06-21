@@ -10,10 +10,10 @@
 
 
 
-class OMXEGLImagePlayer : public OMXVideoPlayer
+class OMXPlayerEGLImage : public OMXVideoPlayer
 {
 public:
-	OMXEGLImagePlayer();
+	OMXPlayerEGLImage();
 	bool Open(COMXStreamInfo &hints, OMXClock *av_clock, EGLImageKHR eglImage_);
 	bool OpenDecoder();
 	EGLImageKHR eglImage;

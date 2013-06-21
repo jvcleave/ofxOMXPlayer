@@ -1,13 +1,3 @@
-/*
- *  OMXVideoPlayer.cpp
- *  openFrameworksLib
- *
- *  Created by jason van cleave on 6/19/13.
- *  Copyright 2013 jasonvancleave.com. All rights reserved.
- *
- */
-
-
 
 #include "OMXVideoPlayer.h"
 
@@ -18,6 +8,7 @@ OMXVideoPlayer::OMXVideoPlayer()
 	pthread_mutex_init(&m_lock, NULL);
 	pthread_mutex_init(&m_lock_decoder, NULL);
 }
+
 OMXVideoPlayer::~OMXVideoPlayer()
 {
 	Close();
@@ -195,9 +186,6 @@ void OMXVideoPlayer::Output(double pts)
 	m_FlipTimeStamp += iFrameDuration;
 	
 	
-	
-	
-	
 	/*if(doDebugging)
 	 {
 	 sprintf(debugInfoBuffer, 
@@ -254,10 +242,14 @@ bool OMXVideoPlayer::AddPacket(OMXPacket *pkt)
 	bool ret = false;
 	
 	if(!pkt)
+	{
 		return ret;
+	}
 	
 	if(m_bStop || m_bAbort)
+	{
 		return ret;
+	}
 	//ofLogVerbose(__func__) << "pkt->size: " << pkt->size;
 	if((m_cached_size + pkt->size) < MAX_DATA_SIZE)
 	{

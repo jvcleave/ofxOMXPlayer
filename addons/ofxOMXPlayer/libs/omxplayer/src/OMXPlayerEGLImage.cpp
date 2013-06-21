@@ -1,4 +1,4 @@
-#include "OMXEGLImagePlayer.h"
+#include "OMXPlayerEGLImage.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -8,7 +8,7 @@
 #include "linux/XMemUtils.h"
 
 
-OMXEGLImagePlayer::OMXEGLImagePlayer()
+OMXPlayerEGLImage::OMXPlayerEGLImage()
 {
 	m_open          = false;
 	m_stream_id     = -1;
@@ -23,18 +23,18 @@ OMXEGLImagePlayer::OMXEGLImagePlayer()
 	m_syncclock     = true;
 	m_speed         = DVD_PLAYSPEED_NORMAL;
 	//doDebugging = false;
-	ofLogVerbose() << "OMXEGLImagePlayer CONSTRUCT";
+	ofLogVerbose() << "OMXPlayerEGLImage CONSTRUCT";
 }
 
 
 
 
-bool OMXEGLImagePlayer::Open(COMXStreamInfo &hints, OMXClock *av_clock, EGLImageKHR eglImage_)
+bool OMXPlayerEGLImage::Open(COMXStreamInfo &hints, OMXClock *av_clock, EGLImageKHR eglImage_)
 {
-	ofLogVerbose(__func__) << " OMXEGLImagePlayer Open";
+	ofLogVerbose(__func__) << " OMXPlayerEGLImage Open";
 
 	eglImage = eglImage_;
-	ofLogVerbose() << "OMXEGLImagePlayer::maxDataSize may need to be reduced for 256 boards, memory intensive apps";
+	ofLogVerbose() << "OMXPlayerEGLImage::maxDataSize may need to be reduced for 256 boards, memory intensive apps";
 
   if (!m_dllAvUtil.Load() || !m_dllAvCodec.Load() || !m_dllAvFormat.Load() || !av_clock)
   {
@@ -77,7 +77,7 @@ bool OMXEGLImagePlayer::Open(COMXStreamInfo &hints, OMXClock *av_clock, EGLImage
 }
 
 
-bool OMXEGLImagePlayer::OpenDecoder()
+bool OMXPlayerEGLImage::OpenDecoder()
 {
 	if (m_hints.fpsrate && m_hints.fpsscale)
 	{

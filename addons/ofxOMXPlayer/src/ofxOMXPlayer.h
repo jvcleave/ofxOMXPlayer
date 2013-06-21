@@ -11,7 +11,7 @@ extern "C"
 
 #include "RBP.h"
 #include "OMXClock.h"
-#include "OMXEGLImagePlayer.h"
+#include "OMXPlayerEGLImage.h"
 #include "OMXPlayerVideo.h"
 #include "OMXPlayerAudio.h"
 
@@ -38,90 +38,93 @@ public:
 	void setup(ofxOMXPlayerSettings settings_);
 	ofxOMXPlayerSettings settings;
 	
-	void loadMovie();
+	void			loadMovie();
 	
-	void 				play();
-	void 				stop();
+	void			play();
+	void			stop();
 	
-	float				duration;
-	float 				getDuration();
+	float			duration;
+	float			getDuration();
 	
-	void 				setPosition(float pct);
-	void 				setVolume(float volume); // 0..1
+	void			setPosition(float pct);
+	void			setVolume(float volume); // 0..1
 	
-	ofTexture &			getTextureReference();
-	void 				draw(float x, float y, float w, float h);
-	void 				draw(float x, float y);
+	ofTexture &		getTextureReference();
+	void			draw(float x, float y, float w, float h);
+	void			draw(float x, float y);
 	
-	void 				setPaused(bool doPause);
+	void			setPaused(bool doPause);
 	
-	int					getCurrentFrame();
-	int					getTotalNumFrames();
+	int				getCurrentFrame();
+	int				getTotalNumFrames();
 	
 	
-	float 				getHeight();
-	float 				getWidth();
+	float			getHeight();
+	float			getWidth();
 	
-	bool				isPaused();
-	bool				isPlaying();
+	bool			isPaused();
+	bool			isPlaying();
 		
-	GLuint textureID;
+	GLuint			textureID;
 
-	int videoWidth;
-	int videoHeight;
+	int				videoWidth;
+	int				videoHeight;
 	
 
-	EGLImageKHR eglImage;
+	EGLImageKHR		eglImage;
 	
-	string getVideoDebugInfo();
-	void generateEGLImage();
-	void openPlayer();
-	double getMediaTime();
-	void close();
-	bool doVideoDebugging;
-	bool doLooping;
-	void threadedFunction();
-	bool m_stop;
-	bool isTextureEnabled;
-	bool didVideoPlayerOpen;
+	string			getVideoDebugInfo();
+	
+	void			openPlayer();
+	double			getMediaTime();
+	void			close();
+	bool			doVideoDebugging;
+	bool			doLooping;
+	void			threadedFunction();
+	//bool			m_stop;
+	bool			isTextureEnabled;
+	bool			didVideoOpen;
+	bool			didAudioOpen;
 	
 private:
 	
-	CRBP                  rbp;
-	COMXCore              omxCore;
-	OMXClock * clock;
+	CRBP				rbp;
+	COMXCore			omxCore;
+	OMXClock*			clock;
+	DllBcmHost			bcmHost;
 	
 	OMXPlayerVideo*		nonEglPlayer;
-	OMXEGLImagePlayer*	eglPlayer;
-	
+	OMXPlayerEGLImage*	eglPlayer;
 	OMXVideoPlayer*		videoPlayer;
 	OMXPlayerAudio		audioPlayer;
+	
 	OMXReader			omxReader;
 	
-	COMXStreamInfo		streamInfo;
+	COMXStreamInfo		videoStreamInfo;
 	COMXStreamInfo		audioStreamInfo;
 	
-	bool isMPEG;
-	bool hasVideo;
-	bool hasAudio;
-	bool m_buffer_empty;
+	bool				isMPEG;
+	bool				hasVideo;
+	bool				hasAudio;
+	bool				isBufferEmpty;
 
-	DllBcmHost        bcmHost;
 	
 	
-	OMXPacket* packet;
 	
-	ofTexture tex;
-	ofPixelFormat internalPixelFormat;
-	string moviePath;
-	int nFrames;
-	bool bPlaying;
-	EGLDisplay display;
-	EGLContext context;
+	OMXPacket*			packet;
+	
+	ofTexture			tex;
+	ofPixelFormat		internalPixelFormat;
+	string				moviePath;
+	int					nFrames;
+	bool				bPlaying;
+	EGLDisplay			display;
+	EGLContext			context;
 	
 	
-	double loop_offset;
-	double startpts;
-	bool didAudioOpen;
+	double				loop_offset;
+	double				startpts;
+	
+	void			generateEGLImage();
 };
 

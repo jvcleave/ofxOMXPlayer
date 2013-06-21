@@ -151,9 +151,9 @@ void developApp::exit()
 {
 	ofLogVerbose() << "developApp::exit";
 	isClosing = true;
-	omxPlayer.lock();
+	/*omxPlayer.lock();
 	omxPlayer.m_stop = true;
-	omxPlayer.unlock();
+	omxPlayer.unlock();*/
 	omxPlayer.waitForThread(true);
 	
 	omxPlayer.close();
