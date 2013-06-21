@@ -19,6 +19,15 @@ OMXPlayerVideoBase::~OMXPlayerVideoBase()
 	pthread_mutex_destroy(&m_lock_decoder);
 }
 
+void OMXPlayerVideoBase::SetSpeed(int speed)
+{
+	m_speed = speed;
+}
+
+int OMXPlayerVideoBase::GetSpeed()
+{
+	return m_speed;
+}
 
 void OMXPlayerVideoBase::Lock()
 {
@@ -134,9 +143,9 @@ void OMXPlayerVideoBase::Output(double pts)
 	}
 	
 	double iSleepTime, iClockSleep, iFrameSleep, iPlayingClock, iCurrentClock, iFrameDuration;
-	iPlayingClock = m_av_clock->GetClock(iCurrentClock, false); // snapshot current clock
-	iClockSleep = pts - iPlayingClock; //sleep calculated by pts to clock comparison
-	iFrameSleep = m_FlipTimeStamp - iCurrentClock; // sleep calculated by duration of frame
+	iPlayingClock = m_av_clock->GetClock(iCurrentClock, false);		// snapshot current clock
+	iClockSleep = pts - iPlayingClock;								//sleep calculated by pts to clock comparison
+	iFrameSleep = m_FlipTimeStamp - iCurrentClock;					// sleep calculated by duration of frame
 	iFrameDuration = m_frametime;
 	
 	// correct sleep times based on speed

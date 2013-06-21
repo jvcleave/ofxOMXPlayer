@@ -77,7 +77,7 @@ public:
 	
 	void			openPlayer();
 	double			getMediaTime();
-	void			close();
+	void			close(ofEventArgs & a);
 	bool			doVideoDebugging;
 	bool			doLooping;
 	void			threadedFunction();
@@ -88,6 +88,7 @@ public:
 	
 private:
 	
+	bool				bPaused;
 	CRBP				rbp;
 	COMXCore			omxCore;
 	OMXClock*			clock;

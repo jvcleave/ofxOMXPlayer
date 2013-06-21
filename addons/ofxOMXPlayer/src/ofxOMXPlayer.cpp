@@ -27,6 +27,8 @@ ofxOMXPlayer::ofxOMXPlayer()
 	didVideoOpen		= false;
 	isTextureEnabled	= false;
 	videoPlayer			= NULL;
+	bPaused = false;
+	ofAddListener(ofEvents().exit, this, &ofxOMXPlayer::close);
 }
 
 
@@ -390,15 +392,16 @@ void ofxOMXPlayer::stop()
 
 void ofxOMXPlayer::setPaused(bool doPause)
 {
-	/*if(doPause)
+	ofLogVerbose(__func__) << " doPause: " << doPause;
+	bPaused = doPause;
+	if(doPause)
 	{
-		videoPlayer->SetSpeed(OMX_PLAYSPEED_PAUSE);
+
 		clock->OMXPause();
 	}else 
 	{
-		videoPlayer->SetSpeed(OMX_PLAYSPEED_NORMAL);
 		clock->OMXResume();
-	}*/
+	}
 
 			
 }
@@ -474,12 +477,7 @@ double ofxOMXPlayer::getMediaTime()
 
 bool ofxOMXPlayer::isPaused()
 {
-	/*if (!clock) 
-	{
-		ofLogVerbose() << "No clock for pause state inquiry";
-		return false;
-	}
-	return clock->OMXIsPaused();*/
+	return bPaused;
 }
 
 bool ofxOMXPlayer::isPlaying()
@@ -487,7 +485,7 @@ bool ofxOMXPlayer::isPlaying()
 	return bPlaying;
 }
 
-void ofxOMXPlayer::close()
+void ofxOMXPlayer::close(ofEventArgs & a)
 {
 	sleep(1000);
 	ofLogVerbose() << "start ofxOMXPlayer::close";
@@ -533,4 +531,5 @@ void ofxOMXPlayer::close()
 	videoPlayer = NULL;
 	ofLogVerbose(__func__) << "videoPlayer->NULL";
 	ofLogVerbose() << "reached end of ofxOMXPlayer::close";
+	ofRemoveListener(ofEvents().exit, this, &ofxOMXPlayer::close);
 }

@@ -28,8 +28,8 @@ void developApp::setup()
 	}
 	ofLogVerbose() << "using videoPath : " << videoPath;
 	
-	doTextures = true;
-	doShader = true;
+	doTextures = false;
+	doShader = false;
 	if (doShader || doTextures) 
 	{
 		usingTexturePlayer = true;
@@ -154,9 +154,9 @@ void developApp::exit()
 	/*omxPlayer.lock();
 	omxPlayer.m_stop = true;
 	omxPlayer.unlock();*/
-	omxPlayer.waitForThread(true);
+	/*omxPlayer.waitForThread(true);
 	
-	omxPlayer.close();
+	omxPlayer.close();*/
 	
 }
 //--------------------------------------------------------------
@@ -166,7 +166,14 @@ void developApp::keyPressed  (int key){
 	
 	switch (key) 
 	{
+		case 'p':
+		{
+			bool isCurrentlyPaused = omxPlayer.isPaused();
+			ofLogVerbose() << "isCurrentlyPaused: " << isCurrentlyPaused;
+			omxPlayer.setPaused(!isCurrentlyPaused);
+			break;
 		
+		}
 		case '1':
 		{
 			ofLogVerbose() << "SENDING PLAY COMMAND";

@@ -50,6 +50,9 @@ public:
 	unsigned int				m_cached_size;
 	
 	
+	void						SetSpeed(int speed);
+	int							GetSpeed();
+	
 	bool						Close();
 	void						Output(double pts);
 	bool						Decode(OMXPacket *pkt);
