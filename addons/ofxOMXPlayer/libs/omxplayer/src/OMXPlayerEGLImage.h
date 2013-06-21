@@ -1,5 +1,5 @@
 #pragma once
-#include "OMXVideoPlayer.h"
+#include "OMXPlayerVideoBase.h"
 
 
 #include "OMXEGLImage.h"
@@ -10,7 +10,7 @@
 
 
 
-class OMXPlayerEGLImage : public OMXVideoPlayer
+class OMXPlayerEGLImage : public OMXPlayerVideoBase
 {
 public:
 	OMXPlayerEGLImage();

@@ -1,7 +1,7 @@
 
-#include "OMXVideoPlayer.h"
+#include "OMXPlayerVideoBase.h"
 
-OMXVideoPlayer::OMXVideoPlayer()
+OMXPlayerVideoBase::OMXPlayerVideoBase()
 {
 	pthread_cond_init(&m_packet_cond, NULL);
 	pthread_cond_init(&m_picture_cond, NULL);
@@ -9,7 +9,7 @@ OMXVideoPlayer::OMXVideoPlayer()
 	pthread_mutex_init(&m_lock_decoder, NULL);
 }
 
-OMXVideoPlayer::~OMXVideoPlayer()
+OMXPlayerVideoBase::~OMXPlayerVideoBase()
 {
 	Close();
 	
@@ -20,27 +20,27 @@ OMXVideoPlayer::~OMXVideoPlayer()
 }
 
 
-void OMXVideoPlayer::Lock()
+void OMXPlayerVideoBase::Lock()
 {
     pthread_mutex_lock(&m_lock);
 }
 
-void OMXVideoPlayer::UnLock()
+void OMXPlayerVideoBase::UnLock()
 {
     pthread_mutex_unlock(&m_lock);
 }
 
-void OMXVideoPlayer::LockDecoder()
+void OMXPlayerVideoBase::LockDecoder()
 {
     pthread_mutex_lock(&m_lock_decoder);
 }
 
-void OMXVideoPlayer::UnLockDecoder()
+void OMXPlayerVideoBase::UnLockDecoder()
 {
     pthread_mutex_unlock(&m_lock_decoder);
 }
 
-bool OMXVideoPlayer::Decode(OMXPacket *pkt)
+bool OMXPlayerVideoBase::Decode(OMXPacket *pkt)
 {
 	if(!pkt)
 	{
@@ -86,7 +86,7 @@ bool OMXVideoPlayer::Decode(OMXPacket *pkt)
 	return ret;
 }
 
-void OMXVideoPlayer::Flush()
+void OMXPlayerVideoBase::Flush()
 {
 	Lock();
 	LockDecoder();
@@ -111,7 +111,7 @@ void OMXVideoPlayer::Flush()
 	UnLock();
 }
 
-void OMXVideoPlayer::Output(double pts)
+void OMXPlayerVideoBase::Output(double pts)
 {
 	
 	if(m_syncclock)
@@ -237,7 +237,7 @@ void OMXVideoPlayer::Output(double pts)
 }
 
 
-bool OMXVideoPlayer::AddPacket(OMXPacket *pkt)
+bool OMXPlayerVideoBase::AddPacket(OMXPacket *pkt)
 {
 	bool ret = false;
 	
@@ -265,7 +265,7 @@ bool OMXVideoPlayer::AddPacket(OMXPacket *pkt)
 }
 
 
-void OMXVideoPlayer::Process()
+void OMXPlayerVideoBase::Process()
 {
 	OMXPacket *omx_pkt = NULL;
 	
@@ -328,7 +328,7 @@ void OMXVideoPlayer::Process()
 	}
 }
 
-bool OMXVideoPlayer::CloseDecoder()
+bool OMXPlayerVideoBase::CloseDecoder()
 {
 	if(m_decoder)
 	{
@@ -338,9 +338,9 @@ bool OMXVideoPlayer::CloseDecoder()
 	return true;
 }
 
-void OMXVideoPlayer::WaitCompletion()
+void OMXPlayerVideoBase::WaitCompletion()
 {
-	ofLogVerbose(__func__) << "OMXVideoPlayer WaitCompletion";
+	ofLogVerbose(__func__) << "OMXPlayerVideoBase WaitCompletion";
 	
 	if(!m_decoder)
 	{
@@ -362,7 +362,7 @@ void OMXVideoPlayer::WaitCompletion()
 	m_decoder->WaitCompletion();
 }
 
-bool OMXVideoPlayer::Close()
+bool OMXPlayerVideoBase::Close()
 {
 	m_bAbort  = true;
 	m_flush   = true;

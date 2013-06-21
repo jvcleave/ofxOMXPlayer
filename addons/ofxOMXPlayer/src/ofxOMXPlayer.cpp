@@ -98,7 +98,7 @@ void ofxOMXPlayer::openPlayer()
 		generateEGLImage();
 		OMXPlayerEGLImage* eglPlayer = new OMXPlayerEGLImage();
 		didVideoOpen = eglPlayer->Open(videoStreamInfo, clock, eglImage);
-		videoPlayer = (OMXVideoPlayer*)eglPlayer;
+		videoPlayer = (OMXPlayerVideoBase*)eglPlayer;
 
 	}else 
 	{
@@ -110,7 +110,7 @@ void ofxOMXPlayer::openPlayer()
 		float display_aspect = 1.0;
 		
 		didVideoOpen = nonEglPlayer->Open(videoStreamInfo, clock, deinterlace, mpeg, hdmi_clock_sync, use_thread, display_aspect);
-		videoPlayer = (OMXVideoPlayer*)nonEglPlayer;
+		videoPlayer = (OMXPlayerVideoBase*)nonEglPlayer;
 		
 	}
 	

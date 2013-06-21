@@ -95,7 +95,7 @@ private:
 	
 	OMXPlayerVideo*		nonEglPlayer;
 	OMXPlayerEGLImage*	eglPlayer;
-	OMXVideoPlayer*		videoPlayer;
+	OMXPlayerVideoBase*		videoPlayer;
 	OMXPlayerAudio		audioPlayer;
 	
 	OMXReader			omxReader;

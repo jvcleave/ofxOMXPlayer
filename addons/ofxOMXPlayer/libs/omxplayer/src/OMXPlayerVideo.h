@@ -1,13 +1,13 @@
 #pragma once
 
 
-#include "OMXVideoPlayer.h"
+#include "OMXPlayerVideoBase.h"
 #include "OMXVideo.h"
 
 
 
 
-class OMXPlayerVideo : public OMXVideoPlayer
+class OMXPlayerVideo : public OMXPlayerVideoBase
 {
 public:
 
