@@ -71,6 +71,7 @@ public:
 	string					m_video_codec_name;
 
 	bool					m_first_frame;
+	uint32_t          m_history_valid_pts;
 
 	
 	

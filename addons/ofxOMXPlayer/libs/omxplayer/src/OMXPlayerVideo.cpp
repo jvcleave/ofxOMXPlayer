@@ -43,8 +43,7 @@ OMXPlayerVideo::OMXPlayerVideo()
 	m_cached_size   = 0;
 	m_hdmi_clock_sync = false;
 	m_iVideoDelay   = 0;
-	m_pts           = 0;
-	m_syncclock     = true;
+	m_pts           = DVD_NOPTS_VALUE;
 	m_speed         = DVD_PLAYSPEED_NORMAL;	
 	
 }
@@ -79,7 +78,6 @@ bool OMXPlayerVideo::Open(COMXStreamInfo &hints, OMXClock *av_clock, bool deinte
 	m_iVideoDelay = 0;
 	m_hdmi_clock_sync = hdmi_clock_sync;
 	m_pts         = 0;
-	m_syncclock   = true;
 	m_speed       = DVD_PLAYSPEED_NORMAL;
 
 
@@ -130,8 +128,7 @@ bool OMXPlayerVideo::OpenDecoder()
         m_decoder->GetDecoderName().c_str() , m_hints.width, m_hints.height, m_hints.profile, m_fps);
   }
 
-  if(m_av_clock)
-    m_av_clock->SetRefreshRate(m_fps);
+  
 
   return true;
 }

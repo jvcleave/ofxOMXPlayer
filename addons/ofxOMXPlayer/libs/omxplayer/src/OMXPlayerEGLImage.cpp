@@ -19,8 +19,7 @@ OMXPlayerEGLImage::OMXPlayerEGLImage()
 	m_flush         = false;
 	m_cached_size   = 0;
 	m_iVideoDelay   = 0;
-	m_pts           = 0;
-	m_syncclock     = true;
+	m_pts           = DVD_NOPTS_VALUE;
 	m_speed         = DVD_PLAYSPEED_NORMAL;
 	//doDebugging = false;
 	ofLogVerbose() << "OMXPlayerEGLImage CONSTRUCT";
@@ -58,7 +57,6 @@ bool OMXPlayerEGLImage::Open(COMXStreamInfo &hints, OMXClock *av_clock, EGLImage
 	m_cached_size = 0;
 	m_iVideoDelay = 0;
 	m_pts         = 0;
-	m_syncclock   = true;
 	m_speed       = DVD_PLAYSPEED_NORMAL;
 	m_FlipTimeStamp = m_av_clock->GetAbsoluteClock();
 
@@ -108,11 +106,6 @@ bool OMXPlayerEGLImage::OpenDecoder()
 	{
 		ofLog(OF_LOG_VERBOSE, "Video codec %s width %d height %d profile %d fps %f\n",
 			  m_decoder->GetDecoderName().c_str() , m_hints.width, m_hints.height, m_hints.profile, m_fps);
-	}
-
-	if(m_av_clock)
-	{
-		m_av_clock->SetRefreshRate(m_fps);
 	}
 	
 	return true;

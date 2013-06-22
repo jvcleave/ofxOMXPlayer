@@ -398,9 +398,9 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglIm
 		return false;
 	}
 	
-	m_av_clock->SetSpeed(DVD_PLAYSPEED_NORMAL);
+	//m_av_clock->SetSpeed(DVD_PLAYSPEED_NORMAL);
 	m_av_clock->OMXStateExecute();
-	m_av_clock->OMXStart();
+	m_av_clock->OMXStart(0.0);
 	
 	omx_err = m_omx_decoder.SetStateForComponent(OMX_StateExecuting);
 	if(omx_err == OMX_ErrorNone)
@@ -504,6 +504,8 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglIm
 	"OMXEGLImage", __func__, m_omx_decoder.GetComponent(), m_omx_decoder.GetInputPort(), m_omx_decoder.GetOutputPort());
 
 	m_first_frame   = true;
+	// start from assuming all recent frames had valid pts
+	m_history_valid_pts = ~0;
 	return true;
 }
 
@@ -564,6 +566,14 @@ unsigned int OMXEGLImage::GetSize()
 	return m_omx_decoder.GetInputBufferSize();
 }
 
+static unsigned count_bits(int32_t value)
+{
+	unsigned bits = 0;
+	for(;value;++bits)
+		value &= value - 1;
+	return bits;
+}
+
 int OMXEGLImage::Decode(uint8_t *pData, int iSize, double dts, double pts)
 {
 	OMX_ERRORTYPE omx_err;
@@ -594,41 +604,47 @@ int OMXEGLImage::Decode(uint8_t *pData, int iSize, double dts, double pts)
 				debugInfo = (string)debugInfoBuffer;
 			}*/
 
-
-	  
-
 			omx_buffer->nFlags = 0;
 			omx_buffer->nOffset = 0;
 			
-			uint64_t val  = (uint64_t)(pts == DVD_NOPTS_VALUE) ? 0 : pts;
+			// some packed bitstream AVI files set almost all pts values to DVD_NOPTS_VALUE, but have a scattering of real pts values.
+			// the valid pts values match the dts values.
+			// if a stream has had more than 4 valid pts values in the last 16, the use UNKNOWN, otherwise use dts
+			m_history_valid_pts = (m_history_valid_pts << 1) | (pts != DVD_NOPTS_VALUE);
+			if(pts == DVD_NOPTS_VALUE && count_bits(m_history_valid_pts & 0xffff) < 4)
+			{
+				pts = dts;
+			}
 			
-			//ofLogVerbose(__func__) <<  "val: " << val;
 			if(m_setStartTime)
 			{
-				omx_buffer->nFlags = OMX_BUFFERFLAG_STARTTIME;
-				m_setStartTime = false;
-			}
-			else
-			{
+				// only send dts on first frame to get nearly correct starttime
 				if(pts == DVD_NOPTS_VALUE)
 				{
-					omx_buffer->nFlags = OMX_BUFFERFLAG_TIME_UNKNOWN;
+					pts = dts;
 				}
+				omx_buffer->nFlags |= OMX_BUFFERFLAG_STARTTIME;
+				ofLog(OF_LOG_VERBOSE, "OMXVideo::Decode VDec : setStartTime %f\n", (pts == DVD_NOPTS_VALUE ? 0.0 : pts) / DVD_TIME_BASE);
+				m_setStartTime = false;
 			}
-
-			omx_buffer->nTimeStamp = ToOMXTime(val);
-
+			
+			if(pts == DVD_NOPTS_VALUE)
+			{
+				omx_buffer->nFlags |= OMX_BUFFERFLAG_TIME_UNKNOWN;
+			}
+			
+			omx_buffer->nTimeStamp = ToOMXTime(pts == DVD_NOPTS_VALUE ? 0 : pts);
 			omx_buffer->nFilledLen = (demuxer_bytes > omx_buffer->nAllocLen) ? omx_buffer->nAllocLen : demuxer_bytes;
 			memcpy(omx_buffer->pBuffer, demuxer_content, omx_buffer->nFilledLen);
-
+			
 			demuxer_bytes -= omx_buffer->nFilledLen;
 			demuxer_content += omx_buffer->nFilledLen;
-
+			
 			if(demuxer_bytes == 0)
 			{
 				omx_buffer->nFlags |= OMX_BUFFERFLAG_ENDOFFRAME;
 			}
-		
+			
 			int nRetry = 0;
 			while(true)
 			{
@@ -705,7 +721,6 @@ int OMXEGLImage::GetInputBufferSize()
 
 void OMXEGLImage::WaitCompletion()
 {
-	ofLogVerbose() << "OMXEGLImage::WaitCompletion";
   if(!m_is_open)
     return;
 
@@ -735,13 +750,9 @@ void OMXEGLImage::WaitCompletion()
 	
   while(true)
   {
-	
     if(m_omx_render.IsEOS())
 	{
-		ofLogVerbose() << "OMXVideo reached End of Stream";
-		m_omx_render.SetEOS(false);
 		break;
-
 	} 
     OMXClock::OMXSleep(50);
   }

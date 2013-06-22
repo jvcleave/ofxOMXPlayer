@@ -58,42 +58,41 @@ bool OMXPlayerVideoBase::Decode(OMXPacket *pkt)
 	
 	bool ret = false;
 	
-	if((unsigned long)m_decoder->GetFreeSpace() < pkt->size)
+	if(!((int)m_decoder->GetFreeSpace() > pkt->size))
 	{
 		OMXClock::OMXSleep(10);
-	}
-	
-	if (pkt->dts == DVD_NOPTS_VALUE && pkt->pts == DVD_NOPTS_VALUE)
-	{
-		pkt->pts = m_pts;
-	}else 
-	{
-		if (pkt->pts == DVD_NOPTS_VALUE)
-		{
-			pkt->pts = pkt->dts;
-		}
 	}
 	
 	if(pkt->pts != DVD_NOPTS_VALUE)
 	{
 		m_pts = pkt->pts;
-		m_pts += m_iVideoDelay;
 	}
+
 	
-	if((unsigned long)m_decoder->GetFreeSpace() > pkt->size)
-	{
-		
-		m_decoder->Decode(pkt->data, pkt->size, m_pts, m_pts);
-		
-		m_av_clock->SetVideoClock(m_pts);
-		
-		Output(m_pts);
-		
+	if((int)m_decoder->GetFreeSpace() > pkt->size)
+    {
+		if(pkt->pts != DVD_NOPTS_VALUE)
+		{
+			m_iCurrentPts = pkt->pts;
+		}
+		else if(pkt->dts != DVD_NOPTS_VALUE)
+		{
+			m_iCurrentPts = pkt->dts;
+		}
+
+		ofLog(OF_LOG_VERBOSE, "CDVDPlayerVideo::Decode dts:%.0f pts:%.0f cur:%.0f, size:%d", pkt->dts, pkt->pts, m_iCurrentPts, pkt->size);
+		m_decoder->Decode(pkt->data, pkt->size, pkt->dts, pkt->pts);
 		ret = true;
+    }
+    else
+	{
+		// video fifo is full, allow other tasks to run
+		OMXClock::OMXSleep(10);
 	}
-	
 	return ret;
 }
+	
+
 
 void OMXPlayerVideoBase::Flush()
 {
@@ -115,135 +114,10 @@ void OMXPlayerVideoBase::Flush()
 		m_decoder->Reset();
 	}
 	
-	m_syncclock = true;
 	UnLockDecoder();
 	UnLock();
 }
 
-void OMXPlayerVideoBase::Output(double pts)
-{
-	
-	if(m_syncclock)
-	{
-		double delay = m_FlipTimeStamp - m_av_clock->GetAbsoluteClock();
-		if( delay > m_frametime )
-		{
-			delay = m_frametime;
-		}else 
-		{
-			if( delay < 0 )
-			{
-				delay = 0;
-			}
-		}
-		
-		//printf("OMXEGLImagePlayer - GENERAL_RESYNC(%f, 1) delay %f\n", pts, m_FlipTimeStamp);
-		m_av_clock->Discontinuity(pts - delay);
-		m_syncclock = false;
-	}
-	
-	double iSleepTime, iClockSleep, iFrameSleep, iPlayingClock, iCurrentClock, iFrameDuration;
-	iPlayingClock = m_av_clock->GetClock(iCurrentClock, false);		// snapshot current clock
-	iClockSleep = pts - iPlayingClock;								//sleep calculated by pts to clock comparison
-	iFrameSleep = m_FlipTimeStamp - iCurrentClock;					// sleep calculated by duration of frame
-	iFrameDuration = m_frametime;
-	
-	// correct sleep times based on speed
-	if(m_speed)
-	{
-		iClockSleep = iClockSleep * DVD_PLAYSPEED_NORMAL / m_speed;
-		iFrameSleep = iFrameSleep * DVD_PLAYSPEED_NORMAL / abs(m_speed);
-		iFrameDuration = iFrameDuration * DVD_PLAYSPEED_NORMAL / abs(m_speed);
-	}
-	else
-	{
-		iClockSleep = 0;
-		iFrameSleep = 0;
-	}
-	
-	// dropping to a very low framerate is not correct (it should not happen at all)
-	iClockSleep = min(iClockSleep, DVD_MSEC_TO_TIME(500));
-	iFrameSleep = min(iFrameSleep, DVD_MSEC_TO_TIME(500));
-	
-	bool m_stalled = false;
-	int m_autosync = 1;
-	if( m_stalled )
-	{
-		iSleepTime = iFrameSleep;
-	}
-	else
-	{
-		iSleepTime = iFrameSleep + (iClockSleep - iFrameSleep) / m_autosync;
-	}
-	
-	// present the current pts of this frame to user, and include the actual
-	// presentation delay, to allow him to adjust for it
-	if( m_stalled )
-	{
-		m_iCurrentPts = DVD_NOPTS_VALUE;
-	}
-	else
-	{
-		m_iCurrentPts = pts - max(0.0, iSleepTime);
-	}
-	
-	m_av_clock->SetPTS(m_iCurrentPts);
-	
-	// timestamp when we think next picture should be displayed based on current duration
-	m_FlipTimeStamp  = iCurrentClock;
-	m_FlipTimeStamp += max(0.0, iSleepTime);
-	m_FlipTimeStamp += iFrameDuration;
-	
-	
-	/*if(doDebugging)
-	 {
-	 sprintf(debugInfoBuffer, 
-	 "iPlayingClock		 %f	\n\
-	 iCurrentClock		 %f	\n\
-	 iClockSleep			 %f	\n\
-	 iFrameSleep			 %f	\n\
-	 iFrameDuration		 %f	\n\
-	 WaitAbsolut			 %f	\n\
-	 m_FlipTimeStamp		 %f	\n\
-	 pts					 %f	\n\
-	 currentFrame		 %d	\n\
-	 Cached Video		 %8d", 
-	 iPlayingClock / DVD_TIME_BASE, 
-	 iCurrentClock  / DVD_TIME_BASE,
-	 iClockSleep / DVD_TIME_BASE, 
-	 iFrameSleep / DVD_TIME_BASE,
-	 iFrameDuration / DVD_TIME_BASE, 
-	 (iCurrentClock + iSleepTime) / DVD_TIME_BASE, 
-	 m_FlipTimeStamp / DVD_TIME_BASE, 
-	 pts / DVD_TIME_BASE,
-	 (int)((m_FlipTimeStamp / DVD_TIME_BASE)*m_fps),
-	 m_cached_size);
-	 
-	 debugInfo = (string) debugInfoBuffer;
-	 }*/
-	
-	//ofLogVerbose() << debugInfo;
-	//EGL WAY - try the while first
-	/*if(m_av_clock->GetAbsoluteClock(false) < (iCurrentClock + iSleepTime + DVD_MSEC_TO_TIME(500)) )
-	 {
-	 //ofLogVerbose() << "OMXEGLImagePlayer::Output returning early";
-	 return;
-	 }*/
-	
-	while(m_av_clock->GetAbsoluteClock(false) < (iCurrentClock + iSleepTime + DVD_MSEC_TO_TIME(500)) )
-	{
-		OMXClock::OMXSleep(10);
-	}
-  	
-	
-	m_av_clock->WaitAbsoluteClock((iCurrentClock + iSleepTime));
-	
-	// guess next frame pts. iDuration is always valid
-	if (m_speed != 0)
-    {
-		m_pts += m_frametime * m_speed / abs(m_speed);
-	}
-}
 
 
 bool OMXPlayerVideoBase::AddPacket(OMXPacket *pkt)
@@ -398,7 +272,6 @@ bool OMXPlayerVideoBase::Close()
 	m_iCurrentPts   = DVD_NOPTS_VALUE;
 	m_pStream       = NULL;
 	m_pts           = 0;
-	m_syncclock     = false;
 	m_speed         = DVD_PLAYSPEED_NORMAL;
 	
 	return true;

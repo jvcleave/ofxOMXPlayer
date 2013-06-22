@@ -163,9 +163,9 @@ void ofxOMXPlayer::openPlayer()
 		}
 		if (!isTextureEnabled) 
 		{
-			clock->SetSpeed(DVD_PLAYSPEED_NORMAL);
+			//clock->SetSpeed(DVD_PLAYSPEED_NORMAL);
 			clock->OMXStateExecute();
-			clock->OMXStart();
+			clock->OMXStart(0.0);
 		}
 		startThread(false, true);
 		

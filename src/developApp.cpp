@@ -28,7 +28,7 @@ void developApp::setup()
 	}
 	ofLogVerbose() << "using videoPath : " << videoPath;
 	
-	doTextures = true;
+	doTextures = false;
 	doShader = false;
 	if (doShader || doTextures) 
 	{

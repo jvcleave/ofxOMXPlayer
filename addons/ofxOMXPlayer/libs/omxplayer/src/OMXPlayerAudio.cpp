@@ -117,18 +117,7 @@ bool OMXPlayerAudio::Open(COMXStreamInfo &hints, OMXClock *av_clock, OMXReader *
   m_pChannelMap = NULL;
   m_speed       = DVD_PLAYSPEED_NORMAL;
 
-  m_error = 0;
-  m_errorbuff = 0;
-  m_errorcount = 0;
-  m_integral = 0;
-  m_skipdupcount = 0;
-  m_prevskipped = false;
-  m_syncclock = true;
-  m_errortime = m_av_clock->CurrentHostCounter();
-
-  m_freq = m_av_clock->CurrentHostFrequency();
-
-  m_av_clock->SetMasterClock(false);
+ // m_av_clock->SetMasterClock(false);
 
   m_player_error = OpenAudioCodec();
   if(!m_player_error)
@@ -184,103 +173,7 @@ bool OMXPlayerAudio::Close()
   return true;
 }
 
-void OMXPlayerAudio::HandleSyncError(double duration, double pts)
-{
-  double clock = m_av_clock->GetClock();
-  double error = pts - clock;
-  int64_t now;
 
-  if( fabs(error) > DVD_MSEC_TO_TIME(100) || m_syncclock )
-  {
-    m_av_clock->Discontinuity(clock+error);
-    /*
-    if(m_speed == DVD_PLAYSPEED_NORMAL)
-      printf("OMXPlayerAudio:: Discontinuity - was:%f, should be:%f, error:%f\n", clock, clock+error, error);
-    */
-
-    m_errorbuff = 0;
-    m_errorcount = 0;
-    m_skipdupcount = 0;
-    m_error = 0;
-    m_syncclock = false;
-    m_errortime = m_av_clock->CurrentHostCounter();
-
-    return;
-  }
-
-  if (m_speed != DVD_PLAYSPEED_NORMAL)
-  {
-    m_errorbuff = 0;
-    m_errorcount = 0;
-    m_integral = 0;
-    m_skipdupcount = 0;
-    m_error = 0;
-    m_errortime = m_av_clock->CurrentHostCounter();
-    return;
-  }
-
-  //check if measured error for 1 second
-  now = m_av_clock->CurrentHostCounter();
-  if ((now - m_errortime) >= m_freq)
-  {
-    m_errortime = now;
-    m_error = m_errorbuff / m_errorcount;
-
-    m_errorbuff = 0;
-    m_errorcount = 0;
-
-/*
-    if (m_synctype == SYNC_DISCON)
-    {
-*/
-      double limit, error;
-      if (m_av_clock->GetRefreshRate(&limit) > 0)
-      {
-        //when the videoreferenceclock is running, the discontinuity limit is one vblank period
-        limit *= DVD_TIME_BASE;
-
-        //make error a multiple of limit, rounded towards zero,
-        //so it won't interfere with the sync methods in CXBMCRenderManager::WaitPresentTime
-        if (m_error > 0.0)
-          error = limit * floor(m_error / limit);
-        else
-          error = limit * ceil(m_error / limit);
-      }
-      else
-      {
-        limit = DVD_MSEC_TO_TIME(10);
-        error = m_error;
-      }
-
-      if (fabs(error) > limit - 0.001)
-      {
-        m_av_clock->Discontinuity(clock+error);
-        /*
-        if(m_speed == DVD_PLAYSPEED_NORMAL)
-          ofLog(OF_LOG_VERBOSE, "CDVDPlayerAudio:: Discontinuity - was:%f, should be:%f, error:%f", clock, clock+error, error);
-        */
-      }
-    }
-/*
-    else if (m_synctype == SYNC_SKIPDUP && m_skipdupcount == 0 && fabs(m_error) > DVD_MSEC_TO_TIME(10))
-    if (m_skipdupcount == 0 && fabs(m_error) > DVD_MSEC_TO_TIME(10))
-    {
-      //check how many packets to skip/duplicate
-      m_skipdupcount = (int)(m_error / duration);
-      //if less than one frame off, see if it's more than two thirds of a frame, so we can get better in sync
-      if (m_skipdupcount == 0 && fabs(m_error) > duration / 3 * 2)
-        m_skipdupcount = (int)(m_error / (duration / 3 * 2));
-
-      if (m_skipdupcount > 0)
-        ofLog(OF_LOG_VERBOSE, "OMXPlayerAudio:: Duplicating %i packet(s) of %.2f ms duration",
-                  m_skipdupcount, duration / DVD_TIME_BASE * 1000.0);
-      else if (m_skipdupcount < 0)
-        ofLog(OF_LOG_VERBOSE, "OMXPlayerAudio:: Skipping %i packet(s) of %.2f ms duration ",
-                  m_skipdupcount * -1,  duration / DVD_TIME_BASE * 1000.0);
-    }
-  }
-*/
-}
 
 bool OMXPlayerAudio::Decode(OMXPacket *pkt)
 {
@@ -322,7 +215,6 @@ bool OMXPlayerAudio::Decode(OMXPacket *pkt)
     ofLog(OF_LOG_VERBOSE, "C : %d %d %d %d %d\n", m_hints.codec, m_hints.channels, m_hints.samplerate, m_hints.bitrate, m_hints.bitspersample);
      ofLog(OF_LOG_VERBOSE, "N : %d %d %d %d %d\n", pkt->hints.codec, channels, pkt->hints.samplerate, pkt->hints.bitrate, pkt->hints.bitspersample);
 
-    m_av_clock->OMXPause();
 
     CloseDecoder();
     CloseAudioCodec();
@@ -343,15 +235,15 @@ bool OMXPlayerAudio::Decode(OMXPacket *pkt)
 
   }
 
-  if(!((unsigned long)m_decoder->GetSpace() > pkt->size))
+  if(!((int)m_decoder->GetSpace() > pkt->size))
     OMXClock::OMXSleep(10);
 
-  if((unsigned long)m_decoder->GetSpace() > pkt->size)
+  if((int)m_decoder->GetSpace() > pkt->size)
   {
-    if(pkt->dts != DVD_NOPTS_VALUE)
-      m_iCurrentPts = pkt->dts;
-
-    m_av_clock->SetPTS(m_iCurrentPts);
+	  if(pkt->pts != DVD_NOPTS_VALUE)
+		  m_iCurrentPts = pkt->pts;
+	  else if(pkt->dts != DVD_NOPTS_VALUE)
+		  m_iCurrentPts = pkt->dts;
 
     const uint8_t *data_dec = pkt->data;
     int            data_len = pkt->size;
@@ -378,28 +270,18 @@ bool OMXPlayerAudio::Decode(OMXPacket *pkt)
 
         int ret = 0;
 
-        ret = m_decoder->AddPackets(decoded, decoded_size, m_iCurrentPts, m_iCurrentPts);
+        ret = m_decoder->AddPackets(decoded, decoded_size, pkt->dts, pkt->pts);
 
         if(ret != decoded_size)
         {
           ofLog(OF_LOG_VERBOSE, "error ret %d decoded_size %d\n", ret, decoded_size);
         }
-
-        int n = (m_hints.channels * m_hints.bitspersample * m_hints.samplerate)>>3;
-        if (n > 0 && m_iCurrentPts != DVD_NOPTS_VALUE)
-          m_iCurrentPts += ((double)decoded_size * DVD_TIME_BASE) / n;
-
-        HandleSyncError((((double)decoded_size * DVD_TIME_BASE) / n), m_iCurrentPts);
       }
     }
     else
     {
-      m_decoder->AddPackets(pkt->data, pkt->size, m_iCurrentPts, m_iCurrentPts);
-
-      HandleSyncError(0, m_iCurrentPts);
+		m_decoder->AddPackets(pkt->data, pkt->size, pkt->dts, pkt->pts);
     }
-
-    m_av_clock->SetAudioClock(m_iCurrentPts);
     return true;
   }
   else
@@ -471,7 +353,6 @@ void OMXPlayerAudio::Flush()
   m_cached_size = 0;
   if(m_decoder)
     m_decoder->Flush();
-  m_syncclock = true;
   UnLockDecoder();
   UnLock();
 }

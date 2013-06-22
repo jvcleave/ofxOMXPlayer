@@ -42,7 +42,6 @@ public:
 	double						m_frametime;
 	bool						m_bAbort;
 	bool						m_flush;
-	bool						m_syncclock;
 	int							m_speed;
 	double						m_pts;
 	double						m_FlipTimeStamp; // time stamp of last flippage. used to play at a forced framerate
@@ -54,7 +53,6 @@ public:
 	int							GetSpeed();
 	
 	bool						Close();
-	void						Output(double pts);
 	bool						Decode(OMXPacket *pkt);
 	void						Process();
 	void						Flush();
