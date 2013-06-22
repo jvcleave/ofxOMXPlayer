@@ -168,9 +168,7 @@ void developApp::keyPressed  (int key){
 	{
 		case 'p':
 		{
-			bool isCurrentlyPaused = omxPlayer.isPaused();
-			ofLogVerbose() << "isCurrentlyPaused: " << isCurrentlyPaused;
-			omxPlayer.setPaused(!isCurrentlyPaused);
+			omxPlayer.setPaused(!omxPlayer.isPaused());
 			break;
 		
 		}

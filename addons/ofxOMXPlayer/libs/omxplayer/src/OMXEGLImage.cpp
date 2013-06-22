@@ -561,95 +561,98 @@ unsigned int OMXEGLImage::GetFreeSpace()
 
 unsigned int OMXEGLImage::GetSize()
 {
-  return m_omx_decoder.GetInputBufferSize();
+	return m_omx_decoder.GetInputBufferSize();
 }
 
 int OMXEGLImage::Decode(uint8_t *pData, int iSize, double dts, double pts)
 {
-  OMX_ERRORTYPE omx_err;
+	OMX_ERRORTYPE omx_err;
 
-  if (pData || iSize > 0)
-  {
-    unsigned int demuxer_bytes = (unsigned int)iSize;
-    uint8_t *demuxer_content = pData;
+	if (pData || iSize > 0)
+	{
+		unsigned int demuxer_bytes = (unsigned int)iSize;
+		uint8_t *demuxer_content = pData;
 
-    while(demuxer_bytes)
-    {
-      // 500ms timeout
-      OMX_BUFFERHEADERTYPE *omx_buffer = m_omx_decoder.GetInputBuffer(500);
-      if(omx_buffer == NULL)
-      {
-        ofLog(OF_LOG_VERBOSE, "OMXEGLImage::Decode timeout\n");
-        return false;
-      }
-		/*if(doDebugging)
+		while(demuxer_bytes)
 		{
-			sprintf(debugInfoBuffer,
-					"DECODER: Presentation timestamp %f \n\
-					buffer 0x%08x #%d\n",
-					pts,
-					omx_buffer->pBuffer,
-					(int)omx_buffer->pAppPrivate);
+			// 500ms timeout
+			OMX_BUFFERHEADERTYPE *omx_buffer = m_omx_decoder.GetInputBuffer(500);
+			if(omx_buffer == NULL)
+			{
+				ofLog(OF_LOG_VERBOSE, "OMXEGLImage::Decode timeout\n");
+				return false;
+			}
+			/*if(doDebugging)
+			{
+				sprintf(debugInfoBuffer,
+						"DECODER: Presentation timestamp %f \n\
+						buffer 0x%08x #%d\n",
+						pts,
+						omx_buffer->pBuffer,
+						(int)omx_buffer->pAppPrivate);
+				
+				debugInfo = (string)debugInfoBuffer;
+			}*/
+
+
+	  
+
+			omx_buffer->nFlags = 0;
+			omx_buffer->nOffset = 0;
 			
-			debugInfo = (string)debugInfoBuffer;
-		}*/
+			uint64_t val  = (uint64_t)(pts == DVD_NOPTS_VALUE) ? 0 : pts;
+			
+			//ofLogVerbose(__func__) <<  "val: " << val;
+			if(m_setStartTime)
+			{
+				omx_buffer->nFlags = OMX_BUFFERFLAG_STARTTIME;
+				m_setStartTime = false;
+			}
+			else
+			{
+				if(pts == DVD_NOPTS_VALUE)
+				{
+					omx_buffer->nFlags = OMX_BUFFERFLAG_TIME_UNKNOWN;
+				}
+			}
 
+			omx_buffer->nTimeStamp = ToOMXTime(val);
 
-      
+			omx_buffer->nFilledLen = (demuxer_bytes > omx_buffer->nAllocLen) ? omx_buffer->nAllocLen : demuxer_bytes;
+			memcpy(omx_buffer->pBuffer, demuxer_content, omx_buffer->nFilledLen);
 
-      omx_buffer->nFlags = 0;
-      omx_buffer->nOffset = 0;
+			demuxer_bytes -= omx_buffer->nFilledLen;
+			demuxer_content += omx_buffer->nFilledLen;
 
-      uint64_t val  = (uint64_t)(pts == DVD_NOPTS_VALUE) ? 0 : pts;
-
-      if(m_setStartTime)
-      {
-        omx_buffer->nFlags = OMX_BUFFERFLAG_STARTTIME;
-        m_setStartTime = false;
-      }
-      else
-      {
-        if(pts == DVD_NOPTS_VALUE)
-          omx_buffer->nFlags = OMX_BUFFERFLAG_TIME_UNKNOWN;
-      }
-
-      omx_buffer->nTimeStamp = ToOMXTime(val);
-
-      omx_buffer->nFilledLen = (demuxer_bytes > omx_buffer->nAllocLen) ? omx_buffer->nAllocLen : demuxer_bytes;
-      memcpy(omx_buffer->pBuffer, demuxer_content, omx_buffer->nFilledLen);
-
-      demuxer_bytes -= omx_buffer->nFilledLen;
-      demuxer_content += omx_buffer->nFilledLen;
-
-      if(demuxer_bytes == 0)
-	  {
-		  omx_buffer->nFlags |= OMX_BUFFERFLAG_ENDOFFRAME;
-	  }
+			if(demuxer_bytes == 0)
+			{
+				omx_buffer->nFlags |= OMX_BUFFERFLAG_ENDOFFRAME;
+			}
 		
-      int nRetry = 0;
-      while(true)
-      {
-        omx_err = m_omx_decoder.EmptyThisBuffer(omx_buffer);
-        if (omx_err == OMX_ErrorNone)
-        {
-          break;
-        }
-        else
-        {
-          ofLog(OF_LOG_VERBOSE, "\n%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", "OMXEGLImage", __func__, omx_err);
-          nRetry++;
-        }
-        if(nRetry == 5)
-        {
-          ofLog(OF_LOG_VERBOSE, "\n%s::%s - OMX_EmptyThisBuffer() finaly failed\n", "OMXEGLImage", __func__);
-          return false;
-        }
-      }
+			int nRetry = 0;
+			while(true)
+			{
+				omx_err = m_omx_decoder.EmptyThisBuffer(omx_buffer);
+				if (omx_err == OMX_ErrorNone)
+				{
+					break;
+				}
+				else
+				{
+					ofLog(OF_LOG_VERBOSE, "\n%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", "OMXEGLImage", __func__, omx_err);
+					nRetry++;
+				}
+				if(nRetry == 5)
+				{
+					ofLog(OF_LOG_VERBOSE, "\n%s::%s - OMX_EmptyThisBuffer() finaly failed\n", "OMXEGLImage", __func__);
+					return false;
+				}
+			}
 
-    }
-    return true;
-  }
-  return false;
+		}
+		return true;
+	}
+	return false;
 }
 
 void OMXEGLImage::Reset(void)
@@ -660,22 +663,26 @@ void OMXEGLImage::Reset(void)
 
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////
 bool OMXEGLImage::Pause()
 {
-  if(m_omx_render.GetComponent() == NULL)
-    return false;
+	if(m_omx_render.GetComponent() == NULL)
+	{
+		return false;
+	}
 
-  if(m_Pause) return true;
-  m_Pause = true;
+	if(m_Pause)
+	{
+		return true;
+	}
+	
+	m_Pause = true;
 
-  m_omx_sched.SetStateForComponent(OMX_StatePause);
-  m_omx_render.SetStateForComponent(OMX_StatePause);
+	m_omx_sched.SetStateForComponent(OMX_StatePause);
+	m_omx_render.SetStateForComponent(OMX_StatePause);
 
-  return true;
+	return true;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////
 bool OMXEGLImage::Resume()
 {
   if(m_omx_render.GetComponent() == NULL)

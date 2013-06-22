@@ -88,7 +88,6 @@ public:
 	
 private:
 	
-	bool				bPaused;
 	CRBP				rbp;
 	COMXCore			omxCore;
 	OMXClock*			clock;

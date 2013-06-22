@@ -27,7 +27,6 @@ ofxOMXPlayer::ofxOMXPlayer()
 	didVideoOpen		= false;
 	isTextureEnabled	= false;
 	videoPlayer			= NULL;
-	bPaused = false;
 	ofAddListener(ofEvents().exit, this, &ofxOMXPlayer::close);
 }
 
@@ -391,27 +390,13 @@ void ofxOMXPlayer::stop()
 void ofxOMXPlayer::setPaused(bool doPause)
 {
 	ofLogVerbose(__func__) << " doPause: " << doPause;
-	bPaused = doPause;
 	if(doPause)
 	{
-		videoPlayer->SetSpeed(0);
 		clock->OMXPause();
-		clock->SetSpeed(0);
-		omxReader.SetSpeed(0);
-		audioPlayer.SetSpeed(0);
-		
-		
-		//clock->SetSpeed(DVD_PLAYSPEED_PAUSE);
 	}else 
 	{
-		videoPlayer->SetSpeed(1);
 		clock->OMXResume();
-		clock->SetSpeed(1);
-		omxReader.SetSpeed(1);
-		audioPlayer.SetSpeed(1);
-		
 	}
-
 			
 }
 void ofxOMXPlayer::draw(float x, float y, float width, float height)
@@ -486,7 +471,7 @@ double ofxOMXPlayer::getMediaTime()
 
 bool ofxOMXPlayer::isPaused()
 {
-	return bPaused;
+	return clock->OMXIsPaused();
 }
 
 bool ofxOMXPlayer::isPlaying()
@@ -496,8 +481,9 @@ bool ofxOMXPlayer::isPlaying()
 
 void ofxOMXPlayer::close(ofEventArgs & a)
 {
-	setPaused(true);
-	OMXClock::OMXSleep(500);
+	//setPaused(true);
+	sleep(1000);
+	OMXClock::OMXSleep(1000);
 	sleep(1000);
 	ofLogVerbose() << "start ofxOMXPlayer::close";
 	if (isTextureEnabled) 

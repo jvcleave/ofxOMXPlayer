@@ -564,7 +564,6 @@ double OMXClock::OMXMediaTime(bool lock /* = true */)
       UnLock();
     return 0;
   }
-
   pts = FromOMXTime(timeStamp.nTimestamp);
   if(lock)
     UnLock();
