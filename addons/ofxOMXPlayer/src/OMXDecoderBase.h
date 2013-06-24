@@ -69,7 +69,7 @@ public:
 	uint32_t          m_history_valid_pts;
 
 	
-	
+	string decoder_name;
 	
 
 	virtual int				Decode(uint8_t *pData, int iSize, double dts, double pts)=0;
@@ -91,6 +91,8 @@ public:
 	unsigned int			GetSize();
 	int						GetInputBufferSize();
 	void					Reset();
+	
+	void ProcessCodec(COMXStreamInfo &hints);
 	static unsigned count_bits(int32_t value)
 	{
 		unsigned bits = 0;

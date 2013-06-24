@@ -6,8 +6,6 @@
 OMXEGLImage::OMXEGLImage()
 {
 	eglBuffer = NULL;
-	debugInfo = "";
-	doDebugging = false;
 }
 
 
@@ -26,7 +24,7 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglIm
 {
 	eglImage = eglImage_;
 	OMX_ERRORTYPE omx_err   = OMX_ErrorNone;
-	std::string decoder_name;
+	
 
 	m_video_codec_name      = "";
 	m_codingType            = OMX_VIDEO_CodingUnused;
@@ -44,114 +42,9 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglIm
 		m_extradata = (uint8_t *)malloc(m_extrasize);
 		memcpy(m_extradata, hints.extradata, hints.extrasize);
 	}
-
-	switch (hints.codec)
-	{
-	case CODEC_ID_H264:
-	{
-	  switch(hints.profile)
-	  {
-		case FF_PROFILE_H264_BASELINE:
-		  // (role name) video_decoder.avc
-		  // H.264 Baseline profile
-		  decoder_name = OMX_H264BASE_DECODER;
-		  m_codingType = OMX_VIDEO_CodingAVC;
-		  m_video_codec_name = "omx-h264";
-		  break;
-		case FF_PROFILE_H264_MAIN:
-		  // (role name) video_decoder.avc
-		  // H.264 Main profile
-		  decoder_name = OMX_H264MAIN_DECODER;
-		  m_codingType = OMX_VIDEO_CodingAVC;
-		  m_video_codec_name = "omx-h264";
-		  break;
-		case FF_PROFILE_H264_HIGH:
-		  // (role name) video_decoder.avc
-		  // H.264 Main profile
-		  decoder_name = OMX_H264HIGH_DECODER;
-		  m_codingType = OMX_VIDEO_CodingAVC;
-		  m_video_codec_name = "omx-h264";
-		  break;
-		case FF_PROFILE_UNKNOWN:
-		  decoder_name = OMX_H264HIGH_DECODER;
-		  m_codingType = OMX_VIDEO_CodingAVC;
-		  m_video_codec_name = "omx-h264";
-		  break;
-		default:
-		  decoder_name = OMX_H264HIGH_DECODER;
-		  m_codingType = OMX_VIDEO_CodingAVC;
-		  m_video_codec_name = "omx-h264";
-		  break;
-	  }
-	}
-	break;
-	case CODEC_ID_MPEG4:
-	  // (role name) video_decoder.mpeg4
-	  // MPEG-4, DivX 4/5 and Xvid compatible
-	  decoder_name = OMX_MPEG4_DECODER;
-	  m_codingType = OMX_VIDEO_CodingMPEG4;
-	  m_video_codec_name = "omx-mpeg4";
-	  break;
-	case CODEC_ID_MPEG1VIDEO:
-	case CODEC_ID_MPEG2VIDEO:
-	  // (role name) video_decoder.mpeg2
-	  // MPEG-2
-	  decoder_name = OMX_MPEG2V_DECODER;
-	  m_codingType = OMX_VIDEO_CodingMPEG2;
-	  m_video_codec_name = "omx-mpeg2";
-	  break;
-	case CODEC_ID_H263:
-	  // (role name) video_decoder.mpeg4
-	  // MPEG-4, DivX 4/5 and Xvid compatible
-	  decoder_name = OMX_MPEG4_DECODER;
-	  m_codingType = OMX_VIDEO_CodingMPEG4;
-	  m_video_codec_name = "omx-h263";
-	  break;
-	case CODEC_ID_VP6:
-	case CODEC_ID_VP6F:
-	case CODEC_ID_VP6A:
-	  // (role name) video_decoder.vp6
-	  // VP6
-	  decoder_name = OMX_VP6_DECODER;
-	  m_codingType = OMX_VIDEO_CodingVP6;
-	  m_video_codec_name = "omx-vp6";
-	break;
-	case CODEC_ID_VP8:
-	  // (role name) video_decoder.vp8
-	  // VP8
-	  decoder_name = OMX_VP8_DECODER;
-	  m_codingType = OMX_VIDEO_CodingVP8;
-	  m_video_codec_name = "omx-vp8";
-	break;
-	case CODEC_ID_THEORA:
-	  // (role name) video_decoder.theora
-	  // theora
-	  decoder_name = OMX_THEORA_DECODER;
-	  m_codingType = OMX_VIDEO_CodingTheora;
-	  m_video_codec_name = "omx-theora";
-	break;
-	case CODEC_ID_MJPEG:
-	case CODEC_ID_MJPEGB:
-	  // (role name) video_decoder.mjpg
-	  // mjpg
-	  decoder_name = OMX_MJPEG_DECODER;
-	  m_codingType = OMX_VIDEO_CodingMJPEG;
-	  m_video_codec_name = "omx-mjpeg";
-	break;
-	case CODEC_ID_VC1:
-	case CODEC_ID_WMV3:
-	  // (role name) video_decoder.vc1
-	  // VC-1, WMV9
-	  decoder_name = OMX_VC1_DECODER;
-	  m_codingType = OMX_VIDEO_CodingWMV;
-	  m_video_codec_name = "omx-vc1";
-	  break;    
-	default:
-	  ofLog(OF_LOG_VERBOSE, "Video codec id unknown: %x\n", hints.codec);
-	  return false;
-	break;
-	}
-
+	
+	ProcessCodec(hints);
+	
 
 	std::string componentName = "";
 
@@ -313,10 +206,6 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglIm
 		return false;
 	}
 	
-	//m_av_clock->SetSpeed(DVD_PLAYSPEED_NORMAL);
-	m_av_clock->OMXStateExecute();
-	m_av_clock->OMXStart(0.0);
-	
 	omx_err = m_omx_decoder.SetStateForComponent(OMX_StateExecuting);
 	if(omx_err == OMX_ErrorNone)
 	{
@@ -473,17 +362,6 @@ int OMXEGLImage::Decode(uint8_t *pData, int iSize, double dts, double pts)
 				ofLog(OF_LOG_VERBOSE, "OMXEGLImage::Decode timeout\n");
 				return false;
 			}
-			/*if(doDebugging)
-			{
-				sprintf(debugInfoBuffer,
-						"DECODER: Presentation timestamp %f \n\
-						buffer 0x%08x #%d\n",
-						pts,
-						omx_buffer->pBuffer,
-						(int)omx_buffer->pAppPrivate);
-				
-				debugInfo = (string)debugInfoBuffer;
-			}*/
 
 			omx_buffer->nFlags = 0;
 			omx_buffer->nOffset = 0;

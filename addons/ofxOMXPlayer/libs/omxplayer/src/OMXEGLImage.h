@@ -16,15 +16,6 @@ public:
 
 	EGLImageKHR eglImage;
 	OMX_BUFFERHEADERTYPE* eglBuffer;
-	char debugInfoBuffer [128];
-	string debugInfo;
-	bool doDebugging;
-
-
-
-
-
-	
 
 	
 };

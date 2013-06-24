@@ -161,12 +161,8 @@ void ofxOMXPlayer::openPlayer()
 				omxReader.enableFileLoopinghack();
 			}
 		}
-		if (!isTextureEnabled) 
-		{
-			//clock->SetSpeed(DVD_PLAYSPEED_NORMAL);
-			clock->OMXStateExecute();
-			clock->OMXStart(0.0);
-		}
+		clock->OMXStateExecute();
+		clock->OMXStart(0.0);
 		startThread(false, true);
 		
 		ofLogVerbose() << "Opened video PASS";	
