@@ -34,14 +34,9 @@ class DllAvFormat;
 class OMXDecoder
 {
 public:
-	OMXDecoder()
-	{
-		ofLogVerbose() << "OMXDecoder created";
-	};
-	virtual ~OMXDecoder()
-	{
-		ofLogVerbose() << "~OMXDecoder"; 
-	};
+	OMXDecoder();
+	
+	~OMXDecoder();
 
 	OMX_VIDEO_CODINGTYPE m_codingType;
 
@@ -75,17 +70,34 @@ public:
 
 	
 	
-	virtual void			SetDropState(bool bDrop)=0;
+	
+
 	virtual int				Decode(uint8_t *pData, int iSize, double dts, double pts)=0;
 	
-	virtual bool			Pause()=0;
-	virtual bool			Resume()=0;
-	virtual unsigned int	GetFreeSpace()=0;
-	virtual unsigned int	GetSize()=0;
-	virtual string			GetDecoderName()=0;
-	virtual int				GetInputBufferSize()=0;
-	virtual void			WaitCompletion()=0;
-	virtual void			Reset()=0;
-	virtual void			Close()=0;
 	
+	
+	void					WaitCompletion();
+	
+	virtual void Close();
+	
+	bool					Resume();
+	bool					Pause();
+	
+	bool					SendDecoderConfig();
+	bool					NaluFormatStartCodes(enum CodecID codec, uint8_t *in_extradata, int in_extrasize);
+	
+	void					SetDropState(bool bDrop);
+	unsigned int			GetFreeSpace();
+	unsigned int			GetSize();
+	int						GetInputBufferSize();
+	void					Reset();
+	static unsigned count_bits(int32_t value)
+	{
+		unsigned bits = 0;
+		for(;value;++bits)
+			value &= value - 1;
+		return bits;
+	}
+	std::string GetDecoderName() { return m_video_codec_name; };
+
 };

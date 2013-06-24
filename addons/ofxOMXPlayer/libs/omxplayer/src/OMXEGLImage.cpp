@@ -1,102 +1,17 @@
-/*
- *      Copyright (C) 2010 Team XBMC
- *      http://www.xbmc.org
- *
- *  This Program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2, or (at your option)
- *  any later version.
- *
- *  This Program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
- *
- */
-
-
 #include "OMXEGLImage.h"
-
-#include "OMXStreamInfo.h"
-
-#include "linux/XMemUtils.h"
-
-#include <sys/time.h>
-#include <inttypes.h>
 
 
 
 
 OMXEGLImage::OMXEGLImage()
 {
-	m_is_open           = false;
-	m_Pause             = false;
-	m_setStartTime      = true;
-	m_extradata         = NULL;
-	m_extrasize         = 0;
-	m_video_codec_name  = "";
-	m_first_frame       = true;
 	eglBuffer = NULL;
 	debugInfo = "";
 	doDebugging = false;
 }
 
-OMXEGLImage::~OMXEGLImage()
-{
-  if (m_is_open)
-    Close();
-}
 
-bool OMXEGLImage::SendDecoderConfig()
-{
-  OMX_ERRORTYPE omx_err   = OMX_ErrorNone;
 
-	
-  /* send decoder config */
-  if(m_extrasize > 0 && m_extradata != NULL)
-  {
-	  ofLogVerbose(__FUNCTION__) << "m_extrasize: " << m_extrasize;
-	  ofLogVerbose(__FUNCTION__) << "m_extradata: " << m_extradata;
-	  
-    OMX_BUFFERHEADERTYPE *omx_buffer = m_omx_decoder.GetInputBuffer();
-
-    if(omx_buffer == NULL)
-    {
-      ofLog(OF_LOG_VERBOSE, "\n%s::%s - buffer error 0x%08x", "OMXEGLImage", __func__, omx_err);
-      return false;
-    }
-
-    omx_buffer->nOffset = 0;
-    omx_buffer->nFilledLen = m_extrasize;
-    if(omx_buffer->nFilledLen > omx_buffer->nAllocLen)
-    {
-      ofLog(OF_LOG_VERBOSE, "\n%s::%s - omx_buffer->nFilledLen > omx_buffer->nAllocLen", "OMXEGLImage", __func__);
-      return false;
-    }
-
-    memset((unsigned char *)omx_buffer->pBuffer, 0x0, omx_buffer->nAllocLen);
-    memcpy((unsigned char *)omx_buffer->pBuffer, m_extradata, omx_buffer->nFilledLen);
-    omx_buffer->nFlags = OMX_BUFFERFLAG_CODECCONFIG | OMX_BUFFERFLAG_ENDOFFRAME;
-  
-    omx_err = m_omx_decoder.EmptyThisBuffer(omx_buffer);
-    if (omx_err != OMX_ErrorNone)
-    {
-      ofLog(OF_LOG_VERBOSE, "\n%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", "OMXEGLImage", __func__, omx_err);
-      return false;
-    }else {
-		ofLog(OF_LOG_VERBOSE, "OMXEGLImage::SendDecoderConfig m_extradata: %i ", m_extradata); 
-	}
-
-  }
-	
-  
-  return true;
-}
 OMX_ERRORTYPE onFillBufferDone(OMX_HANDLETYPE hComponent,
 							   OMX_PTR pAppData,
 							   OMX_BUFFERHEADERTYPE* pBuffer)
@@ -509,20 +424,7 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglIm
 	return true;
 }
 
-bool OMXEGLImage::NaluFormatStartCodes(enum CodecID codec, uint8_t *in_extradata, int in_extrasize)
-{
-	switch(codec)
-	{
-		case CODEC_ID_H264:
-			if (in_extrasize < 7 || in_extradata == NULL)
-				return true;
-			// valid avcC atom data always starts with the value 1 (version), otherwise annexb
-			else if ( *in_extradata != 1 )
-				return true;
-		default: break;
-	}
-	return false;    
-}
+
 
 void OMXEGLImage::Close()
 {
@@ -551,28 +453,7 @@ void OMXEGLImage::Close()
   m_first_frame       = true;
 }
 
-void OMXEGLImage::SetDropState(bool bDrop)
-{
-  m_drop_state = bDrop;
-}
 
-unsigned int OMXEGLImage::GetFreeSpace()
-{
-  return m_omx_decoder.GetInputBufferSpace();
-}
-
-unsigned int OMXEGLImage::GetSize()
-{
-	return m_omx_decoder.GetInputBufferSize();
-}
-
-static unsigned count_bits(int32_t value)
-{
-	unsigned bits = 0;
-	for(;value;++bits)
-		value &= value - 1;
-	return bits;
-}
 
 int OMXEGLImage::Decode(uint8_t *pData, int iSize, double dts, double pts)
 {
@@ -669,93 +550,4 @@ int OMXEGLImage::Decode(uint8_t *pData, int iSize, double dts, double pts)
 		return true;
 	}
 	return false;
-}
-
-void OMXEGLImage::Reset(void)
-{
-
-  m_omx_decoder.FlushInput();
-  m_omx_tunnel_decoder.Flush();
-
-}
-
-bool OMXEGLImage::Pause()
-{
-	if(m_omx_render.GetComponent() == NULL)
-	{
-		return false;
-	}
-
-	if(m_Pause)
-	{
-		return true;
-	}
-	
-	m_Pause = true;
-
-	m_omx_sched.SetStateForComponent(OMX_StatePause);
-	m_omx_render.SetStateForComponent(OMX_StatePause);
-
-	return true;
-}
-
-bool OMXEGLImage::Resume()
-{
-  if(m_omx_render.GetComponent() == NULL)
-    return false;
-
-  if(!m_Pause) return true;
-  m_Pause = false;
-
-  m_omx_sched.SetStateForComponent(OMX_StateExecuting);
-  m_omx_render.SetStateForComponent(OMX_StateExecuting);
-
-  return true;
-}
-
-
-int OMXEGLImage::GetInputBufferSize()
-{
-  return m_omx_decoder.GetInputBufferSize();
-}
-
-void OMXEGLImage::WaitCompletion()
-{
-  if(!m_is_open)
-    return;
-
-  OMX_ERRORTYPE omx_err = OMX_ErrorNone;
-  OMX_BUFFERHEADERTYPE *omx_buffer = m_omx_decoder.GetInputBuffer();
-  
-  if(omx_buffer == NULL)
-  {
-    ofLog(OF_LOG_VERBOSE, "%s::%s - buffer error 0x%08x", "OMXEGLImage", __func__, omx_err);
-    return;
-  }
-  
-  omx_buffer->nOffset     = 0;
-  omx_buffer->nFilledLen  = 0;
-  omx_buffer->nTimeStamp  = ToOMXTime(0LL);
-
-  omx_buffer->nFlags = OMX_BUFFERFLAG_ENDOFFRAME | OMX_BUFFERFLAG_EOS | OMX_BUFFERFLAG_TIME_UNKNOWN;
-  
-  omx_err = m_omx_decoder.EmptyThisBuffer(omx_buffer);
-  if (omx_err != OMX_ErrorNone)
-  {
-    ofLog(OF_LOG_VERBOSE, "\n%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", "OMXEGLImage", __func__, omx_err);
-    return;
-  }
-	
-
-	
-  while(true)
-  {
-    if(m_omx_render.IsEOS())
-	{
-		break;
-	} 
-    OMXClock::OMXSleep(50);
-  }
-
-  return;
 }

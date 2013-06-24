@@ -1,111 +1,14 @@
-/*
- *      Copyright (C) 2010 Team XBMC
- *      http://www.xbmc.org
- *
- *  This Program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2, or (at your option)
- *  any later version.
- *
- *  This Program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
- *
- */
-
 #include "OMXVideo.h"
-
-#include "OMXStreamInfo.h"
-#include "linux/XMemUtils.h"
-
-#include <sys/time.h>
-#include <inttypes.h>
-
-#ifdef CLASSNAME
-#undef CLASSNAME
-#endif
-#define CLASSNAME "COMXVideo"
-
-
 
 
 COMXVideo::COMXVideo()
 {
-  m_is_open           = false;
-  m_Pause             = false;
-  m_setStartTime      = true;
-  m_extradata         = NULL;
-  m_extrasize         = 0;
-  m_video_codec_name  = "";
-  m_deinterlace       = false;
-  m_hdmi_clock_sync   = false;
-  m_first_frame       = true;
-	ofLogVerbose() << "COMXVideo CONSTRUCT";
-}
 
-COMXVideo::~COMXVideo()
-{
-  if (m_is_open)
-    Close();
-}
-
-bool COMXVideo::SendDecoderConfig()
-{
-  OMX_ERRORTYPE omx_err   = OMX_ErrorNone;
-
-  /* send decoder config */
-  if(m_extrasize > 0 && m_extradata != NULL)
-  {
-    OMX_BUFFERHEADERTYPE *omx_buffer = m_omx_decoder.GetInputBuffer();
-
-    if(omx_buffer == NULL)
-    {
-      ofLog(OF_LOG_VERBOSE, "%s::%s - buffer error 0x%08x", CLASSNAME, __func__, omx_err);
-      return false;
-    }
-
-    omx_buffer->nOffset = 0;
-    omx_buffer->nFilledLen = m_extrasize;
-    if(omx_buffer->nFilledLen > omx_buffer->nAllocLen)
-    {
-      ofLog(OF_LOG_VERBOSE, "%s::%s - omx_buffer->nFilledLen > omx_buffer->nAllocLen", CLASSNAME, __func__);
-      return false;
-    }
-
-    memset((unsigned char *)omx_buffer->pBuffer, 0x0, omx_buffer->nAllocLen);
-    memcpy((unsigned char *)omx_buffer->pBuffer, m_extradata, omx_buffer->nFilledLen);
-    omx_buffer->nFlags = OMX_BUFFERFLAG_CODECCONFIG | OMX_BUFFERFLAG_ENDOFFRAME;
+	m_deinterlace       = false;
+	m_hdmi_clock_sync   = false;
   
-    omx_err = m_omx_decoder.EmptyThisBuffer(omx_buffer);
-    if (omx_err != OMX_ErrorNone)
-    {
-      ofLog(OF_LOG_VERBOSE, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, omx_err);
-      return false;
-    }
-  }
-  return true;
 }
 
-bool COMXVideo::NaluFormatStartCodes(enum CodecID codec, uint8_t *in_extradata, int in_extrasize)
-{
-  switch(codec)
-  {
-    case CODEC_ID_H264:
-      if (in_extrasize < 7 || in_extradata == NULL)
-        return true;
-      // valid avcC atom data always starts with the value 1 (version), otherwise annexb
-      else if ( *in_extradata != 1 )
-        return true;
-    default: break;
-  }
-  return false;    
-}
 
 bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, float display_aspect, bool deinterlace, bool hdmi_clock_sync)
 {
@@ -558,7 +461,7 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, float display_aspec
 
 	ofLog(OF_LOG_VERBOSE,
 	"%s::%s - decoder_component(0x%p), input_port(0x%x), output_port(0x%x) deinterlace %d hdmiclocksync %d\n",
-	CLASSNAME, __func__, m_omx_decoder.GetComponent(), m_omx_decoder.GetInputPort(), m_omx_decoder.GetOutputPort(),
+	"OMXVideo", __func__, m_omx_decoder.GetComponent(), m_omx_decoder.GetInputPort(), m_omx_decoder.GetOutputPort(),
 	m_deinterlace, m_hdmi_clock_sync);
 
 	m_first_frame   = true;
@@ -603,28 +506,6 @@ void COMXVideo::Close()
   m_setStartTime      = true;
 }
 
-void COMXVideo::SetDropState(bool bDrop)
-{
-  m_drop_state = bDrop;
-}
-
-unsigned int COMXVideo::GetFreeSpace()
-{
-  return m_omx_decoder.GetInputBufferSpace();
-}
-
-unsigned int COMXVideo::GetSize()
-{
-  return m_omx_decoder.GetInputBufferSize();
-}
-
-static unsigned count_bits(int32_t value)
-{
-	unsigned bits = 0;
-	for(;value;++bits)
-		value &= value - 1;
-	return bits;
-}
 
 int COMXVideo::Decode(uint8_t *pData, int iSize, double dts, double pts)
 {
@@ -703,12 +584,12 @@ int COMXVideo::Decode(uint8_t *pData, int iSize, double dts, double pts)
 			}
 			else
 			{
-				ofLog(OF_LOG_VERBOSE, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, omx_err);
+				ofLog(OF_LOG_VERBOSE, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", "OMXVideo", __func__, omx_err);
 				nRetry++;
 			}
 			if(nRetry == 5)
 			{
-				ofLog(OF_LOG_VERBOSE, "%s::%s - OMX_EmptyThisBuffer() finaly failed\n", CLASSNAME, __func__);
+				ofLog(OF_LOG_VERBOSE, "%s::%s - OMX_EmptyThisBuffer() finaly failed\n", "OMXVideo", __func__);
 				return false;
 			}
       }
@@ -718,9 +599,9 @@ int COMXVideo::Decode(uint8_t *pData, int iSize, double dts, double pts)
 
       if(omx_err != OMX_ErrorNone)
       {
-        ofLog(OF_LOG_VERBOSE, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, omx_err);
+        ofLog(OF_LOG_VERBOSE, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", "OMXVideo", __func__, omx_err);
 
-        ofLog(OF_LOG_VERBOSE, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, omx_err);
+        ofLog(OF_LOG_VERBOSE, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", "OMXVideo", __func__, omx_err);
 
         return false;
       }
@@ -735,7 +616,7 @@ int COMXVideo::Decode(uint8_t *pData, int iSize, double dts, double pts)
         omx_err = m_omx_decoder.GetParameter(OMX_IndexParamPortDefinition, &port_image);
         if(omx_err != OMX_ErrorNone)
         {
-          ofLog(OF_LOG_VERBOSE, "%s::%s - error OMX_IndexParamPortDefinition 1 omx_err(0x%08x)\n", CLASSNAME, __func__, omx_err);
+          ofLog(OF_LOG_VERBOSE, "%s::%s - error OMX_IndexParamPortDefinition 1 omx_err(0x%08x)\n", "OMXVideo", __func__, omx_err);
         }
 
         /* we assume when the sizes equal we have the first decoded frame */
@@ -746,7 +627,7 @@ int COMXVideo::Decode(uint8_t *pData, int iSize, double dts, double pts)
           omx_err = m_omx_decoder.WaitForEvent(OMX_EventPortSettingsChanged);
           if(omx_err == OMX_ErrorStreamCorrupt)
           {
-            ofLog(OF_LOG_VERBOSE, "%s::%s - image not unsupported\n", CLASSNAME, __func__);
+            ofLog(OF_LOG_VERBOSE, "%s::%s - image not unsupported\n", "OMXVideo", __func__);
             return false;
           }
 
@@ -761,14 +642,14 @@ int COMXVideo::Decode(uint8_t *pData, int iSize, double dts, double pts)
           omx_err = m_omx_image_fx.SetParameter(OMX_IndexParamPortDefinition, &port_image);
           if(omx_err != OMX_ErrorNone)
           {
-            ofLog(OF_LOG_VERBOSE, "%s::%s - error OMX_IndexParamPortDefinition 2 omx_err(0x%08x)\n", CLASSNAME, __func__, omx_err);
+            ofLog(OF_LOG_VERBOSE, "%s::%s - error OMX_IndexParamPortDefinition 2 omx_err(0x%08x)\n", "OMXVideo", __func__, omx_err);
           }
 
           port_image.nPortIndex = m_omx_image_fx.GetOutputPort();
           omx_err = m_omx_image_fx.SetParameter(OMX_IndexParamPortDefinition, &port_image);
           if(omx_err != OMX_ErrorNone)
           {
-            ofLog(OF_LOG_VERBOSE, "%s::%s - error OMX_IndexParamPortDefinition 3 omx_err(0x%08x)\n", CLASSNAME, __func__, omx_err);
+            ofLog(OF_LOG_VERBOSE, "%s::%s - error OMX_IndexParamPortDefinition 3 omx_err(0x%08x)\n", "OMXVideo", __func__, omx_err);
           }
 
           m_omx_decoder.EnablePort(m_omx_decoder.GetOutputPort(), false);
@@ -789,42 +670,7 @@ int COMXVideo::Decode(uint8_t *pData, int iSize, double dts, double pts)
   return false;
 }
 
-void COMXVideo::Reset(void)
-{
-  m_omx_decoder.FlushInput();
-  m_omx_tunnel_decoder.Flush();
 
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////
-bool COMXVideo::Pause()
-{
-  if(m_omx_render.GetComponent() == NULL)
-    return false;
-
-  if(m_Pause) return true;
-  m_Pause = true;
-
-  m_omx_sched.SetStateForComponent(OMX_StatePause);
-  m_omx_render.SetStateForComponent(OMX_StatePause);
-
-  return true;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////
-bool COMXVideo::Resume()
-{
-  if(m_omx_render.GetComponent() == NULL)
-    return false;
-
-  if(!m_Pause) return true;
-  m_Pause = false;
-
-  m_omx_sched.SetStateForComponent(OMX_StateExecuting);
-  m_omx_render.SetStateForComponent(OMX_StateExecuting);
-
-  return true;
-}
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 /*void COMXVideo::SetVideoRect(const CRect& SrcRect, const CRect& DestRect)
@@ -854,48 +700,6 @@ bool COMXVideo::Resume()
       configDisplay.dest_rect.width, configDisplay.dest_rect.height);
 }*/
 
-int COMXVideo::GetInputBufferSize()
-{
-  return m_omx_decoder.GetInputBufferSize();
-}
 
-void COMXVideo::WaitCompletion()
-{
-  if(!m_is_open)
-    return;
 
-  OMX_ERRORTYPE omx_err = OMX_ErrorNone;
-  OMX_BUFFERHEADERTYPE *omx_buffer = m_omx_decoder.GetInputBuffer();
-  
-  if(omx_buffer == NULL)
-  {
-    ofLog(OF_LOG_VERBOSE, "%s::%s - buffer error 0x%08x", CLASSNAME, __func__, omx_err);
-    return;
-  }
-  
-  omx_buffer->nOffset     = 0;
-  omx_buffer->nFilledLen  = 0;
-  omx_buffer->nTimeStamp  = ToOMXTime(0LL);
 
-  omx_buffer->nFlags = OMX_BUFFERFLAG_ENDOFFRAME | OMX_BUFFERFLAG_EOS | OMX_BUFFERFLAG_TIME_UNKNOWN;
-  
-  omx_err = m_omx_decoder.EmptyThisBuffer(omx_buffer);
-  if (omx_err != OMX_ErrorNone)
-  {
-    ofLog(OF_LOG_VERBOSE, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, omx_err);
-    return;
-  }
-
-  // clock_gettime(CLOCK_REALTIME, &starttime);
-
-  while(true)
-  {
-    if(m_omx_render.IsEOS())
-	{
-		break;
-	}
-    OMXClock::OMXSleep(50);
-  }
-
-  return;
-}
