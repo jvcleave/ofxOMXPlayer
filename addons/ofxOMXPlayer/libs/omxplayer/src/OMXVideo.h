@@ -2,10 +2,10 @@
 
 #include "ofMain.h"
 
-#include "OMXDecoder.h"
+#include "OMXDecoderBase.h"
 
 
-class COMXVideo : public OMXDecoder
+class COMXVideo : public OMXDecoderBase
 {
 public:
 	COMXVideo();

@@ -117,13 +117,13 @@ bool OMXPlayerVideo::OpenDecoder()
   nonTextureDecoder = new COMXVideo();
   if(!nonTextureDecoder->Open(m_hints, m_av_clock, m_display_aspect, m_Deinterlace, m_hdmi_clock_sync))
   {
-	m_decoder = (OMXDecoder*)nonTextureDecoder;
+	m_decoder = (OMXDecoderBase*)nonTextureDecoder;
     CloseDecoder();
     return false;
   }
   else
   {
-	m_decoder = (OMXDecoder*)nonTextureDecoder;
+	m_decoder = (OMXDecoderBase*)nonTextureDecoder;
     ofLog(OF_LOG_VERBOSE, "Video codec %s width %d height %d profile %d fps %f\n",
         m_decoder->GetDecoderName().c_str() , m_hints.width, m_hints.height, m_hints.profile, m_fps);
   }

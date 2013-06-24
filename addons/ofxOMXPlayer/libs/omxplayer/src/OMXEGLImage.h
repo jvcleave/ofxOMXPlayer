@@ -2,9 +2,9 @@
 
 #include "ofMain.h"
 
-#include "OMXDecoder.h"
+#include "OMXDecoderBase.h"
 
-class OMXEGLImage : public OMXDecoder
+class OMXEGLImage : public OMXDecoderBase
 {
 public:
 	OMXEGLImage();

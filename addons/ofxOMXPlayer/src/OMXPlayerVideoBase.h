@@ -9,7 +9,7 @@
 #include "OMXClock.h"
 #include "OMXStreamInfo.h"
 #include "OMXThread.h"
-#include "OMXDecoder.h"
+#include "OMXDecoderBase.h"
 
 #define MAX_DATA_SIZE    40 * 1024 * 1024
 
@@ -19,7 +19,7 @@ class OMXPlayerVideoBase: public OMXThread
 public:
 	OMXPlayerVideoBase();
 	~OMXPlayerVideoBase();
-	OMXDecoder*					m_decoder;
+	OMXDecoderBase*					m_decoder;
 	AVStream*					m_pStream;
 	int							m_stream_id;
 	std::deque<OMXPacket *>		m_packets;

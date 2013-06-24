@@ -97,12 +97,12 @@ bool OMXPlayerEGLImage::OpenDecoder()
 	
 	if(!eglImageDecoder->Open(m_hints, m_av_clock, eglImage))
 	{
-		m_decoder = (OMXDecoder*)eglImageDecoder;
+		m_decoder = (OMXDecoderBase*)eglImageDecoder;
 		CloseDecoder();
 		return false;
 	}
 	else
-		m_decoder = (OMXDecoder*)eglImageDecoder;
+		m_decoder = (OMXDecoderBase*)eglImageDecoder;
 	{
 		ofLog(OF_LOG_VERBOSE, "Video codec %s width %d height %d profile %d fps %f\n",
 			  m_decoder->GetDecoderName().c_str() , m_hints.width, m_hints.height, m_hints.profile, m_fps);
