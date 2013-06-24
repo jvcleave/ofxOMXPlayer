@@ -7,7 +7,9 @@ void developApp::onCharacterReceived(SSHKeyListenerEventData& e)
 //--------------------------------------------------------------
 void developApp::setup()
 {
+	bool doRandomSelect = true;
 	isClosing = false;
+	isShaderEnabled = false;
 	usingTexturePlayer =  false;
 	videoPath = "/opt/vc/src/hello_pi/hello_video/test.h264";
 	/* to get the videos I am testing run command:
@@ -23,13 +25,19 @@ void developApp::setup()
 		vector<ofFile> files = currentVideoDirectory.getFiles();
 		if (files.size()>0) 
 		{
-			videoPath = files[0].path();
+			if (doRandomSelect && files.size()>1) {
+				videoPath = files[ofRandom(files.size())].path();
+			}else 
+			{
+				videoPath = files[0].path();
+			}
+
 		}		
 	}
 	ofLogVerbose() << "using videoPath : " << videoPath;
 	
 	doTextures = true;
-	doShader = false;
+	doShader = true;
 	if (doShader || doTextures) 
 	{
 		usingTexturePlayer = true;
@@ -98,7 +106,7 @@ void developApp::draw(){
 		return;
 	}
 	
-	if (doShader) 
+	if (doShader && isShaderEnabled) 
 	{
 		fbo.draw(0, 0);
 	}else 
@@ -135,16 +143,19 @@ void developApp::updateFbo()
 	if (isClosing) {
 		return;
 	}
+	if(isShaderEnabled)
+	{
+		fbo.begin();
+			ofClear(0, 0, 0, 0);
+				shader.begin();
+				shader.setUniformTexture("tex0", omxPlayer.getTextureReference(), omxPlayer.textureID);
+				shader.setUniform1f("time", ofGetElapsedTimef());
+				shader.setUniform2f("resolution", ofGetWidth(), ofGetHeight());
+				ofRect(0, 0, ofGetWidth(), ofGetHeight());
+			shader.end();
+		fbo.end();
+	}
 	
-	fbo.begin();
-		ofClear(0, 0, 0, 0);
-		shader.begin();
-			shader.setUniformTexture("tex0", omxPlayer.getTextureReference(), omxPlayer.textureID);
-			shader.setUniform1f("time", ofGetElapsedTimef());
-			shader.setUniform2f("resolution", ofGetWidth(), ofGetHeight());
-			ofRect(0, 0, ofGetWidth(), ofGetHeight());
-		shader.end();
-	fbo.end();
 }
 
 void developApp::exit()
@@ -172,6 +183,16 @@ void developApp::keyPressed  (int key){
 			break;
 		
 		}
+			
+		case 's':
+		{
+			if (doShader && usingTexturePlayer)
+			{
+				isShaderEnabled = !isShaderEnabled;
+			}
+			break;
+		}
+
 		case '1':
 		{
 			ofLogVerbose() << "SENDING PLAY COMMAND";

@@ -42,5 +42,6 @@ public:
 	
 	void createNonTexturePlayer();
 	void createTexturePlayer();
+	bool isShaderEnabled;
 };
 
