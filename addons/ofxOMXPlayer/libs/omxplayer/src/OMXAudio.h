@@ -4,7 +4,6 @@
 
 #include "IAudioRenderer.h"
 
-#include "IAudioCallback.h"
 #include "linux/PlatformDefs.h"
 #include "DllAvCodec.h"
 #include "DllAvUtil.h"
@@ -14,22 +13,19 @@
 #include "BitstreamConverter.h"
 
 #define AUDIO_BUFFER_SECONDS 2
-#define VIS_PACKET_SIZE 3840
 
 class COMXAudio : public IAudioRenderer
 {
 public:
-  void UnRegisterAudioCallback();
-  void RegisterAudioCallback(IAudioCallback* pCallback);
   unsigned int GetChunkLen();
   float GetDelay();
   float GetCacheTime();
   float GetCacheTotal();
   unsigned int GetAudioRenderingLatency();
   COMXAudio();
-  bool Initialize(IAudioCallback* pCallback, const CStdString& device, enum PCMChannels *channelMap,
+  bool Initialize(const CStdString& device, enum PCMChannels *channelMap,
                            COMXStreamInfo &hints, OMXClock *clock, EEncoded bPassthrough, bool bUseHWDecode, bool boostOnDownmix);
-  bool Initialize(IAudioCallback* pCallback, const CStdString& device, int iChannels, enum PCMChannels *channelMap, unsigned int downmixChannels, unsigned int uiSamplesPerSec, unsigned int uiBitsPerSample, bool bResample, bool boostOnDownmix, bool bIsMusic=false, EEncoded bPassthrough = IAudioRenderer::ENCODED_NONE);
+  bool Initialize(const CStdString& device, int iChannels, enum PCMChannels *channelMap, unsigned int downmixChannels, unsigned int uiSamplesPerSec, unsigned int uiBitsPerSample, bool bResample, bool boostOnDownmix, bool bIsMusic=false, EEncoded bPassthrough = IAudioRenderer::ENCODED_NONE);
   ~COMXAudio();
 
   unsigned int AddPackets(const void* data, unsigned int len);
@@ -65,7 +61,6 @@ public:
   unsigned int SyncAC3(BYTE* pData, unsigned int iSize);
 
 private:
-  IAudioCallback* m_pCallback;
   bool          m_Initialized;
   bool          m_Pause;
   bool          m_CanPause;
@@ -92,10 +87,7 @@ private:
   OMX_AUDIO_CODINGTYPE m_eEncoding;
   uint8_t       *m_extradata;
   int           m_extrasize;
-  // stuff for visualisation
-  unsigned int  m_visBufferLength;
-  double        m_last_pts;
-  short            m_visBuffer[VIS_PACKET_SIZE+2];
+
   OMX_AUDIO_PARAM_PCMMODETYPE m_pcm_output;
   OMX_AUDIO_PARAM_PCMMODETYPE m_pcm_input;
   OMX_AUDIO_PARAM_DTSTYPE     m_dtsParam;

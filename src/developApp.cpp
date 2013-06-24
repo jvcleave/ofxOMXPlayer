@@ -28,7 +28,7 @@ void developApp::setup()
 	}
 	ofLogVerbose() << "using videoPath : " << videoPath;
 	
-	doTextures = false;
+	doTextures = true;
 	doShader = false;
 	if (doShader || doTextures) 
 	{
@@ -112,7 +112,7 @@ void developApp::draw(){
 	info << "APP FPS: "+ ofToString(ofGetFrameRate());
 	
 	
-	info <<"\n" <<	"MEDIA TIME: "			<< omxPlayer.getMediaTime();
+	info <<"\n" <<	"MEDIA TIME: "			<< (int) (omxPlayer.getMediaTime()*10);
 	info <<"\n" <<	"DIMENSIONS: "			<< omxPlayer.getWidth()<<"x"<<omxPlayer.getHeight();
 	info <<"\n" <<	"DURATION: "			<< omxPlayer.getDuration();
 	info <<"\n" <<	"TOTAL FRAMES: "		<< omxPlayer.getTotalNumFrames();

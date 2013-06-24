@@ -476,7 +476,7 @@ bool OMXPlayerAudio::OpenDecoder()
   {
     if(m_passthrough)
       m_hw_decode = false;
-    bAudioRenderOpen = m_decoder->Initialize(NULL, m_device.substr(4), m_pChannelMap,
+    bAudioRenderOpen = m_decoder->Initialize(m_device.substr(4), m_pChannelMap,
                                              m_hints, m_av_clock, m_passthrough, 
                                              m_hw_decode, m_boost_on_downmix);
   }
@@ -488,7 +488,7 @@ bool OMXPlayerAudio::OpenDecoder()
     if(m_hints.channels == 6)
       m_hints.channels = 8;
 
-    bAudioRenderOpen = m_decoder->Initialize(NULL, m_device.substr(4), m_hints.channels, m_pChannelMap,
+    bAudioRenderOpen = m_decoder->Initialize(m_device.substr(4), m_hints.channels, m_pChannelMap,
                                              downmix_channels, m_hints.samplerate, m_hints.bitspersample,
                                              false, m_boost_on_downmix, false, m_passthrough);
   }
@@ -561,21 +561,6 @@ ofLogVerbose() << "OMXPlayerAudio::WaitCompletion";
   }
 
   m_decoder->WaitCompletion();
-}
-
-void OMXPlayerAudio::RegisterAudioCallback(IAudioCallback *pCallback)
-{
-  if(m_decoder) m_decoder->RegisterAudioCallback(pCallback);
-
-}
-void OMXPlayerAudio::UnRegisterAudioCallback()
-{
-  if(m_decoder) m_decoder->UnRegisterAudioCallback();
-}
-
-void OMXPlayerAudio::DoAudioWork()
-{
-  if(m_decoder) m_decoder->DoAudioWork();
 }
 
 void OMXPlayerAudio::SetCurrentVolume(long nVolume)

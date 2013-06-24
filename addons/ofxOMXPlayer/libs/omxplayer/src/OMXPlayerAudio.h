@@ -97,9 +97,7 @@ public:
     return cached_size;
 
   };
-  void  RegisterAudioCallback(IAudioCallback* pCallback);
-  void  UnRegisterAudioCallback();
-  void  DoAudioWork();
+
   void SetCurrentVolume(long nVolume);
   long GetCurrentVolume();
   void SetSpeed(int iSpeed);

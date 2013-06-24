@@ -100,7 +100,6 @@ const float downmixing_coefficients_8[16] = {
 //////////////////////////////////////////////////////////////////////
 //***********************************************************************************************
 COMXAudio::COMXAudio() :
-  m_pCallback       (NULL   ),
   m_Initialized     (false  ),
   m_Pause           (false  ),
   m_CanPause        (false  ),
@@ -125,9 +124,7 @@ COMXAudio::COMXAudio() :
   m_SampleRate      (0      ),
   m_eEncoding       (OMX_AUDIO_CodingPCM),
   m_extradata       (NULL   ),
-  m_extrasize       (0      ),
-  m_visBufferLength (0      ),
-  m_last_pts        (DVD_NOPTS_VALUE)
+  m_extrasize       (0      )
 {
 }
 
@@ -138,7 +135,7 @@ COMXAudio::~COMXAudio()
 }
 
 
-bool COMXAudio::Initialize(IAudioCallback* pCallback, const CStdString& device, enum PCMChannels *channelMap,
+bool COMXAudio::Initialize(const CStdString& device, enum PCMChannels *channelMap,
                            COMXStreamInfo &hints, OMXClock *clock, EEncoded bPassthrough, bool bUseHWDecode,
                            bool boostOnDownmix)
 {
@@ -159,8 +156,6 @@ bool COMXAudio::Initialize(IAudioCallback* pCallback, const CStdString& device, 
     SetCodingType(CODEC_ID_PCM_S16LE);
   }
 
-  SetClock(clock);
-
   if(hints.extrasize > 0 && hints.extradata != NULL)
   {
     m_extrasize = hints.extrasize;
@@ -168,10 +163,10 @@ bool COMXAudio::Initialize(IAudioCallback* pCallback, const CStdString& device, 
     memcpy(m_extradata, hints.extradata, hints.extrasize);
   }
 
-  return Initialize(pCallback, device, hints.channels, channelMap, hints.channels, hints.samplerate, hints.bitspersample, false, boostOnDownmix, false, bPassthrough);
+  return Initialize(device, hints.channels, channelMap, hints.channels, hints.samplerate, hints.bitspersample, false, boostOnDownmix, false, bPassthrough);
 }
 
-bool COMXAudio::Initialize(IAudioCallback* pCallback, const CStdString& device, int iChannels, enum PCMChannels *channelMap, unsigned int downmixChannels, unsigned int uiSamplesPerSec, unsigned int uiBitsPerSample, bool bResample, bool boostOnDownmix, bool bIsMusic, EEncoded bPassthrough)
+bool COMXAudio::Initialize(const CStdString& device, int iChannels, enum PCMChannels *channelMap, unsigned int downmixChannels, unsigned int uiSamplesPerSec, unsigned int uiBitsPerSample, bool bResample, bool boostOnDownmix, bool bIsMusic, EEncoded bPassthrough)
 {
   std::string deviceuse;
   if(device == "hdmi") {
@@ -187,8 +182,6 @@ bool COMXAudio::Initialize(IAudioCallback* pCallback, const CStdString& device, 
 
   if(bPassthrough != IAudioRenderer::ENCODED_NONE)
     m_Passthrough =true;
-
-  m_drc         = 0;
 
   memset(&m_wave_header, 0x0, sizeof(m_wave_header));
 
@@ -582,7 +575,6 @@ bool COMXAudio::Initialize(IAudioCallback* pCallback, const CStdString& device, 
   m_Initialized   = true;
   m_setStartTime  = true;
   m_first_frame   = true;
-  m_last_pts      = DVD_NOPTS_VALUE;
 
   SetCurrentVolume(m_CurrentVolume);
 
@@ -647,7 +639,6 @@ bool COMXAudio::Deinitialize()
 
   m_setStartTime  = true;
   m_first_frame   = true;
-  m_last_pts      = DVD_NOPTS_VALUE;
 
   return true;
 }
@@ -663,7 +654,6 @@ void COMXAudio::Flush()
     m_omx_tunnel_mixer.Flush();
   
   //m_setStartTime  = true;
-  m_last_pts      = DVD_NOPTS_VALUE;
   m_LostSync      = true;
   //m_first_frame   = true;
 }
@@ -837,13 +827,6 @@ unsigned int COMXAudio::AddPackets(const void* data, unsigned int len, double dt
     return len;
   }
 
-  if (!m_Passthrough && m_pCallback)
-  {
-    unsigned int mylen = std::min(len, sizeof m_visBuffer);
-    memcpy(m_visBuffer, data, mylen);
-    m_visBufferLength = mylen;
-  }
-
   if(m_eEncoding == OMX_AUDIO_CodingDTS && m_LostSync && (m_Passthrough || m_HWDecode))
   {
     int skip = SyncDTS((uint8_t *)data, len);
@@ -891,44 +874,29 @@ unsigned int COMXAudio::AddPackets(const void* data, unsigned int len, double dt
           (float)pts / AV_TIME_BASE, omx_buffer, omx_buffer->pBuffer, (int)omx_buffer->pAppPrivate);
     */
 
-    uint64_t val  = (uint64_t)(pts == DVD_NOPTS_VALUE) ? 0 : pts;
-
-    if(m_setStartTime)
-    {
-      omx_buffer->nFlags = OMX_BUFFERFLAG_STARTTIME;
-
-      m_setStartTime = false;
-      m_last_pts = pts;
-    }
-    else
-    {
-      if(pts == DVD_NOPTS_VALUE)
-      {
-        omx_buffer->nFlags = OMX_BUFFERFLAG_TIME_UNKNOWN;
-        m_last_pts = pts;
-      }
-      else if (m_last_pts != pts)
-      {
-        if(pts > m_last_pts)
-          m_last_pts = pts;
-        else
-          omx_buffer->nFlags = OMX_BUFFERFLAG_TIME_UNKNOWN;;
-      }
-      else if (m_last_pts == pts)
-      {
-        omx_buffer->nFlags = OMX_BUFFERFLAG_TIME_UNKNOWN;
-      }
-    }
-
-    omx_buffer->nTimeStamp = ToOMXTime(val);
-
-    demuxer_bytes -= omx_buffer->nFilledLen;
-    demuxer_content += omx_buffer->nFilledLen;
-
-    if(demuxer_bytes == 0)
-      omx_buffer->nFlags |= OMX_BUFFERFLAG_ENDOFFRAME;
-
-    int nRetry = 0;
+	  uint64_t val  = (uint64_t)(pts == DVD_NOPTS_VALUE) ? 0 : pts;
+	  
+	  if(m_setStartTime)
+	  {
+		  omx_buffer->nFlags = OMX_BUFFERFLAG_STARTTIME;
+		  
+		  m_setStartTime = false;
+	  }
+	  else if(pts == DVD_NOPTS_VALUE)
+	  {
+		  omx_buffer->nFlags = OMX_BUFFERFLAG_TIME_UNKNOWN;
+	  }
+	  
+	  omx_buffer->nTimeStamp = ToOMXTime(val);
+	  
+	  demuxer_bytes -= omx_buffer->nFilledLen;
+	  demuxer_content += omx_buffer->nFilledLen;
+	  
+	  if(demuxer_bytes == 0)
+		  omx_buffer->nFlags |= OMX_BUFFERFLAG_ENDOFFRAME;
+	  
+	  int nRetry = 0;
+	  
     while(true)
     {
       omx_err = m_omx_decoder.EmptyThisBuffer(omx_buffer);
@@ -1131,27 +1099,6 @@ unsigned int COMXAudio::GetChunkLen()
 int COMXAudio::SetPlaySpeed(int iSpeed)
 {
   return 0;
-}
-
-void COMXAudio::RegisterAudioCallback(IAudioCallback *pCallback)
-{
-  m_pCallback = pCallback;
-  if (m_pCallback && !m_Passthrough && !m_HWDecode)
-    m_pCallback->OnInitialize(m_OutputChannels, m_SampleRate, m_BitsPerSample);
-}
-
-void COMXAudio::UnRegisterAudioCallback()
-{
-  m_pCallback = NULL;
-}
-
-void COMXAudio::DoAudioWork()
-{
-  if (m_pCallback && m_visBufferLength)
-  {
-    m_pCallback->OnAudioData((BYTE*)m_visBuffer, m_visBufferLength);
-    m_visBufferLength = 0;
-  }
 }
 
 unsigned int COMXAudio::GetAudioRenderingLatency()

@@ -80,7 +80,7 @@ bool OMXPlayerVideoBase::Decode(OMXPacket *pkt)
 			m_iCurrentPts = pkt->dts;
 		}
 
-		ofLog(OF_LOG_VERBOSE, "CDVDPlayerVideo::Decode dts:%.0f pts:%.0f cur:%.0f, size:%d", pkt->dts, pkt->pts, m_iCurrentPts, pkt->size);
+		ofLog(OF_LOG_VERBOSE, "OMXPlayerVideoBase::Decode dts:%.0f pts:%.0f cur:%.0f, size:%d", pkt->dts, pkt->pts, m_iCurrentPts, pkt->size);
 		m_decoder->Decode(pkt->data, pkt->size, pkt->dts, pkt->pts);
 		ret = true;
     }
