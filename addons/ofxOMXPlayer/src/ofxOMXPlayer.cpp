@@ -17,7 +17,7 @@ ofxOMXPlayer::ofxOMXPlayer()
 	doLooping			= true;
 	isBufferEmpty		= true;
 	loop_offset = 0;
-	startpts              = 0;
+	startpts              = 0.0;
 	if (doVideoDebugging) 
 	{
 		//videoPlayer->doDebugging = true; //this can cause a string error, probably thread safe issue
@@ -27,6 +27,13 @@ ofxOMXPlayer::ofxOMXPlayer()
 	didVideoOpen		= false;
 	isTextureEnabled	= false;
 	videoPlayer			= NULL;
+	
+	rbp.Initialize();
+	omxCore.Initialize();
+	
+	clock = new OMXClock(); 
+	eglPlayer = NULL;
+	nonEglPlayer = NULL;
 	ofAddListener(ofEvents().exit, this, &ofxOMXPlayer::close);
 }
 
@@ -38,10 +45,7 @@ void ofxOMXPlayer::setup(ofxOMXPlayerSettings settings_)
 	ofLogVerbose() << "moviePath is " << moviePath;
 	isTextureEnabled = settings.enableTexture;
 	
-	rbp.Initialize();
-	omxCore.Initialize();
 	
-	clock = new OMXClock(); 
 	bool doDumpFormat = false;
 	
 	if(omxReader.Open(moviePath.c_str(), doDumpFormat))
@@ -96,14 +100,20 @@ void ofxOMXPlayer::openPlayer()
 	ofLogVerbose() << "videoStreamInfo.nb_frames " <<videoStreamInfo.nb_frames;
 	if (isTextureEnabled) 
 	{
-		generateEGLImage();
-		OMXPlayerEGLImage* eglPlayer = new OMXPlayerEGLImage();
+		if (!eglPlayer) 
+		{
+			generateEGLImage();
+			eglPlayer = new OMXPlayerEGLImage();
+		}
+		
 		didVideoOpen = eglPlayer->Open(videoStreamInfo, clock, eglImage);
 		videoPlayer = (OMXPlayerVideoBase*)eglPlayer;
 
 	}else 
 	{
-		OMXPlayerVideo* nonEglPlayer = new OMXPlayerVideo();
+		if (!nonEglPlayer) {
+			nonEglPlayer = new OMXPlayerVideo();
+		}
 		bool deinterlace = false;
 		bool hdmi_clock_sync = true;
 		float display_aspect = 1.0;
@@ -234,10 +244,10 @@ void ofxOMXPlayer::threadedFunction()
 	while (isThreadRunning()) 
 	{
 		struct timespec starttime, endtime;
-		printf("V : %8.02f %8d %8d A : %8.02f %8.02f Cv : %8d Ca : %8d                            \r",
+		/*printf("V : %8.02f %8d %8d A : %8.02f %8.02f Cv : %8d Ca : %8d                            \r",
 		 clock->OMXMediaTime(), videoPlayer->GetDecoderBufferSize(),
 		 videoPlayer->GetDecoderFreeSpace(), audioPlayer.GetCurrentPTS() / DVD_TIME_BASE, 
-		 audioPlayer.GetDelay(), videoPlayer->GetCached(), audioPlayer.GetCached());
+		 audioPlayer.GetDelay(), videoPlayer->GetCached(), audioPlayer.GetCached());*/
 		
 		if(omxReader.IsEof() && !packet)
 		{
@@ -245,7 +255,7 @@ void ofxOMXPlayer::threadedFunction()
 			{
 				if (doLooping)
 				{
-					
+					//startpts = 1.0;
 					omxReader.SeekTime(0 * 1000.0f, AVSEEK_FLAG_BACKWARD, &startpts);
 					if(hasAudio)
 					{
@@ -254,8 +264,9 @@ void ofxOMXPlayer::threadedFunction()
 					else if(hasVideo)
 					{
 						loop_offset = videoPlayer->GetCurrentPTS();
-						// printf("Loop offset : %8.02f\n", loop_offset / DVD_TIME_BASE);
-					}  
+						
+					} 
+					ofLog(OF_LOG_VERBOSE, "Loop offset : %8.02f\n", loop_offset / DVD_TIME_BASE);
 				}
 				else
 				{

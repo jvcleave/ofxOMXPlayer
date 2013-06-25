@@ -85,7 +85,6 @@ bool OMXPlayerVideoBase::Decode(OMXPacket *pkt)
 	{
 		m_pts = pkt->pts;
 	}
-
 	
 	if((int)m_decoder->GetFreeSpace() > pkt->size)
     {
@@ -224,6 +223,7 @@ void OMXPlayerVideoBase::Process()
 			}
 		}
 		UnLockDecoder();
+		
 		
 	}
 	

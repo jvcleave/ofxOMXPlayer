@@ -544,76 +544,86 @@ OMX_BUFFERHEADERTYPE *COMXCoreComponent::GetOutputBuffer()
 
 OMX_ERRORTYPE COMXCoreComponent::AllocInputBuffers(bool use_buffers /* = false **/)
 {
-  OMX_ERRORTYPE omx_err = OMX_ErrorNone;
+	OMX_ERRORTYPE omx_err = OMX_ErrorNone;
 
-  m_omx_input_use_buffers = use_buffers; 
+	m_omx_input_use_buffers = use_buffers; 
 
-  if(!m_handle)
-    return OMX_ErrorUndefined;
+	if(!m_handle)
+	{
+		return OMX_ErrorUndefined;
+	}
+	
+	OMX_PARAM_PORTDEFINITIONTYPE portFormat;
+	OMX_INIT_STRUCTURE(portFormat);
+	portFormat.nPortIndex = m_input_port;
 
-  OMX_PARAM_PORTDEFINITIONTYPE portFormat;
-  OMX_INIT_STRUCTURE(portFormat);
-  portFormat.nPortIndex = m_input_port;
+	omx_err = OMX_GetParameter(m_handle, OMX_IndexParamPortDefinition, &portFormat);
+	if(omx_err != OMX_ErrorNone)
+	{
+		return omx_err;
+	}
 
-  omx_err = OMX_GetParameter(m_handle, OMX_IndexParamPortDefinition, &portFormat);
-  if(omx_err != OMX_ErrorNone)
-    return omx_err;
+	if(GetState() != OMX_StateIdle)
+	{
+		if(GetState() != OMX_StateLoaded)
+		{
+			SetStateForComponent(OMX_StateLoaded);
+		}
+		SetStateForComponent(OMX_StateIdle);
+	}
 
-  if(GetState() != OMX_StateIdle)
-  {
-    if(GetState() != OMX_StateLoaded)
-      SetStateForComponent(OMX_StateLoaded);
+	omx_err = EnablePort(m_input_port, false);
+	if(omx_err != OMX_ErrorNone)
+	{
+		return omx_err;
+	}
 
-    SetStateForComponent(OMX_StateIdle);
-  }
+	m_input_alignment     = portFormat.nBufferAlignment;
+	m_input_buffer_count  = portFormat.nBufferCountActual;
+	m_input_buffer_size   = portFormat.nBufferSize;
 
-  omx_err = EnablePort(m_input_port, false);
-  if(omx_err != OMX_ErrorNone)
-    return omx_err;
+	ofLog(OF_LOG_VERBOSE, "\nCOMXCoreComponent::AllocInputBuffers component(%s) - port(%d), nBufferCountMin(%u), nBufferCountActual(%u), nBufferSize(%u), nBufferAlignmen(%u)\n",m_componentName.c_str(), GetInputPort(), portFormat.nBufferCountMin, portFormat.nBufferCountActual, portFormat.nBufferSize, portFormat.nBufferAlignment);
 
-  m_input_alignment     = portFormat.nBufferAlignment;
-  m_input_buffer_count  = portFormat.nBufferCountActual;
-  m_input_buffer_size   = portFormat.nBufferSize;
+	for (size_t i = 0; i < portFormat.nBufferCountActual; i++)
+	{
+		OMX_BUFFERHEADERTYPE *buffer = NULL;
+		OMX_U8* data = NULL;
 
- ofLog(OF_LOG_VERBOSE, "\nCOMXCoreComponent::AllocInputBuffers component(%s) - port(%d), nBufferCountMin(%u), nBufferCountActual(%u), nBufferSize(%u), nBufferAlignmen(%u)\n",m_componentName.c_str(), GetInputPort(), portFormat.nBufferCountMin, portFormat.nBufferCountActual, portFormat.nBufferSize, portFormat.nBufferAlignment);
+		if(m_omx_input_use_buffers)
+		{
+			data = (OMX_U8*)_aligned_malloc(portFormat.nBufferSize, m_input_alignment);
+			omx_err = OMX_UseBuffer(m_handle, &buffer, m_input_port, NULL, portFormat.nBufferSize, data);
+		}
+		else
+		{
+			omx_err = OMX_AllocateBuffer(m_handle, &buffer, m_input_port, NULL, portFormat.nBufferSize);
+		}
+		if(omx_err != OMX_ErrorNone)
+		{
+			ofLog(OF_LOG_VERBOSE, "\nCOMXCoreComponent::AllocInputBuffers component(%s) - OMX_UseBuffer failed with omx_err(0x%x)\n", m_componentName.c_str(), omx_err);
 
-  for (size_t i = 0; i < portFormat.nBufferCountActual; i++)
-  {
-    OMX_BUFFERHEADERTYPE *buffer = NULL;
-    OMX_U8* data = NULL;
+			if(m_omx_input_use_buffers && data)
+			{
+				_aligned_free(data);
+			}
 
-    if(m_omx_input_use_buffers)
-    {
-      data = (OMX_U8*)_aligned_malloc(portFormat.nBufferSize, m_input_alignment);
-      omx_err = OMX_UseBuffer(m_handle, &buffer, m_input_port, NULL, portFormat.nBufferSize, data);
-    }
-    else
-    {
-      omx_err = OMX_AllocateBuffer(m_handle, &buffer, m_input_port, NULL, portFormat.nBufferSize);
-    }
-    if(omx_err != OMX_ErrorNone)
-    {
-     ofLog(OF_LOG_VERBOSE, "\nCOMXCoreComponent::AllocInputBuffers component(%s) - OMX_UseBuffer failed with omx_err(0x%x)\n", m_componentName.c_str(), omx_err);
+			return omx_err;
+		}
+		buffer->nInputPortIndex = m_input_port;
+		buffer->nFilledLen      = 0;
+		buffer->nOffset         = 0;
+		buffer->pAppPrivate     = (void*)i;  
+		m_omx_input_buffers.push_back(buffer);
+		  
+		m_omx_input_avaliable.push(buffer);
+	}
+	ofLogVerbose(m_componentName + "::"+__func__) << "BUFFER SIZE: " << m_omx_input_buffers.size();
+	//ofLog(OF_LOG_VERBOSE, "BUFFER SIZE %d", m_omx_input_buffers.size());
+	omx_err = WaitForCommand(OMX_CommandPortEnable, m_input_port);
 
-      if(m_omx_input_use_buffers && data)
-        _aligned_free(data);
+	m_flush_input = false;
 
-      return omx_err;
-    }
-    buffer->nInputPortIndex = m_input_port;
-    buffer->nFilledLen      = 0;
-    buffer->nOffset         = 0;
-    buffer->pAppPrivate     = (void*)i;  
-    m_omx_input_buffers.push_back(buffer);
-	  ofLog(OF_LOG_VERBOSE, "BUFFER SIZE %d", m_omx_input_buffers.size());
-    m_omx_input_avaliable.push(buffer);
-  }
-
-  omx_err = WaitForCommand(OMX_CommandPortEnable, m_input_port);
-
-  m_flush_input = false;
-
-  return omx_err;
+	return omx_err;
 }
 
 OMX_ERRORTYPE COMXCoreComponent::AllocOutputBuffers(bool use_buffers /* = false */)

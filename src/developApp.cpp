@@ -7,7 +7,7 @@ void developApp::onCharacterReceived(SSHKeyListenerEventData& e)
 //--------------------------------------------------------------
 void developApp::setup()
 {
-	
+	doRandomSelect		= true;
 	isClosing				= false;
 	isShaderEnabled			= false;
 	usingTexturePlayer		= false;
@@ -24,9 +24,8 @@ void developApp::setup()
 	if (currentVideoDirectory.exists()) 
 	{
 		//option to put multiple videos in folder to test
-		bool doRandomSelect		= true;
 		currentVideoDirectory.listDir();
-		vector<ofFile> files = currentVideoDirectory.getFiles();
+		files = currentVideoDirectory.getFiles();
 		if (files.size()>0) 
 		{
 			if (doRandomSelect && files.size()>1) {
@@ -54,10 +53,11 @@ void developApp::setup()
 	consoleListener.setup(this);
 	ofHideCursor();
 }
+
 void developApp::createNonTexturePlayer()
 {
 	ofLogVerbose() << "createNonTexturePlayer";
-	ofxOMXPlayerSettings settings;
+	
 	settings.videoPath = videoPath;
 	settings.enableTexture = false;
 	omxPlayer.setup(settings);
@@ -76,7 +76,6 @@ void developApp::createTexturePlayer()
 		fbo.end();
 		
 	}
-	ofxOMXPlayerSettings settings;
 	settings.videoPath = videoPath;
 	omxPlayer.setup(settings);
 }
@@ -205,8 +204,8 @@ void developApp::keyPressed  (int key){
 		}
 		case '2':
 		{
-			ofLogVerbose() << "SENDING STOP COMMAND";
-			omxPlayer.stop();
+			
+
 			break;
 		}
 			

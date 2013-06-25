@@ -43,5 +43,9 @@ public:
 	void createNonTexturePlayer();
 	void createTexturePlayer();
 	bool isShaderEnabled;
+	
+	ofxOMXPlayerSettings settings;
+	vector<ofFile> files;
+	bool doRandomSelect;
 };
 

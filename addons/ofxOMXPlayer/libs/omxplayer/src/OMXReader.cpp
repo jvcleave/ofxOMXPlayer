@@ -790,6 +790,10 @@ bool OMXReader::GetHints(AVStream *stream, COMXStreamInfo *hints)
 	
 	if(stream->codec->codec_type == AVMEDIA_TYPE_VIDEO)
 	{
+		//CUSTOM
+		hints->duration		= stream->duration;
+		hints->nb_frames	= stream->nb_frames;
+		
 		hints->fpsrate       = stream->r_frame_rate.num;
 		hints->fpsscale      = stream->r_frame_rate.den;
 		

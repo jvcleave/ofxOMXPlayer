@@ -74,5 +74,4 @@ public:
 	void						LockDecoder();
 	void						UnLockDecoder();
 	
-	
 };
