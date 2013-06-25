@@ -105,7 +105,7 @@ public:
     { return true; }
   virtual bool Load() 
   {
-    printf("\nDllBcm: Using omx system library");
+    printf("\nDllBcm: Using omx system library \n");
     return true;
   }
   virtual void Unload() {}

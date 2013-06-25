@@ -20,7 +20,8 @@ OMXDecoderBase::OMXDecoderBase()
 	m_extrasize         = 0;
 	m_video_codec_name  = "";
 	m_first_frame       = true;
-	decoder_name		= "undefined decoder name";
+	decoder_name = OMX_VIDEO_DECODER;
+	
 	ofLogVerbose() << "OMXDecoderBase::CONSTRUCT";
 	
 }
@@ -60,8 +61,8 @@ bool OMXDecoderBase::SendDecoderConfig()
 	/* send decoder config */
 	if(m_extrasize > 0 && m_extradata != NULL)
 	{
-		ofLogVerbose(__FUNCTION__) << "m_extrasize: " << m_extrasize;
-		ofLogVerbose(__FUNCTION__) << "m_extradata: " << m_extradata;
+		ofLogVerbose(__func__) << "m_extrasize: " << m_extrasize;
+		ofLogVerbose(__func__) << "m_extradata: " << m_extradata;
 		
 		OMX_BUFFERHEADERTYPE *omx_buffer = m_omx_decoder.GetInputBuffer();
 		

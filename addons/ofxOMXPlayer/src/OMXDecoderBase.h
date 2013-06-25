@@ -27,7 +27,6 @@
 #define OMX_THEORA_DECODER      OMX_VIDEO_DECODER
 #define OMX_MJPEG_DECODER       OMX_VIDEO_DECODER
 
-#define MAX_TEXT_LENGTH 1024
 
 class DllAvUtil;
 class DllAvFormat;

@@ -7,11 +7,13 @@ void developApp::onCharacterReceived(SSHKeyListenerEventData& e)
 //--------------------------------------------------------------
 void developApp::setup()
 {
-	bool doRandomSelect = true;
-	isClosing = false;
-	isShaderEnabled = false;
-	usingTexturePlayer =  false;
+	
+	isClosing				= false;
+	isShaderEnabled			= false;
+	usingTexturePlayer		= false;
+	
 	videoPath = "/opt/vc/src/hello_pi/hello_video/test.h264";
+	
 	/* to get the videos I am testing run command:
 	 * $wget -r -nd -P /home/pi/videos http://www.jvcref.com/files/PI/video/
 	 */
@@ -21,6 +23,8 @@ void developApp::setup()
 	ofDirectory currentVideoDirectory("/home/pi/videos/current");
 	if (currentVideoDirectory.exists()) 
 	{
+		//option to put multiple videos in folder to test
+		bool doRandomSelect		= true;
 		currentVideoDirectory.listDir();
 		vector<ofFile> files = currentVideoDirectory.getFiles();
 		if (files.size()>0) 
@@ -31,13 +35,13 @@ void developApp::setup()
 			{
 				videoPath = files[0].path();
 			}
-
 		}		
 	}
+	
 	ofLogVerbose() << "using videoPath : " << videoPath;
 	
-	doTextures = true;
-	doShader = true;
+	doTextures	= true;
+	doShader	= true;
 	if (doShader || doTextures) 
 	{
 		usingTexturePlayer = true;

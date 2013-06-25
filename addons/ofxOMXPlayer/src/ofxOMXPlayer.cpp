@@ -233,11 +233,11 @@ void ofxOMXPlayer::threadedFunction()
 {
 	while (isThreadRunning()) 
 	{
-		/*struct timespec starttime, endtime;
+		struct timespec starttime, endtime;
 		printf("V : %8.02f %8d %8d A : %8.02f %8.02f Cv : %8d Ca : %8d                            \r",
 		 clock->OMXMediaTime(), videoPlayer->GetDecoderBufferSize(),
 		 videoPlayer->GetDecoderFreeSpace(), audioPlayer.GetCurrentPTS() / DVD_TIME_BASE, 
-		 audioPlayer.GetDelay(), videoPlayer->GetCached(), audioPlayer.GetCached());*/
+		 audioPlayer.GetDelay(), videoPlayer->GetCached(), audioPlayer.GetCached());
 		
 		if(omxReader.IsEof() && !packet)
 		{
@@ -264,12 +264,6 @@ void ofxOMXPlayer::threadedFunction()
 			}
 			else
 			{
-				// Abort audio buffering, now we're on our own
-				/*if (isBufferEmpty)
-				{
-					clock->OMXResume();
-				}*/
-				
 				OMXClock::OMXSleep(10);
 				continue;
 			}
@@ -277,48 +271,11 @@ void ofxOMXPlayer::threadedFunction()
 		
 		if (hasAudio) 
 		{
-			/*if(audioPlayer.Error())
+			if(audioPlayer.Error())
 			 {
-			 ofLog(OF_LOG_ERROR, "audio player error. emergency exit!!!\n");
-			 m_stop = true;
-			 close();
-			 ofExit(0);
-			 }*/
+				 ofLogError(__func__) << "audio player error.";
+			 }
 		}
-		
-		/* when the audio buffer runs under 0.1 seconds we buffer up */
-		/*if(hasAudio)
-		{
-			if(audioPlayer.GetDelay() < 0.1f && !isBufferEmpty)
-			{
-				if(!clock->OMXIsPaused())
-				{
-					clock->OMXPause();
-					//printf("buffering start\n");
-					isBufferEmpty = true;
-					clock_gettime(CLOCK_REALTIME, &starttime);
-				}
-			}
-			if(audioPlayer.GetDelay() > (AUDIO_BUFFER_SECONDS * 0.75f) && isBufferEmpty)
-			{
-				if(clock->OMXIsPaused())
-				{
-					clock->OMXResume();
-					//printf("buffering end\n");
-					isBufferEmpty = false;
-				}
-			}
-			if(isBufferEmpty)
-			{
-				clock_gettime(CLOCK_REALTIME, &endtime);
-				if((endtime.tv_sec - starttime.tv_sec) > 1)
-				{
-					isBufferEmpty = false;
-					clock->OMXResume();
-					//printf("buffering timed out\n");
-				}
-			}
-		}*/
 		
 		if(!packet)
 		{
@@ -477,6 +434,7 @@ bool ofxOMXPlayer::isPlaying()
 
 void ofxOMXPlayer::close(ofEventArgs & a)
 {
+	waitForThread(true);
 	//setPaused(true);
 	sleep(1000);
 	OMXClock::OMXSleep(1000);

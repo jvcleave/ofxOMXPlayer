@@ -21,7 +21,6 @@ OMXPlayerEGLImage::OMXPlayerEGLImage()
 	m_iVideoDelay   = 0;
 	m_pts           = DVD_NOPTS_VALUE;
 	m_speed         = DVD_PLAYSPEED_NORMAL;
-	//doDebugging = false;
 	ofLogVerbose() << "OMXPlayerEGLImage CONSTRUCT";
 }
 

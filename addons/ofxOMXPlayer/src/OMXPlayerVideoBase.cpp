@@ -29,6 +29,24 @@ int OMXPlayerVideoBase::GetSpeed()
 	return m_speed;
 }
 
+int  OMXPlayerVideoBase::GetDecoderFreeSpace()
+{
+	if(m_decoder)
+	{
+		return m_decoder->GetFreeSpace();
+	}
+	return 0;
+}
+
+int  OMXPlayerVideoBase::GetDecoderBufferSize()
+{
+	if(m_decoder)
+	{
+		return m_decoder->GetInputBufferSize();
+	}
+	return 0;
+}
+
 void OMXPlayerVideoBase::Lock()
 {
     pthread_mutex_lock(&m_lock);

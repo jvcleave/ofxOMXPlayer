@@ -117,7 +117,7 @@ public:
    // DLL faking.
    virtual bool ResolveExports() { return true; }
    virtual bool Load() {
-     printf("\nDllAvUtilBase: Using libavutil system library");
+     printf("\nDllAvUtilBase: Using libavutil system library \n");
      return true;
    }
    virtual void Unload() {}

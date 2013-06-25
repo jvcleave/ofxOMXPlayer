@@ -1256,62 +1256,68 @@ OMX_ERRORTYPE COMXCoreComponent::UseEGLImage(OMX_BUFFERHEADERTYPE** ppBufferHdr,
 
 bool COMXCoreComponent::Initialize( const std::string &component_name, OMX_INDEXTYPE index)
 {
-  OMX_ERRORTYPE omx_err;
+	ofLogVerbose(__func__) << " component_name: " << component_name;
+	OMX_ERRORTYPE omx_err;
 
-  if(!m_DllOMX->Load())
-    return false;
+	if(!m_DllOMX->Load())
+	{
+		return false;
+	}
 
-  m_DllOMXOpen = true;
+	m_DllOMXOpen = true;
 
-  m_componentName = component_name;
-  
-  m_callbacks.EventHandler    = &COMXCoreComponent::DecoderEventHandlerCallback;
-  m_callbacks.EmptyBufferDone = &COMXCoreComponent::DecoderEmptyBufferDoneCallback;
-  m_callbacks.FillBufferDone  = &COMXCoreComponent::DecoderFillBufferDoneCallback;
+	m_componentName = component_name;
 
-  // Get video component handle setting up callbacks, component is in loaded state on return.
-  omx_err = m_DllOMX->OMX_GetHandle(&m_handle, (char*)component_name.c_str(), this, &m_callbacks);
-  if (omx_err != OMX_ErrorNone)
-  {
-   ofLog(OF_LOG_VERBOSE, "\nCOMXCoreComponent::Initialize - could not get component handle for %s omx_err(0x%08x)\n", component_name.c_str(), (int)omx_err);
-    Deinitialize();
-    return false;
-  }
+	m_callbacks.EventHandler    = &COMXCoreComponent::DecoderEventHandlerCallback;
+	m_callbacks.EmptyBufferDone = &COMXCoreComponent::DecoderEmptyBufferDoneCallback;
+	m_callbacks.FillBufferDone  = &COMXCoreComponent::DecoderFillBufferDoneCallback;
 
-  OMX_PORT_PARAM_TYPE port_param;
-  OMX_INIT_STRUCTURE(port_param);
+	// Get video component handle setting up callbacks, component is in loaded state on return.
+	omx_err = m_DllOMX->OMX_GetHandle(&m_handle, (char*)component_name.c_str(), this, &m_callbacks);
+	
+	if (omx_err != OMX_ErrorNone)
+	{
+		ofLog(OF_LOG_VERBOSE, "\nCOMXCoreComponent::Initialize - could not get component handle for %s omx_err(0x%08x)\n", component_name.c_str(), (int)omx_err);
+		Deinitialize();
+			return false;
+	}
 
-  omx_err = OMX_GetParameter(m_handle, index, &port_param);
-  if (omx_err != OMX_ErrorNone)
-  {
-   ofLog(OF_LOG_VERBOSE, "\nCOMXCoreComponent::Initialize - could not get port_param for component %s omx_err(0x%08x)\n", component_name.c_str(), (int)omx_err);
-  }
+	OMX_PORT_PARAM_TYPE port_param;
+	OMX_INIT_STRUCTURE(port_param);
 
-  omx_err = DisableAllPorts();
-  if (omx_err != OMX_ErrorNone)
-  {
-   ofLog(OF_LOG_VERBOSE, "\nCOMXCoreComponent::Initialize - error disable ports on component %s omx_err(0x%08x)\n", component_name.c_str(), (int)omx_err);
-  }
+	omx_err = OMX_GetParameter(m_handle, index, &port_param);
+	if (omx_err != OMX_ErrorNone)
+	{
+		ofLog(OF_LOG_VERBOSE, "\nCOMXCoreComponent::Initialize - could not get port_param for component %s omx_err(0x%08x)\n", component_name.c_str(), (int)omx_err);
+	}
 
-  m_input_port  = port_param.nStartPortNumber;
-  m_output_port = m_input_port + 1;
+	omx_err = DisableAllPorts();
+	if (omx_err != OMX_ErrorNone)
+	{
+		ofLog(OF_LOG_VERBOSE, "\nCOMXCoreComponent::Initialize - error disable ports on component %s omx_err(0x%08x)\n", component_name.c_str(), (int)omx_err);
+	}
 
-  if(m_componentName == "OMX.broadcom.audio_mixer")
-  {
-    m_input_port  = port_param.nStartPortNumber + 1;
-    m_output_port = port_param.nStartPortNumber;
-  }
+	m_input_port  = port_param.nStartPortNumber;
+	m_output_port = m_input_port + 1;
 
-  if (m_output_port > port_param.nStartPortNumber+port_param.nPorts-1)
-    m_output_port = port_param.nStartPortNumber+port_param.nPorts-1;
+	if(m_componentName == "OMX.broadcom.audio_mixer")
+	{
+		m_input_port  = port_param.nStartPortNumber + 1;
+		m_output_port = port_param.nStartPortNumber;
+	}
 
- ofLog(OF_LOG_VERBOSE, "\nCOMXCoreComponent::Initialize %s input port %d output port %d\n", m_componentName.c_str(), m_input_port, m_output_port);
+	if (m_output_port > port_param.nStartPortNumber+port_param.nPorts-1)
+	{
+		m_output_port = port_param.nStartPortNumber+port_param.nPorts-1;
+	}
 
-  m_exit = false;
-  m_flush_input   = false;
-  m_flush_output  = false;
+	ofLog(OF_LOG_VERBOSE, "\nCOMXCoreComponent::Initialize %s input port %d output port %d\n", m_componentName.c_str(), m_input_port, m_output_port);
 
-  return true;
+	m_exit = false;
+	m_flush_input   = false;
+	m_flush_output  = false;
+
+	return true;
 }
 
 bool COMXCoreComponent::Deinitialize()

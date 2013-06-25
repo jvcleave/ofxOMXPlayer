@@ -6,14 +6,13 @@ COMXVideo::COMXVideo()
 
 	m_deinterlace       = false;
 	m_hdmi_clock_sync   = false;
-  
+    
 }
 
 
 bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, float display_aspect, bool deinterlace, bool hdmi_clock_sync)
 {
 	OMX_ERRORTYPE omx_err   = OMX_ErrorNone;
-	std::string decoder_name;
 
 	m_video_codec_name      = "";
 	m_codingType            = OMX_VIDEO_CodingUnused;
@@ -47,9 +46,7 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, float display_aspec
 		m_deinterlace = false;
 	}
 
-	std::string componentName = "";
-
-	componentName = decoder_name;
+	std::string componentName = decoder_name;
 	if(!m_omx_decoder.Initialize(componentName, OMX_IndexParamVideoInit))
 	{
 		return false;

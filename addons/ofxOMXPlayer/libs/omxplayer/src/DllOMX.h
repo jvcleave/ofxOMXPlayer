@@ -52,7 +52,7 @@ public:
     { return true; }
   virtual bool Load() 
   {
-    printf("\nDllOMX: Using omx system library");
+    printf("\nDllOMX: Using omx system library \n");
     return true;
   }
   virtual void Unload() {}
