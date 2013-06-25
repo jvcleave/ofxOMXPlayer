@@ -93,7 +93,7 @@ void ofxOMXPlayer::openPlayer()
 	
 	ofLogVerbose() << "SET videoWidth: "	<< videoWidth;
 	ofLogVerbose() << "SET videoHeight: "	<< videoHeight;
-
+	ofLogVerbose() << "videoStreamInfo.nb_frames " <<videoStreamInfo.nb_frames;
 	if (isTextureEnabled) 
 	{
 		generateEGLImage();
@@ -142,7 +142,7 @@ void ofxOMXPlayer::openPlayer()
 	
 	if (isPlaying()) 
 	{
-		ofLogVerbose() << "videoStreamInfo.nb_frames " <<videoStreamInfo.nb_frames;
+		
 		ofLogVerbose() << "videoPlayer->GetFPS(): " << videoPlayer->GetFPS();
 		
 		if(videoStreamInfo.nb_frames>0 && videoPlayer->GetFPS()>0)
@@ -158,7 +158,7 @@ void ofxOMXPlayer::openPlayer()
 			
 			if (doLooping) 
 			{
-				omxReader.enableFileLoopinghack();
+				//omxReader.enableFileLoopinghack();
 			}
 		}
 		clock->OMXStateExecute();
@@ -279,7 +279,7 @@ void ofxOMXPlayer::threadedFunction()
 		
 		if(!packet)
 		{
-			packet = omxReader.Read(false);
+			packet = omxReader.Read();
 			if (packet && doLooping && packet->pts != DVD_NOPTS_VALUE)
 			{
 				packet->pts += loop_offset;
