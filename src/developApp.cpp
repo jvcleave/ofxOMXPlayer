@@ -177,6 +177,9 @@ void developApp::exit()
 void developApp::keyPressed  (int key){
 	
 	ofLogVerbose() << key << "received!";
+	if (key == 0x5b44) {
+		ofLogVerbose() << "RIGHT KEY PRESSED";
+	}
 	
 	switch (key) 
 	{
@@ -202,10 +205,11 @@ void developApp::keyPressed  (int key){
 			omxPlayer.play();
 			break;
 		}
-		case '2':
+		
+		case 'b':
 		{
 			
-
+			omxPlayer.stepFrameForward();
 			break;
 		}
 			
@@ -216,46 +220,3 @@ void developApp::keyPressed  (int key){
 	}
 	
 }
-
-//--------------------------------------------------------------
-void developApp::keyReleased(int key){
-	
-}
-
-//--------------------------------------------------------------
-void developApp::mouseMoved(int x, int y ){
-	
-}
-
-//--------------------------------------------------------------
-void developApp::mouseDragged(int x, int y, int button){
-	
-	
-}
-
-//--------------------------------------------------------------
-void developApp::mousePressed(int x, int y, int button){
-	
-}
-
-//--------------------------------------------------------------
-void developApp::mouseReleased(int x, int y, int button){
-	
-}
-
-
-//--------------------------------------------------------------
-void developApp::windowResized(int w, int h){
-	
-}
-
-//--------------------------------------------------------------
-void developApp::gotMessage(ofMessage msg){
-	
-}
-
-//--------------------------------------------------------------
-void developApp::dragEvent(ofDragInfo dragInfo){ 
-	
-}
-

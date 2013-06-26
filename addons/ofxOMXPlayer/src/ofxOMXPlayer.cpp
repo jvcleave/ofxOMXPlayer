@@ -295,6 +295,9 @@ void ofxOMXPlayer::threadedFunction()
 			{
 				packet->pts += loop_offset;
 				packet->dts += loop_offset;
+				
+				//packet->pts = DVD_NOPTS_VALUE;
+				//packet->dts = DVD_NOPTS_VALUE;
 			}
 		}
 		
@@ -437,6 +440,15 @@ bool ofxOMXPlayer::isPaused()
 {
 	return clock->OMXIsPaused();
 }
+void ofxOMXPlayer::stepFrameForward()
+{
+	if (!isPaused()) 
+	{
+		setPaused(true);
+	}
+	clock->OMXStep(1);
+}
+
 
 bool ofxOMXPlayer::isPlaying()
 {
@@ -447,9 +459,9 @@ void ofxOMXPlayer::close(ofEventArgs & a)
 {
 	waitForThread(true);
 	//setPaused(true);
-	sleep(1000);
-	OMXClock::OMXSleep(1000);
-	sleep(1000);
+	sleep(500);
+	OMXClock::OMXSleep(500);
+	//sleep(500);
 	ofLogVerbose() << "start ofxOMXPlayer::close";
 	if (isTextureEnabled) 
 	{

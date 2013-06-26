@@ -85,7 +85,7 @@ public:
 	bool			isTextureEnabled;
 	bool			didVideoOpen;
 	bool			didAudioOpen;
-	
+	void			stepFrameForward();
 private:
 	
 	CRBP				rbp;

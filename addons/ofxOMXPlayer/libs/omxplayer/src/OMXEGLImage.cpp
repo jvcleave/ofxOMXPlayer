@@ -129,7 +129,8 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglIm
 	portParam.nPortIndex = m_omx_decoder.GetInputPort();
 	// JVC: I think numVideoBuffers can be probed for an optimal amount
 	// omxplayer uses 60 but maybe that takes away GPU memory for other operations?
-	int numVideoBuffers = 80;
+	ofLogVerbose(__func__) << "portParam.nBufferCountActual GET VAR --------------------------:" << portParam.nBufferCountActual;
+	int numVideoBuffers = 60; //20 is minimum - can get up to 80
 	portParam.nBufferCountActual = numVideoBuffers; 
 
 	portParam.format.video.nFrameWidth  = m_decoded_width;
@@ -145,9 +146,7 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglIm
 		return false;
 	}
 	
-	// broadcom omx entension:
-	// When enabled, the timestamp fifo mode will change the way incoming timestamps are associated with output images.
-	// In this mode the incoming timestamps get used without re-ordering on output images
+
 	OMX_PARAM_BRCMVIDEODECODEERRORCONCEALMENTTYPE concanParam;
 	OMX_INIT_STRUCTURE(concanParam);
 	concanParam.bStartWithValidFrame = OMX_FALSE;
@@ -179,6 +178,28 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglIm
 			return false;
 		}
 
+	}
+	
+	// broadcom omx entension:
+	// When enabled, the timestamp fifo mode will change the way incoming timestamps are associated with output images.
+	// In this mode the incoming timestamps get used without re-ordering on output images.
+	if(hints.ptsinvalid)
+	{
+		OMX_CONFIG_BOOLEANTYPE timeStampMode;
+		OMX_INIT_STRUCTURE(timeStampMode);
+		timeStampMode.bEnabled = OMX_TRUE;
+		omx_err = m_omx_decoder.SetParameter((OMX_INDEXTYPE)OMX_IndexParamBrcmVideoTimestampFifo, &timeStampMode);
+		
+		if (omx_err == OMX_ErrorNone)
+		{
+			ofLogVerbose()	<< "Open OMX_IndexParamBrcmVideoTimestampFifo PASS";
+		}else 
+		{
+			ofLog(OF_LOG_VERBOSE, "Open OMX_IndexParamBrcmVideoTimestampFifo error (0%08x)\n", omx_err);
+			return false;
+		}
+
+		
 	}
 	
 
@@ -324,7 +345,7 @@ void OMXEGLImage::Close()
   m_omx_tunnel_sched.Deestablish();
 
   m_omx_decoder.FlushInput();
-
+	m_omx_render.FlushOutput();
   m_omx_sched.Deinitialize();
   m_omx_decoder.Deinitialize();
   m_omx_render.Deinitialize();
