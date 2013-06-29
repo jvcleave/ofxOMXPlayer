@@ -11,7 +11,7 @@
 #include "OMXThread.h"
 #include "OMXDecoderBase.h"
 
-#define MAX_DATA_SIZE    40 * 1024 * 1024
+#define MAX_DATA_SIZE    10 * 1024 * 1024
 
 
 class OMXPlayerVideoBase: public OMXThread

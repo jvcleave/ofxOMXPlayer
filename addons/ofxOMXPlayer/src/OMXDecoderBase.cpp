@@ -9,7 +9,7 @@
 #include <sys/time.h>
 #include <inttypes.h>
 
-
+int OMXDecoderBase::fillBufferCounter =0;
 OMXDecoderBase::OMXDecoderBase()
 {
 	
@@ -21,6 +21,7 @@ OMXDecoderBase::OMXDecoderBase()
 	m_video_codec_name  = "";
 	m_first_frame       = true;
 	decoder_name = OMX_VIDEO_DECODER;
+	
 	
 	ofLogVerbose() << "OMXDecoderBase::CONSTRUCT";
 	
@@ -46,13 +47,7 @@ bool OMXDecoderBase::NaluFormatStartCodes(enum CodecID codec, uint8_t *in_extrad
 	return false;    
 }
 
-OMXDecoderBase::~OMXDecoderBase()
-{
-	if (m_is_open)
-	{
-		Close();
-	}
-}
+
 
 bool OMXDecoderBase::SendDecoderConfig()
 {
@@ -198,11 +193,6 @@ void OMXDecoderBase::Reset()
 	m_omx_decoder.FlushInput();
 	m_omx_tunnel_decoder.Flush();
 	
-}
-
-void OMXDecoderBase::Close()
-{
-	ofLogVerbose() << "OMXDecoderBase Close";
 }
 
 

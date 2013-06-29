@@ -135,6 +135,7 @@ public:
 	static void FreePacket(OMXPacket *pkt);
 	static OMXPacket *AllocPacket(int size);
 	void SetSpeed(int iSpeed);
+	int GetSpeed(){return m_speed; };
 	void UpdateCurrentPTS();
 	double ConvertTimestamp(int64_t pts, int den, int num);
 	int GetChapter();

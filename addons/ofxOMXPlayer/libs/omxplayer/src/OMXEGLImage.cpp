@@ -2,22 +2,43 @@
 
 
 
+unsigned long long currentFrameTime;
+unsigned long long lastFrameTime;
 
+bool isFirstCallback = true;
 OMXEGLImage::OMXEGLImage()
 {
 	eglBuffer = NULL;
+	
 }
-
-
 
 OMX_ERRORTYPE onFillBufferDone(OMX_HANDLETYPE hComponent,
 							   OMX_PTR pAppData,
 							   OMX_BUFFERHEADERTYPE* pBuffer)
 {    
-	
+	/*if (isFirstCallback) {
+		isFirstCallback = false;
+		currentFrameTime = ofGetElapsedTimeMillis();
+		ofLogVerbose() << "isFirstCallback";
+	}else 
+	{
+		lastFrameTime = currentFrameTime;
+		currentFrameTime = ofGetElapsedTimeMillis();
+		ofLogVerbose() << "Frame process time: " << currentFrameTime - lastFrameTime;
+		
+	}*/
+
 	//ofLogVerbose() << "onFillBufferDone<----------";
 	//COMXCoreComponent *ctx = static_cast<COMXCoreComponent*>(pAppData);
 	OMX_ERRORTYPE didFillBuffer = OMX_FillThisBuffer(hComponent, pBuffer);
+	if (didFillBuffer == OMX_ErrorNone) 
+	{
+		//OMXDecoderBase *ctx = static_cast<OMXDecoderBase*>(pAppData);
+		
+		OMXDecoderBase::fillBufferCounter++;
+		//ofLogVerbose(__func__) << " fillBufferCounter: " << fillBufferCounter;
+	}
+	
 	return didFillBuffer;
 }
 bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglImage_)
@@ -336,29 +357,33 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglIm
 
 void OMXEGLImage::Close()
 {
-  m_omx_tunnel_decoder.Flush();
-  m_omx_tunnel_clock.Flush();
-  m_omx_tunnel_sched.Flush();
+	ofLogVerbose() << "OMXEGLImage::Close start";
+	m_omx_tunnel_decoder.Flush();
+	m_omx_tunnel_clock.Flush();
+	m_omx_tunnel_sched.Flush();
 
-  m_omx_tunnel_clock.Deestablish();
-  m_omx_tunnel_decoder.Deestablish();
-  m_omx_tunnel_sched.Deestablish();
+	m_omx_tunnel_clock.Deestablish();
+	m_omx_tunnel_decoder.Deestablish();
+	m_omx_tunnel_sched.Deestablish();
 
-  m_omx_decoder.FlushInput();
+	m_omx_decoder.FlushInput();
 	m_omx_render.FlushOutput();
-  m_omx_sched.Deinitialize();
-  m_omx_decoder.Deinitialize();
-  m_omx_render.Deinitialize();
+	m_omx_sched.Deinitialize();
+	m_omx_decoder.Deinitialize();
+	m_omx_render.Deinitialize();
 
-  m_is_open       = false;
+	m_is_open       = false;
 
-  if(m_extradata)
-    free(m_extradata);
-  m_extradata = NULL;
-  m_extrasize = 0;
+	if(m_extradata)
+	{
+	  free(m_extradata);
+	}
+	m_extradata = NULL;
+	m_extrasize = 0;
 
-  m_video_codec_name  = "";
-  m_first_frame       = true;
+	m_video_codec_name  = "";
+	m_first_frame       = true;
+	ofLogVerbose() << "OMXEGLImage::Close end";
 }
 
 
@@ -427,6 +452,8 @@ int OMXEGLImage::Decode(uint8_t *pData, int iSize, double dts, double pts)
 			while(true)
 			{
 				omx_err = m_omx_decoder.EmptyThisBuffer(omx_buffer);
+				
+				
 				if (omx_err == OMX_ErrorNone)
 				{
 					break;

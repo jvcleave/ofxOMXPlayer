@@ -5,7 +5,6 @@
 
 #define MAX_DATA_SIZE_VIDEO    8 * 1024 * 1024
 #define MAX_DATA_SIZE_AUDIO    2 * 1024 * 1024
-#define MAX_DATA_SIZE          10 * 1024 * 1024
 
 static bool g_abort = false;
 
@@ -881,16 +880,31 @@ bool OMXReader::IsEof()
 
 void OMXReader::FreePacket(OMXPacket *pkt)
 {
-	if(pkt)
+	delete pkt->data;
+	pkt->data = NULL;
+	delete pkt;
+	pkt = NULL;
+	/*if(pkt)
 	{
 		if(pkt->data)
 			free(pkt->data);
 		free(pkt);
-	}
+	}*/
 }
 
 OMXPacket *OMXReader::AllocPacket(int size)
 {
+	OMXPacket *pkt = new OMXPacket();
+	pkt->data = new uint8_t[size + FF_INPUT_BUFFER_PADDING_SIZE];
+	//memset(pkt->data + size, 0, FF_INPUT_BUFFER_PADDING_SIZE);
+	pkt->size = size;
+	pkt->dts  = DVD_NOPTS_VALUE;
+	pkt->pts  = DVD_NOPTS_VALUE;
+	pkt->now  = DVD_NOPTS_VALUE;
+	pkt->duration = DVD_NOPTS_VALUE;
+	
+	return pkt;
+	/*
 	OMXPacket *pkt = (OMXPacket *)malloc(sizeof(OMXPacket));
 	if(pkt)
 	{
@@ -912,7 +926,7 @@ OMXPacket *OMXReader::AllocPacket(int size)
 			pkt->duration = DVD_NOPTS_VALUE;
 		}
 	}
-	return pkt;
+	return pkt;*/
 }
 
 bool OMXReader::SetActiveStream(OMXStreamType type, unsigned int index)

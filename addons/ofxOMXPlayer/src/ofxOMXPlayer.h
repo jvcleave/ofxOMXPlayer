@@ -3,6 +3,7 @@
 #include "ofMain.h"
 #include "ofAppEGLWindow.h"
 
+
 extern "C" 
 {
 	#include <libavformat/avformat.h>
@@ -124,7 +125,8 @@ private:
 	
 	double				loop_offset;
 	double				startpts;
-	
+	int					loopCounter;
 	void			generateEGLImage();
+	bool			doAbort;
 };
 

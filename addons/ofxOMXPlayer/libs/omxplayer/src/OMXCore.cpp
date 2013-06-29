@@ -78,7 +78,7 @@ OMX_ERRORTYPE COMXCoreTunel::Flush()
 
   if(!m_src_component || !m_dst_component)
     return OMX_ErrorUndefined;
-
+	ofLogVerbose(__func__) << m_src_component->GetName() << " START";
   Lock();
 
   OMX_ERRORTYPE omx_err = OMX_ErrorNone;
@@ -107,7 +107,7 @@ OMX_ERRORTYPE COMXCoreTunel::Flush()
     omx_err = m_dst_component->WaitForCommand(OMX_CommandFlush, m_dst_port);
 
   UnLock();
-
+	ofLogVerbose(__func__) << m_src_component->GetName() << " END";
   return OMX_ErrorNone;
 }
 
@@ -470,7 +470,7 @@ void COMXCoreComponent::FlushInput()
   {
    ofLog(OF_LOG_VERBOSE, "\nCOMXCoreComponent::FlushInput - Error on component %s omx_err(0x%08x)",  m_componentName.c_str(), (int)omx_err);
   }
-  WaitForCommand(OMX_CommandFlush, m_input_port);
+  WaitForCommand(OMX_CommandFlush, m_input_port, 500);//TODO timeout here?
 
   UnLock();
 }

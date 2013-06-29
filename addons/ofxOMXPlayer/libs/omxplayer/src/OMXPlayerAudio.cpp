@@ -340,6 +340,7 @@ void OMXPlayerAudio::Process()
 
 void OMXPlayerAudio::Flush()
 {
+  ofLogVerbose() << "OMXPlayerAudio::Flush start";
   Lock();
   LockDecoder();
   m_flush = true;
@@ -355,6 +356,7 @@ void OMXPlayerAudio::Flush()
     m_decoder->Flush();
   UnLockDecoder();
   UnLock();
+	ofLogVerbose() << "OMXPlayerAudio::Flush end";
 }
 
 bool OMXPlayerAudio::AddPacket(OMXPacket *pkt)

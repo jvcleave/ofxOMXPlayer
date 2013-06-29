@@ -117,6 +117,7 @@ bool OMXPlayerVideoBase::Decode(OMXPacket *pkt)
 
 void OMXPlayerVideoBase::Flush()
 {
+	ofLogVerbose() << "OMXPlayerVideoBase::Flush start";
 	Lock();
 	LockDecoder();
 	m_flush = true;
@@ -124,7 +125,9 @@ void OMXPlayerVideoBase::Flush()
 	{
 		OMXPacket *pkt = m_packets.front(); 
 		m_packets.pop_front();
+		ofLogVerbose() << "OMXPlayerVideoBase->OMXReader FreePacket";
 		OMXReader::FreePacket(pkt);
+		
 	}
 	
 	m_iCurrentPts = DVD_NOPTS_VALUE;
@@ -132,11 +135,13 @@ void OMXPlayerVideoBase::Flush()
 	
 	if(m_decoder)
 	{
+		ofLogVerbose() << "OMXPlayerVideoBase::m_decoder->Reset";
 		m_decoder->Reset();
 	}
 	
 	UnLockDecoder();
 	UnLock();
+	ofLogVerbose() << "OMXPlayerVideoBase::Flush end";
 }
 
 

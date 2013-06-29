@@ -24,4 +24,13 @@ public:
 	bool				m_deinterlace;
 	bool				m_hdmi_clock_sync;
 	bool				m_syncclock;
+	
+	~COMXVideo()
+	{
+		if (m_is_open)
+		{
+			Close();
+			ofLogVerbose() <<  "~OMXDecoderBase called without Close!";
+		}
+	}
 };

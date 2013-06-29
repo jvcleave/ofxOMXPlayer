@@ -35,7 +35,7 @@ class OMXDecoderBase
 public:
 	OMXDecoderBase();
 	
-	~OMXDecoderBase();
+	virtual ~OMXDecoderBase(){};
 
 	OMX_VIDEO_CODINGTYPE m_codingType;
 
@@ -65,7 +65,7 @@ public:
 	string					m_video_codec_name;
 
 	bool					m_first_frame;
-	uint32_t          m_history_valid_pts;
+	uint32_t				m_history_valid_pts;
 
 	
 	string decoder_name;
@@ -77,7 +77,7 @@ public:
 	
 	void					WaitCompletion();
 	
-	virtual void Close();
+	virtual void Close() = 0;
 	
 	bool					Resume();
 	bool					Pause();
@@ -100,5 +100,6 @@ public:
 		return bits;
 	}
 	std::string GetDecoderName() { return m_video_codec_name; };
+	static int fillBufferCounter;
 
 };

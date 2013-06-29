@@ -17,5 +17,12 @@ public:
 	EGLImageKHR eglImage;
 	OMX_BUFFERHEADERTYPE* eglBuffer;
 
-	
+	~OMXEGLImage()
+	{
+		if (m_is_open)
+		{
+			Close();
+			ofLogVerbose() <<  "~OMXDecoderBase called without Close!";
+		}
+	}
 };

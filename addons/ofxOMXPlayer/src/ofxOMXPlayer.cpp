@@ -34,6 +34,8 @@ ofxOMXPlayer::ofxOMXPlayer()
 	clock = new OMXClock(); 
 	eglPlayer = NULL;
 	nonEglPlayer = NULL;
+	loopCounter = 0;
+	doAbort = false;
 	ofAddListener(ofEvents().exit, this, &ofxOMXPlayer::close);
 }
 
@@ -239,11 +241,17 @@ ofTexture & ofxOMXPlayer::getTextureReference()
 {
 	return tex;
 }
+
+bool doLoopReset = false;
 void ofxOMXPlayer::threadedFunction()
 {
 	while (isThreadRunning()) 
 	{
-		struct timespec starttime, endtime;
+		if (doAbort) 
+		{
+			return;
+		}
+		//struct timespec starttime, endtime;
 		/*printf("V : %8.02f %8d %8d A : %8.02f %8.02f Cv : %8d Ca : %8d                            \r",
 		 clock->OMXMediaTime(), videoPlayer->GetDecoderBufferSize(),
 		 videoPlayer->GetDecoderFreeSpace(), audioPlayer.GetCurrentPTS() / DVD_TIME_BASE, 
@@ -251,22 +259,37 @@ void ofxOMXPlayer::threadedFunction()
 		
 		if(omxReader.IsEof() && !packet)
 		{
+			//ofLogVerbose() << "Dumping Cache " << "Audio Cache: " << audioPlayer.GetCached() << " Video Cache: " << videoPlayer->GetCached();
 			if (!audioPlayer.GetCached() && !videoPlayer->GetCached())
 			{
+				/*
+				 The way this works is that loop_offset is a marker (actually the same as the DURATION)
+				 Once the file reader seeks to the beginning of the file again loop_offset is then added to subsequent packet's timestamps
+				 */
 				if (doLooping)
 				{
-					//startpts = 1.0;
+				
+					if(hasVideo)
+					{
+						videoPlayer->WaitCompletion();
+					}
 					omxReader.SeekTime(0 * 1000.0f, AVSEEK_FLAG_BACKWARD, &startpts);
 					if(hasAudio)
 					{
-						loop_offset = audioPlayer.GetCurrentPTS() /* + DVD_MSEC_TO_TIME(0) */;
+						loop_offset = audioPlayer.GetCurrentPTS();
+						ofLogVerbose() << "LOOP via audioPlayer [] [] [] [] [] [] [] []";
+
 					}
 					else if(hasVideo)
 					{
 						loop_offset = videoPlayer->GetCurrentPTS();
+						ofLogVerbose() << "LOOP via videoPlayer [] [] [] [] [] [] [] []";
 						
-					} 
+					}
+					loopCounter++;
+
 					ofLog(OF_LOG_VERBOSE, "Loop offset : %8.02f\n", loop_offset / DVD_TIME_BASE);
+					
 				}
 				else
 				{
@@ -280,6 +303,11 @@ void ofxOMXPlayer::threadedFunction()
 			}
 		}
 		
+		if (doLooping && OMXDecoderBase::fillBufferCounter>=getTotalNumFrames()) 
+		{
+			OMXDecoderBase::fillBufferCounter=0;
+			//setPaused(true);
+		}
 		if (hasAudio) 
 		{
 			if(audioPlayer.Error())
@@ -295,9 +323,6 @@ void ofxOMXPlayer::threadedFunction()
 			{
 				packet->pts += loop_offset;
 				packet->dts += loop_offset;
-				
-				//packet->pts = DVD_NOPTS_VALUE;
-				//packet->dts = DVD_NOPTS_VALUE;
 			}
 		}
 		
@@ -403,11 +428,12 @@ float ofxOMXPlayer::getDuration()
 {
 	return duration;
 }
-//inaccurate, I believe as it is referring to decoded frames which can be 
-//ahead of rendered frames
+//may be inaccurate as we are counting our own frames
 int ofxOMXPlayer::getCurrentFrame()
 {
-	return (int)(videoPlayer->GetCurrentPTS()/ DVD_TIME_BASE)*videoPlayer->GetFPS();
+	
+	return OMXDecoderBase::fillBufferCounter;
+	//return (int)(videoPlayer->m_iCurrentPts/ DVD_TIME_BASE)*videoPlayer->GetFPS();
 }
 
 int ofxOMXPlayer::getTotalNumFrames()
@@ -457,15 +483,14 @@ bool ofxOMXPlayer::isPlaying()
 
 void ofxOMXPlayer::close(ofEventArgs & a)
 {
+	doAbort = true;
 	waitForThread(true);
 	//setPaused(true);
-	sleep(500);
-	OMXClock::OMXSleep(500);
-	//sleep(500);
+	OMXClock::OMXSleep(200);
 	ofLogVerbose() << "start ofxOMXPlayer::close";
 	if (isTextureEnabled) 
 	{
-		OMXClock::OMXSleep(500);
+		OMXClock::OMXSleep(200);
 	}
 
 	if (!isTextureEnabled) 
@@ -475,18 +500,30 @@ void ofxOMXPlayer::close(ofEventArgs & a)
 		clock->OMXStateIdle();
 		ofLogVerbose(__func__) << "clock->OMXStateIdle";
 	}
-
-
+	
+	
+	
 	videoPlayer->Close();
 	ofLogVerbose(__func__) << "videoPlayer->Closed";
+	delete videoPlayer;
+	ofLogVerbose(__func__) << "videoPlayer->deleted";
+	videoPlayer = NULL;
+	ofLogVerbose(__func__) << "videoPlayer->NULL";
+	
 	audioPlayer.Close();
 	ofLogVerbose(__func__) << "audioPlayer->Closed";
+	
 	if(packet)
 	{
 		omxReader.FreePacket(packet);
 		packet = NULL;
 	}
 	ofLogVerbose(__func__) << "packet freed";
+	
+
+	
+	
+	audioPlayer.Close();
 	omxReader.Close();
 	ofLogVerbose(__func__) << "omxReader->Closed";
 	
@@ -500,10 +537,8 @@ void ofxOMXPlayer::close(ofEventArgs & a)
 	ofLogVerbose(__func__) << "omxCore->Deinitialized";
 	rbp.Deinitialize();
 	ofLogVerbose(__func__) << "rbp->Deinitialized";
-	delete videoPlayer;
-	ofLogVerbose(__func__) << "videoPlayer->deleted";
-	videoPlayer = NULL;
-	ofLogVerbose(__func__) << "videoPlayer->NULL";
-	ofLogVerbose() << "reached end of ofxOMXPlayer::close";
+
+	
 	ofRemoveListener(ofEvents().exit, this, &ofxOMXPlayer::close);
+	ofLogVerbose() << "reached end of ofxOMXPlayer::close";
 }
