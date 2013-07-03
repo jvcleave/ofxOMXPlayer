@@ -360,10 +360,7 @@ void ofxOMXPlayer::threadedFunction()
 	}
 }
 
-void ofxOMXPlayer::setVolume(float volume)
-{
-	
-}
+
 
 
 //--------------------------------------------------------
@@ -487,6 +484,30 @@ bool ofxOMXPlayer::isPlaying()
 	return bPlaying;
 }
 
+
+void ofxOMXPlayer::setVolume(float volume)
+{
+	ofLogVerbose(__func__) << "volume: " << volume;
+	float value = ofMap(volume, 0.0, 1.0, -6000, 6000, false);
+	if (hasAudio && didAudioOpen) 
+	{
+		audioPlayer.SetCurrentVolume(value);
+	}
+}
+
+float ofxOMXPlayer::getVolume()
+{
+	if (hasAudio && didAudioOpen) 
+	{
+		float value = ofMap(audioPlayer.GetCurrentVolume(), -6000, 6000, 0.0, 1.0, false);
+		return value;
+	}else 
+	{
+		return 0;
+		ofLogError(__func__) << "returning 0 hasAudio: " << hasAudio << " didAudioOpen: " << didAudioOpen;
+	}
+
+}
 void ofxOMXPlayer::close(ofEventArgs & a)
 {
 	doAbort = true;

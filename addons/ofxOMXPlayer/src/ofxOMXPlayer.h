@@ -49,7 +49,7 @@ public:
 	
 	void			setPosition(float pct);
 	void			setVolume(float volume); // 0..1
-	
+	float			getVolume();
 	ofTexture &		getTextureReference();
 	void			draw(float x, float y, float w, float h);
 	void			draw(float x, float y);

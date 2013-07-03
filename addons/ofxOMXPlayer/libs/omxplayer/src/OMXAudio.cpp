@@ -784,6 +784,7 @@ bool COMXAudio::SetCurrentVolume(long nVolume)
   }
   else
   {
+	  
     OMX_AUDIO_CONFIG_VOLUMETYPE volume;
     OMX_INIT_STRUCTURE(volume);
     volume.nPortIndex = m_omx_render.GetInputPort();
@@ -798,7 +799,12 @@ bool COMXAudio::SetCurrentVolume(long nVolume)
       ofLog(OF_LOG_ERROR, "%s::%s - error setting OMX_IndexConfigAudioVolume, error 0x%08x\n",
                 CLASSNAME, __func__, omx_err);
       return false;
-    }
+    }else 
+	{
+		ofLogVerbose(__func__) << "Set Volume to " << nVolume;
+		ofLogVerbose(__func__) << "volume.bLinear: " << volume.bLinear;
+	}
+
   }
 
   return true;

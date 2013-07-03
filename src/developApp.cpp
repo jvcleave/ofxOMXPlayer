@@ -39,7 +39,7 @@ void developApp::setup()
 	
 	ofLogVerbose() << "using videoPath : " << videoPath;
 	
-	doTextures	= false;
+	doTextures	= true;
 	doShader	= false;
 	if (doShader || doTextures) 
 	{
@@ -130,12 +130,11 @@ void developApp::draw(){
 	info <<"\n" <<	"CURRENT FRAME: "		<< omxPlayer.getCurrentFrame();
 	info <<"\n" <<	"REMAINING FRAMES: "	<< omxPlayer.getTotalNumFrames() - omxPlayer.getCurrentFrame();
 
-	info <<"\n" <<	omxPlayer.getVideoDebugInfo() << endl;
+	info <<"\n" <<	"CURRENT VOLUME: "		<< omxPlayer.getVolume();
 	
 	info <<"\n" <<	"KEYS:";
 	info <<"\n" <<	"p to toggle Pause";
-	info <<"\n" <<	"1 to send Play command";
-	info <<"\n" <<	"2 to send Stop command";
+
 	ofDrawBitmapStringHighlight(info.str(), 60, 60, ofColor(0, 0, 0, 90), ofColor::yellow);
 	
 	
@@ -175,8 +174,8 @@ void developApp::exit()
 }
 //--------------------------------------------------------------
 void developApp::keyPressed  (int key){
-	
-	ofLogVerbose() << key << "received!";
+	 
+	ofLogVerbose() << key << " received!";
 	if (key == 0x5b44) {
 		ofLogVerbose() << "RIGHT KEY PRESSED";
 	}
@@ -201,11 +200,23 @@ void developApp::keyPressed  (int key){
 
 		case '1':
 		{
-			ofLogVerbose() << "SENDING PLAY COMMAND";
-			omxPlayer.play();
+			
+			float currentVolume = omxPlayer.getVolume();
+			currentVolume-=0.1f;
+			if (currentVolume>=0) 
+			{
+				omxPlayer.setVolume(currentVolume);
+			}
 			break;
 		}
-		
+		case '2':
+		{
+			float currentVolume = omxPlayer.getVolume();
+			currentVolume+=0.1f;
+			omxPlayer.setVolume(currentVolume);
+			break;
+		}
+			
 		case 'b':
 		{
 			

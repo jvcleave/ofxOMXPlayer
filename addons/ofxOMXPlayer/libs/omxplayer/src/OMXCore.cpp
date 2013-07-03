@@ -113,6 +113,8 @@ OMX_ERRORTYPE COMXCoreTunel::Flush()
 
 OMX_ERRORTYPE COMXCoreTunel::Deestablish(bool noWait)
 {
+
+  ofLogVerbose(__func__) << " m_src_component: " << m_src_component->GetName() << "m_dst_component: " << m_dst_component->GetName() << " START";
   if(!m_DllOMXOpen)
     return OMX_ErrorUndefined;
 
@@ -163,7 +165,7 @@ OMX_ERRORTYPE COMXCoreTunel::Deestablish(bool noWait)
   }
 
   UnLock();
-
+	ofLogVerbose(__func__) << " END";
   return OMX_ErrorNone;
 }
 
