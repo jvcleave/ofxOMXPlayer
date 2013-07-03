@@ -567,7 +567,11 @@ ofLogVerbose() << "OMXPlayerAudio::WaitCompletion";
 
 void OMXPlayerAudio::SetCurrentVolume(long nVolume)
 {
-  if(m_decoder) m_decoder->SetCurrentVolume(nVolume);
+	ofLogVerbose(__func__) << "nVolume: " << nVolume;
+	if(m_decoder) 
+	{
+		m_decoder->SetCurrentVolume(nVolume);
+	}
 }
 
 long OMXPlayerAudio::GetCurrentVolume()

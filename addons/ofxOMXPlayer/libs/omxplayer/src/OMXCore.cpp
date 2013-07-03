@@ -74,13 +74,15 @@ void COMXCoreTunel::Initialize(COMXCoreComponent *src_component, unsigned int sr
 OMX_ERRORTYPE COMXCoreTunel::Flush()
 {
   if(!m_DllOMXOpen)
+	ofLogVerbose(__func__) << "m_DllOMXOpen NOT OPEN - RETURNING EARLY";
     return OMX_ErrorUndefined;
 
   if(!m_src_component || !m_dst_component)
     return OMX_ErrorUndefined;
-	ofLogVerbose(__func__) << m_src_component->GetName() << " START";
+	
   Lock();
-
+  ofLogVerbose(__func__) << "m_src_component: " << m_src_component->GetName() << " m_dst_component: " << m_dst_component->GetName() << " START";
+	
   OMX_ERRORTYPE omx_err = OMX_ErrorNone;
   if(m_src_component->GetComponent())
   {
@@ -114,12 +116,24 @@ OMX_ERRORTYPE COMXCoreTunel::Flush()
 OMX_ERRORTYPE COMXCoreTunel::Deestablish(bool noWait)
 {
 
-  ofLogVerbose(__func__) << " m_src_component: " << m_src_component->GetName() << "m_dst_component: " << m_dst_component->GetName() << " START";
   if(!m_DllOMXOpen)
-    return OMX_ErrorUndefined;
+  {
+	  ofLogVerbose(__func__) << "m_DllOMXOpen NOT OPEN - RETURNING EARLY";
+	  return OMX_ErrorUndefined;
+  }
+    
 
   if(!m_src_component || !m_dst_component)
-    return OMX_ErrorUndefined;
+  {
+	  ofLogVerbose(__func__) << "MISSING COMPONENT RETURNING EARLY " << " m_src_component: " << m_src_component->GetName() << " m_dst_component: " << m_dst_component->GetName();
+	  return OMX_ErrorUndefined;
+  }else 
+  {
+	  ofLogVerbose(__func__) << " m_src_component: " << m_src_component->GetName() << " m_dst_component: " << m_dst_component->GetName() << " START";
+
+  }
+
+    
 
   Lock();
 
@@ -462,6 +476,8 @@ void COMXCoreComponent::FlushAll()
 
 void COMXCoreComponent::FlushInput()
 {
+	
+	ofLogVerbose(__func__) << " START m_componentName: " << m_componentName;
   Lock();
 
   OMX_ERRORTYPE omx_err = OMX_ErrorNone;
@@ -472,7 +488,7 @@ void COMXCoreComponent::FlushInput()
   {
    ofLog(OF_LOG_VERBOSE, "\nCOMXCoreComponent::FlushInput - Error on component %s omx_err(0x%08x)",  m_componentName.c_str(), (int)omx_err);
   }
-  WaitForCommand(OMX_CommandFlush, m_input_port, 500);//TODO timeout here?
+  WaitForCommand(OMX_CommandFlush, m_input_port, 100);//TODO timeout here?
 
   UnLock();
 }
@@ -489,9 +505,10 @@ void COMXCoreComponent::FlushOutput()
   {
    ofLog(OF_LOG_VERBOSE, "\nCOMXCoreComponent::FlushOutput - Error on component %s omx_err(0x%08x)", m_componentName.c_str(), (int)omx_err);
   }
-  WaitForCommand(OMX_CommandFlush, m_output_port);
+  WaitForCommand(OMX_CommandFlush, m_output_port, 100);
 
   UnLock();
+	ofLogVerbose(__func__) << " END m_componentName: " << m_componentName;
 }
 
 // timeout in milliseconds

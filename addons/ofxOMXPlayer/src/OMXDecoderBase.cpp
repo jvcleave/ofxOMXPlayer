@@ -189,10 +189,12 @@ bool OMXDecoderBase::Resume()
 
 void OMXDecoderBase::Reset()
 {
+	ofLogVerbose(__func__) << " START";
 	
 	m_omx_decoder.FlushInput();
 	m_omx_tunnel_decoder.Flush();
 	
+	ofLogVerbose(__func__) << " END";
 }
 
 

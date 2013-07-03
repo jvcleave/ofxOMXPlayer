@@ -488,9 +488,10 @@ bool ofxOMXPlayer::isPlaying()
 void ofxOMXPlayer::setVolume(float volume)
 {
 	ofLogVerbose(__func__) << "volume: " << volume;
-	float value = ofMap(volume, 0.0, 1.0, -6000, 6000, false);
+	float value = ofMap(volume, 0.0, 1.0, -6000, 6000, true);
 	if (hasAudio && didAudioOpen) 
 	{
+		
 		audioPlayer.SetCurrentVolume(value);
 	}
 }
@@ -499,7 +500,8 @@ float ofxOMXPlayer::getVolume()
 {
 	if (hasAudio && didAudioOpen) 
 	{
-		float value = ofMap(audioPlayer.GetCurrentVolume(), -6000, 6000, 0.0, 1.0, false);
+		//ofLogVerbose() << "GetCurrentVolume: " << audioPlayer.GetCurrentVolume();
+		float value = ofMap(audioPlayer.GetCurrentVolume(), -6000, 6000, 0.0, 1.0, true);
 		return value;
 	}else 
 	{

@@ -368,6 +368,7 @@ void OMXEGLImage::Close()
 
 	m_omx_decoder.FlushInput();
 	m_omx_render.FlushOutput();
+	
 	m_omx_sched.Deinitialize();
 	m_omx_decoder.Deinitialize();
 	m_omx_render.Deinitialize();
