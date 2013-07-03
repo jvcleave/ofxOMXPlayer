@@ -360,6 +360,12 @@ void ofxOMXPlayer::threadedFunction()
 	}
 }
 
+void ofxOMXPlayer::setVolume(float volume)
+{
+	
+}
+
+
 //--------------------------------------------------------
 void ofxOMXPlayer::play()
 {

@@ -362,9 +362,9 @@ void OMXEGLImage::Close()
 	m_omx_tunnel_clock.Flush();
 	m_omx_tunnel_sched.Flush();
 
-	m_omx_tunnel_clock.Deestablish();
-	m_omx_tunnel_decoder.Deestablish();
-	m_omx_tunnel_sched.Deestablish();
+	m_omx_tunnel_clock.Deestablish(false);
+	m_omx_tunnel_decoder.Deestablish(false);
+	m_omx_tunnel_sched.Deestablish(false);
 
 	m_omx_decoder.FlushInput();
 	m_omx_render.FlushOutput();
