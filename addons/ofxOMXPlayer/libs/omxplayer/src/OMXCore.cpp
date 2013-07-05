@@ -140,7 +140,7 @@ OMX_ERRORTYPE COMXCoreTunel::Deestablish(bool noWait)
   OMX_ERRORTYPE omx_err = OMX_ErrorNone;
 
   if(m_src_component->GetComponent() && m_portSettingsChanged && !noWait)
-    omx_err = m_src_component->WaitForEvent(OMX_EventPortSettingsChanged);
+    omx_err = m_src_component->WaitForEvent(OMX_EventPortSettingsChanged, 500);
 
   if(m_src_component->GetComponent())
   {

@@ -475,7 +475,7 @@ void ofxOMXPlayer::increaseVolume()
 	}
 	
 	float currentVolume = getVolume();
-	currentVolume+=0.1f;
+	currentVolume+=0.1;
 	setVolume(currentVolume);
 }
 
@@ -488,11 +488,8 @@ void ofxOMXPlayer::decreaseVolume()
 	}
 	
 	float currentVolume = getVolume();
-	currentVolume-=0.1f;
-	if (currentVolume>=0) 
-	{
-		setVolume(currentVolume);
-	}
+	currentVolume-=0.1;
+	setVolume(currentVolume);
 }
 
 void ofxOMXPlayer::setVolume(float volume)
@@ -501,7 +498,7 @@ void ofxOMXPlayer::setVolume(float volume)
 	{
 		return;
 	}
-	float value = ofMap(volume, 0.0, 1.0, -6000, 6000, true);
+	float value = ofMap(volume, 0.0, 1.0, -6000.0, 6000.0, true);
 	audioPlayer.SetCurrentVolume(value);
 }
 
@@ -511,8 +508,8 @@ float ofxOMXPlayer::getVolume()
 	{
 		return 0;
 	}
-	float value = ofMap(audioPlayer.GetCurrentVolume(), -6000, 6000, 0.0, 1.0, true);
-	return value;
+	float value = ofMap(audioPlayer.GetCurrentVolume(), -6000.0, 6000.0, 0.0, 1.0, true);
+	return floorf(value * 100 + 0.5) / 100;
 }
 
 void ofxOMXPlayer::close(ofEventArgs & a)
