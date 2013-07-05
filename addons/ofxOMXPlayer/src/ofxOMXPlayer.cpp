@@ -13,16 +13,11 @@ ofxOMXPlayer::ofxOMXPlayer()
 	bPlaying			= false;
 	duration			= 0.0;
 	nFrames				= 0;
-	doVideoDebugging	= false;
 	doLooping			= true;
 	isBufferEmpty		= true;
 	loop_offset = 0;
 	startpts              = 0.0;
-	if (doVideoDebugging) 
-	{
-		//videoPlayer->doDebugging = true; //this can cause a string error, probably thread safe issue
-	}
-	//m_stop				= false;
+
 	didAudioOpen		= false;
 	didVideoOpen		= false;
 	isTextureEnabled	= false;
@@ -414,24 +409,12 @@ void ofxOMXPlayer::draw(float x, float y)
 	getTextureReference().draw(x, y);
 }
 
-string ofxOMXPlayer::getVideoDebugInfo()
-{
-	/*if (!doVideoDebugging) 
-	{
-		return "doVideoDebugging not enabled";
-	}
-	if (videoPlayer->m_decoder != NULL) 
-	{
-		return videoPlayer->m_decoder->debugInfo + "\n" + videoPlayer->debugInfo;
-	}*/
-	return "NO INFO YET";
-}
 
 float ofxOMXPlayer::getDuration()
 {
 	return duration;
 }
-//may be inaccurate as we are counting our own frames
+//we are counting our own frames
 int ofxOMXPlayer::getCurrentFrame()
 {
 	
@@ -484,37 +467,58 @@ bool ofxOMXPlayer::isPlaying()
 	return bPlaying;
 }
 
+void ofxOMXPlayer::increaseVolume()
+{
+	if (!hasAudio || !didAudioOpen) 
+	{
+		return;
+	}
+	
+	float currentVolume = getVolume();
+	currentVolume+=0.1f;
+	setVolume(currentVolume);
+}
+
+
+void ofxOMXPlayer::decreaseVolume()
+{
+	if (!hasAudio || !didAudioOpen) 
+	{
+		return;
+	}
+	
+	float currentVolume = getVolume();
+	currentVolume-=0.1f;
+	if (currentVolume>=0) 
+	{
+		setVolume(currentVolume);
+	}
+}
 
 void ofxOMXPlayer::setVolume(float volume)
 {
-	ofLogVerbose(__func__) << "volume: " << volume;
-	float value = ofMap(volume, 0.0, 1.0, -6000, 6000, true);
-	if (hasAudio && didAudioOpen) 
+	if (!hasAudio || !didAudioOpen) 
 	{
-		
-		audioPlayer.SetCurrentVolume(value);
+		return;
 	}
+	float value = ofMap(volume, 0.0, 1.0, -6000, 6000, true);
+	audioPlayer.SetCurrentVolume(value);
 }
 
 float ofxOMXPlayer::getVolume()
 {
-	if (hasAudio && didAudioOpen) 
-	{
-		//ofLogVerbose() << "GetCurrentVolume: " << audioPlayer.GetCurrentVolume();
-		float value = ofMap(audioPlayer.GetCurrentVolume(), -6000, 6000, 0.0, 1.0, true);
-		return value;
-	}else 
+	if (!hasAudio || !didAudioOpen) 
 	{
 		return 0;
-		ofLogError(__func__) << "returning 0 hasAudio: " << hasAudio << " didAudioOpen: " << didAudioOpen;
 	}
-
+	float value = ofMap(audioPlayer.GetCurrentVolume(), -6000, 6000, 0.0, 1.0, true);
+	return value;
 }
+
 void ofxOMXPlayer::close(ofEventArgs & a)
 {
 	doAbort = true;
 	waitForThread(true);
-	//setPaused(true);
 	OMXClock::OMXSleep(200);
 	ofLogVerbose() << "start ofxOMXPlayer::close";
 	if (isTextureEnabled) 

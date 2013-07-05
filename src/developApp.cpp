@@ -40,7 +40,7 @@ void developApp::setup()
 	ofLogVerbose() << "using videoPath : " << videoPath;
 	
 	doTextures	= true;
-	doShader	= false;
+	doShader	= true;
 	if (doShader || doTextures) 
 	{
 		usingTexturePlayer = true;
@@ -123,7 +123,7 @@ void developApp::draw(){
 	info << "APP FPS: "+ ofToString(ofGetFrameRate());
 	
 	
-	info <<"\n" <<	"MEDIA TIME: "			<< (int) (omxPlayer.getMediaTime()*10);
+	info <<"\n" <<	"MEDIA TIME: "			<< omxPlayer.getMediaTime();
 	info <<"\n" <<	"DIMENSIONS: "			<< omxPlayer.getWidth()<<"x"<<omxPlayer.getHeight();
 	info <<"\n" <<	"DURATION: "			<< omxPlayer.getDuration();
 	info <<"\n" <<	"TOTAL FRAMES: "		<< omxPlayer.getTotalNumFrames();
@@ -133,8 +133,14 @@ void developApp::draw(){
 	info <<"\n" <<	"CURRENT VOLUME: "		<< omxPlayer.getVolume();
 	
 	info <<"\n" <<	"KEYS:";
-	info <<"\n" <<	"p to toggle Pause";
-
+	info <<"\n" <<	"p to Toggle Pause";
+	info <<"\n" <<	"b to Step frame forward";
+	if (usingTexturePlayer) 
+	{
+		info <<"\n" <<	"s to Toggle Shader";
+	}
+	info <<"\n" <<	"1 to Decrease Volume";
+	info <<"\n" <<	"2 to Increase Volume";
 	ofDrawBitmapStringHighlight(info.str(), 60, 60, ofColor(0, 0, 0, 90), ofColor::yellow);
 	
 	
@@ -164,12 +170,6 @@ void developApp::exit()
 {
 	ofLogVerbose() << "developApp::exit";
 	isClosing = true;
-	/*omxPlayer.lock();
-	omxPlayer.m_stop = true;
-	omxPlayer.unlock();*/
-	/*omxPlayer.waitForThread(true);
-	
-	omxPlayer.close();*/
 	
 }
 //--------------------------------------------------------------
@@ -201,19 +201,12 @@ void developApp::keyPressed  (int key){
 		case '1':
 		{
 			
-			float currentVolume = omxPlayer.getVolume();
-			currentVolume-=0.1f;
-			if (currentVolume>=0) 
-			{
-				omxPlayer.setVolume(currentVolume);
-			}
+			omxPlayer.decreaseVolume();
 			break;
 		}
 		case '2':
 		{
-			float currentVolume = omxPlayer.getVolume();
-			currentVolume+=0.1f;
-			omxPlayer.setVolume(currentVolume);
+			omxPlayer.increaseVolume();
 			break;
 		}
 			

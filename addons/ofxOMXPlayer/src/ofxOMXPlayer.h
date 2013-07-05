@@ -73,9 +73,7 @@ public:
 	
 
 	EGLImageKHR		eglImage;
-	
-	string			getVideoDebugInfo();
-	
+		
 	void			openPlayer();
 	double			getMediaTime();
 	void			close(ofEventArgs & a);
@@ -87,6 +85,8 @@ public:
 	bool			didVideoOpen;
 	bool			didAudioOpen;
 	void			stepFrameForward();
+	void			increaseVolume();
+	void			decreaseVolume();
 private:
 	
 	CRBP				rbp;
@@ -94,10 +94,10 @@ private:
 	OMXClock*			clock;
 	DllBcmHost			bcmHost;
 	
-	OMXPlayerVideo*		nonEglPlayer;
-	OMXPlayerEGLImage*	eglPlayer;
+	OMXPlayerVideo*			nonEglPlayer;
+	OMXPlayerEGLImage*		eglPlayer;
 	OMXPlayerVideoBase*		videoPlayer;
-	OMXPlayerAudio		audioPlayer;
+	OMXPlayerAudio			audioPlayer;
 	
 	OMXReader			omxReader;
 	
@@ -126,7 +126,7 @@ private:
 	double				loop_offset;
 	double				startpts;
 	int					loopCounter;
-	void			generateEGLImage();
-	bool			doAbort;
+	void				generateEGLImage();
+	bool				doAbort;
 };
 
