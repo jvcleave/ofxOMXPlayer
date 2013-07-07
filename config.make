@@ -123,6 +123,17 @@ PROJECT_DEFINES += _REENTRANT
 PROJECT_DEFINES += OMX 
 PROJECT_DEFINES += OMX_SKIP64BIT 
 
+PROGRAMMABLE_HEADER_PATH = ../../../libs/openFrameworks/gl/ofGLProgrammableRenderer.h
+
+exist := $(wildcard $(PROGRAMMABLE_HEADER_PATH))
+ifneq ($(strip $(exist)),)
+$(info Found Programmable renderer at $(PROGRAMMABLE_HEADER_PATH))
+PROJECT_DEFINES += PROGRAMMABLE_PRESENT 
+else
+$(info Could not find Programmable renderer at $(PROGRAMMABLE_HEADER_PATH))
+endif
+
+
 ################################################################################
 # PROJECT CFLAGS
 #   This is a list of fully qualified CFLAGS required when compiling for this 
