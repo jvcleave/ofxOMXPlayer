@@ -80,7 +80,7 @@ public:
 	bool			doVideoDebugging;
 	bool			doLooping;
 	void			threadedFunction();
-	//bool			m_stop;
+
 	bool			isTextureEnabled;
 	bool			didVideoOpen;
 	bool			didAudioOpen;
@@ -97,7 +97,7 @@ private:
 	OMXPlayerVideo*			nonEglPlayer;
 	OMXPlayerEGLImage*		eglPlayer;
 	OMXPlayerVideoBase*		videoPlayer;
-	OMXPlayerAudio			audioPlayer;
+	OMXPlayerAudio*			audioPlayer;
 	
 	OMXReader			omxReader;
 	
@@ -127,6 +127,5 @@ private:
 	double				startpts;
 	int					loopCounter;
 	void				generateEGLImage();
-	bool				doAbort;
 };
 

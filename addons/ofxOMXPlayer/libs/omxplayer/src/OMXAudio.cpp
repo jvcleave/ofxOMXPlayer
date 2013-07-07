@@ -598,10 +598,10 @@ bool COMXAudio::Deinitialize()
     m_omx_tunnel_mixer.Flush();
   m_omx_tunnel_clock.Flush();
 
-  m_omx_tunnel_clock.Deestablish();
+  m_omx_tunnel_clock.Deestablish(true);
   if(!m_Passthrough)
-    m_omx_tunnel_mixer.Deestablish();
-  m_omx_tunnel_decoder.Deestablish();
+    m_omx_tunnel_mixer.Deestablish(true);
+  m_omx_tunnel_decoder.Deestablish(true);
 
   m_omx_decoder.FlushInput();
 

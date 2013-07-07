@@ -125,7 +125,7 @@ void OMXPlayerVideoBase::Flush()
 	{
 		OMXPacket *pkt = m_packets.front(); 
 		m_packets.pop_front();
-		ofLogVerbose() << "OMXPlayerVideoBase->OMXReader FreePacket";
+		//ofLogVerbose() << "OMXPlayerVideoBase->OMXReader FreePacket";
 		OMXReader::FreePacket(pkt);
 		
 	}

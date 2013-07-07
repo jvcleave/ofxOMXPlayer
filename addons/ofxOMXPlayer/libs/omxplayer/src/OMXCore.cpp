@@ -140,7 +140,7 @@ OMX_ERRORTYPE COMXCoreTunel::Deestablish(bool noWait)
   OMX_ERRORTYPE omx_err = OMX_ErrorNone;
 
   if(m_src_component->GetComponent() && m_portSettingsChanged && !noWait)
-    omx_err = m_src_component->WaitForEvent(OMX_EventPortSettingsChanged, 500);
+    omx_err = m_src_component->WaitForEvent(OMX_EventPortSettingsChanged);
 
   if(m_src_component->GetComponent())
   {
@@ -488,7 +488,7 @@ void COMXCoreComponent::FlushInput()
   {
    ofLog(OF_LOG_VERBOSE, "\nCOMXCoreComponent::FlushInput - Error on component %s omx_err(0x%08x)",  m_componentName.c_str(), (int)omx_err);
   }
-  WaitForCommand(OMX_CommandFlush, m_input_port, 100);//TODO timeout here?
+  WaitForCommand(OMX_CommandFlush, m_input_port);//TODO timeout here?
 
   UnLock();
 }
@@ -505,7 +505,7 @@ void COMXCoreComponent::FlushOutput()
   {
    ofLog(OF_LOG_VERBOSE, "\nCOMXCoreComponent::FlushOutput - Error on component %s omx_err(0x%08x)", m_componentName.c_str(), (int)omx_err);
   }
-  WaitForCommand(OMX_CommandFlush, m_output_port, 100);
+  WaitForCommand(OMX_CommandFlush, m_output_port);
 
   UnLock();
 	ofLogVerbose(__func__) << " END m_componentName: " << m_componentName;
@@ -1099,7 +1099,7 @@ OMX_STATETYPE COMXCoreComponent::GetState()
   }
 
   UnLock();
-
+	ofLogVerbose() << "COMXCoreComponent::GetState END";
   return (OMX_STATETYPE)0;
 }
 

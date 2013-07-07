@@ -55,12 +55,16 @@ OMXPlayerAudio::OMXPlayerAudio()
 
 OMXPlayerAudio::~OMXPlayerAudio()
 {
-  Close();
+	if(m_open)
+	{
+		Close();
+	}
 
-  pthread_cond_destroy(&m_audio_cond);
-  pthread_cond_destroy(&m_packet_cond);
-  pthread_mutex_destroy(&m_lock);
-  pthread_mutex_destroy(&m_lock_decoder);
+
+	pthread_cond_destroy(&m_audio_cond);
+	pthread_cond_destroy(&m_packet_cond);
+	pthread_mutex_destroy(&m_lock);
+	pthread_mutex_destroy(&m_lock_decoder);
 }
 
 void OMXPlayerAudio::Lock()

@@ -101,20 +101,48 @@ bool OMXClock::OMXStateExecute(bool lock /* = true */)
 
 void OMXClock::OMXStateIdle(bool lock /* = true */)
 {
+	ofLogVerbose() << "OMXClock::OMXStateIdle START";
 	if(m_omx_clock.GetComponent() == NULL)
+	{
+		ofLogError(__func__) << "NO CLOCK YET";
 		return;
+	}
 	
 	if(lock)
+	{
 		Lock();
-	
+	}
+	OMX_ERRORTYPE omx_err = OMX_ErrorNone;
+
 	if(m_omx_clock.GetState() == OMX_StateExecuting)
-		m_omx_clock.SetStateForComponent(OMX_StatePause);
+	{
+		omx_err = m_omx_clock.SetStateForComponent(OMX_StatePause);
+		if (omx_err != OMX_ErrorNone) 
+		{
+			ofLog(OF_LOG_VERBOSE, "m_omx_clock SetStateForComponent OMX_StatePause FAIL: omx_err(0x%x)\n", omx_err);
+		}else
+		{
+			ofLogVerbose() << "m_omx_clock SetStateForComponent OMX_StatePause PASS";
+		}
+	}
 	
 	if(m_omx_clock.GetState() != OMX_StateIdle)
-		m_omx_clock.SetStateForComponent(OMX_StateIdle);
+	{
+		omx_err = m_omx_clock.SetStateForComponent(OMX_StateIdle);
+		if (omx_err != OMX_ErrorNone) 
+		{
+			ofLog(OF_LOG_ERROR, "m_omx_clock SetStateForComponent OMX_StateIdle FAIL: omx_err(0x%x)\n", omx_err);
+		}else
+		{
+			ofLogVerbose() << "m_omx_clock SetStateForComponent OMX_StateIdle PASS";
+		}
+	}
 	
 	if(lock)
+	{
 		UnLock();
+	}
+	ofLogVerbose() << "OMXClock::OMXStateIdle END";
 }
 
 COMXCoreComponent *OMXClock::GetOMXClock()
@@ -128,7 +156,11 @@ COMXCoreComponent *OMXClock::GetOMXClock()
 bool  OMXClock::OMXStop(bool lock /* = true */)
 {
 	if(m_omx_clock.GetComponent() == NULL)
+	{
+		ofLogVerbose() << "NO CLOCK - RETURNING EARLY";
 		return false;
+	}
+		
 	
 	if(lock)
 		Lock();
@@ -153,6 +185,7 @@ bool  OMXClock::OMXStop(bool lock /* = true */)
 	if(lock)
 		UnLock();
 	
+	ofLogVerbose() << "CLOCK STOPPED";
 	return true;
 }
 
