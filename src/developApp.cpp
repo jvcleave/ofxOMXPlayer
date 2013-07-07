@@ -9,7 +9,7 @@ void developApp::setup()
 {
 	doRandomSelect		= true;
 	isClosing				= false;
-	isShaderEnabled			= false;
+	
 	usingTexturePlayer		= false;
 	
 	videoPath = ofToDataPath("big_buck_bunny_MpegStreamclip_720p_h264_50Quality_48K_256k_AAC.mov", true);
@@ -42,6 +42,7 @@ void developApp::setup()
 	
 	doTextures	= true;
 	doShader	= true;
+	isShaderEnabled = doShader;
 	if (doShader || doTextures) 
 	{
 		usingTexturePlayer = true;
