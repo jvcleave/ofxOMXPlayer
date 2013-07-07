@@ -38,6 +38,8 @@ void ofxOMXPlayer::setup(ofxOMXPlayerSettings settings_)
 {
 	settings = settings_;
 	moviePath = settings.videoPath; 
+	doLooping = settings.enableLooping;
+	
 	ofLogVerbose() << "moviePath is " << moviePath;
 	isTextureEnabled = settings.enableTexture;
 	

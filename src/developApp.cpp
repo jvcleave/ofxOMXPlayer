@@ -12,7 +12,8 @@ void developApp::setup()
 	isShaderEnabled			= false;
 	usingTexturePlayer		= false;
 	
-	videoPath = "/opt/vc/src/hello_pi/hello_video/test.h264";
+	videoPath = ofToDataPath("big_buck_bunny_MpegStreamclip_720p_h264_50Quality_48K_256k_AAC.mov", true);
+
 	
 	/* to get the videos I am testing run command:
 	 * $wget -r -nd -P /home/pi/videos http://www.jvcref.com/files/PI/video/

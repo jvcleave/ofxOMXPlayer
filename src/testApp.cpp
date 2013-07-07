@@ -4,19 +4,10 @@
 void testApp::setup()
 {
 	ofSetLogLevel(OF_LOG_VERBOSE);
-	ofEnableAlphaBlending();
-	doShader = true;
-	if (doShader) 
-	{
-		shader.load("PostProcessing.vert", "PostProcessing.frag", "");
-		
-		fbo.allocate(ofGetWidth(), ofGetHeight());
-		fbo.begin();
-		ofClear(0, 0, 0, 0);
-		fbo.end();
-		
-	}
-	string videoPath = "/opt/vc/src/hello_pi/hello_video/test.h264";
+	
+	
+	
+	string videoPath = ofToDataPath("big_buck_bunny_MpegStreamclip_720p_h264_50Quality_48K_256k_AAC.mov", true);
 	
 	//this will let us just grab a video without recompiling
 	ofDirectory currentVideoDirectory("/home/pi/videos/current");
@@ -30,21 +21,44 @@ void testApp::setup()
 		}		
 	}
 	
-	
+	//Somewhat like ofFboSettings we may have a lot of options so this is the current model
 	ofxOMXPlayerSettings settings;
 	settings.videoPath = videoPath;
+	settings.useHDMIForAudio = true; //default
+	settings.enableTexture = true;	//default
+	settings.enableLooping = true; //default
+	
+	
+	
+	if (settings.enableTexture)
+	{
+		doShader = true;
+		if (doShader) 
+		{
+			ofEnableAlphaBlending();
+			
+			shader.load("PostProcessing.vert", "PostProcessing.frag", "");
+			
+			fbo.allocate(ofGetWidth(), ofGetHeight());
+			fbo.begin();
+			ofClear(0, 0, 0, 0);
+			fbo.end();
+			
+		}
+	}
+	
 	
 	omxPlayer.setup(settings);
+	
 }
 
 //--------------------------------------------------------------
 void testApp::update()
 {
-	if(!omxPlayer.isPlaying())
+	if(!omxPlayer.isPlaying() || !omxPlayer.isTextureEnabled)
 	{
 		return;
 	}
-	
 	
 	if (doShader) 
 	{
@@ -67,7 +81,7 @@ void testApp::updateFbo()
 
 //--------------------------------------------------------------
 void testApp::draw(){
-	if(!omxPlayer.isPlaying())
+	if(!omxPlayer.isPlaying() && !omxPlayer.isTextureEnabled)
 	{
 		return;
 	}
@@ -78,7 +92,11 @@ void testApp::draw(){
 	}else 
 	{
 		omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
-		omxPlayer.draw(0, 0, omxPlayer.getWidth()/4, omxPlayer.getHeight()/4);
+		
+		//draw a smaller version in the lower right
+		int scaledHeight = omxPlayer.getHeight()/4;
+		int scaledWidth = omxPlayer.getWidth()/4;
+		omxPlayer.draw(ofGetWidth()-scaledWidth, ofGetHeight()-scaledHeight, scaledWidth, scaledHeight);
 	}
 
 	stringstream info;
@@ -87,21 +105,13 @@ void testApp::draw(){
 	info <<"\n" <<	"DIMENSIONS: "			<< omxPlayer.getWidth()<<"x"<<omxPlayer.getHeight();
 	info <<"\n" <<	"DURATION: "			<< omxPlayer.getDuration();
 	info <<"\n" <<	"TOTAL FRAMES: "		<< omxPlayer.getTotalNumFrames();
-	ofDrawBitmapStringHighlight(info.str(), 200, 200, ofColor::black, ofColor::yellow);
+	info <<"\n" <<	"CURRENT FRAME: "		<< omxPlayer.getCurrentFrame();
+	info <<"\n" <<	"REMAINING FRAMES: "	<< omxPlayer.getTotalNumFrames() - omxPlayer.getCurrentFrame();
+	info <<"\n" <<	"CURRENT VOLUME: "		<< omxPlayer.getVolume();
+	
+	ofDrawBitmapStringHighlight(info.str(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
 }
 
-
-
-void testApp::exit()
-{
-	/*omxPlayer.lock();
-	omxPlayer.m_stop = true;
-	omxPlayer.unlock();
-	omxPlayer.waitForThread(true);
-	
-	omxPlayer.close();*/
-	
-}
 //--------------------------------------------------------------
 void testApp::keyPressed  (int key){
 

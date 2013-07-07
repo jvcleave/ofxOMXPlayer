@@ -1,19 +1,4 @@
-STATUS: IN DEVELOPMENT
-
-USAGE: This is not currently setup to run in the addons folder. Clone into openFrameworks/apps/myApps/ofxOMXPlayer
-
-keep open a second terminal and run 
-
-$ killall -9 ofxOMXPlayer
-
-if it hangs (usually on exit)
-
-Now with Audio!
-This was only tested with the audio via the headphone jack with this tweak:
-https://gist.github.com/jvcleave/4972661
-
-test videos here:
-http://www.jvcref.com/files/PI/video/
+STATUS: PERPETUAL DEVELOPMENT
 
 DESCRIPTION:
 This is an ofxAddon that allows textures to be read by openFrameworks on the Raspberry Pi via OpenMax based video. Textures can then be manipulated and used for shaders, etc.
@@ -21,6 +6,37 @@ This is an ofxAddon that allows textures to be read by openFrameworks on the Ras
 REQUIREMENTS:
 GPU split set to 128 (may need to be higher for larger videos)
 develop-raspberrypi branch of https://github.com/openFrameworks-RaspberryPi/openFrameworks
+
+USAGE: This is not currently setup to run in the openFrameworks/addons folder. Clone into openFrameworks/apps/myApps/ofxOMXPlayer
+
+There are now 2 modes of Playback, textured or non-textured. 
+
+Non-Textured:
+Is limited to fullscreen video but OF is still able to run other processes in the background. No other drawing can take place (overlays, etc). 1080p video plays back fine in this mode
+
+Textured:
+Allows the use of shaders, pixel manipulation, drawing overlays, etc, 720p video works best here
+
+MISC:
+Audio can be played back through HDMI or headphone jack
+Headphone jack may require this tweak:
+https://gist.github.com/jvcleave/4972661
+
+HDMI Audio may require this line added to /boot/config.txt
+To use HDMI Audio you may need to add the below line to /boot/config.txt and reboot. See http://elinux.org/RPiconfig for more details
+	
+hdmi_drive=2
+
+
+There are two apps in this repo. I use the developApp to add features but keep the testApp so I can make sure both compile. The testApp is typically
+the default (set in main.cpp) but I sometimes forget to set it back before pushing
+
+TODO:
+Implement better Seeking
+General cleanup (many properties are public)
+Get into ofxAddons structure
+Possibly have it extend ofBaseVideoPlayer
+Possibly Re-introduce support for test.h264 like files with no metadata
 
 
 CREDITS:
@@ -35,5 +51,25 @@ See addons/ofxOMXPlayer/libs/omxplayer/COPYING for license details inherited fro
 Thanks to OtherCrashOverride for helping me figure out the linking issue to enable callbacks
 https://github.com/OtherCrashOverride
 
+Thanks to @bendenoz for help with the looping
+https://github.com/bendenoz
+
 Included shader from
 http://www.iquilezles.org/apps/shadertoy/?p=Postpro
+
+Test Video file from:
+http://www.bigbuckbunny.org/index.php/download/
+
+Recompressed with MPEGStreamclip (http://www.squared5.com/) to:
+Duration: 0:01:00
+Data Size: 14.69 MB
+Bit Rate: 2.05 Mbps
+
+Video Tracks:
+H.264, 1280 × 720, 24 fps, 1.79 Mbps
+
+Audio Tracks:
+MPEG-4 Audio stereo, 48 kHz, 256 kbps
+
+
+

@@ -21,13 +21,22 @@ struct ofxOMXPlayerSettings
 	ofxOMXPlayerSettings()
 	{
 		videoPath = "";
+		
 		useHDMIForAudio = true;
 		enableTexture = true;
+		enableLooping = true;
 	}
 	string videoPath;
 	bool enableTexture;
 	bool useHDMIForAudio;
-	
+	bool enableLooping;
+	/*
+		To use HDMI Audio you may need to add the below line to /boot/config.txt and reboot
+	 
+		hdmi_drive=2
+	 
+		see http://elinux.org/RPiconfig for more details
+	 */
 	
 };
 
