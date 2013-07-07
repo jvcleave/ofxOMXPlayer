@@ -7,6 +7,8 @@ void developApp::onCharacterReceived(SSHKeyListenerEventData& e)
 //--------------------------------------------------------------
 void developApp::setup()
 {
+	ofSetVerticalSync(false);
+	ofSetFrameRate(0);
 	doRandomSelect		= true;
 	isClosing				= false;
 	
