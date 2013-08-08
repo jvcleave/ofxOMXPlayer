@@ -2,7 +2,10 @@
 
 void developApp::onCharacterReceived(SSHKeyListenerEventData& e)
 {
-	keyPressed((int)e.character);
+	ConsoleListener* thread = (ConsoleListener*) e.listener;
+	thread->lock();
+		keyPressed((int)e.character);
+	thread->unlock();
 }
 //--------------------------------------------------------------
 void developApp::setup()
@@ -44,7 +47,7 @@ void developApp::setup()
 	
 	doTextures	= true;
 	doShader	= true;
-	isShaderEnabled = doShader;
+	isShaderEnabled = false;
 	if (doShader || doTextures) 
 	{
 		usingTexturePlayer = true;
@@ -118,7 +121,7 @@ void developApp::draw(){
 		fbo.draw(0, 0);
 	}else 
 	{
-		omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
+		omxPlayer.draw(0, 0, omxPlayer.getWidth(), omxPlayer.getHeight());
 		//omxPlayer.draw(0, 0, omxPlayer.getWidth()/4, omxPlayer.getHeight()/4);
 	}
 	
@@ -128,6 +131,7 @@ void developApp::draw(){
 	
 	
 	info <<"\n" <<	"MEDIA TIME: "			<< omxPlayer.getMediaTime();
+	info <<"\n" <<	"OF DIMENSIONS: "		<< ofGetWidth()<<"x"<<ofGetHeight();
 	info <<"\n" <<	"DIMENSIONS: "			<< omxPlayer.getWidth()<<"x"<<omxPlayer.getHeight();
 	info <<"\n" <<	"DURATION: "			<< omxPlayer.getDuration();
 	info <<"\n" <<	"TOTAL FRAMES: "		<< omxPlayer.getTotalNumFrames();
@@ -160,10 +164,11 @@ void developApp::updateFbo()
 		fbo.begin();
 			ofClear(0, 0, 0, 0);
 				shader.begin();
-				shader.setUniformTexture("tex0", omxPlayer.getTextureReference(), omxPlayer.textureID);
+				//shader.setUniformTexture("tex0", omxPlayer.getTextureReference(), omxPlayer.textureID);
+				omxPlayer.draw(0, 0, omxPlayer.getWidth(), omxPlayer.getHeight());
 				shader.setUniform1f("time", ofGetElapsedTimef());
 				shader.setUniform2f("resolution", ofGetWidth(), ofGetHeight());
-				ofRect(0, 0, ofGetWidth(), ofGetHeight());
+				//ofRect(0, 0, ofGetWidth(), ofGetHeight());
 			shader.end();
 		fbo.end();
 	}

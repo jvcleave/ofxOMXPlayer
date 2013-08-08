@@ -2,13 +2,17 @@
 
 #include "ofMain.h"
 
+
 class SSHKeyListenerEventData
 {
 public:
-	SSHKeyListenerEventData(char character_)
+	SSHKeyListenerEventData(char character_, void* listener_)
 	{
 		character = character_;
+		listener = listener_;
 	}
+	void* listener;
+	
 	char character;
 };
 
@@ -22,26 +26,35 @@ class ConsoleListener: public ofThread
 {
 public:
 	SSHKeyListener* listener;
+	
+	
 	ConsoleListener()
 	{
 		listener = NULL;
 	}
+	
 	void setup(SSHKeyListener* listener_)
 	{
 		listener = listener_;
-		startThread(false, false);
+		startThread(true, true);
 	}
 	void threadedFunction()
 	{
 		while (isThreadRunning()) 
 		{
-			char buffer[10];
-			while(fgets(buffer, 10 , stdin) != NULL)
+			if (listener != NULL) 
 			{
-				//ofLogVerbose() << buffer;
-				SSHKeyListenerEventData eventData(buffer[0]);
-				listener->onCharacterReceived(eventData);
+				
+				char buffer[10];
+				if (fgets(buffer, 10 , stdin) != NULL) 
+				{
+					
+					SSHKeyListenerEventData eventData(buffer[0], (void *)this);
+					listener->onCharacterReceived(eventData);
+					
+				}
 			}
+			
 		}
 	}
 	

@@ -30,6 +30,7 @@ ofxOMXPlayer::ofxOMXPlayer()
 	eglPlayer = NULL;
 	nonEglPlayer = NULL;
 	loopCounter = 0;
+	getPocoThread().setName("ofxOMXPlayer");
 	ofAddListener(ofEvents().exit, this, &ofxOMXPlayer::close);
 }
 
@@ -196,6 +197,12 @@ void ofxOMXPlayer::generateEGLImage()
 	tex.setTextureWrap(GL_REPEAT, GL_REPEAT);
 	textureID = tex.getTextureData().textureID;
 	
+	ofLogVerbose() << "tex.getTextureData().tex_t: " << tex.getTextureData().tex_t;
+	ofLogVerbose() << "tex.getTextureData().tex_u: " << tex.getTextureData().tex_u;
+	//tex.getTextureData().tex_t = 1.0f;
+	//tex.getTextureData().tex_u = 1.0f;
+	
+	
 	//TODO - should be a way to use ofPixels for the getPixels() functions?
 	glEnable(GL_TEXTURE_2D);
 
@@ -254,8 +261,25 @@ void ofxOMXPlayer::threadedFunction()
 		if(omxReader.IsEof() && !packet)
 		{
 			//ofLogVerbose() << "Dumping Cache " << "Audio Cache: " << audioPlayer->GetCached() << " Video Cache: " << videoPlayer->GetCached();
-			if (!audioPlayer->GetCached() && !videoPlayer->GetCached())
+			
+			bool isCacheEmpty = false;
+			
+			if (hasAudio) 
 			{
+				if (!audioPlayer->GetCached() && !videoPlayer->GetCached()) 
+				{
+					isCacheEmpty = true;
+				}
+			}else 
+			{
+				if (!videoPlayer->GetCached()) 
+				{
+					isCacheEmpty = true;
+				}
+			}
+			if (isCacheEmpty)
+			{
+				
 				/*
 				 The way this works is that loop_offset is a marker (actually the same as the DURATION)
 				 Once the file reader seeks to the beginning of the file again loop_offset is then added to subsequent packet's timestamps
