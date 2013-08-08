@@ -109,6 +109,7 @@ void testApp::draw(){
 	info <<"\n" <<	"REMAINING FRAMES: "	<< omxPlayer.getTotalNumFrames() - omxPlayer.getCurrentFrame();
 	info <<"\n" <<	"CURRENT VOLUME: "		<< omxPlayer.getVolume();
 	
+	
 	ofDrawBitmapStringHighlight(info.str(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
 }
 
