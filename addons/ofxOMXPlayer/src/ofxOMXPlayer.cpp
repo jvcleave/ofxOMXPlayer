@@ -197,13 +197,6 @@ void ofxOMXPlayer::generateEGLImage()
 	tex.setTextureWrap(GL_REPEAT, GL_REPEAT);
 	textureID = tex.getTextureData().textureID;
 	
-	ofLogVerbose() << "tex.getTextureData().tex_t: " << tex.getTextureData().tex_t;
-	ofLogVerbose() << "tex.getTextureData().tex_u: " << tex.getTextureData().tex_u;
-	//tex.getTextureData().tex_t = 1.0f;
-	//tex.getTextureData().tex_u = 1.0f;
-	
-	
-	//TODO - should be a way to use ofPixels for the getPixels() functions?
 	glEnable(GL_TEXTURE_2D);
 
 	// setup first texture
