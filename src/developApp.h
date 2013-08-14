@@ -4,7 +4,6 @@
 #include "ofxOMXPlayer.h"
 
 #include "ConsoleListener.h"
-#include "FPSLogger.h"
 
 class developApp : public ofBaseApp, public SSHKeyListener{
 	
@@ -36,12 +35,11 @@ public:
 	
 	void createNonTexturePlayer();
 	void createTexturePlayer();
-	bool isShaderEnabled;
 	
 	ofxOMXPlayerSettings settings;
 	vector<ofFile> files;
 	bool doRandomSelect;
 	
-	FPSLogger fpsLogger;
+	bool doWriteImage;
 };
 

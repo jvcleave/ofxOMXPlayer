@@ -47,7 +47,6 @@ void developApp::setup()
 	
 	doTextures	= true;
 	doShader	= true;
-	isShaderEnabled = false;
 	if (doShader || doTextures) 
 	{
 		usingTexturePlayer = true;
@@ -59,6 +58,7 @@ void developApp::setup()
 	
 	consoleListener.setup(this);
 	ofHideCursor();
+	doWriteImage = false;
 }
 
 void developApp::createNonTexturePlayer()
@@ -79,7 +79,7 @@ void developApp::createTexturePlayer()
 		
 		fbo.allocate(ofGetWidth(), ofGetHeight());
 		fbo.begin();
-		ofClear(0, 0, 0, 0);
+			ofClear(0, 0, 0, 0);
 		fbo.end();
 		
 	}
@@ -98,7 +98,17 @@ void developApp::update()
 		if (usingTexturePlayer && doShader) 
 		{
 			updateFbo();
+			if (doWriteImage) 
+			{
+				string path = ofToDataPath(ofGetTimestampString()+".png", true);
+				ofPixels pixels;
+				pixels.allocate(ofGetWidth(), ofGetHeight(), OF_PIXELS_RGBA);
+				fbo.readToPixels(pixels);
+				ofSaveImage(pixels, path);
+				doWriteImage = false;
+			}
 		}
+		
 	}
 }
 
@@ -116,12 +126,13 @@ void developApp::draw(){
 		return;
 	}
 	
-	if (doShader && isShaderEnabled) 
+	if (doShader) 
 	{
 		fbo.draw(0, 0);
+		
 	}else 
 	{
-		omxPlayer.draw(0, 0, omxPlayer.getWidth(), omxPlayer.getHeight());
+		omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
 		//omxPlayer.draw(0, 0, omxPlayer.getWidth()/4, omxPlayer.getHeight()/4);
 	}
 	
@@ -159,16 +170,15 @@ void developApp::updateFbo()
 	if (isClosing) {
 		return;
 	}
-	if(isShaderEnabled)
+	if(doShader)
 	{
 		fbo.begin();
 			ofClear(0, 0, 0, 0);
 				shader.begin();
-				//shader.setUniformTexture("tex0", omxPlayer.getTextureReference(), omxPlayer.textureID);
-				omxPlayer.draw(0, 0, omxPlayer.getWidth(), omxPlayer.getHeight());
+				shader.setUniformTexture("tex0", omxPlayer.getTextureReference(), omxPlayer.textureID);
 				shader.setUniform1f("time", ofGetElapsedTimef());
 				shader.setUniform2f("resolution", ofGetWidth(), ofGetHeight());
-				//ofRect(0, 0, ofGetWidth(), ofGetHeight());
+				ofRect(0, 0, ofGetWidth(), ofGetHeight());
 			shader.end();
 		fbo.end();
 	}
@@ -184,15 +194,20 @@ void developApp::exit()
 //--------------------------------------------------------------
 void developApp::keyPressed  (int key){
 	 
-	ofLogVerbose() << key << " received!";
-	if (key == 0x5b44) {
-		ofLogVerbose() << "RIGHT KEY PRESSED";
-	}
-	
+	ofLogVerbose() << "key received!";
 	switch (key) 
 	{
+		case 'j':
+		{
+			ofLogVerbose() << "will write image";
+			doWriteImage = true;
+			doShader = true; //fbo only used with shader in this app
+			break;
+		}
+
 		case 'p':
 		{
+			ofLogVerbose() << "pause: " << !omxPlayer.isPaused();
 			omxPlayer.setPaused(!omxPlayer.isPaused());
 			break;
 		
@@ -200,9 +215,10 @@ void developApp::keyPressed  (int key){
 			
 		case 's':
 		{
-			if (doShader && usingTexturePlayer)
+			if (usingTexturePlayer)
 			{
-				isShaderEnabled = !isShaderEnabled;
+				doShader = !doShader;
+				ofLogVerbose() << "doShader " << doShader;
 			}
 			break;
 		}
@@ -210,18 +226,20 @@ void developApp::keyPressed  (int key){
 		case '1':
 		{
 			
+			ofLogVerbose() << "decreaseVolume";
 			omxPlayer.decreaseVolume();
 			break;
 		}
 		case '2':
 		{
+			ofLogVerbose() << "increaseVolume";
 			omxPlayer.increaseVolume();
 			break;
 		}
 			
 		case 'b':
 		{
-			
+			ofLogVerbose() << "stepFrameForward";
 			omxPlayer.stepFrameForward();
 			break;
 		}
