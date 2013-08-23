@@ -530,5 +530,8 @@ void ofxOMXPlayer::close(ofEventArgs & a)
 	waitForThread(true);
 	
 	ofRemoveListener(ofEvents().exit, this, &ofxOMXPlayer::close);
+	if (eglPlayer) {
+		eglDestroyImageKHR(display, eglImage);
+	}
 	ofLogVerbose() << "reached end of ofxOMXPlayer::close";
 }
