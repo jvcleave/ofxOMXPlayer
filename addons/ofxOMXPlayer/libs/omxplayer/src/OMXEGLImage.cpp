@@ -288,7 +288,7 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglIm
 	}
 	
 	ofLogVerbose() << "m_omx_render.GetOutputPort(): " << m_omx_render.GetOutputPort();
-	m_omx_render.EnablePort(m_omx_render.GetOutputPort(), true);
+	m_omx_render.EnablePort(m_omx_render.GetOutputPort(), false);
 	if(omx_err == OMX_ErrorNone)
 	{
 		ofLogVerbose() << "m_omx_render Enable OUTPUT Port PASS";
