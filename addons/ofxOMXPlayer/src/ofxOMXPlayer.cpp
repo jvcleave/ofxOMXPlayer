@@ -102,13 +102,12 @@ void ofxOMXPlayer::openPlayer()
 	{
 		if (!eglPlayer) 
 		{
-			generateEGLImage();
 			eglPlayer = new OMXPlayerEGLImage();
 		}
 		
-		didVideoOpen = eglPlayer->Open(videoStreamInfo, clock, eglImage);
+		didVideoOpen = eglPlayer->Open(videoStreamInfo, clock);
 		videoPlayer = (OMXPlayerVideoBase*)eglPlayer;
-
+		textureID	= eglPlayer->eglImageDecoder->textureID;
 	}else 
 	{
 		if (!nonEglPlayer) {
@@ -184,60 +183,16 @@ void ofxOMXPlayer::openPlayer()
 	}
 }
 
-void ofxOMXPlayer::generateEGLImage()
-{
-	ofDisableArbTex();
-	
-	ofAppEGLWindow *appEGLWindow = (ofAppEGLWindow *) ofGetWindowPtr();
-	display = appEGLWindow->getEglDisplay();
-	context = appEGLWindow->getEglContext();
 
-	
-	tex.allocate(videoWidth, videoHeight, GL_RGBA);
-	tex.getTextureData().bFlipTexture = true;
-	tex.setTextureWrap(GL_REPEAT, GL_REPEAT);
-	textureID = tex.getTextureData().textureID;
-	
-	glEnable(GL_TEXTURE_2D);
-
-	// setup first texture
-	int dataSize = videoWidth * videoHeight * 4;
-	
-	GLubyte* pixelData = new GLubyte [dataSize];
-	
-	
-    memset(pixelData, 0xff, dataSize);  // white texture, opaque
-	
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, videoWidth, videoHeight, 0,
-				 GL_RGBA, GL_UNSIGNED_BYTE, pixelData);
-	
-	delete[] pixelData;
-	
-	
-	// Create EGL Image
-	eglImage = eglCreateImageKHR(
-								 display,
-								 context,
-								 EGL_GL_TEXTURE_2D_KHR,
-								 (EGLClientBuffer)textureID,
-								 0);
-    glDisable(GL_TEXTURE_2D);
-	if (eglImage == EGL_NO_IMAGE_KHR)
-	{
-		ofLogError()	<< "Create EGLImage FAIL";
-		return;
-	}
-	else
-	{
-		ofLogVerbose()	<< "Create EGLImage PASS";
-	}
-}
 
 
 ofTexture & ofxOMXPlayer::getTextureReference()
 {
-	return tex;
+	if (!eglPlayer) 
+	{
+		ofLogError(__func__) << "NO TEXTURE AVAILABLE";
+	}
+	return eglPlayer->eglImageDecoder->tex;
 }
 
 bool doLoopReset = false;
@@ -516,9 +471,3 @@ float ofxOMXPlayer::getVolume()
 	float value = ofMap(audioPlayer->GetCurrentVolume(), -6000.0, 6000.0, 0.0, 1.0, true);
 	return floorf(value * 100 + 0.5) / 100;
 }
-
-/*
- if (eglPlayer) {
- eglDestroyImageKHR(display, eglImage);
- }
- */

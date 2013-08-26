@@ -9,6 +9,8 @@ bool isFirstCallback = true;
 OMXEGLImage::OMXEGLImage()
 {
 	eglBuffer = NULL;
+	appEGLWindow = NULL;
+	
 	
 }
 
@@ -41,9 +43,8 @@ OMX_ERRORTYPE onFillBufferDone(OMX_HANDLETYPE hComponent,
 	
 	return didFillBuffer;
 }
-bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglImage_)
+bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 {
-	eglImage = eglImage_;
 	OMX_ERRORTYPE omx_err   = OMX_ErrorNone;
 	
 
@@ -52,7 +53,8 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglIm
 
 	m_decoded_width  = hints.width;
 	m_decoded_height = hints.height;
-
+	
+	generateEGLImage(m_decoded_width, m_decoded_height);
 
 	if(!m_decoded_width || !m_decoded_height)
 	return false;
@@ -362,9 +364,57 @@ OMXEGLImage::~OMXEGLImage()
 	}
 }
 
+void OMXEGLImage::generateEGLImage(int videoWidth, int videoHeight)
+{	
+	appEGLWindow = (ofAppEGLWindow *) ofGetWindowPtr();
+	display = appEGLWindow->getEglDisplay();
+	context = appEGLWindow->getEglContext();
+	
+	
+	tex.allocate(videoWidth, videoHeight, GL_RGBA);
+	tex.getTextureData().bFlipTexture = true;
+	tex.setTextureWrap(GL_REPEAT, GL_REPEAT);
+	textureID = tex.getTextureData().textureID;
+	
+	glEnable(GL_TEXTURE_2D);
+	
+	// setup first texture
+	int dataSize = videoWidth * videoHeight * 4;
+	
+	GLubyte* pixelData = new GLubyte [dataSize];
+	
+	
+    memset(pixelData, 0xff, dataSize);  // white texture, opaque
+	
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, videoWidth, videoHeight, 0,
+				 GL_RGBA, GL_UNSIGNED_BYTE, pixelData);
+	
+	delete[] pixelData;
+	
+	
+	// Create EGL Image
+	eglImage = eglCreateImageKHR(
+								 display,
+								 context,
+								 EGL_GL_TEXTURE_2D_KHR,
+								 (EGLClientBuffer)textureID,
+								 0);
+    glDisable(GL_TEXTURE_2D);
+	if (eglImage == EGL_NO_IMAGE_KHR)
+	{
+		ofLogError()	<< "Create EGLImage FAIL";
+		return;
+	}
+	else
+	{
+		ofLogVerbose()	<< "Create EGLImage PASS";
+	}
+}
+
 void OMXEGLImage::Close()
 {
-	ofLogVerbose() << "OMXEGLImage::Close start";
+	ofLogVerbose(__func__) << " Start";
 	m_omx_tunnel_decoder.Flush();
 	m_omx_tunnel_clock.Flush();
 	m_omx_tunnel_sched.Flush();
@@ -391,7 +441,21 @@ void OMXEGLImage::Close()
 
 	m_video_codec_name  = "";
 	m_first_frame       = true;
-	ofLogVerbose() << "OMXEGLImage::Close end";
+	
+	if (eglImage) 
+	{
+		if (eglDestroyImageKHR(display, eglImage)) 
+		{
+			ofLogVerbose(__func__) << "eglDestroyImageKHR PASS";
+		}else
+		{
+			ofLogError(__func__) << "eglDestroyImageKHR FAIL";
+		}
+		
+	}
+	
+	
+	ofLogVerbose(__func__) << " END";
 }
 
 

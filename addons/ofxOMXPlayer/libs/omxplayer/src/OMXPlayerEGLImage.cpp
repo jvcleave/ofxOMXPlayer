@@ -27,11 +27,10 @@ OMXPlayerEGLImage::OMXPlayerEGLImage()
 
 
 
-bool OMXPlayerEGLImage::Open(COMXStreamInfo &hints, OMXClock *av_clock, EGLImageKHR eglImage_)
+bool OMXPlayerEGLImage::Open(COMXStreamInfo &hints, OMXClock *av_clock)
 {
 	ofLogVerbose(__func__) << " OMXPlayerEGLImage Open";
 
-	eglImage = eglImage_;
 	ofLogVerbose() << "OMXPlayerEGLImage::maxDataSize may need to be reduced for 256 boards, memory intensive apps";
 
   if (!m_dllAvUtil.Load() || !m_dllAvCodec.Load() || !m_dllAvFormat.Load() || !av_clock)
@@ -94,7 +93,7 @@ bool OMXPlayerEGLImage::OpenDecoder()
 
 	eglImageDecoder = new OMXEGLImage();
 	
-	if(!eglImageDecoder->Open(m_hints, m_av_clock, eglImage))
+	if(!eglImageDecoder->Open(m_hints, m_av_clock))
 	{
 		m_decoder = (OMXDecoderBase*)eglImageDecoder;
 		CloseDecoder();

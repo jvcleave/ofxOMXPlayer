@@ -1332,6 +1332,11 @@ void COMXAudio::PrintChannels(OMX_AUDIO_CHANNELTYPE eChannelMapping[])
 
 void COMXAudio::PrintPCM(OMX_AUDIO_PARAM_PCMMODETYPE *pcm)
 {
+	ofLogVerbose(__func__) << "PCM PROPERTIES";
+	stringstream info;
+	info << "nPortIndex: " << (int)pcm->nPortIndex << "\n";
+	ofLogVerbose(__func__) << info.str();
+	
   ofLog(OF_LOG_VERBOSE, "pcm->nPortIndex     : %d\n", (int)pcm->nPortIndex);
   ofLog(OF_LOG_VERBOSE, "pcm->eNumData       : %d\n", pcm->eNumData);
   ofLog(OF_LOG_VERBOSE, "pcm->eEndian        : %d\n", pcm->eEndian);

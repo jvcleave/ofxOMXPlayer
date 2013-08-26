@@ -11,7 +11,6 @@ void developApp::onCharacterReceived(SSHKeyListenerEventData& e)
 void developApp::setup()
 {
 	ofSetVerticalSync(false);
-	ofSetFrameRate(0);
 	doRandomSelect		= true;
 	isClosing				= false;
 	
@@ -46,7 +45,7 @@ void developApp::setup()
 	ofLogVerbose() << "using videoPath : " << videoPath;
 	
 	doTextures	= true;
-	doShader	= true;
+	doShader	= false;
 	if (doShader || doTextures) 
 	{
 		usingTexturePlayer = true;

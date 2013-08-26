@@ -14,9 +14,8 @@ class OMXPlayerEGLImage : public OMXPlayerVideoBase
 {
 public:
 	OMXPlayerEGLImage();
-	bool Open(COMXStreamInfo &hints, OMXClock *av_clock, EGLImageKHR eglImage_);
+	bool Open(COMXStreamInfo &hints, OMXClock *av_clock);
 	bool OpenDecoder();
-	EGLImageKHR eglImage;
 	
 	OMXEGLImage*				eglImageDecoder;
 };

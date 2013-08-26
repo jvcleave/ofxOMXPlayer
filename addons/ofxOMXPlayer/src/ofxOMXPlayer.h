@@ -75,13 +75,12 @@ public:
 	bool			isPaused();
 	bool			isPlaying();
 		
-	GLuint			textureID;
+	
 
 	int				videoWidth;
 	int				videoHeight;
-	
+	GLuint				textureID;
 
-	EGLImageKHR		eglImage;
 		
 	void			openPlayer();
 	double			getMediaTime();
@@ -123,18 +122,18 @@ private:
 	
 	OMXPacket*			packet;
 	
-	ofTexture			tex;
+
+	
 	ofPixelFormat		internalPixelFormat;
 	string				moviePath;
 	int					nFrames;
 	bool				bPlaying;
-	EGLDisplay			display;
-	EGLContext			context;
+
 	
 	
 	double				loop_offset;
 	double				startpts;
 	int					loopCounter;
-	void				generateEGLImage();
+	
 };
 
