@@ -24,7 +24,6 @@ ofxOMXPlayer::ofxOMXPlayer()
 	videoPlayer			= NULL;
 	listener			= NULL;
 	
-	//rbp.Initialize();
 	omxCore.Initialize();
 	
 	clock = new OMXClock(); 

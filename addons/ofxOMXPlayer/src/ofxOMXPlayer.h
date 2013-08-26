@@ -121,10 +121,8 @@ public:
 	void			removeListener();
 private:
 	
-	//CRBP					rbp;
 	COMXCore				omxCore;
 	OMXClock*				clock;
-	//DllBcmHost				bcmHost;
 	
 	OMXPlayerVideo*			nonEglPlayer;
 	OMXPlayerEGLImage*		eglPlayer;
