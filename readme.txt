@@ -5,7 +5,7 @@ This is an ofxAddon that allows textures to be read by openFrameworks on the Ras
 
 REQUIREMENTS:
 GPU split set to 128 (may need to be higher for larger videos)
-develop-raspberrypi branch of https://github.com/openFrameworks-RaspberryPi/openFrameworks
+openFrameworks version 0.8 or higher http://www.openframeworks.cc/setup/raspberrypi/
 
 USAGE: This is not currently setup to run in the openFrameworks/addons folder. Clone into openFrameworks/apps/myApps/ofxOMXPlayer
 
