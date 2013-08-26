@@ -22,7 +22,6 @@ Audio can be played back through HDMI or headphone jack
 Headphone jack may require this tweak:
 https://gist.github.com/jvcleave/4972661
 
-HDMI Audio may require this line added to /boot/config.txt
 To use HDMI Audio you may need to add the below line to /boot/config.txt and reboot. See http://elinux.org/RPiconfig for more details
 	
 hdmi_drive=2
