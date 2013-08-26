@@ -31,6 +31,9 @@ public:
 	ConsoleListener()
 	{
 		listener = NULL;
+		string oldName = getPocoThread().getName();
+		
+		getPocoThread().setName("ConsoleListener_"+oldName);
 	}
 	
 	void setup(SSHKeyListener* listener_)

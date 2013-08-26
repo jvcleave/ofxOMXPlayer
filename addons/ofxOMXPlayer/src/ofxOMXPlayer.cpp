@@ -30,8 +30,9 @@ ofxOMXPlayer::ofxOMXPlayer()
 	eglPlayer = NULL;
 	nonEglPlayer = NULL;
 	loopCounter = 0;
-	getPocoThread().setName("ofxOMXPlayer");
-	ofAddListener(ofEvents().exit, this, &ofxOMXPlayer::close);
+	string oldName = getPocoThread().getName();
+	
+	getPocoThread().setName("ofxOMXPlayer_"+oldName);
 }
 
 
@@ -197,13 +198,6 @@ void ofxOMXPlayer::generateEGLImage()
 	tex.setTextureWrap(GL_REPEAT, GL_REPEAT);
 	textureID = tex.getTextureData().textureID;
 	
-	ofLogVerbose() << "tex.getTextureData().tex_t: " << tex.getTextureData().tex_t;
-	ofLogVerbose() << "tex.getTextureData().tex_u: " << tex.getTextureData().tex_u;
-	//tex.getTextureData().tex_t = 1.0f;
-	//tex.getTextureData().tex_u = 1.0f;
-	
-	
-	//TODO - should be a way to use ofPixels for the getPixels() functions?
 	glEnable(GL_TEXTURE_2D);
 
 	// setup first texture
@@ -523,15 +517,8 @@ float ofxOMXPlayer::getVolume()
 	return floorf(value * 100 + 0.5) / 100;
 }
 
-void ofxOMXPlayer::close(ofEventArgs & a)
-{
-	
-	ofLogVerbose() << "start ofxOMXPlayer::close";
-	waitForThread(true);
-	
-	ofRemoveListener(ofEvents().exit, this, &ofxOMXPlayer::close);
-	if (eglPlayer) {
-		eglDestroyImageKHR(display, eglImage);
-	}
-	ofLogVerbose() << "reached end of ofxOMXPlayer::close";
-}
+/*
+ if (eglPlayer) {
+ eglDestroyImageKHR(display, eglImage);
+ }
+ */
