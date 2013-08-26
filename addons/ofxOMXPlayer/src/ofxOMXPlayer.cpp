@@ -22,6 +22,7 @@ ofxOMXPlayer::ofxOMXPlayer()
 	didVideoOpen		= false;
 	isTextureEnabled	= false;
 	videoPlayer			= NULL;
+	listener			= NULL;
 	
 	rbp.Initialize();
 	omxCore.Initialize();
@@ -41,7 +42,7 @@ void ofxOMXPlayer::setup(ofxOMXPlayerSettings settings_)
 	settings = settings_;
 	moviePath = settings.videoPath; 
 	doLooping = settings.enableLooping;
-	
+	addListener(settings.listener);
 	ofLogVerbose() << "moviePath is " << moviePath;
 	isTextureEnabled = settings.enableTexture;
 	
@@ -228,7 +229,7 @@ void ofxOMXPlayer::threadedFunction()
 			}
 			if (isCacheEmpty)
 			{
-				
+				onVideoEnd();
 				/*
 				 The way this works is that loop_offset is a marker (actually the same as the DURATION)
 				 Once the file reader seeks to the beginning of the file again loop_offset is then added to subsequent packet's timestamps
@@ -470,4 +471,25 @@ float ofxOMXPlayer::getVolume()
 	}
 	float value = ofMap(audioPlayer->GetCurrentVolume(), -6000.0, 6000.0, 0.0, 1.0, true);
 	return floorf(value * 100 + 0.5) / 100;
+}
+
+
+void ofxOMXPlayer::addListener(ofxOMXPlayerListener* listener_)
+{
+	listener = listener_;
+}
+
+void ofxOMXPlayer::removeListener()
+{
+	listener = NULL;
+}
+
+void ofxOMXPlayer::onVideoEnd()
+{
+	if (listener != NULL) 
+	{
+		
+		ofxOMXPlayerListenerEventData eventData((void *)this);
+		listener->onVideoEnd(eventData);
+	}
 }

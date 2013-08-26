@@ -16,6 +16,25 @@ extern "C"
 #include "OMXPlayerVideo.h"
 #include "OMXPlayerAudio.h"
 
+
+class ofxOMXPlayerListenerEventData
+{
+public:
+	ofxOMXPlayerListenerEventData(void* listener_)
+	{
+		listener = listener_;
+	}
+	void* listener;
+};
+
+
+class ofxOMXPlayerListener
+{
+public:
+	virtual void onVideoEnd(ofxOMXPlayerListenerEventData& e) = 0;
+};
+
+
 struct ofxOMXPlayerSettings 
 {
 	ofxOMXPlayerSettings()
@@ -25,11 +44,13 @@ struct ofxOMXPlayerSettings
 		useHDMIForAudio = true;
 		enableTexture = true;
 		enableLooping = true;
+		listener	  = NULL;
 	}
 	string videoPath;
 	bool enableTexture;
 	bool useHDMIForAudio;
 	bool enableLooping;
+	ofxOMXPlayerListener* listener;
 	/*
 		To use HDMI Audio you may need to add the below line to /boot/config.txt and reboot
 	 
@@ -95,45 +116,50 @@ public:
 	void			stepFrameForward();
 	void			increaseVolume();
 	void			decreaseVolume();
+	
+	void			addListener(ofxOMXPlayerListener* listener_);
+	void			removeListener();
 private:
 	
-	CRBP				rbp;
-	COMXCore			omxCore;
-	OMXClock*			clock;
-	DllBcmHost			bcmHost;
+	CRBP					rbp;
+	COMXCore				omxCore;
+	OMXClock*				clock;
+	DllBcmHost				bcmHost;
 	
 	OMXPlayerVideo*			nonEglPlayer;
 	OMXPlayerEGLImage*		eglPlayer;
 	OMXPlayerVideoBase*		videoPlayer;
 	OMXPlayerAudio*			audioPlayer;
 	
-	OMXReader			omxReader;
+	OMXReader				omxReader;
 	
-	COMXStreamInfo		videoStreamInfo;
-	COMXStreamInfo		audioStreamInfo;
+	COMXStreamInfo			videoStreamInfo;
+	COMXStreamInfo			audioStreamInfo;
 	
-	bool				isMPEG;
-	bool				hasVideo;
-	bool				hasAudio;
-	bool				isBufferEmpty;
+	bool					isMPEG;
+	bool					hasVideo;
+	bool					hasAudio;
+	bool					isBufferEmpty;
 
 	
 	
 	
-	OMXPacket*			packet;
+	OMXPacket*				packet;
 	
 
 	
-	ofPixelFormat		internalPixelFormat;
-	string				moviePath;
-	int					nFrames;
-	bool				bPlaying;
+	ofPixelFormat			internalPixelFormat;
+	string					moviePath;
+	int						nFrames;
+	bool					bPlaying;
 
 	
 	
-	double				loop_offset;
-	double				startpts;
-	int					loopCounter;
+	double					loop_offset;
+	double					startpts;
+	int						loopCounter;
 	
+	ofxOMXPlayerListener*	listener;
+	void					onVideoEnd();
 };
 

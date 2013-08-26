@@ -4,7 +4,7 @@
 void testApp::setup()
 {
 	ofSetLogLevel(OF_LOG_VERBOSE);
-	
+	ofSetVerticalSync(false);
 	
 	
 	string videoPath = ofToDataPath("big_buck_bunny_MpegStreamclip_720p_h264_50Quality_48K_256k_AAC.mov", true);
@@ -24,9 +24,9 @@ void testApp::setup()
 	//Somewhat like ofFboSettings we may have a lot of options so this is the current model
 	ofxOMXPlayerSettings settings;
 	settings.videoPath = videoPath;
-	settings.useHDMIForAudio = true; //default
-	settings.enableTexture = true;	//default
-	settings.enableLooping = true; //default
+	settings.useHDMIForAudio = true;	//default true
+	settings.enableTexture = true;		//default true
+	settings.enableLooping = true;		//default true
 	
 	
 	

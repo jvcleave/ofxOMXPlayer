@@ -1,27 +1,60 @@
-#include "ofMain.h"
 
-#define USE_DEVELOP_APP
+//Ugly but I change these a lot 
 
-#ifdef USE_DEVELOP_APP
-	#include "developApp.h"
-#warning "!!!!!!! YOU ARE USING THE developApp WHEN YOU PROBABLY WANT THE testApp !!!!!!!!"
-#else
-	#include "testApp.h"
-#endif
-
-#include "ofGLProgrammableRenderer.h"
+//#define USE_DEVELOP_APP
+//#define USE_PLAYLIST_APP
+#define USE_TEST_APP
 
 //========================================================================
-int main( ){
-	ofSetLogLevel(OF_LOG_VERBOSE);
-	
-	ofSetCurrentRenderer(ofPtr<ofBaseRenderer>(new ofGLProgrammableRenderer()));
-	
-	ofSetupOpenGL(1280, 720, OF_WINDOW);
+#ifdef USE_TEST_APP
+	#warning "!!!!!!! YOU ARE USING THE testApp"
 
-	#ifdef USE_DEVELOP_APP
-		ofRunApp( new developApp());
-	#else
+	#include "ofMain.h"
+	#include "testApp.h"
+	#include "ofGLProgrammableRenderer.h"
+
+	int main()
+	{
+		ofSetLogLevel(OF_LOG_VERBOSE);
+		ofSetCurrentRenderer(ofGLProgrammableRenderer::TYPE);
+		ofSetupOpenGL(1280, 720, OF_WINDOW);
 		ofRunApp( new testApp());
-	#endif
-}
+	}
+#endif
+
+
+//========================================================================
+#ifdef USE_DEVELOP_APP
+	#warning "!!!!!!! YOU ARE USING THE developApp"
+
+	#include "ofMain.h"
+	#include "developApp.h"
+	#include "ofGLProgrammableRenderer.h"
+
+	int main()
+	{
+		ofSetLogLevel(OF_LOG_VERBOSE);
+		ofSetCurrentRenderer(ofGLProgrammableRenderer::TYPE);
+		ofSetupOpenGL(1280, 720, OF_WINDOW);
+		ofRunApp( new developApp());
+	}
+
+#endif
+
+
+//========================================================================
+#ifdef USE_PLAYLIST_APP
+	#warning "!!!!!!! YOU ARE USING THE playlistApp"
+
+	#include "ofMain.h"
+	#include "playlistApp.h"
+	#include "ofGLProgrammableRenderer.h"
+
+	int main()
+	{
+		ofSetLogLevel(OF_LOG_VERBOSE);
+		ofSetCurrentRenderer(ofGLProgrammableRenderer::TYPE);
+		ofSetupOpenGL(1280, 720, OF_WINDOW);
+		ofRunApp( new playlistApp());
+	}
+#endif
