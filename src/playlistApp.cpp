@@ -2,7 +2,7 @@
 
 //This app is a demo of the ability to play multiple files with the Non-Texture Player
 //It requires multiple video files to be in /home/pi/videos/current
-//There is a bit of glitching while teh files switch
+//There is a bit of glitching while the files switch
 
 //This also demonstrates the ofxOMXPlayerListener pattern available
 

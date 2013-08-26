@@ -10,7 +10,7 @@ extern "C"
 	#include <libavutil/avutil.h>
 };
 
-#include "RBP.h"
+//#include "RBP.h"
 #include "OMXClock.h"
 #include "OMXPlayerEGLImage.h"
 #include "OMXPlayerVideo.h"
@@ -121,10 +121,10 @@ public:
 	void			removeListener();
 private:
 	
-	CRBP					rbp;
+	//CRBP					rbp;
 	COMXCore				omxCore;
 	OMXClock*				clock;
-	DllBcmHost				bcmHost;
+	//DllBcmHost				bcmHost;
 	
 	OMXPlayerVideo*			nonEglPlayer;
 	OMXPlayerEGLImage*		eglPlayer;

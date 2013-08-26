@@ -28,20 +28,32 @@ To use HDMI Audio you may need to add the below line to /boot/config.txt and reb
 hdmi_drive=2
 
 
-There are two apps in this repo. I use the developApp to add features but keep the testApp so I can make sure both compile. The testApp is typically
-the default (set in main.cpp) but I sometimes forget to set it back before pushing
+There are 3 apps in this repo. You can switch which one runs in main.cpp
+
+testApp
+The most "stable" of the 3 and demos the most tested functionality. 
+This is typically the default when you clone/download but I sometimes forget to set it back before pushing
+
+developApp
+I use the developApp to test features. It uses a ConsoleListener class that allows you to input
+keys via an SSH terminal which is the way I develop/test
+
+playlistApp
+The newest of the 3 and demonstrates the ability to play multiple videos in non-texture mode. There is currently a bit of glitching while as files switch.
+This also demonstrates the ofxOMXPlayerListener pattern available. If your app extends ofxOMXPlayerListener you will receive an event when the video ends
+
 
 TODO:
+Multiple video support for textured Player
 Implement better Seeking
-General cleanup (many properties are public)
 Get into ofxAddons structure
+Re-introduce support for test.h264 like files with no metadata
+General cleanup (many properties are public)
 Possibly have it extend ofBaseVideoPlayer
-Possibly Re-introduce support for test.h264 like files with no metadata
-
 
 CREDITS:
 Majority of the code is based off of 
-https://github.com/huceke/omxplayer
+https://github.com/popcornmix/omxplayer
 
 with some modifications by xbmc:
 https://github.com/xbmc/xbmc
