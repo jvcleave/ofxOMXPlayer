@@ -100,11 +100,14 @@ bool OMXPlayerVideo::Open(COMXStreamInfo &hints, OMXClock *av_clock, bool deinte
 bool OMXPlayerVideo::OpenDecoder()
 {
 	
-  ofLogVerbose(__func__) << "OMXPlayerVideo OpenDecoder";
   if (m_hints.fpsrate && m_hints.fpsscale)
-    m_fps = DVD_TIME_BASE / OMXReader::NormalizeFrameduration((double)DVD_TIME_BASE * m_hints.fpsscale / m_hints.fpsrate);
+  {
+	  m_fps = DVD_TIME_BASE / OMXReader::NormalizeFrameduration((double)DVD_TIME_BASE * m_hints.fpsscale / m_hints.fpsrate);
+  }
   else
-    m_fps = 25;
+  {
+	  m_fps = 25;
+  }
 
   if( m_fps > 100 || m_fps < 5 )
   {
@@ -123,9 +126,17 @@ bool OMXPlayerVideo::OpenDecoder()
   }
   else
   {
-	m_decoder = (OMXDecoderBase*)nonTextureDecoder;
-    ofLog(OF_LOG_VERBOSE, "Video codec %s width %d height %d profile %d fps %f\n",
-        m_decoder->GetDecoderName().c_str() , m_hints.width, m_hints.height, m_hints.profile, m_fps);
+	  m_decoder = (OMXDecoderBase*)nonTextureDecoder;
+	  stringstream info;
+	  info << "Video codec: "	<<	m_decoder->GetDecoderName()		<< "\n";
+	  info << "Video width: "	<<	m_hints.width					<< "\n";
+	  info << "Video height: "	<<	m_hints.height					<< "\n";
+	  info << "Video profile: "	<<	m_hints.profile					<< "\n";
+	  info << "Video fps: "		<<	m_fps							<< "\n";	
+	  ofLogVerbose(__func__) << "\n" << info;
+	  
+    /*ofLog(OF_LOG_VERBOSE, "Video codec %s width %d height %d profile %d fps %f\n",
+        m_decoder->GetDecoderName().c_str() , m_hints.width, m_hints.height, m_hints.profile, m_fps);*/
   }
 
   

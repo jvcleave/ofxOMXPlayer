@@ -50,11 +50,11 @@ public:
     { return ::OMX_SetupTunnel(hOutput, nPortOutput, hInput, nPortInput); };
   virtual bool ResolveExports() 
     { return true; }
-  virtual bool Load() 
-  {
-    printf("\nDllOMX: Using omx system library \n");
-    return true;
-  }
+  //virtual bool Load() 
+//  {
+//    printf("\nDllOMX: Using omx system library \n");
+//    return true;
+//  }
   virtual void Unload() {}
 };
 

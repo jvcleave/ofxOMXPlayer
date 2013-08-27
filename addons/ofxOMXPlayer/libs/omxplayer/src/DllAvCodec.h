@@ -160,7 +160,7 @@ public:
   // DLL faking.
   virtual bool ResolveExports() { return true; }
   virtual bool Load() {
-    printf("\nDllAvCodec: Using libavcodec system library \n");
+    printf("DllAvCodec: Using libavcodec system library \n");
     return true;
   }
   virtual void Unload() {}

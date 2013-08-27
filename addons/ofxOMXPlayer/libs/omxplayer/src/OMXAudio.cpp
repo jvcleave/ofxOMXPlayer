@@ -1188,190 +1188,196 @@ bool COMXAudio::SetClock(OMXClock *clock)
  
 void COMXAudio::SetCodingType(CodecID codec)
 {
-  switch(codec)
-  { 
-    case CODEC_ID_DTS:
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::SetCodingType OMX_AUDIO_CodingDTS");
-      m_eEncoding = OMX_AUDIO_CodingDTS;
-      break;
-    case CODEC_ID_AC3:
-    case CODEC_ID_EAC3:
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::SetCodingType OMX_AUDIO_CodingDDP");
-      m_eEncoding = OMX_AUDIO_CodingDDP;
-      break;
-    default:
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::SetCodingType OMX_AUDIO_CodingPCM");
-      m_eEncoding = OMX_AUDIO_CodingPCM;
-      break;
-  } 
+	switch(codec)
+	{ 
+		case CODEC_ID_DTS:
+			ofLogVerbose(__func__) << "OMX_AUDIO_CodingDTS";
+			m_eEncoding = OMX_AUDIO_CodingDTS;
+			break;
+		case CODEC_ID_AC3:
+		case CODEC_ID_EAC3:
+			ofLogVerbose(__func__) << "OMX_AUDIO_CodingDDP";
+			m_eEncoding = OMX_AUDIO_CodingDDP;
+			break;
+		default:
+			ofLogVerbose(__func__) << "OMX_AUDIO_CodingPCM";
+			m_eEncoding = OMX_AUDIO_CodingPCM;
+			break;
+	} 
 }
 
 bool COMXAudio::CanHWDecode(CodecID codec)
 {
-  switch(codec)
-  { 
-    /*
-    case CODEC_ID_VORBIS:
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::CanHWDecode OMX_AUDIO_CodingVORBIS");
-      m_eEncoding = OMX_AUDIO_CodingVORBIS;
-      m_HWDecode = true;
-      break;
-    case CODEC_ID_AAC:
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::CanHWDecode OMX_AUDIO_CodingAAC");
-      m_eEncoding = OMX_AUDIO_CodingAAC;
-      m_HWDecode = true;
-      break;
-    */
-    case CODEC_ID_MP2:
-    case CODEC_ID_MP3:
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::CanHWDecode OMX_AUDIO_CodingMP3");
-      m_eEncoding = OMX_AUDIO_CodingMP3;
-      m_HWDecode = true;
-      break;
-    case CODEC_ID_DTS:
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::CanHWDecode OMX_AUDIO_CodingDTS");
-      m_eEncoding = OMX_AUDIO_CodingDTS;
-      m_HWDecode = true;
-      break;
-    case CODEC_ID_AC3:
-    case CODEC_ID_EAC3:
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::CanHWDecode OMX_AUDIO_CodingDDP");
-      m_eEncoding = OMX_AUDIO_CodingDDP;
-      m_HWDecode = true;
-      break;
-    default:
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::CanHWDecode OMX_AUDIO_CodingPCM");
-      m_eEncoding = OMX_AUDIO_CodingPCM;
-      m_HWDecode = false;
-      break;
-  } 
-
-  return m_HWDecode;
+	switch(codec)
+	{ 
+			/*
+			 case CODEC_ID_VORBIS:
+			 ofLogVerbose(__func__) << "OMX_AUDIO_CodingVORBIS";
+			 m_eEncoding = OMX_AUDIO_CodingVORBIS;
+			 m_HWDecode = true;
+			 break;
+			 case CODEC_ID_AAC:
+			 ofLogVerbose(__func__) << "OMX_AUDIO_CodingAAC";
+			 m_eEncoding = OMX_AUDIO_CodingAAC;
+			 m_HWDecode = true;
+			 break;
+			 */
+		case CODEC_ID_MP2:
+		case CODEC_ID_MP3:
+			ofLogVerbose(__func__) << "OMX_AUDIO_CodingMP3";
+			m_eEncoding = OMX_AUDIO_CodingMP3;
+			m_HWDecode = true;
+			break;
+		case CODEC_ID_DTS:
+			ofLogVerbose(__func__) << "OMX_AUDIO_CodingDTS";
+			m_eEncoding = OMX_AUDIO_CodingDTS;
+			m_HWDecode = true;
+			break;
+		case CODEC_ID_AC3:
+		case CODEC_ID_EAC3:
+			ofLogVerbose(__func__) << "OMX_AUDIO_CodingDDP";
+			m_eEncoding = OMX_AUDIO_CodingDDP;
+			m_HWDecode = true;
+			break;
+		default:
+			ofLogVerbose(__func__) << "OMX_AUDIO_CodingPCM";
+			m_eEncoding = OMX_AUDIO_CodingPCM;
+			m_HWDecode = false;
+			break;
+	} 
+	
+	return m_HWDecode;
 }
 
 bool COMXAudio::HWDecode(CodecID codec)
 {
-  bool ret = false;
-
-  switch(codec)
-  { 
-    /*
-    case CODEC_ID_VORBIS:
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::HWDecode CODEC_ID_VORBIS");
-      ret = true;
-      break;
-    case CODEC_ID_AAC:
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::HWDecode CODEC_ID_AAC");
-      ret = true;
-      break;
-    */
-    case CODEC_ID_MP2:
-    case CODEC_ID_MP3:
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::HWDecode CODEC_ID_MP2 / CODEC_ID_MP3");
-      ret = true;
-      break;
-    case CODEC_ID_DTS:
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::HWDecode CODEC_ID_DTS");
-      ret = true;
-      break;
-    case CODEC_ID_AC3:
-    case CODEC_ID_EAC3:
-      ofLog(OF_LOG_VERBOSE, "COMXAudio::HWDecode CODEC_ID_AC3 / CODEC_ID_EAC3");
-      ret = true;
-      break;
-    default:
-      ret = false;
-      break;
-  } 
-
-  return ret;
+	bool ret = false;
+	
+	switch(codec)
+	{ 
+			/*
+			 case CODEC_ID_VORBIS:
+			 ofLogVerbose(__func__) << "CODEC_ID_VORBIS";
+			 ret = true;
+			 break;
+			 case CODEC_ID_AAC:
+			 ofLogVerbose(__func__) << "CODEC_ID_AAC";
+			 ret = true;
+			 break;
+			 */
+		case CODEC_ID_MP2:
+		case CODEC_ID_MP3:
+			ofLogVerbose(__func__) << "CODEC_ID_MP2 / CODEC_ID_MP3";
+			ret = true;
+			break;
+		case CODEC_ID_DTS:
+			ofLogVerbose(__func__) << "CODEC_ID_DTS";
+			ret = true;
+			break;
+		case CODEC_ID_AC3:
+		case CODEC_ID_EAC3:
+			ofLogVerbose(__func__) << "CODEC_ID_AC3 / CODEC_ID_EAC3";
+			ret = true;
+			break;
+		default:
+			ret = false;
+			break;
+	} 
+	
+	return ret;
 }
 
 void COMXAudio::PrintChannels(OMX_AUDIO_CHANNELTYPE eChannelMapping[])
 {
-  for(int i = 0; i < OMX_AUDIO_MAXCHANNELS; i++)
-  {
-    switch(eChannelMapping[i])
-    {
-      case OMX_AUDIO_ChannelLF:
-        ofLog(OF_LOG_VERBOSE, "OMX_AUDIO_ChannelLF");
-        break;
-      case OMX_AUDIO_ChannelRF:
-        ofLog(OF_LOG_VERBOSE, "OMX_AUDIO_ChannelRF");
-        break;
-      case OMX_AUDIO_ChannelCF:
-        ofLog(OF_LOG_VERBOSE, "OMX_AUDIO_ChannelCF");
-        break;
-      case OMX_AUDIO_ChannelLS:
-        ofLog(OF_LOG_VERBOSE, "OMX_AUDIO_ChannelLS");
-        break;
-      case OMX_AUDIO_ChannelRS:
-        ofLog(OF_LOG_VERBOSE, "OMX_AUDIO_ChannelRS");
-        break;
-      case OMX_AUDIO_ChannelLFE:
-        ofLog(OF_LOG_VERBOSE, "OMX_AUDIO_ChannelLFE");
-        break;
-      case OMX_AUDIO_ChannelCS:
-        ofLog(OF_LOG_VERBOSE, "OMX_AUDIO_ChannelCS");
-        break;
-      case OMX_AUDIO_ChannelLR:
-        ofLog(OF_LOG_VERBOSE, "OMX_AUDIO_ChannelLR");
-        break;
-      case OMX_AUDIO_ChannelRR:
-        ofLog(OF_LOG_VERBOSE, "OMX_AUDIO_ChannelRR");
-        break;
-      case OMX_AUDIO_ChannelNone:
-      case OMX_AUDIO_ChannelKhronosExtensions:
-      case OMX_AUDIO_ChannelVendorStartUnused:
-      case OMX_AUDIO_ChannelMax:
-      default:
-        break;
-    }
-  }
+	for(int i = 0; i < OMX_AUDIO_MAXCHANNELS; i++)
+	{
+		switch(eChannelMapping[i])
+		{
+			case OMX_AUDIO_ChannelLF:
+				ofLogVerbose(__func__) << "OMX_AUDIO_ChannelLF";
+				break;
+			case OMX_AUDIO_ChannelRF:
+				ofLogVerbose(__func__) << "OMX_AUDIO_ChannelRF";
+				break;
+			case OMX_AUDIO_ChannelCF:
+				ofLogVerbose(__func__) << "OMX_AUDIO_ChannelCF";
+				break;
+			case OMX_AUDIO_ChannelLS:
+				ofLogVerbose(__func__) << "OMX_AUDIO_ChannelLS";
+				break;
+			case OMX_AUDIO_ChannelRS:
+				ofLogVerbose(__func__) << "OMX_AUDIO_ChannelRS";
+				break;
+			case OMX_AUDIO_ChannelLFE:
+				ofLogVerbose(__func__) << "OMX_AUDIO_ChannelLFE";
+				break;
+			case OMX_AUDIO_ChannelCS:
+				ofLogVerbose(__func__) << "OMX_AUDIO_ChannelCS";
+				break;
+			case OMX_AUDIO_ChannelLR:
+				ofLogVerbose(__func__) << "OMX_AUDIO_ChannelLR";
+				break;
+			case OMX_AUDIO_ChannelRR:
+				ofLogVerbose(__func__) << "OMX_AUDIO_ChannelRR";
+				break;
+			case OMX_AUDIO_ChannelNone:
+			case OMX_AUDIO_ChannelKhronosExtensions:
+			case OMX_AUDIO_ChannelVendorStartUnused:
+			case OMX_AUDIO_ChannelMax:
+			default:
+				break;
+		}
+	}
 }
 
 void COMXAudio::PrintPCM(OMX_AUDIO_PARAM_PCMMODETYPE *pcm)
 {
-	ofLogVerbose(__func__) << "PCM PROPERTIES";
-	stringstream info;
-	info << "nPortIndex: " << (int)pcm->nPortIndex << "\n";
-	ofLogVerbose(__func__) << info.str();
 	
-  ofLog(OF_LOG_VERBOSE, "pcm->nPortIndex     : %d\n", (int)pcm->nPortIndex);
-  ofLog(OF_LOG_VERBOSE, "pcm->eNumData       : %d\n", pcm->eNumData);
-  ofLog(OF_LOG_VERBOSE, "pcm->eEndian        : %d\n", pcm->eEndian);
-  ofLog(OF_LOG_VERBOSE, "pcm->bInterleaved   : %d\n", (int)pcm->bInterleaved);
-  ofLog(OF_LOG_VERBOSE, "pcm->nBitPerSample  : %d\n", (int)pcm->nBitPerSample);
-  ofLog(OF_LOG_VERBOSE, "pcm->ePCMMode       : %d\n", pcm->ePCMMode);
-  ofLog(OF_LOG_VERBOSE, "pcm->nChannels      : %d\n", (int)pcm->nChannels);
-  ofLog(OF_LOG_VERBOSE, "pcm->nSamplingRate  : %d\n", (int)pcm->nSamplingRate);
+	stringstream info;
+	info << "PCM PROPERTIES"	<< "\n";
+	info << "nPortIndex: "		<< (int)pcm->nPortIndex			<< "\n";
+	info << "eNumData: "		<< pcm->eNumData				<< "\n";
+	info << "eEndian: "			<< pcm->eEndian					<< "\n";
+	info << "bInterleaved: "	<< (int)pcm->bInterleaved		<< "\n";
+	info << "nBitPerSample: "	<< (int)pcm->nBitPerSample		<< "\n";
+	info << "ePCMMode: "		<< pcm->ePCMMode				<< "\n";
+	info << "nChannels: "		<< (int)pcm->nChannels			<< "\n";
+	info << "nSamplingRate: "	<< (int)pcm->nSamplingRate		<< "\n";
+	ofLogVerbose(__func__) << "\n" <<  info.str();
 
   PrintChannels(pcm->eChannelMapping);
 }
 
 void COMXAudio::PrintDDP(OMX_AUDIO_PARAM_DDPTYPE *ddparm)
 {
-  ofLog(OF_LOG_VERBOSE, "ddparm->nPortIndex         : %d\n", (int)ddparm->nPortIndex);
-  ofLog(OF_LOG_VERBOSE, "ddparm->nChannels          : %d\n", (int)ddparm->nChannels);
-  ofLog(OF_LOG_VERBOSE, "ddparm->nBitRate           : %d\n", (int)ddparm->nBitRate);
-  ofLog(OF_LOG_VERBOSE, "ddparm->nSampleRate        : %d\n", (int)ddparm->nSampleRate);
-  ofLog(OF_LOG_VERBOSE, "ddparm->eBitStreamId       : %d\n", (int)ddparm->eBitStreamId);
-  ofLog(OF_LOG_VERBOSE, "ddparm->eBitStreamMode     : %d\n", (int)ddparm->eBitStreamMode);
-  ofLog(OF_LOG_VERBOSE, "ddparm->eDolbySurroundMode : %d\n", (int)ddparm->eDolbySurroundMode);
-
-  PrintChannels(ddparm->eChannelMapping);
+	stringstream info;
+	info << "DDP PROPERTIES"	<< "\n";	
+	info << "nPortIndex         : " <<  (int)ddparm->nPortIndex			<< "\n";
+	info << "nChannels          : " <<  (int)ddparm->nChannels			<< "\n";
+	info << "nBitRate           : " <<  (int)ddparm->nBitRate			<< "\n";
+	info << "nSampleRate        : " <<  (int)ddparm->nSampleRate		<< "\n";
+	info << "eBitStreamId       : " <<  (int)ddparm->eBitStreamId		<< "\n";
+	info << "eBitStreamMode     : " <<  (int)ddparm->eBitStreamMode		<< "\n";
+	info << "eDolbySurroundMode : " <<  (int)ddparm->eDolbySurroundMode << "\n";
+	
+	ofLogVerbose(__func__) << "\n" <<  info.str();
+	
+	PrintChannels(ddparm->eChannelMapping);
 }
-
 void COMXAudio::PrintDTS(OMX_AUDIO_PARAM_DTSTYPE *dtsparam)
 {
-  ofLog(OF_LOG_VERBOSE, "dtsparam->nPortIndex         : %d\n", (int)dtsparam->nPortIndex);
-  ofLog(OF_LOG_VERBOSE, "dtsparam->nChannels          : %d\n", (int)dtsparam->nChannels);
-  ofLog(OF_LOG_VERBOSE, "dtsparam->nBitRate           : %d\n", (int)dtsparam->nBitRate);
-  ofLog(OF_LOG_VERBOSE, "dtsparam->nSampleRate        : %d\n", (int)dtsparam->nSampleRate);
-  ofLog(OF_LOG_VERBOSE, "dtsparam->nFormat            : 0x%08x\n", (int)dtsparam->nFormat);
-  ofLog(OF_LOG_VERBOSE, "dtsparam->nDtsType           : %d\n", (int)dtsparam->nDtsType);
-  ofLog(OF_LOG_VERBOSE, "dtsparam->nDtsFrameSizeBytes : %d\n", (int)dtsparam->nDtsFrameSizeBytes);
+	stringstream info;
+	info << "DTS PROPERTIES"	<< "\n";
+	info << "nPortIndex         : " <<  (int)dtsparam->nPortIndex 				<< "\n";
+	info << "nChannels          : " <<  (int)dtsparam->nChannels 				<< "\n";
+	info << "nBitRate           : " <<  (int)dtsparam->nBitRate 				<< "\n";
+	info << "nSampleRate        : " <<  (int)dtsparam->nSampleRate				<< "\n";
+	info << "nFormat            : " <<  (int)dtsparam->nFormat					<< "\n";
+	info << "nDtsType           : " <<  (int)dtsparam->nDtsType 				<< "\n";	
+	info << "nDtsFrameSizeBytes : " <<  (int)dtsparam->nDtsFrameSizeBytes 		<< "\n";
 
+	ofLogVerbose(__func__) << "\n" <<  info.str();
+	
   PrintChannels(dtsparam->eChannelMapping);
 }
 

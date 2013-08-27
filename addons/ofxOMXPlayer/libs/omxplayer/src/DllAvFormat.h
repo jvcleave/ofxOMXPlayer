@@ -121,7 +121,7 @@ public:
   // DLL faking.
   virtual bool ResolveExports() { return true; }
   virtual bool Load() {
-    printf("\nDllAvFormat: Using libavformat system library \n");
+    printf("DllAvFormat: Using libavformat system library \n");
     return true;
   }
   virtual void Unload() {}

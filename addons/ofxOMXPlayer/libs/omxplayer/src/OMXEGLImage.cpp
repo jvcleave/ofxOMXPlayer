@@ -43,9 +43,10 @@ OMX_ERRORTYPE onFillBufferDone(OMX_HANDLETYPE hComponent,
 	
 	return didFillBuffer;
 }
+
 bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 {
-	OMX_ERRORTYPE omx_err   = OMX_ErrorNone;
+	OMX_ERRORTYPE error   = OMX_ErrorNone;
 	
 
 	m_video_codec_name      = "";
@@ -71,18 +72,26 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 
 	std::string componentName = decoder_name;
 	if(!m_omx_decoder.Initialize(componentName, OMX_IndexParamVideoInit))
-	return false;
+	{
+		return false;
+	}
 
 	componentName = "OMX.broadcom.egl_render";
 	if(!m_omx_render.Initialize(componentName, OMX_IndexParamVideoInit))
-	return false;
+	{
+		return false;
+	}
 
 	componentName = "OMX.broadcom.video_scheduler";
 	if(!m_omx_sched.Initialize(componentName, OMX_IndexParamVideoInit))
-	return false;
+	{
+		return false;
+	}
 
 	if(clock == NULL)
-	return false;
+	{
+		return false;
+	}
 
 	m_av_clock = clock;
 	m_omx_clock = m_av_clock->GetOMXClock();
@@ -94,21 +103,21 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 		return false; 
 	}
 
-	m_omx_tunnel_decoder.Initialize(&m_omx_decoder, m_omx_decoder.GetOutputPort(), &m_omx_sched, m_omx_sched.GetInputPort());
-	m_omx_tunnel_sched.Initialize(&m_omx_sched, m_omx_sched.GetOutputPort(), &m_omx_render, m_omx_render.GetInputPort());
-	m_omx_tunnel_clock.Initialize(m_omx_clock, m_omx_clock->GetInputPort() + 1, &m_omx_sched, m_omx_sched.GetOutputPort() + 1);
+	m_omx_tunnel_decoder.Initialize(&m_omx_decoder,		m_omx_decoder.GetOutputPort(),		&m_omx_sched,	m_omx_sched.GetInputPort());
+	m_omx_tunnel_sched.Initialize(	&m_omx_sched,		m_omx_sched.GetOutputPort(),		&m_omx_render,	m_omx_render.GetInputPort());
+	m_omx_tunnel_clock.Initialize(	m_omx_clock,		m_omx_clock->GetInputPort() + 1,	&m_omx_sched,	m_omx_sched.GetOutputPort() + 1);
 
-	omx_err = m_omx_tunnel_clock.Establish(false);
-	if(omx_err != OMX_ErrorNone)
+	error = m_omx_tunnel_clock.Establish(false);
+	if(error != OMX_ErrorNone)
 	{
-		ofLog(OF_LOG_VERBOSE, "\nOMXEGLImage::Open m_omx_tunnel_clock.Establish\n");
+		ofLogError(__func__) << "m_omx_tunnel_clock.Establish FAIL";
 		return false;
 	}
 
-	omx_err = m_omx_decoder.SetStateForComponent(OMX_StateIdle);
-	if (omx_err != OMX_ErrorNone)
+	error = m_omx_decoder.SetStateForComponent(OMX_StateIdle);
+	if (error != OMX_ErrorNone)
 	{
-		ofLog(OF_LOG_VERBOSE, "\nOMXEGLImage::Open m_omx_decoder.SetStateForComponent\n");
+		ofLogError(__func__) << "m_omx_decoder OMX_StateIdle FAIL";
 		return false;
 	}
 
@@ -126,13 +135,13 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 		formatType.xFramerate = 25 * (1<<16);
 	}
 
-	omx_err = m_omx_decoder.SetParameter(OMX_IndexParamVideoPortFormat, &formatType);
-	if(omx_err == OMX_ErrorNone)
+	error = m_omx_decoder.SetParameter(OMX_IndexParamVideoPortFormat, &formatType);
+	if(error == OMX_ErrorNone)
 	{
 		ofLogVerbose() << "m_omx_decoder SET OMX_IndexParamVideoPortFormat PASS";
 	}else 
 	{
-		ofLogError() << "m_omx_decoder SET OMX_IndexParamVideoPortFormat FAIL";
+		ofLog(OF_LOG_ERROR, "m_omx_decoder GET OMX_IndexParamVideoPortFormat FAIL error: 0x%08x\n", error);
 		return false;
 	}
 
@@ -140,16 +149,16 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 	OMX_INIT_STRUCTURE(portParam);
 	portParam.nPortIndex = m_omx_decoder.GetInputPort();
 
-	omx_err = m_omx_decoder.GetParameter(OMX_IndexParamPortDefinition, &portParam);
-	if(omx_err == OMX_ErrorNone)
+	error = m_omx_decoder.GetParameter(OMX_IndexParamPortDefinition, &portParam);
+	if(error == OMX_ErrorNone)
 	{
 		ofLogVerbose() << "m_omx_decoder GET OMX_IndexParamPortDefinition PASS";
 	}else 
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_decoder GET OMX_IndexParamPortDefinition FAIL omx_err(0x%08x)\n", omx_err);
+		ofLog(OF_LOG_ERROR, "m_omx_decoder GET OMX_IndexParamPortDefinition FAIL error: 0x%08x\n", error);
 		return false;
 	}
-	portParam.nPortIndex = m_omx_decoder.GetInputPort();
+
 	// JVC: I think numVideoBuffers can be probed for an optimal amount
 	// omxplayer uses 60 but maybe that takes away GPU memory for other operations?
 	ofLogVerbose(__func__) << "portParam.nBufferCountActual GET VAR --------------------------:" << portParam.nBufferCountActual;
@@ -159,13 +168,13 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 	portParam.format.video.nFrameWidth  = m_decoded_width;
 	portParam.format.video.nFrameHeight = m_decoded_height;
 
-	omx_err = m_omx_decoder.SetParameter(OMX_IndexParamPortDefinition, &portParam);
-	if(omx_err == OMX_ErrorNone)
+	error = m_omx_decoder.SetParameter(OMX_IndexParamPortDefinition, &portParam);
+	if(error == OMX_ErrorNone)
 	{
 	  ofLogVerbose() << "m_omx_decoder SET OMX_IndexParamPortDefinition PASS";
 	}else 
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_decoder SET OMX_IndexParamPortDefinition FAIL omx_err(0x%08x)\n", omx_err);
+		ofLog(OF_LOG_ERROR, "m_omx_decoder SET OMX_IndexParamPortDefinition FAIL error: 0x%08x\n", error);
 		return false;
 	}
 	
@@ -174,13 +183,13 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 	OMX_INIT_STRUCTURE(concanParam);
 	concanParam.bStartWithValidFrame = OMX_FALSE;
 	
-	omx_err = m_omx_decoder.SetParameter(OMX_IndexParamBrcmVideoDecodeErrorConcealment, &concanParam);
-	if(omx_err == OMX_ErrorNone)
+	error = m_omx_decoder.SetParameter(OMX_IndexParamBrcmVideoDecodeErrorConcealment, &concanParam);
+	if(error == OMX_ErrorNone)
 	{
 		ofLogVerbose()	<< "m_omx_decoder OMX_IndexParamBrcmVideoDecodeErrorConcealment PASS";
 	}else 
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_decoder OMX_IndexParamBrcmVideoDecodeErrorConcealment FAIL omx_err(0x%08x)\n", omx_err);
+		ofLog(OF_LOG_ERROR, "m_omx_decoder OMX_IndexParamBrcmVideoDecodeErrorConcealment FAIL error: 0x%08x\n", error);
 		return false;
 	}
 	
@@ -191,13 +200,13 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 		nalStreamFormat.nPortIndex = m_omx_decoder.GetInputPort();
 		nalStreamFormat.eNaluFormat = OMX_NaluFormatOneNaluPerBuffer;
 		
-		omx_err = m_omx_decoder.SetParameter((OMX_INDEXTYPE)OMX_IndexParamNalStreamFormatSelect, &nalStreamFormat);
-		if (omx_err == OMX_ErrorNone)
+		error = m_omx_decoder.SetParameter((OMX_INDEXTYPE)OMX_IndexParamNalStreamFormatSelect, &nalStreamFormat);
+		if (error == OMX_ErrorNone)
 		{
 			ofLogVerbose()	<< "Open OMX_IndexParamNalStreamFormatSelect PASS";
 		}else 
 		{
-			ofLog(OF_LOG_ERROR, "Open OMX_IndexParamNalStreamFormatSelect FAIL (0%08x)\n", omx_err);
+			ofLog(OF_LOG_ERROR, "Open OMX_IndexParamNalStreamFormatSelect FAIL (0%08x)\n", error);
 			return false;
 		}
 
@@ -211,14 +220,14 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 		OMX_CONFIG_BOOLEANTYPE timeStampMode;
 		OMX_INIT_STRUCTURE(timeStampMode);
 		timeStampMode.bEnabled = OMX_TRUE;
-		omx_err = m_omx_decoder.SetParameter((OMX_INDEXTYPE)OMX_IndexParamBrcmVideoTimestampFifo, &timeStampMode);
+		error = m_omx_decoder.SetParameter((OMX_INDEXTYPE)OMX_IndexParamBrcmVideoTimestampFifo, &timeStampMode);
 		
-		if (omx_err == OMX_ErrorNone)
+		if (error == OMX_ErrorNone)
 		{
 			ofLogVerbose()	<< "Open OMX_IndexParamBrcmVideoTimestampFifo PASS";
 		}else 
 		{
-			ofLog(OF_LOG_VERBOSE, "Open OMX_IndexParamBrcmVideoTimestampFifo error (0%08x)\n", omx_err);
+			ofLog(OF_LOG_ERROR, "Open OMX_IndexParamBrcmVideoTimestampFifo error (0%08x)\n", error);
 			return false;
 		}
 
@@ -227,86 +236,86 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 	
 
 	// Alloc buffers for the omx intput port.
-	omx_err = m_omx_decoder.AllocInputBuffers();
-	if(omx_err == OMX_ErrorNone)
+	error = m_omx_decoder.AllocInputBuffers();
+	if(error == OMX_ErrorNone)
 	{
 		ofLogVerbose() << "m_omx_decoder AllocInputBuffers PASS";
 	}else 
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_decoder AllocInputBuffers FAIL omx_err(0x%08x)\n", omx_err);
+		ofLog(OF_LOG_ERROR, "m_omx_decoder AllocInputBuffers FAIL error: 0x%08x\n", error);
 		return false;
 	}
 
 
-	omx_err = m_omx_tunnel_decoder.Establish(false);
-	if(omx_err == OMX_ErrorNone)
+	error = m_omx_tunnel_decoder.Establish(false);
+	if(error == OMX_ErrorNone)
 	{
 		ofLogVerbose() << "m_omx_tunnel_decoder Establish PASS";
 	}else 
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_tunnel_decoder Establish FAIL omx_err(0x%08x)\n", omx_err);
+		ofLog(OF_LOG_ERROR, "m_omx_tunnel_decoder Establish FAIL error: 0x%08x\n", error);
 		return false;
 	}
 	
-	omx_err = m_omx_decoder.SetStateForComponent(OMX_StateExecuting);
-	if(omx_err == OMX_ErrorNone)
+	error = m_omx_decoder.SetStateForComponent(OMX_StateExecuting);
+	if(error == OMX_ErrorNone)
 	{
 		ofLogVerbose() << "m_omx_decoder OMX_StateExecuting PASS";
 	}else 
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_decoder OMX_StateExecuting FAIL omx_err(0x%08x)", omx_err);
+		ofLog(OF_LOG_ERROR, "m_omx_decoder OMX_StateExecuting FAIL error: 0x%08x", error);
 		return false;
 	}
 	
 
-	omx_err = m_omx_tunnel_sched.Establish(false);
-	if(omx_err == OMX_ErrorNone)
+	error = m_omx_tunnel_sched.Establish(false);
+	if(error == OMX_ErrorNone)
 	{
 		ofLogVerbose() << "m_omx_tunnel_sched Establish PASS";
 	}else 
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_tunnel_sched Establish FAIL omx_err(0x%08x)", omx_err);
+		ofLog(OF_LOG_ERROR, "m_omx_tunnel_sched Establish FAIL error: 0x%08x", error);
 		return false;
 	}
 
-	omx_err = m_omx_sched.SetStateForComponent(OMX_StateExecuting);
-	if(omx_err == OMX_ErrorNone)
+	error = m_omx_sched.SetStateForComponent(OMX_StateExecuting);
+	if(error == OMX_ErrorNone)
 	{
 		ofLogVerbose() << "m_omx_sched OMX_StateExecuting PASS";
 	}else 
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_sched OMX_StateExecuting FAIL omx_err(0x%08x)", omx_err);
+		ofLog(OF_LOG_ERROR, "m_omx_sched OMX_StateExecuting FAIL error: 0x%08x", error);
 		return false;
 	}
 	
-	omx_err = m_omx_render.SetStateForComponent(OMX_StateIdle);
-	if(omx_err == OMX_ErrorNone)
+	error = m_omx_render.SetStateForComponent(OMX_StateIdle);
+	if(error == OMX_ErrorNone)
 	{
 		ofLogVerbose() << "m_omx_render OMX_StateIdle PASS";
 	}else 
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_render OMX_StateIdle FAIL omx_err(0x%08x)", omx_err);
+		ofLog(OF_LOG_ERROR, "m_omx_render OMX_StateIdle FAIL error: 0x%08x", error);
 		return false;
 	}
 	
 	ofLogVerbose() << "m_omx_render.GetOutputPort(): " << m_omx_render.GetOutputPort();
 	m_omx_render.EnablePort(m_omx_render.GetOutputPort(), false);
-	if(omx_err == OMX_ErrorNone)
+	if(error == OMX_ErrorNone)
 	{
 		ofLogVerbose() << "m_omx_render Enable OUTPUT Port PASS";
 	}else 
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_render Enable OUTPUT Port  FAIL omx_err(0x%08x)", omx_err);
+		ofLog(OF_LOG_ERROR, "m_omx_render Enable OUTPUT Port  FAIL error: 0x%08x", error);
 		return false;
 	}
 	
-	omx_err = m_omx_render.UseEGLImage(&eglBuffer, m_omx_render.GetOutputPort(), NULL, eglImage);
-	if(omx_err == OMX_ErrorNone)
+	error = m_omx_render.UseEGLImage(&eglBuffer, m_omx_render.GetOutputPort(), NULL, eglImage);
+	if(error == OMX_ErrorNone)
 	{
 		ofLogVerbose() << "m_omx_render UseEGLImage PASS";
 	}else 
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_render UseEGLImage  FAIL omx_err(0x%08x)", omx_err);
+		ofLog(OF_LOG_ERROR, "m_omx_render UseEGLImage  FAIL error: 0x%08x", error);
 		return false;
 	}
 
@@ -321,22 +330,22 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 	}
 	
 	m_omx_render.SetCustomDecoderFillBufferDoneHandler(onFillBufferDone);
-	omx_err = m_omx_render.SetStateForComponent(OMX_StateExecuting);
-	if(omx_err == OMX_ErrorNone)
+	error = m_omx_render.SetStateForComponent(OMX_StateExecuting);
+	if(error == OMX_ErrorNone)
 	{
 		ofLogVerbose() << "m_omx_render OMX_StateExecuting PASS";
 	}else 
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_render OMX_StateExecuting FAIL omx_err(0x%08x)", omx_err);
+		ofLog(OF_LOG_ERROR, "m_omx_render OMX_StateExecuting FAIL error: 0x%08x", error);
 		return false;
 	}
-	omx_err = m_omx_render.FillThisBuffer(eglBuffer);
-	if(omx_err == OMX_ErrorNone)
+	error = m_omx_render.FillThisBuffer(eglBuffer);
+	if(error == OMX_ErrorNone)
 	{
 		ofLogVerbose() << "m_omx_render FillThisBuffer PASS";
 	}else 
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_render FillThisBuffer FAIL omx_err(0x%08x)", omx_err);
+		ofLog(OF_LOG_ERROR, "m_omx_render FillThisBuffer FAIL error: 0x%08x", error);
 		return false;
 	}
 	
@@ -346,7 +355,7 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 
 
 	ofLog(OF_LOG_VERBOSE, 
-	"%s::%s - decoder_component(0x%p), input_port(0x%x), output_port(0x%x)\n",
+	"%s::%s - decoder_component: 0x%p, input_port: 0x%x, output_port: 0x%x \n",
 	"OMXEGLImage", __func__, m_omx_decoder.GetComponent(), m_omx_decoder.GetInputPort(), m_omx_decoder.GetOutputPort());
 
 	m_first_frame   = true;
@@ -357,7 +366,7 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 
 OMXEGLImage::~OMXEGLImage()
 {
-	ofLogVerbose() << "~OMXEGLImage";
+	ofLogVerbose(__func__) << "m_is_open: " << m_is_open;
 	if (m_is_open) 
 	{
 		Close();
@@ -375,6 +384,9 @@ void OMXEGLImage::generateEGLImage(int videoWidth, int videoHeight)
 	tex.getTextureData().bFlipTexture = true;
 	tex.setTextureWrap(GL_REPEAT, GL_REPEAT);
 	textureID = tex.getTextureData().textureID;
+	
+	ofLogVerbose(__func__) << "textureID: " << textureID;
+	ofLogVerbose(__func__) << "tex.isAllocated(): " << tex.isAllocated();
 	
 	glEnable(GL_TEXTURE_2D);
 	
@@ -404,7 +416,6 @@ void OMXEGLImage::generateEGLImage(int videoWidth, int videoHeight)
 	if (eglImage == EGL_NO_IMAGE_KHR)
 	{
 		ofLogError()	<< "Create EGLImage FAIL";
-		return;
 	}
 	else
 	{
@@ -462,7 +473,7 @@ void OMXEGLImage::Close()
 
 int OMXEGLImage::Decode(uint8_t *pData, int iSize, double dts, double pts)
 {
-	OMX_ERRORTYPE omx_err;
+	OMX_ERRORTYPE error;
 
 	if (pData || iSize > 0)
 	{
@@ -523,16 +534,16 @@ int OMXEGLImage::Decode(uint8_t *pData, int iSize, double dts, double pts)
 			int nRetry = 0;
 			while(true)
 			{
-				omx_err = m_omx_decoder.EmptyThisBuffer(omx_buffer);
+				error = m_omx_decoder.EmptyThisBuffer(omx_buffer);
 				
 				
-				if (omx_err == OMX_ErrorNone)
+				if (error == OMX_ErrorNone)
 				{
 					break;
 				}
 				else
 				{
-					ofLog(OF_LOG_VERBOSE, "\n%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", "OMXEGLImage", __func__, omx_err);
+					ofLog(OF_LOG_VERBOSE, "\n%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", "OMXEGLImage", __func__, error);
 					nRetry++;
 				}
 				if(nRetry == 5)
