@@ -14,16 +14,16 @@ public:
 	void Close();
 	int  Decode(uint8_t *pData, int iSize, double dts, double pts);
 	
-	ofAppEGLWindow*		appEGLWindow;
+	/*ofAppEGLWindow*		appEGLWindow;
 	EGLDisplay			display;
 	EGLContext			context;
 	
 	EGLImageKHR			eglImage;
 	ofTexture			tex;
-	GLuint				textureID;
+	GLuint				textureID;*/
 	
 	
 	
-	
+	OMX_BUFFERHEADERTYPE* eglBuffer;
 	void generateEGLImage(int videoWidth, int videoHeight);
 };

@@ -124,7 +124,7 @@ void ofxOMXPlayer::openPlayer()
 		
 		didVideoOpen = eglPlayer->Open(videoStreamInfo, clock);
 		videoPlayer = (OMXPlayerVideoBase*)eglPlayer;
-		textureID	= eglPlayer->eglImageDecoder->textureID;
+		textureID	= GlobalEGLContainer::getInstance().textureID;
 	}else 
 	{
 		if (!nonEglPlayer) {
@@ -209,7 +209,7 @@ ofTexture & ofxOMXPlayer::getTextureReference()
 	{
 		ofLogError(__func__) << "NO TEXTURE AVAILABLE";
 	}
-	return eglPlayer->eglImageDecoder->tex;
+	return GlobalEGLContainer::getInstance().texture;
 }
 
 bool doLoopReset = false;

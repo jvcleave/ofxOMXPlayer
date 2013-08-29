@@ -10,7 +10,6 @@
 
 #include "ofMain.h"
 #include "ofAppEGLWindow.h"
-#include "OMXCore.h"
 
 class GlobalEGLContainer
 {
@@ -20,17 +19,18 @@ public:
 		static GlobalEGLContainer    instance;
 		return instance;
 	}
-	ofTexture* texture;
+	ofTexture texture;
 	EGLImageKHR eglImage;
 	GLuint textureID;
-	OMX_BUFFERHEADERTYPE* eglBuffer;
-
+	ofAppEGLWindow*		appEGLWindow;
+	EGLDisplay			display;
+	EGLContext			context;
+	bool hasGenerated;
 private:
 	GlobalEGLContainer() {
-		texture = NULL;
-		eglImage = NULL;
 		textureID = 0;
-		eglBuffer = NULL;
+		appEGLWindow = NULL;
+		hasGenerated = false;
 	};
 	GlobalEGLContainer(GlobalEGLContainer const&);              // Don't Implement.
 	void operator=(GlobalEGLContainer const&);					// Don't implement
