@@ -9,7 +9,7 @@ ofxOMXPlayer::ofxOMXPlayer()
 	hasAudio			= false;
 	packet				= NULL;
 	moviePath			= "moviePath is undefined";
-	clock				= NULL;
+	
 	bPlaying			= false;
 	duration			= 0.0;
 	nFrames				= 0;
@@ -21,36 +21,55 @@ ofxOMXPlayer::ofxOMXPlayer()
 	didAudioOpen		= false;
 	didVideoOpen		= false;
 	isTextureEnabled	= false;
+	
 	videoPlayer			= NULL;
+	eglPlayer			= NULL;
+	nonEglPlayer		= NULL;
+	
+	audioPlayer			= NULL;
+	
 	listener			= NULL;
 	
-	omxCore.Initialize();
 	
-	clock = new OMXClock(); 
-	eglPlayer = NULL;
-	nonEglPlayer = NULL;
+	clock		= NULL;
 	loopCounter = 0;
-	string oldName = getPocoThread().getName();
+	//string oldName = getPocoThread().getName();
 	
-	getPocoThread().setName("ofxOMXPlayer_"+oldName);
+	//getPocoThread().setName("ofxOMXPlayer_"+oldName);
+	
+	omxCore.Initialize();
 }
 
-void ofxOMXPlayer::close()
+ofxOMXPlayer::~ofxOMXPlayer()
 {
-	
+	ofLogVerbose() << "~ofxOMXPlayer START";
 	bPlaying = false;
-
+	if (listener) 
+	{
+		listener = NULL;
+	}
 	if (videoPlayer != NULL) 
 	{
 		delete videoPlayer;
 		videoPlayer = NULL;
+		
+	}
+	eglPlayer   = NULL;
+	nonEglPlayer = NULL;
+	
+	if (audioPlayer) 
+	{
+		delete audioPlayer;
+		audioPlayer = NULL;
 	}
 	
-	/*if (clock != NULL) 
+	if (clock) 
 	{
 		delete clock;
 		clock = NULL;
-	}*/
+	}
+	omxCore.Deinitialize();
+	ofLogVerbose() << "~ofxOMXPlayer END";
 	
 }
 void ofxOMXPlayer::setup(ofxOMXPlayerSettings settings_)
@@ -62,6 +81,10 @@ void ofxOMXPlayer::setup(ofxOMXPlayerSettings settings_)
 	ofLogVerbose() << "moviePath is " << moviePath;
 	isTextureEnabled = settings.enableTexture;
 	
+	if (!clock) 
+	{
+		clock = new OMXClock(); 
+	}
 	
 	bool doDumpFormat = false;
 	
@@ -485,7 +508,7 @@ void ofxOMXPlayer::setVolume(float volume)
 
 float ofxOMXPlayer::getVolume()
 {
-	if (!hasAudio || !didAudioOpen) 
+	if (!hasAudio || !didAudioOpen || !audioPlayer) 
 	{
 		return 0;
 	}

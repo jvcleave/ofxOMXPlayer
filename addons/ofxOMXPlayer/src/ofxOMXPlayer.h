@@ -66,7 +66,7 @@ class ofxOMXPlayer : public ofThread
 {
 public:
 	ofxOMXPlayer();
-	void close();
+	~ofxOMXPlayer();
 	void setup(ofxOMXPlayerSettings settings_);
 	ofxOMXPlayerSettings settings;
 	
@@ -106,7 +106,6 @@ public:
 		
 	void			openPlayer();
 	double			getMediaTime();
-	void			close(ofEventArgs & a);
 	bool			doVideoDebugging;
 	bool			doLooping;
 	void			threadedFunction();

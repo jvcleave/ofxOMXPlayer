@@ -244,7 +244,7 @@ void developApp::keyPressed  (int key){
 		}
 		case 'c':
 		{
-			omxPlayer.close();
+			//omxPlayer.close();
 		}
 		default:
 		{
