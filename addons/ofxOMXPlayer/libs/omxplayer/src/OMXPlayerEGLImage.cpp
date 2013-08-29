@@ -21,6 +21,7 @@ OMXPlayerEGLImage::OMXPlayerEGLImage()
 	m_iVideoDelay   = 0;
 	m_pts           = DVD_NOPTS_VALUE;
 	m_speed         = DVD_PLAYSPEED_NORMAL;
+	eglImageDecoder = NULL;
 	ofLogVerbose() << "OMXPlayerEGLImage CONSTRUCT";
 }
 
@@ -91,7 +92,11 @@ bool OMXPlayerEGLImage::OpenDecoder()
 
 	m_frametime = (double)DVD_TIME_BASE / m_fps;
 
-	eglImageDecoder = new OMXEGLImage();
+	if (!eglImageDecoder) 
+	{
+		eglImageDecoder = new OMXEGLImage();
+
+	}
 	
 	m_decoder = (OMXDecoderBase*)eglImageDecoder;
 	

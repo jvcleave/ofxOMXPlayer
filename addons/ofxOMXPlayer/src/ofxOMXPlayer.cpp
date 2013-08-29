@@ -35,7 +35,24 @@ ofxOMXPlayer::ofxOMXPlayer()
 	getPocoThread().setName("ofxOMXPlayer_"+oldName);
 }
 
+void ofxOMXPlayer::close()
+{
+	
+	bPlaying = false;
 
+	if (videoPlayer != NULL) 
+	{
+		delete videoPlayer;
+		videoPlayer = NULL;
+	}
+	
+	/*if (clock != NULL) 
+	{
+		delete clock;
+		clock = NULL;
+	}*/
+	
+}
 void ofxOMXPlayer::setup(ofxOMXPlayerSettings settings_)
 {
 	settings = settings_;
@@ -201,6 +218,10 @@ void ofxOMXPlayer::threadedFunction()
 	while (isThreadRunning()) 
 	{
 		
+		if (videoPlayer == NULL) 
+		{
+			return;
+		}
 		//struct timespec starttime, endtime;
 		/*printf("V : %8.02f %8d %8d A : %8.02f %8.02f Cv : %8d Ca : %8d                            \r",
 		 clock->OMXMediaTime(), videoPlayer->GetDecoderBufferSize(),

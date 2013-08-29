@@ -44,8 +44,8 @@ void developApp::setup()
 	
 	ofLogVerbose() << "using videoPath : " << videoPath;
 	
-	doTextures	= true;
-	doShader	= true;
+	doTextures	= false;
+	doShader	= false;
 	if (doShader || doTextures) 
 	{
 		usingTexturePlayer = true;
@@ -242,7 +242,10 @@ void developApp::keyPressed  (int key){
 			omxPlayer.stepFrameForward();
 			break;
 		}
-			
+		case 'c':
+		{
+			omxPlayer.close();
+		}
 		default:
 		{
 			break;

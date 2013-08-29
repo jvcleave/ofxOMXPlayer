@@ -3,6 +3,8 @@
 
 OMXPlayerVideoBase::OMXPlayerVideoBase()
 {
+	m_decoder = NULL;
+	m_pStream = NULL;
 	pthread_cond_init(&m_packet_cond, NULL);
 	pthread_cond_init(&m_picture_cond, NULL);
 	pthread_mutex_init(&m_lock, NULL);
@@ -274,6 +276,7 @@ void OMXPlayerVideoBase::WaitCompletion()
 
 bool OMXPlayerVideoBase::Close()
 {
+	ofLogVerbose() << "OMXPlayerVideoBase::Close()";
 	m_bAbort  = true;
 	m_flush   = true;
 	
@@ -287,7 +290,7 @@ bool OMXPlayerVideoBase::Close()
 		
 		StopThread();
 	}
-	
+	ofLogVerbose() << "OMXPlayerVideoBase::Close() pre CloseDecoder";
 	CloseDecoder();
 	
 	m_dllAvUtil.Unload();

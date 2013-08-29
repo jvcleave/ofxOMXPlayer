@@ -20,6 +20,8 @@ OMXDecoderBase::OMXDecoderBase()
 	m_extrasize         = 0;
 	m_video_codec_name  = "";
 	m_first_frame       = true;
+	m_av_clock			= NULL;
+	m_omx_clock			= NULL;
 	decoder_name = OMX_VIDEO_DECODER;
 	
 	

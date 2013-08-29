@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "ofxOMXPlayer.h"
+#include "GlobalEGLContainer.h"
 
 class playlistApp : public ofBaseApp, public ofxOMXPlayerListener{
 

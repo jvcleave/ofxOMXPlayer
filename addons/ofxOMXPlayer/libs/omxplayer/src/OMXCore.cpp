@@ -472,7 +472,7 @@ void COMXCoreComponent::FlushInput()
   {
    ofLog(OF_LOG_VERBOSE, "COMXCoreComponent::FlushInput - Error on component %s error: 0x%08x",  m_componentName.c_str(), omx_err);
   }
-  WaitForCommand(OMX_CommandFlush, m_input_port);//TODO timeout here?
+  WaitForCommand(OMX_CommandFlush, m_input_port, 50);//TODO timeout here?
 
   UnLock();
 }

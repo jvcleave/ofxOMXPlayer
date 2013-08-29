@@ -3,6 +3,7 @@
 #include "ofMain.h"
 #include "ofAppEGLWindow.h"
 #include "OMXDecoderBase.h"
+#include "GlobalEGLContainer.h"
 
 class OMXEGLImage : public OMXDecoderBase
 {
@@ -23,6 +24,6 @@ public:
 	
 	
 	
-	OMX_BUFFERHEADERTYPE* eglBuffer;
+	
 	void generateEGLImage(int videoWidth, int videoHeight);
 };

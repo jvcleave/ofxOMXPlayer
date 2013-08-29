@@ -19,7 +19,7 @@ class OMXPlayerVideoBase: public OMXThread
 public:
 	OMXPlayerVideoBase();
 	~OMXPlayerVideoBase();
-	OMXDecoderBase*					m_decoder;
+	OMXDecoderBase*				m_decoder;
 	AVStream*					m_pStream;
 	int							m_stream_id;
 	std::deque<OMXPacket *>		m_packets;

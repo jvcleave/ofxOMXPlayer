@@ -66,6 +66,7 @@ class ofxOMXPlayer : public ofThread
 {
 public:
 	ofxOMXPlayer();
+	void close();
 	void setup(ofxOMXPlayerSettings settings_);
 	ofxOMXPlayerSettings settings;
 	
@@ -128,7 +129,7 @@ private:
 	OMXPlayerEGLImage*		eglPlayer;
 	OMXPlayerVideoBase*		videoPlayer;
 	OMXPlayerAudio*			audioPlayer;
-	
+	ofxOMXPlayerListener*	listener;
 	OMXReader				omxReader;
 	
 	COMXStreamInfo			videoStreamInfo;
@@ -157,7 +158,7 @@ private:
 	double					startpts;
 	int						loopCounter;
 	
-	ofxOMXPlayerListener*	listener;
+	
 	void					onVideoEnd();
 };
 

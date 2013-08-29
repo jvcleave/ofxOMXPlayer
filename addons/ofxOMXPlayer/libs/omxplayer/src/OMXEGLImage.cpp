@@ -8,7 +8,7 @@ unsigned long long lastFrameTime;
 bool isFirstCallback = true;
 OMXEGLImage::OMXEGLImage()
 {
-	eglBuffer = NULL;
+	ofLogVerbose() << "OMXEGLImage CONSTRUCT";
 	appEGLWindow = NULL;
 	
 	
@@ -309,7 +309,7 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 		return false;
 	}
 	
-	error = m_omx_render.UseEGLImage(&eglBuffer, m_omx_render.GetOutputPort(), NULL, eglImage);
+	error = m_omx_render.UseEGLImage(&GlobalEGLContainer::getInstance().eglBuffer, m_omx_render.GetOutputPort(), NULL, eglImage);
 	if(error == OMX_ErrorNone)
 	{
 		ofLogVerbose() << "m_omx_render UseEGLImage PASS";
@@ -339,7 +339,7 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 		ofLog(OF_LOG_ERROR, "m_omx_render OMX_StateExecuting FAIL error: 0x%08x", error);
 		return false;
 	}
-	error = m_omx_render.FillThisBuffer(eglBuffer);
+	error = m_omx_render.FillThisBuffer(GlobalEGLContainer::getInstance().eglBuffer);
 	if(error == OMX_ErrorNone)
 	{
 		ofLogVerbose() << "m_omx_render FillThisBuffer PASS";
@@ -375,6 +375,14 @@ OMXEGLImage::~OMXEGLImage()
 
 void OMXEGLImage::generateEGLImage(int videoWidth, int videoHeight)
 {	
+	
+	if (!GlobalEGLContainer::getInstance().eglImage == NULL) 
+	{
+		eglImage = GlobalEGLContainer::getInstance().eglImage;
+		textureID = GlobalEGLContainer::getInstance().textureID;
+		tex		  = *GlobalEGLContainer::getInstance().texture;
+		return;
+	}
 	appEGLWindow = (ofAppEGLWindow *) ofGetWindowPtr();
 	display = appEGLWindow->getEglDisplay();
 	context = appEGLWindow->getEglContext();
@@ -384,6 +392,8 @@ void OMXEGLImage::generateEGLImage(int videoWidth, int videoHeight)
 	tex.getTextureData().bFlipTexture = true;
 	tex.setTextureWrap(GL_REPEAT, GL_REPEAT);
 	textureID = tex.getTextureData().textureID;
+	GlobalEGLContainer::getInstance().textureID = textureID;
+	GlobalEGLContainer::getInstance().texture = &tex;
 	
 	ofLogVerbose(__func__) << "textureID: " << textureID;
 	ofLogVerbose(__func__) << "tex.isAllocated(): " << tex.isAllocated();
@@ -420,7 +430,9 @@ void OMXEGLImage::generateEGLImage(int videoWidth, int videoHeight)
 	else
 	{
 		ofLogVerbose()	<< "Create EGLImage PASS";
+		GlobalEGLContainer::getInstance().eglImage = eglImage;
 	}
+	
 }
 
 void OMXEGLImage::Close()
@@ -434,8 +446,9 @@ void OMXEGLImage::Close()
 	m_omx_tunnel_decoder.Deestablish();
 	m_omx_tunnel_sched.Deestablish();
 
-	m_omx_decoder.FlushInput();
+	/*m_omx_decoder.FlushInput();
 	m_omx_render.FlushOutput();
+	m_omx_render.FlushInput();*/
 	
 	m_omx_sched.Deinitialize();
 	m_omx_decoder.Deinitialize();
@@ -452,8 +465,7 @@ void OMXEGLImage::Close()
 
 	m_video_codec_name  = "";
 	m_first_frame       = true;
-	
-	if (eglImage) 
+	/*if (eglImage) 
 	{
 		if (eglDestroyImageKHR(display, eglImage)) 
 		{
@@ -463,7 +475,7 @@ void OMXEGLImage::Close()
 			ofLogError(__func__) << "eglDestroyImageKHR FAIL";
 		}
 		
-	}
+	}*/
 	
 	
 	ofLogVerbose(__func__) << " END";
