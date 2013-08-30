@@ -4,11 +4,7 @@ ofxOMXPlayer::ofxOMXPlayer()
 {
 	
 	pthread_mutex_init(&m_lock, NULL);
-	pthread_attr_setdetachstate(&m_tattr, PTHREAD_CREATE_JOINABLE);
-	pthread_attr_init(&m_tattr);
-	m_thread    = 0;
-	m_bStop     = false;
-	m_running   = false;
+
 	
 	
 	videoWidth			= 0;
@@ -48,17 +44,27 @@ ofxOMXPlayer::ofxOMXPlayer()
 	
 	omxCore.Initialize();
 }
+void ofxOMXPlayer::Lock()
+{
+    pthread_mutex_lock(&m_lock);
+}
+
+void ofxOMXPlayer::UnLock()
+{
+    pthread_mutex_unlock(&m_lock);
+}
 
 ofxOMXPlayer::~ofxOMXPlayer()
 {
 	ofLogVerbose() << "~ofxOMXPlayer START";
+	
+	if(ThreadHandle())
+	{
+		StopThread();
+	}
+	pthread_mutex_destroy(&m_lock);
 	bPlaying = false;
 	m_bStop = true;
-	pthread_join(m_thread, NULL);
-	m_running = false;
-	
-	pthread_mutex_destroy(&m_lock);
-	pthread_attr_destroy(&m_tattr);
 	
 	
 	if (listener) 
@@ -85,9 +91,7 @@ ofxOMXPlayer::~ofxOMXPlayer()
 		delete clock;
 		clock = NULL;
 	}
-	
-	m_thread    = 0;
-	
+		
 	omxCore.Deinitialize();
 	ofLogVerbose() << "~ofxOMXPlayer END";
 	
@@ -234,10 +238,8 @@ void ofxOMXPlayer::openPlayer()
 		}
 		clock->OMXStateExecute();
 		clock->OMXStart(0.0);
-		m_bStop    = false;
-		m_running = true;
 		
-		pthread_create(&m_thread, &m_tattr, &ofxOMXPlayer::Run, this);
+		Create();
 		
 		ofLogVerbose() << "Opened video PASS";	
 		
@@ -259,11 +261,10 @@ ofTexture & ofxOMXPlayer::getTextureReference()
 	return GlobalEGLContainer::getInstance().texture;
 }
 
-void * ofxOMXPlayer::Run(void *arg)
+void ofxOMXPlayer::Process()
 {
 	
-	ofxOMXPlayer *omxPlayer = static_cast<ofxOMXPlayer *>(arg);
-	while (!omxPlayer->m_bStop) 
+	while (!m_bStop) 
 	{
 		
 		
@@ -274,21 +275,21 @@ void * ofxOMXPlayer::Run(void *arg)
 		 videoPlayer->GetDecoderFreeSpace(), audioPlayer->GetCurrentPTS() / DVD_TIME_BASE, 
 		 audioPlayer->GetDelay(), videoPlayer->GetCached(), audioPlayer->GetCached());*/
 		
-		if(omxPlayer->omxReader.IsEof() && !omxPlayer->packet)
+		if(omxReader.IsEof() && !packet)
 		{
 			//ofLogVerbose() << "Dumping Cache " << "Audio Cache: " << audioPlayer->GetCached() << " Video Cache: " << videoPlayer->GetCached();
 			
 			bool isCacheEmpty = false;
 			
-			if (omxPlayer->hasAudio) 
+			if (hasAudio) 
 			{
-				if (!omxPlayer->audioPlayer->GetCached() && !omxPlayer->videoPlayer->GetCached()) 
+				if (!audioPlayer->GetCached() && !videoPlayer->GetCached()) 
 				{
 					isCacheEmpty = true;
 				}
 			}else 
 			{
-				if (!omxPlayer->videoPlayer->GetCached()) 
+				if (!videoPlayer->GetCached()) 
 				{
 					isCacheEmpty = true;
 				}
@@ -296,32 +297,30 @@ void * ofxOMXPlayer::Run(void *arg)
 			if (isCacheEmpty)
 			{
 				
-				omxPlayer->onVideoEnd();
-				
-				pthread_mutex_lock(&omxPlayer->m_lock);
+				onVideoEnd();
 				/*
 				 The way this works is that loop_offset is a marker (actually the same as the DURATION)
 				 Once the file reader seeks to the beginning of the file again loop_offset is then added to subsequent packet's timestamps
 				 */
-				if (omxPlayer->settings.enableLooping == true)
+				if (settings.enableLooping == true)
 				{
-					ofLogVerbose(__func__) << "ABOUT TO ATTEMPT LOOP omxPlayer->settings.enableLooping: " << omxPlayer->settings.enableLooping;
-					omxPlayer->omxReader.SeekTime(0 * 1000.0f, AVSEEK_FLAG_BACKWARD, &omxPlayer->startpts);
-					if(omxPlayer->hasAudio)
+					ofLogVerbose(__func__) << "ABOUT TO ATTEMPT LOOP settings.enableLooping: " << settings.enableLooping;
+					omxReader.SeekTime(0 * 1000.0f, AVSEEK_FLAG_BACKWARD, &startpts);
+					if(hasAudio)
 					{
-						omxPlayer->loop_offset = omxPlayer->audioPlayer->GetCurrentPTS();
+						loop_offset = audioPlayer->GetCurrentPTS();
 						ofLogVerbose() << "LOOP via audioPlayer [] [] [] [] [] [] [] []";
 
 					}
-					else if(omxPlayer->hasVideo)
+					else if(hasVideo)
 					{
-						omxPlayer->loop_offset = omxPlayer->videoPlayer->GetCurrentPTS();
+						loop_offset = videoPlayer->GetCurrentPTS();
 						ofLogVerbose() << "LOOP via videoPlayer [] [] [] [] [] [] [] []";
 						
 					}
-					omxPlayer->loopCounter++;
+					loopCounter++;
 
-					ofLog(OF_LOG_VERBOSE, "Loop offset : %8.02f\n", omxPlayer->loop_offset / DVD_TIME_BASE);
+					ofLog(OF_LOG_VERBOSE, "Loop offset : %8.02f\n", loop_offset / DVD_TIME_BASE);
 					
 				}
 				else
@@ -329,7 +328,6 @@ void * ofxOMXPlayer::Run(void *arg)
 					
 					break;
 				}
-				pthread_mutex_unlock(&omxPlayer->m_lock);
 			}
 			else
 			{
@@ -339,44 +337,44 @@ void * ofxOMXPlayer::Run(void *arg)
 			
 		}
 		
-		if (omxPlayer->settings.enableLooping == true && OMXDecoderBase::fillBufferCounter>=omxPlayer->getTotalNumFrames()) 
+		if (settings.enableLooping == true && OMXDecoderBase::fillBufferCounter>=getTotalNumFrames()) 
 		{
 			OMXDecoderBase::fillBufferCounter=0;
 		}
-		if (omxPlayer->hasAudio) 
+		if (hasAudio) 
 		{
-			if(omxPlayer->audioPlayer->Error())
+			if(audioPlayer->Error())
 			 {
 				 ofLogError(__func__) << "audio player error.";
 			 }
 		}
 		
-		if(!omxPlayer->packet)
+		if(!packet)
 		{
-			omxPlayer->packet = omxPlayer->omxReader.Read();
-			if (omxPlayer->packet && (omxPlayer->settings.enableLooping == true) && omxPlayer->packet->pts != DVD_NOPTS_VALUE)
+			packet = omxReader.Read();
+			if (packet && (settings.enableLooping == true) && packet->pts != DVD_NOPTS_VALUE)
 			{
-				omxPlayer->packet->pts += omxPlayer->loop_offset;
-				omxPlayer->packet->dts += omxPlayer->loop_offset;
+				packet->pts += loop_offset;
+				packet->dts += loop_offset;
 			}
 		}
 		
-		if(omxPlayer->hasVideo && omxPlayer->packet && omxPlayer->omxReader.IsActive(OMXSTREAM_VIDEO, omxPlayer->packet->stream_index))
+		if(hasVideo && packet && omxReader.IsActive(OMXSTREAM_VIDEO, packet->stream_index))
 		{
-			if(omxPlayer->videoPlayer->AddPacket(omxPlayer->packet))
+			if(videoPlayer->AddPacket(packet))
 			{
-				omxPlayer->packet = NULL;
+				packet = NULL;
 			}
 			else
 			{
 				OMXClock::OMXSleep(10);
 			}
 		}
-		else if(omxPlayer->hasAudio && omxPlayer->packet && omxPlayer->packet->codec_type == AVMEDIA_TYPE_AUDIO)
+		else if(hasAudio && packet && packet->codec_type == AVMEDIA_TYPE_AUDIO)
 		{
-			if(omxPlayer->audioPlayer->AddPacket(omxPlayer->packet))
+			if(audioPlayer->AddPacket(packet))
 			{
-				omxPlayer->packet = NULL;
+				packet = NULL;
 			}
 			else
 			{
@@ -385,16 +383,14 @@ void * ofxOMXPlayer::Run(void *arg)
 		}
 		else
 		{
-			if(omxPlayer->packet)
+			if(packet)
 			{
-				omxPlayer->omxReader.FreePacket(omxPlayer->packet);
-				omxPlayer->packet = NULL;
+				omxReader.FreePacket(packet);
+				packet = NULL;
 			}
 		}		
 		
 	}
-	
-	pthread_exit(NULL);
 }
 
 

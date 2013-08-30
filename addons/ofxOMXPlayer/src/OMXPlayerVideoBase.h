@@ -33,7 +33,7 @@ public:
 	double						m_iCurrentPts;
 	
 	pthread_cond_t				m_packet_cond;
-	pthread_cond_t				m_picture_cond;
+	//pthread_cond_t				m_picture_cond;
 	pthread_mutex_t				m_lock;
 	pthread_mutex_t				m_lock_decoder;
 	
