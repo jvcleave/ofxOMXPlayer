@@ -12,7 +12,7 @@ void playlistApp::onVideoEnd(ofxOMXPlayerListenerEventData& e)
 {
 	ofLogVerbose(__func__) << " RECEIVED";
 	
-	omxPlayer->waitForThread(true);
+	//omxPlayer->waitForThread(true);
 	
 	delete omxPlayer;
 	omxPlayer = NULL;
@@ -55,8 +55,8 @@ void playlistApp::createPlayer()
 	ofxOMXPlayerSettings settings;
 	settings.videoPath = files[videoCounter].path();
 	settings.useHDMIForAudio = true;	//default true
-	settings.enableTexture = true;		//default true
-	settings.enableLooping = false;		//default true
+	settings.enableTexture = false;		//default true
+	//settings.enableLooping = false;		//default true
 	
 	settings.listener = this; //this app extends ofxOMXPlayerListener so it will receive events 
 	if(!omxPlayer)

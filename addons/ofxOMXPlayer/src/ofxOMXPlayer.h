@@ -10,7 +10,7 @@ extern "C"
 	#include <libavutil/avutil.h>
 };
 
-//#include "RBP.h"
+#include <pthread.h>
 #include "OMXClock.h"
 #include "OMXPlayerEGLImage.h"
 #include "OMXPlayerVideo.h"
@@ -43,7 +43,7 @@ struct ofxOMXPlayerSettings
 		
 		useHDMIForAudio = true;
 		enableTexture = true;
-		enableLooping = true;
+		enableLooping = false;
 		listener	  = NULL;
 	}
 	string videoPath;
@@ -62,11 +62,15 @@ struct ofxOMXPlayerSettings
 };
 
 
-class ofxOMXPlayer : public ofThread
+class ofxOMXPlayer
 {
 public:
 	ofxOMXPlayer();
 	~ofxOMXPlayer();
+	
+	void Lock();
+	void UnLock();
+	
 	void setup(ofxOMXPlayerSettings settings_);
 	ofxOMXPlayerSettings settings;
 	
@@ -108,7 +112,7 @@ public:
 	double			getMediaTime();
 	bool			doVideoDebugging;
 	bool			doLooping;
-	void			threadedFunction();
+	static void *Run(void *arg);
 
 	bool			isTextureEnabled;
 	bool			didVideoOpen;
@@ -119,6 +123,13 @@ public:
 	
 	void			addListener(ofxOMXPlayerListener* listener_);
 	void			removeListener();
+	
+	pthread_attr_t      m_tattr;
+	pthread_mutex_t     m_lock;
+	pthread_t           m_thread;
+	volatile bool       m_running;
+	volatile bool       m_bStop;
+	
 private:
 	
 	COMXCore				omxCore;

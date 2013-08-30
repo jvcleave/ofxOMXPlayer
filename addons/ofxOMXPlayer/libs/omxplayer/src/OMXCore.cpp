@@ -75,7 +75,7 @@ OMX_ERRORTYPE COMXCoreTunel::Flush()
     return OMX_ErrorUndefined;
 	
   Lock();
-  ofLogVerbose(__func__) << "m_src_component: " << m_src_component->GetName() << " m_dst_component: " << m_dst_component->GetName() << " START";
+  //ofLogVerbose(__func__) << "m_src_component: " << m_src_component->GetName() << " m_dst_component: " << m_dst_component->GetName() << " START";
 	
   OMX_ERRORTYPE omx_err = OMX_ErrorNone;
   if(m_src_component->GetComponent())
@@ -113,7 +113,6 @@ OMX_ERRORTYPE COMXCoreTunel::Deestablish(bool noWait)
   
   if(!m_src_component || !m_dst_component)
   {
-	  ofLogVerbose(__func__) << "MISSING COMPONENT RETURNING EARLY " << " m_src_component: " << m_src_component->GetName() << " m_dst_component: " << m_dst_component->GetName();
 	  return OMX_ErrorUndefined;
   }else 
   {
