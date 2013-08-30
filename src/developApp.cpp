@@ -1,5 +1,7 @@
 #include "developApp.h"
 
+bool hasFrameChanged = false;
+int previousFrameNumber =0;
 void developApp::onCharacterReceived(SSHKeyListenerEventData& e)
 {
 	ConsoleListener* thread = (ConsoleListener*) e.listener;
@@ -44,8 +46,8 @@ void developApp::setup()
 	
 	ofLogVerbose() << "using videoPath : " << videoPath;
 	
-	doTextures	= false;
-	doShader	= false;
+	doTextures	= true;
+	doShader	= true;
 	if (doShader || doTextures) 
 	{
 		usingTexturePlayer = true;
@@ -94,6 +96,21 @@ void developApp::update()
 	}
 	if(omxPlayer.isPlaying())
 	{
+		int currentFrameNumber = omxPlayer.getCurrentFrame();
+		if (currentFrameNumber != previousFrameNumber) 
+		{
+			hasFrameChanged = true;
+			previousFrameNumber = currentFrameNumber;
+		}else 
+		{
+			hasFrameChanged = false;
+		}
+
+		if (!hasFrameChanged) 
+		{
+			return;
+		}
+		
 		if (usingTexturePlayer && doShader) 
 		{
 			updateFbo();

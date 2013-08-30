@@ -85,12 +85,12 @@ public:
   OMX_ERRORTYPE SetConfig(OMX_INDEXTYPE configIndex, OMX_PTR configStruct);
   OMX_ERRORTYPE GetConfig(OMX_INDEXTYPE configIndex, OMX_PTR configStruct);
   OMX_ERRORTYPE SendCommand(OMX_COMMANDTYPE cmd, OMX_U32 cmdParam, OMX_PTR cmdParamData);
-  OMX_ERRORTYPE EnablePort(unsigned int port, bool wait = true);
-  OMX_ERRORTYPE DisablePort(unsigned int port, bool wait = true);
+  OMX_ERRORTYPE EnablePort(unsigned int port, bool wait = false);
+  OMX_ERRORTYPE DisablePort(unsigned int port, bool wait = false);
   OMX_ERRORTYPE UseEGLImage(OMX_BUFFERHEADERTYPE** ppBufferHdr, OMX_U32 nPortIndex, OMX_PTR pAppPrivate, void* eglImage);
 
   bool          Initialize( const std::string &component_name, OMX_INDEXTYPE index);
-  bool          Deinitialize();
+  bool          Deinitialize(bool doFlush=true);
 
   // OMXCore Decoder delegate callback routines.
   static OMX_ERRORTYPE DecoderEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData,

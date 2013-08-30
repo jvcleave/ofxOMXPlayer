@@ -18,5 +18,6 @@ class playlistApp : public ofBaseApp, public ofxOMXPlayerListener{
 		void onVideoEnd(ofxOMXPlayerListenerEventData& e);
 		vector<ofFile> files;
 		int videoCounter;
+	
 };
 

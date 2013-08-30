@@ -450,7 +450,7 @@ bool COMXAudio::Initialize(const CStdString& device, int iChannels, enum PCMChan
   }
   */
 
-  omx_err = m_omx_decoder.AllocInputBuffers(true);
+  omx_err = m_omx_decoder.AllocInputBuffers();
   if(omx_err != OMX_ErrorNone) 
   {
     ofLog(OF_LOG_ERROR, "COMXAudio::Initialize - Error alloc buffers 0x%08x", omx_err);
@@ -598,17 +598,19 @@ bool COMXAudio::Deinitialize()
     m_omx_tunnel_mixer.Flush();
   m_omx_tunnel_clock.Flush();
 
-  m_omx_tunnel_clock.Deestablish(true);
+	bool noWait = true;
+  m_omx_tunnel_clock.Deestablish(noWait);
   if(!m_Passthrough)
-    m_omx_tunnel_mixer.Deestablish(true);
-  m_omx_tunnel_decoder.Deestablish(true);
+    m_omx_tunnel_mixer.Deestablish(noWait);
+  m_omx_tunnel_decoder.Deestablish(noWait);
 
-  m_omx_decoder.FlushInput();
+  //m_omx_decoder.FlushInput();
 
-  m_omx_render.Deinitialize();
+	bool doFlush = false;
+  m_omx_render.Deinitialize(doFlush);
   if(!m_Passthrough)
-    m_omx_mixer.Deinitialize();
-  m_omx_decoder.Deinitialize();
+    m_omx_mixer.Deinitialize(doFlush);
+  m_omx_decoder.Deinitialize(doFlush);
 
   m_Initialized = false;
   m_BytesPerSec = 0;

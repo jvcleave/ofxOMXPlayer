@@ -81,7 +81,7 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 	{
 		return false;
 	}
-
+	
 	componentName = "OMX.broadcom.video_scheduler";
 	if(!m_omx_sched.Initialize(componentName, OMX_IndexParamVideoInit))
 	{
@@ -234,7 +234,7 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 		
 	}
 	
-
+	
 	// Alloc buffers for the omx intput port.
 	error = m_omx_decoder.AllocInputBuffers();
 	if(error == OMX_ErrorNone)
@@ -433,23 +433,26 @@ void OMXEGLImage::generateEGLImage(int videoWidth, int videoHeight)
 
 void OMXEGLImage::Close()
 {
-	return; //yolo
+	//return; //yolo
 	ofLogVerbose(__func__) << " Start";
-	m_omx_tunnel_decoder.Flush();
+	/*m_omx_tunnel_decoder.Flush();
 	m_omx_tunnel_clock.Flush();
-	m_omx_tunnel_sched.Flush();
-
-	m_omx_tunnel_clock.Deestablish();
-	m_omx_tunnel_decoder.Deestablish();
-	m_omx_tunnel_sched.Deestablish();
-
+	m_omx_tunnel_sched.Flush();*/
+	
+	bool noWait = true;
+	m_omx_tunnel_clock.Deestablish(noWait);
+	m_omx_tunnel_decoder.Deestablish(noWait);
+	m_omx_tunnel_sched.Deestablish(noWait);
+	 
+	//This already happened in Flush above
 	/*m_omx_decoder.FlushInput();
 	m_omx_render.FlushOutput();
 	m_omx_render.FlushInput();*/
 	
-	m_omx_sched.Deinitialize();
-	m_omx_decoder.Deinitialize();
-	m_omx_render.Deinitialize();
+	bool doFlush = false;
+	m_omx_sched.Deinitialize(doFlush);
+	m_omx_decoder.Deinitialize(doFlush);
+	m_omx_render.Deinitialize(doFlush);
 
 	m_is_open       = false;
 

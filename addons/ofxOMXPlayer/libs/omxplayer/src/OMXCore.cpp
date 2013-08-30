@@ -42,11 +42,14 @@ COMXCoreTunel::COMXCoreTunel()
 
 COMXCoreTunel::~COMXCoreTunel()
 {
-  Deestablish();
-  m_DllOMX->Unload();
-  delete m_DllOMX;
-
-  pthread_mutex_destroy(&m_lock);
+	Deestablish();
+	if (m_DllOMX) 
+	{
+		m_DllOMX->Unload();
+		delete m_DllOMX;
+	}
+	
+	pthread_mutex_destroy(&m_lock);
 }
 
 void COMXCoreTunel::Lock()
@@ -80,7 +83,8 @@ OMX_ERRORTYPE COMXCoreTunel::Flush()
   OMX_ERRORTYPE omx_err = OMX_ErrorNone;
   if(m_src_component->GetComponent())
   {
-    omx_err = OMX_SendCommand(m_src_component->GetComponent(), OMX_CommandFlush, m_src_port, NULL);
+    //omx_err = OMX_SendCommand(m_src_component->GetComponent(), OMX_CommandFlush, m_src_port, NULL);
+	  m_src_component->FlushAll();
     if(omx_err != OMX_ErrorNone && omx_err != OMX_ErrorSameState)
     {
      ofLog(OF_LOG_VERBOSE, "COMXCoreComponent::Flush - Error flush  port %d on component %s error: 0x%08x",  m_src_port, m_src_component->GetName().c_str(), omx_err);
@@ -89,18 +93,27 @@ OMX_ERRORTYPE COMXCoreTunel::Flush()
 
   if(m_dst_component->GetComponent())
   {
-    omx_err = OMX_SendCommand(m_dst_component->GetComponent(), OMX_CommandFlush, m_dst_port, NULL);
+    //omx_err = OMX_SendCommand(m_dst_component->GetComponent(), OMX_CommandFlush, m_dst_port, NULL);
+	  m_dst_component->FlushAll();
     if(omx_err != OMX_ErrorNone && omx_err != OMX_ErrorSameState)
     {
      ofLog(OF_LOG_VERBOSE, "COMXCoreComponent::Flush - Error flush port %d on component %s error: 0x%08x", m_dst_port, m_dst_component->GetName().c_str(), omx_err);
     }
   }
-
+/*
   if(m_src_component->GetComponent())
-    omx_err = m_src_component->WaitForCommand(OMX_CommandFlush, m_src_port);
-
+  {
+	   //omx_err = m_src_component->WaitForCommand(OMX_CommandFlush, m_src_port);
+	  omx_err = m_src_component->FlushOutput();
+  }
+   
+	
   if(m_dst_component->GetComponent())
-    omx_err = m_dst_component->WaitForCommand(OMX_CommandFlush, m_dst_port);
+  {
+	  //omx_err = m_dst_component->WaitForCommand(OMX_CommandFlush, m_dst_port);
+	  m_dst_component->FlushInput();
+	  
+  }*/
 
   UnLock();
 	ofLogVerbose(__func__) << m_src_component->GetName() << " END";
@@ -352,7 +365,8 @@ COMXCoreComponent::COMXCoreComponent()
 COMXCoreComponent::~COMXCoreComponent()
 {
   Deinitialize();
-
+	
+  
   pthread_mutex_destroy(&m_omx_input_mutex);
   pthread_mutex_destroy(&m_omx_output_mutex);
   pthread_mutex_destroy(&m_omx_event_mutex);
@@ -363,7 +377,12 @@ COMXCoreComponent::~COMXCoreComponent()
   pthread_mutex_destroy(&m_lock);
   sem_destroy(&m_omx_fill_buffer_done);
 
-  delete m_DllOMX;
+	if (m_DllOMX) 
+	{
+		m_DllOMX->Unload();
+		delete m_DllOMX;
+	}
+  
 }
 void COMXCoreComponent::SetEOS(bool isEndofStream)
 {
@@ -459,7 +478,10 @@ void COMXCoreComponent::FlushAll()
 
 void COMXCoreComponent::FlushInput()
 {
-	
+	if (!m_omx_input_use_buffers) 
+	{
+		return;
+	}
 	ofLogVerbose(__func__) << " START m_componentName: " << m_componentName;
   Lock();
 
@@ -471,13 +493,16 @@ void COMXCoreComponent::FlushInput()
   {
    ofLog(OF_LOG_VERBOSE, "COMXCoreComponent::FlushInput - Error on component %s error: 0x%08x",  m_componentName.c_str(), omx_err);
   }
-  WaitForCommand(OMX_CommandFlush, m_input_port);//TODO timeout here?
+  //WaitForCommand(OMX_CommandFlush, m_input_port);//TODO timeout here?
 
   UnLock();
 }
 
 void COMXCoreComponent::FlushOutput()
 {
+	if (!m_omx_output_use_buffers) {
+		return;
+	}
   Lock();
 
   OMX_ERRORTYPE omx_err = OMX_ErrorNone;
@@ -488,7 +513,7 @@ void COMXCoreComponent::FlushOutput()
   {
    ofLog(OF_LOG_VERBOSE, "COMXCoreComponent::FlushOutput - Error on component %s error: 0x%08x", m_componentName.c_str(), omx_err);
   }
-  WaitForCommand(OMX_CommandFlush, m_output_port);
+  //WaitForCommand(OMX_CommandFlush, m_output_port);
 
   UnLock();
 	ofLogVerbose(__func__) << " END m_componentName: " << m_componentName;
@@ -621,7 +646,7 @@ OMX_ERRORTYPE COMXCoreComponent::AllocInputBuffers(bool use_buffers /* = false *
 	}
 	ofLogVerbose(m_componentName + "::"+__func__) << "BUFFER SIZE: " << m_omx_input_buffers.size();
 	//ofLog(OF_LOG_VERBOSE, "BUFFER SIZE %d", m_omx_input_buffers.size());
-	omx_err = WaitForCommand(OMX_CommandPortEnable, m_input_port);
+	//omx_err = WaitForCommand(OMX_CommandPortEnable, m_input_port);
 
 	m_flush_input = false;
 
@@ -694,7 +719,7 @@ OMX_ERRORTYPE COMXCoreComponent::AllocOutputBuffers(bool use_buffers /* = false 
     m_omx_output_available.push(buffer);
   }
 
-  omx_err = WaitForCommand(OMX_CommandPortEnable, m_output_port);
+  //omx_err = WaitForCommand(OMX_CommandPortEnable, m_output_port);
 
   m_flush_output = false;
 
@@ -733,8 +758,8 @@ OMX_ERRORTYPE COMXCoreComponent::FreeInputBuffers(bool wait)
     }
   }
 
-  WaitForCommand(OMX_CommandPortDisable, m_input_port);
-  assert(m_omx_input_buffers.size() == m_omx_input_avaliable.size());
+  //WaitForCommand(OMX_CommandPortDisable, m_input_port);
+ // assert(m_omx_input_buffers.size() == m_omx_input_avaliable.size());
 
   m_omx_input_buffers.clear();
 
@@ -782,8 +807,8 @@ OMX_ERRORTYPE COMXCoreComponent::FreeOutputBuffers(bool wait)
     }
   }
 
-  WaitForCommand(OMX_CommandPortDisable, m_output_port);
-  assert(m_omx_output_buffers.size() == m_omx_output_available.size());
+ // WaitForCommand(OMX_CommandPortDisable, m_output_port);
+  //assert(m_omx_output_buffers.size() == m_omx_output_available.size());
 
   m_omx_output_buffers.clear();
 
@@ -846,12 +871,12 @@ OMX_ERRORTYPE COMXCoreComponent::DisableAllPorts()
         {
          ofLog(OF_LOG_VERBOSE, "COMXCoreComponent::DisableAllPorts - Error disable port %d on component %s error: 0x%08x", (int)(ports.nStartPortNumber) + j, m_componentName.c_str(), omx_err);
         }
-        omx_err = WaitForCommand(OMX_CommandPortDisable, ports.nStartPortNumber+j);
+       /* omx_err = WaitForCommand(OMX_CommandPortDisable, ports.nStartPortNumber+j);
         if(omx_err != OMX_ErrorNone && omx_err != OMX_ErrorSameState)
         {
           UnLock();
           return omx_err;
-        }
+        }*/
       }
     }
   }
@@ -1054,13 +1079,13 @@ OMX_ERRORTYPE COMXCoreComponent::SetStateForComponent(OMX_STATETYPE state)
   }
   else 
   {
-    omx_err = WaitForCommand(OMX_CommandStateSet, state);
+   /* omx_err = WaitForCommand(OMX_CommandStateSet, state);
     if(omx_err == OMX_ErrorSameState)
     {
      ofLog(OF_LOG_VERBOSE, "COMXCoreComponent::SetStateForComponent - %s ignore OMX_ErrorSameState\n", m_componentName.c_str());
       UnLock();
       return OMX_ErrorNone;
-    }
+    }*/
   }
 
   UnLock();
@@ -1325,7 +1350,7 @@ bool COMXCoreComponent::Initialize( const std::string &component_name, OMX_INDEX
 	return true;
 }
 
-bool COMXCoreComponent::Deinitialize()
+bool COMXCoreComponent::Deinitialize(bool doFlush)//default: true
 {
   OMX_ERRORTYPE omx_err;
 
@@ -1337,7 +1362,11 @@ bool COMXCoreComponent::Deinitialize()
   if(m_handle) 
   {
 
-    FlushAll();
+	if(doFlush)
+	{
+		FlushAll();
+	}
+    
 
     FreeOutputBuffers(true);
     FreeInputBuffers(true);
@@ -1367,7 +1396,7 @@ bool COMXCoreComponent::Deinitialize()
   CustomDecoderFillBufferDoneHandler = NULL;
   CustomDecoderEmptyBufferDoneHandler = NULL;
 
-  m_DllOMX->Unload();
+  
 
   return true;
 }
@@ -1622,7 +1651,11 @@ COMXCore::COMXCore()
 
 COMXCore::~COMXCore()
 {
-  delete m_DllOMX;
+	if(m_DllOMX)
+	{
+		m_DllOMX->Unload();
+		delete m_DllOMX;
+	}
 }
 
 bool COMXCore::Initialize()
@@ -1650,6 +1683,6 @@ void COMXCore::Deinitialize()
     {
      ofLog(OF_LOG_VERBOSE, "\nCOMXCore::Deinitialize - OMXCore failed to deinit, error: 0x%08x", omx_err);
     }  
-    m_DllOMX->Unload();
+   
   }
 }
