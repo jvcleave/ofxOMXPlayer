@@ -43,7 +43,7 @@ struct ofxOMXPlayerSettings
 		
 		useHDMIForAudio = true;
 		enableTexture = true;
-		enableLooping = false;
+		enableLooping = true;
 		listener	  = NULL;
 	}
 	string videoPath;

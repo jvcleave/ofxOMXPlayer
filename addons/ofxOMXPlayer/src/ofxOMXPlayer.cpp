@@ -100,7 +100,7 @@ void ofxOMXPlayer::setup(ofxOMXPlayerSettings settings_)
 {
 	settings = settings_;
 	moviePath = settings.videoPath; 
-	//doLooping = settings.enableLooping;
+	doLooping = settings.enableLooping;
 	addListener(settings.listener);
 	ofLogVerbose() << "moviePath is " << moviePath;
 	ofLogVerbose() << "doLooping is " << doLooping;
@@ -302,9 +302,9 @@ void ofxOMXPlayer::Process()
 				 The way this works is that loop_offset is a marker (actually the same as the DURATION)
 				 Once the file reader seeks to the beginning of the file again loop_offset is then added to subsequent packet's timestamps
 				 */
-				if (settings.enableLooping == true)
+				if (doLooping)
 				{
-					ofLogVerbose(__func__) << "ABOUT TO ATTEMPT LOOP settings.enableLooping: " << settings.enableLooping;
+					ofLogVerbose(__func__) << "ABOUT TO ATTEMPT LOOP doLooping " << doLooping;
 					omxReader.SeekTime(0 * 1000.0f, AVSEEK_FLAG_BACKWARD, &startpts);
 					if(hasAudio)
 					{
@@ -337,7 +337,7 @@ void ofxOMXPlayer::Process()
 			
 		}
 		
-		if (settings.enableLooping == true && OMXDecoderBase::fillBufferCounter>=getTotalNumFrames()) 
+		if (doLooping && OMXDecoderBase::fillBufferCounter>=getTotalNumFrames()) 
 		{
 			OMXDecoderBase::fillBufferCounter=0;
 		}
@@ -352,7 +352,7 @@ void ofxOMXPlayer::Process()
 		if(!packet)
 		{
 			packet = omxReader.Read();
-			if (packet && (settings.enableLooping == true) && packet->pts != DVD_NOPTS_VALUE)
+			if (packet && doLooping && packet->pts != DVD_NOPTS_VALUE)
 			{
 				packet->pts += loop_offset;
 				packet->dts += loop_offset;
