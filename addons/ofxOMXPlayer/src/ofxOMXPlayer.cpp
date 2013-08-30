@@ -4,8 +4,6 @@ ofxOMXPlayer::ofxOMXPlayer()
 {
 	
 	pthread_mutex_init(&m_lock, NULL);
-
-	
 	
 	videoWidth			= 0;
 	videoHeight			= 0;
@@ -35,13 +33,8 @@ ofxOMXPlayer::ofxOMXPlayer()
 	
 	listener			= NULL;
 	
-	
 	clock		= NULL;
-	loopCounter = 0;
-	//string oldName = getPocoThread().getName();
-	
-	//getPocoThread().setName("ofxOMXPlayer_"+oldName);
-	
+	loopCounter = 0;	
 	omxCore.Initialize();
 }
 void ofxOMXPlayer::Lock()
@@ -56,15 +49,16 @@ void ofxOMXPlayer::UnLock()
 
 ofxOMXPlayer::~ofxOMXPlayer()
 {
-	ofLogVerbose() << "~ofxOMXPlayer START";
 	
+	ofLogVerbose() << "~ofxOMXPlayer START";
+	m_bStop = true;
 	if(ThreadHandle())
 	{
 		StopThread();
 	}
 	pthread_mutex_destroy(&m_lock);
 	bPlaying = false;
-	m_bStop = true;
+	
 	
 	
 	if (listener) 
@@ -96,8 +90,9 @@ ofxOMXPlayer::~ofxOMXPlayer()
 	ofLogVerbose() << "~ofxOMXPlayer END";
 	
 }
-void ofxOMXPlayer::setup(ofxOMXPlayerSettings settings_)
+bool ofxOMXPlayer::setup(ofxOMXPlayerSettings settings_)
 {
+	
 	settings = settings_;
 	moviePath = settings.videoPath; 
 	doLooping = settings.enableLooping;
@@ -136,24 +131,28 @@ void ofxOMXPlayer::setup(ofxOMXPlayerSettings settings_)
 			if(clock->OMXInitialize(hasVideo, hasAudio))
 			{
 				ofLogVerbose() << "clock Init PASS";
-				openPlayer();
+				return openPlayer();
 				
 			}else 
 			{
 				ofLogError() << "clock Init FAIL";
+				return false;
 			}
 		}else 
 		{
 			ofLogError() << "Video streams detection FAIL";
+			return false;
 		}
 	}else 
 	{
 		ofLogError() << "omxReader open moviePath FAIL: "  << moviePath;
+		return false;
 	}
 }
 
-void ofxOMXPlayer::openPlayer()
+bool ofxOMXPlayer::openPlayer()
 {
+	bool didOpen = false;
 	omxReader.GetHints(OMXSTREAM_VIDEO, videoStreamInfo);
 	omxReader.GetHints(OMXSTREAM_AUDIO, audioStreamInfo);
 
@@ -238,14 +237,14 @@ void ofxOMXPlayer::openPlayer()
 		}
 		clock->OMXStateExecute();
 		clock->OMXStart(0.0);
-		
+				
+		ofLogVerbose() << "Opened video PASS";
 		Create();
-		
-		ofLogVerbose() << "Opened video PASS";	
-		
+		return true;
 	}else 
 	{
 		ofLogError() << "Opened video FAIL";
+		return false;
 	}
 }
 
@@ -296,13 +295,16 @@ void ofxOMXPlayer::Process()
 			}
 			if (isCacheEmpty)
 			{
-				
 				onVideoEnd();
 				/*
 				 The way this works is that loop_offset is a marker (actually the same as the DURATION)
 				 Once the file reader seeks to the beginning of the file again loop_offset is then added to subsequent packet's timestamps
 				 */
-				if (doLooping)
+				if (doLooping) 
+				{
+					ofLogVerbose() << "\n\n\This \n is \n\n insane \n\n\n - doLooping sometimes returns non bool values and evaluates to true: You are probably about to crash - sorry. doLooping is: " << doLooping;
+				}
+				if (doLooping == 1)//TODO: figure this out
 				{
 					ofLogVerbose(__func__) << "ABOUT TO ATTEMPT LOOP doLooping " << doLooping;
 					omxReader.SeekTime(0 * 1000.0f, AVSEEK_FLAG_BACKWARD, &startpts);
@@ -563,4 +565,5 @@ void ofxOMXPlayer::onVideoEnd()
 		ofxOMXPlayerListenerEventData eventData((void *)this);
 		listener->onVideoEnd(eventData);
 	}
+	
 }

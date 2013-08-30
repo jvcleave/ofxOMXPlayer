@@ -68,7 +68,7 @@ public:
 	ofxOMXPlayer();
 	~ofxOMXPlayer();
 	
-	void setup(ofxOMXPlayerSettings settings_);
+	bool setup(ofxOMXPlayerSettings settings_);
 	ofxOMXPlayerSettings settings;
 	
 	void			loadMovie();
@@ -98,14 +98,13 @@ public:
 	bool			isPaused();
 	bool			isPlaying();
 		
-	
 
 	int				videoWidth;
 	int				videoHeight;
 	GLuint				textureID;
 
 		
-	void			openPlayer();
+	bool			openPlayer();
 	double			getMediaTime();
 	bool			doVideoDebugging;
 	bool			doLooping;
