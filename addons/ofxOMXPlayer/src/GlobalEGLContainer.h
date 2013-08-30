@@ -26,11 +26,13 @@ public:
 	EGLDisplay			display;
 	EGLContext			context;
 	bool hasGenerated;
+	bool doLooping;
 private:
 	GlobalEGLContainer() {
 		textureID = 0;
 		appEGLWindow = NULL;
 		hasGenerated = false;
+		doLooping = false;
 	};
 	GlobalEGLContainer(GlobalEGLContainer const&);              // Don't Implement.
 	void operator=(GlobalEGLContainer const&);					// Don't implement

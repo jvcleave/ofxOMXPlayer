@@ -68,8 +68,7 @@ public:
 	ofxOMXPlayer();
 	~ofxOMXPlayer();
 	
-	bool setup(ofxOMXPlayerSettings settings_);
-	ofxOMXPlayerSettings settings;
+	bool setup(ofxOMXPlayerSettings settings);
 	
 	void			loadMovie();
 	
@@ -101,14 +100,13 @@ public:
 
 	int				videoWidth;
 	int				videoHeight;
-	GLuint				textureID;
+	GLuint			textureID;
 
 		
 	bool			openPlayer();
 	double			getMediaTime();
-	bool			doVideoDebugging;
-	bool			doLooping;
-
+	bool			useHDMIForAudio;
+	
 	bool			isTextureEnabled;
 	bool			didVideoOpen;
 	bool			didAudioOpen;

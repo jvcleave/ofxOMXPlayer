@@ -311,8 +311,8 @@ bool COMXAudio::Initialize(const CStdString& device, int iChannels, enum PCMChan
   m_pcm_input.nChannels             = m_InputChannels;
   m_pcm_input.nSamplingRate         = uiSamplesPerSec;
 
-  PrintPCM(&m_pcm_input);
-  PrintPCM(&m_pcm_output);
+  //PrintPCM(&m_pcm_input);
+  //PrintPCM(&m_pcm_output);
 
   OMX_ERRORTYPE omx_err = OMX_ErrorNone;
   std::string componentName = "";
@@ -450,7 +450,7 @@ bool COMXAudio::Initialize(const CStdString& device, int iChannels, enum PCMChan
   }
   */
 
-  omx_err = m_omx_decoder.AllocInputBuffers();
+  omx_err = m_omx_decoder.AllocInputBuffers(true);
   if(omx_err != OMX_ErrorNone) 
   {
     ofLog(OF_LOG_ERROR, "COMXAudio::Initialize - Error alloc buffers 0x%08x", omx_err);
@@ -985,14 +985,14 @@ unsigned int COMXAudio::AddPackets(const void* data, unsigned int len, double dt
           ofLog(OF_LOG_ERROR, "COMXAudio::AddPackets error GetParameter 2  omx_err(0x%08x)\n", omx_err);
         }
 
-        PrintPCM(&m_pcm_input);
-        PrintPCM(&m_pcm_output);
+        //PrintPCM(&m_pcm_input);
+        //PrintPCM(&m_pcm_output);
       }
       else
       {
         m_pcm_output.nPortIndex      = m_omx_decoder.GetOutputPort();
         m_omx_decoder.GetParameter(OMX_IndexParamAudioPcm, &m_pcm_output);
-        PrintPCM(&m_pcm_output);
+       // PrintPCM(&m_pcm_output);
 
         OMX_AUDIO_PARAM_PORTFORMATTYPE formatType;
         OMX_INIT_STRUCTURE(formatType);

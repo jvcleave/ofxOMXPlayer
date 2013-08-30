@@ -104,7 +104,7 @@ void playlistApp::draw(){
 	omxPlayer->draw(ofGetWidth()-scaledWidth, ofGetHeight()-scaledHeight, scaledWidth, scaledHeight);
 	
 
-	/*stringstream info;
+	stringstream info;
 	info << "APP FPS: "+ ofToString(ofGetFrameRate());
 	info <<"\n" <<	"MEDIA TIME: "			<< omxPlayer->getMediaTime();
 	info <<"\n" <<	"DIMENSIONS: "			<< omxPlayer->getWidth()<<"x"<<omxPlayer->getHeight();
@@ -115,7 +115,7 @@ void playlistApp::draw(){
 	info <<"\n" <<	"CURRENT VOLUME: "		<< omxPlayer->getVolume();
 	
 	
-	ofDrawBitmapStringHighlight(info.str(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);*/
+	ofDrawBitmapStringHighlight(info.str(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
 }
 
 //--------------------------------------------------------------

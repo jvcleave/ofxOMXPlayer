@@ -59,7 +59,7 @@ public:
   // DLL faking.
   virtual bool ResolveExports() { return true; }
   virtual bool Load() {
-    ofLog(OF_LOG_VERBOSE, "DllAvFormat: Using libswresample system library");
+    //ofLog(OF_LOG_VERBOSE, "DllAvFormat: Using libswresample system library");
     return true;
   }
   virtual void Unload() {}

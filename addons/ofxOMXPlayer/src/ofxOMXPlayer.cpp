@@ -16,7 +16,8 @@ ofxOMXPlayer::ofxOMXPlayer()
 	bPlaying			= false;
 	duration			= 0.0;
 	nFrames				= 0;
-	doLooping			= false;
+	//GlobalEGLContainer::getInstance().doLooping			= false;
+	useHDMIForAudio		= true;
 	isBufferEmpty		= true;
 	loop_offset = 0;
 	startpts              = 0.0;
@@ -36,6 +37,7 @@ ofxOMXPlayer::ofxOMXPlayer()
 	clock		= NULL;
 	loopCounter = 0;	
 	omxCore.Initialize();
+	OMXDecoderBase::fillBufferCounter=0;
 }
 void ofxOMXPlayer::Lock()
 {
@@ -90,15 +92,15 @@ ofxOMXPlayer::~ofxOMXPlayer()
 	ofLogVerbose() << "~ofxOMXPlayer END";
 	
 }
-bool ofxOMXPlayer::setup(ofxOMXPlayerSettings settings_)
+bool ofxOMXPlayer::setup(ofxOMXPlayerSettings settings)
 {
 	
-	settings = settings_;
 	moviePath = settings.videoPath; 
-	doLooping = settings.enableLooping;
+	GlobalEGLContainer::getInstance().doLooping = settings.enableLooping;
+	useHDMIForAudio = settings.useHDMIForAudio;
 	addListener(settings.listener);
 	ofLogVerbose() << "moviePath is " << moviePath;
-	ofLogVerbose() << "doLooping is " << doLooping;
+	ofLogVerbose() << "GlobalEGLContainer::getInstance().doLooping is " << GlobalEGLContainer::getInstance().doLooping;
 	isTextureEnabled = settings.enableTexture;
 	
 	if (!clock) 
@@ -152,7 +154,6 @@ bool ofxOMXPlayer::setup(ofxOMXPlayerSettings settings_)
 
 bool ofxOMXPlayer::openPlayer()
 {
-	bool didOpen = false;
 	omxReader.GetHints(OMXSTREAM_VIDEO, videoStreamInfo);
 	omxReader.GetHints(OMXSTREAM_AUDIO, audioStreamInfo);
 
@@ -191,7 +192,7 @@ bool ofxOMXPlayer::openPlayer()
 	if (hasAudio) 
 	{
 		string deviceString = "omx:hdmi";
-		if (!settings.useHDMIForAudio)
+		if (!useHDMIForAudio)
 		{
 			deviceString = "omx:local";
 		}
@@ -230,7 +231,7 @@ bool ofxOMXPlayer::openPlayer()
 			//file is weird (like test.h264) and has no reported frames
 			//enable File looping hack if looping enabled;
 			
-			if (doLooping) 
+			if (GlobalEGLContainer::getInstance().doLooping) 
 			{
 				//omxReader.enableFileLoopinghack();
 			}
@@ -295,18 +296,18 @@ void ofxOMXPlayer::Process()
 			}
 			if (isCacheEmpty)
 			{
-				onVideoEnd();
+				
 				/*
 				 The way this works is that loop_offset is a marker (actually the same as the DURATION)
 				 Once the file reader seeks to the beginning of the file again loop_offset is then added to subsequent packet's timestamps
 				 */
-				if (doLooping) 
+				if (GlobalEGLContainer::getInstance().doLooping) 
 				{
-					ofLogVerbose() << "\n\n\This \n is \n\n insane \n\n\n - doLooping sometimes returns non bool values and evaluates to true: You are probably about to crash - sorry. doLooping is: " << doLooping;
+					ofLogVerbose() << "\n\n\This \n is \n\n insane \n\n\n - GlobalEGLContainer::getInstance().doLooping sometimes returns non bool values and evaluates to true: You are probably about to crash - sorry. GlobalEGLContainer::getInstance().doLooping is: " << GlobalEGLContainer::getInstance().doLooping;
 				}
-				if (doLooping == 1)//TODO: figure this out
+				if (GlobalEGLContainer::getInstance().doLooping)//TODO: figure this out
 				{
-					ofLogVerbose(__func__) << "ABOUT TO ATTEMPT LOOP doLooping " << doLooping;
+					ofLogVerbose(__func__) << "ABOUT TO ATTEMPT LOOP GlobalEGLContainer::getInstance().doLooping " << GlobalEGLContainer::getInstance().doLooping;
 					omxReader.SeekTime(0 * 1000.0f, AVSEEK_FLAG_BACKWARD, &startpts);
 					if(hasAudio)
 					{
@@ -327,7 +328,7 @@ void ofxOMXPlayer::Process()
 				}
 				else
 				{
-					
+					onVideoEnd();
 					break;
 				}
 			}
@@ -339,22 +340,22 @@ void ofxOMXPlayer::Process()
 			
 		}
 		
-		if (doLooping && OMXDecoderBase::fillBufferCounter>=getTotalNumFrames()) 
+		if (GlobalEGLContainer::getInstance().doLooping && OMXDecoderBase::fillBufferCounter>=getTotalNumFrames()) 
 		{
 			OMXDecoderBase::fillBufferCounter=0;
 		}
-		if (hasAudio) 
-		{
-			if(audioPlayer->Error())
-			 {
-				 ofLogError(__func__) << "audio player error.";
-			 }
-		}
+		//if (hasAudio) 
+//		{
+//			if(audioPlayer->Error())
+//			 {
+//				 ofLogError(__func__) << "audio player error.";
+//			 }
+//		}
 		
 		if(!packet)
 		{
 			packet = omxReader.Read();
-			if (packet && doLooping && packet->pts != DVD_NOPTS_VALUE)
+			if (packet && GlobalEGLContainer::getInstance().doLooping && packet->pts != DVD_NOPTS_VALUE)
 			{
 				packet->pts += loop_offset;
 				packet->dts += loop_offset;
