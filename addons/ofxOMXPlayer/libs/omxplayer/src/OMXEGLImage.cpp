@@ -162,7 +162,7 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 	// JVC: I think numVideoBuffers can be probed for an optimal amount
 	// omxplayer uses 60 but maybe that takes away GPU memory for other operations?
 	ofLogVerbose(__func__) << "portParam.nBufferCountActual GET VAR --------------------------:" << portParam.nBufferCountActual;
-	int numVideoBuffers = 80; //20 is minimum - can get up to 80
+	int numVideoBuffers = 60; //20 is minimum - can get up to 80
 	portParam.nBufferCountActual = numVideoBuffers; 
 
 	portParam.format.video.nFrameWidth  = m_decoded_width;

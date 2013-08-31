@@ -196,7 +196,7 @@ bool ofxOMXPlayer::openPlayer()
 		{
 			deviceString = "omx:local";
 		}
-		bool m_passthrough			= false;
+		bool m_passthrough			= false;/* passthrough overwrites hw decode */
 		int m_use_hw_audio			= false;
 		bool m_boost_on_downmix		= false;
 		bool m_thread_player		= true;

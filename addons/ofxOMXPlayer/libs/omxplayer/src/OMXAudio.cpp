@@ -162,7 +162,7 @@ bool COMXAudio::Initialize(const CStdString& device, enum PCMChannels *channelMa
     m_extradata = (uint8_t *)malloc(m_extrasize);
     memcpy(m_extradata, hints.extradata, hints.extrasize);
   }
-
+  ofLogVerbose(__PRETTY_FUNCTION__) << " m_Passthrough: " << m_Passthrough;
   return Initialize(device, hints.channels, channelMap, hints.channels, hints.samplerate, hints.bitspersample, false, boostOnDownmix, false, bPassthrough);
 }
 
@@ -174,7 +174,7 @@ bool COMXAudio::Initialize(const CStdString& device, int iChannels, enum PCMChan
   } else {
     deviceuse = "local";
   }
-
+	
   if(!m_dllAvUtil.Load())
     return false;
 
@@ -185,22 +185,8 @@ bool COMXAudio::Initialize(const CStdString& device, int iChannels, enum PCMChan
 
   memset(&m_wave_header, 0x0, sizeof(m_wave_header));
 
-#ifndef STANDALONE
-  bool bAudioOnAllSpeakers(false);
-  g_audioContext.SetupSpeakerConfig(iChannels, bAudioOnAllSpeakers, bIsMusic);
-
-  if(bPassthrough)
-  {
-    g_audioContext.SetActiveDevice(CAudioContext::DIRECTSOUND_DEVICE_DIGITAL);
-  } else {
-    g_audioContext.SetActiveDevice(CAudioContext::DIRECTSOUND_DEVICE);
-  }
-
-  m_CurrentVolume = g_settings.m_nVolumeLevel; 
-#else
-  m_CurrentVolume = 0;
-#endif
-
+ m_CurrentVolume = 0;
+ofLogVerbose(__PRETTY_FUNCTION__) << " m_Passthrough: " << m_Passthrough;
   m_downmix_channels = downmixChannels;
   m_normalize_downmix = !boostOnDownmix;
 
@@ -609,7 +595,7 @@ bool COMXAudio::Deinitialize()
 	bool doFlush = false;
   m_omx_render.Deinitialize(doFlush);
   if(!m_Passthrough)
-    m_omx_mixer.Deinitialize(doFlush);
+    //m_omx_mixer.Deinitialize(doFlush);
   m_omx_decoder.Deinitialize(doFlush);
 
   m_Initialized = false;
@@ -1210,82 +1196,83 @@ void COMXAudio::SetCodingType(CodecID codec)
 
 bool COMXAudio::CanHWDecode(CodecID codec)
 {
+	string codecName = "UNKNOWN";
 	switch(codec)
 	{ 
-			/*
-			 case CODEC_ID_VORBIS:
-			 ofLogVerbose(__func__) << "OMX_AUDIO_CodingVORBIS";
+			
+		case CODEC_ID_VORBIS:
+			 codecName =  "OMX_AUDIO_CodingVORBIS";
 			 m_eEncoding = OMX_AUDIO_CodingVORBIS;
-			 m_HWDecode = true;
+			 m_HWDecode = false;
 			 break;
-			 case CODEC_ID_AAC:
-			 ofLogVerbose(__func__) << "OMX_AUDIO_CodingAAC";
+		case CODEC_ID_AAC:
+			codecName =  "OMX_AUDIO_CodingAAC";
 			 m_eEncoding = OMX_AUDIO_CodingAAC;
-			 m_HWDecode = true;
+			 m_HWDecode = false;
 			 break;
-			 */
+			 
 		case CODEC_ID_MP2:
 		case CODEC_ID_MP3:
-			ofLogVerbose(__func__) << "OMX_AUDIO_CodingMP3";
+			codecName = "OMX_AUDIO_CodingMP3";
 			m_eEncoding = OMX_AUDIO_CodingMP3;
 			m_HWDecode = true;
 			break;
 		case CODEC_ID_DTS:
-			ofLogVerbose(__func__) << "OMX_AUDIO_CodingDTS";
+			codecName =  "OMX_AUDIO_CodingDTS";
 			m_eEncoding = OMX_AUDIO_CodingDTS;
 			m_HWDecode = true;
 			break;
 		case CODEC_ID_AC3:
 		case CODEC_ID_EAC3:
-			ofLogVerbose(__func__) << "OMX_AUDIO_CodingDDP";
+			codecName =  "OMX_AUDIO_CodingDDP";
 			m_eEncoding = OMX_AUDIO_CodingDDP;
 			m_HWDecode = true;
 			break;
 		default:
-			ofLogVerbose(__func__) << "OMX_AUDIO_CodingPCM";
+			codecName =  "OMX_AUDIO_CodingPCM";
 			m_eEncoding = OMX_AUDIO_CodingPCM;
 			m_HWDecode = false;
 			break;
 	} 
-	
+	ofLogVerbose(__func__) << "codecName is: " <<  codecName << " m_HWDecode IS:  " << m_HWDecode;
 	return m_HWDecode;
 }
 
 bool COMXAudio::HWDecode(CodecID codec)
 {
 	bool ret = false;
-	
+	string codecName = "UNKNOWN";
 	switch(codec)
 	{ 
-			/*
-			 case CODEC_ID_VORBIS:
-			 ofLogVerbose(__func__) << "CODEC_ID_VORBIS";
-			 ret = true;
+			
+		case CODEC_ID_VORBIS:
+			codecName =  "CODEC_ID_VORBIS";
+			 ret = false;
 			 break;
-			 case CODEC_ID_AAC:
-			 ofLogVerbose(__func__) << "CODEC_ID_AAC";
-			 ret = true;
+		case CODEC_ID_AAC:
+			 codecName ="CODEC_ID_AAC";
+			 ret = false;
 			 break;
-			 */
+			 
 		case CODEC_ID_MP2:
 		case CODEC_ID_MP3:
-			ofLogVerbose(__func__) << "CODEC_ID_MP2 / CODEC_ID_MP3";
+			codecName ="CODEC_ID_MP2 / CODEC_ID_MP3";
 			ret = true;
 			break;
 		case CODEC_ID_DTS:
-			ofLogVerbose(__func__) << "CODEC_ID_DTS";
+			codecName = "CODEC_ID_DTS";
 			ret = true;
 			break;
 		case CODEC_ID_AC3:
 		case CODEC_ID_EAC3:
-			ofLogVerbose(__func__) << "CODEC_ID_AC3 / CODEC_ID_EAC3";
+			codecName = "CODEC_ID_AC3 / CODEC_ID_EAC3";
 			ret = true;
 			break;
 		default:
 			ret = false;
 			break;
 	} 
-	
+	ofLogVerbose(__func__) << "codecName is " <<  codecName << " RETURNING " << ret;
 	return ret;
 }
 
