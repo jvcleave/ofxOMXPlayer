@@ -51,7 +51,7 @@ void playlistApp::createPlayer()
 	ofxOMXPlayerSettings settings;
 	settings.videoPath = files[videoCounter].path();
 	settings.useHDMIForAudio = true;	//default true
-	settings.enableTexture = true;		//default true
+	settings.enableTexture = (ofGetElapsedTimeMillis() % 2 == 0);		//default true
 	settings.enableLooping = false;		//default true
 	
 	settings.listener = this; //this app extends ofxOMXPlayerListener so it will receive events 
@@ -81,7 +81,10 @@ void playlistApp::update()
 	
 }
 
-
+unsigned long long skipTimeStart=0;
+unsigned long long skipTimeEnd=0;
+unsigned long long amountSkipped =0;
+bool doingSkipCheck = false;
 //--------------------------------------------------------------
 void playlistApp::draw(){
 	
@@ -114,8 +117,26 @@ void playlistApp::draw(){
 	info <<"\n" <<	"REMAINING FRAMES: "	<< omxPlayer->getTotalNumFrames() - omxPlayer->getCurrentFrame();
 	info <<"\n" <<	"CURRENT VOLUME: "		<< omxPlayer->getVolume();
 	
+	ofColor textColor = ofColor::yellow;
+	if(omxPlayer->getCurrentFrame() == 0)
+	{
+		textColor = ofColor::white;
+		if(!doingSkipCheck)
+		{
+			doingSkipCheck = true;
+			skipTimeStart = ofGetElapsedTimeMillis();
+		}
+	}
+	if(doingSkipCheck && textColor == ofColor::yellow)
+	{
+		skipTimeEnd = ofGetElapsedTimeMillis();
+		amountSkipped = skipTimeEnd-skipTimeStart;
+		doingSkipCheck = false;
+		
+	}
 	
-	ofDrawBitmapStringHighlight(info.str(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
+	info <<"\n" <<	"MILLIS SKIPPED: "		<< amountSkipped;
+	ofDrawBitmapStringHighlight(info.str(), 60, 60, ofColor(ofColor::black, 90), textColor);
 }
 
 //--------------------------------------------------------------
