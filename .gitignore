@@ -5,3 +5,4 @@ bin/omxplayer*
 !bin/data/big_buck_bunny_MpegStreamclip_720p_h264_50Quality_48K_256k_AAC.mov
 bin/data/2013*.log
 bin/data/2013*.png
+*._*
