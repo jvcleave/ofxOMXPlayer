@@ -169,7 +169,7 @@ bool ofxOMXPlayer::openPlayer()
 		{
 			eglPlayer = new OMXPlayerEGLImage();
 		}
-		
+		GlobalEGLContainer::getInstance().generateEGLImage(videoWidth, videoHeight);
 		didVideoOpen = eglPlayer->Open(videoStreamInfo, clock);
 		videoPlayer = (OMXPlayerVideoBase*)eglPlayer;
 		textureID	= GlobalEGLContainer::getInstance().textureID;
@@ -266,9 +266,6 @@ void ofxOMXPlayer::Process()
 	
 	while (!m_bStop) 
 	{
-		
-		
-		
 		//struct timespec starttime, endtime;
 		/*printf("V : %8.02f %8d %8d A : %8.02f %8.02f Cv : %8d Ca : %8d                            \r",
 		 clock->OMXMediaTime(), videoPlayer->GetDecoderBufferSize(),
@@ -301,10 +298,6 @@ void ofxOMXPlayer::Process()
 				 The way this works is that loop_offset is a marker (actually the same as the DURATION)
 				 Once the file reader seeks to the beginning of the file again loop_offset is then added to subsequent packet's timestamps
 				 */
-				if (GlobalEGLContainer::getInstance().doLooping) 
-				{
-					ofLogVerbose() << "\n\n\This \n is \n\n insane \n\n\n - GlobalEGLContainer::getInstance().doLooping sometimes returns non bool values and evaluates to true: You are probably about to crash - sorry. GlobalEGLContainer::getInstance().doLooping is: " << GlobalEGLContainer::getInstance().doLooping;
-				}
 				if (GlobalEGLContainer::getInstance().doLooping)//TODO: figure this out
 				{
 					ofLogVerbose(__func__) << "ABOUT TO ATTEMPT LOOP GlobalEGLContainer::getInstance().doLooping " << GlobalEGLContainer::getInstance().doLooping;
@@ -344,13 +337,13 @@ void ofxOMXPlayer::Process()
 		{
 			OMXDecoderBase::fillBufferCounter=0;
 		}
-		//if (hasAudio) 
-//		{
-//			if(audioPlayer->Error())
-//			 {
-//				 ofLogError(__func__) << "audio player error.";
-//			 }
-//		}
+		if (hasAudio) 
+		{
+			if(audioPlayer->Error())
+			 {
+				 ofLogError(__func__) << "audio player error.";
+			 }
+		}
 		
 		if(!packet)
 		{

@@ -11,7 +11,6 @@ OMXEGLImage::OMXEGLImage()
 	ofLogVerbose() << "OMXEGLImage CONSTRUCT";
 	eglBuffer = NULL;
 	
-	
 }
 
 OMX_ERRORTYPE onFillBufferDone(OMX_HANDLETYPE hComponent,
@@ -55,7 +54,7 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 	m_decoded_width  = hints.width;
 	m_decoded_height = hints.height;
 	
-	generateEGLImage(m_decoded_width, m_decoded_height);
+	
 
 	if(!m_decoded_width || !m_decoded_height)
 	return false;
@@ -102,17 +101,11 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 		m_omx_clock = NULL;
 		return false; 
 	}
-
+	
 	m_omx_tunnel_decoder.Initialize(&m_omx_decoder,		m_omx_decoder.GetOutputPort(),		&m_omx_sched,	m_omx_sched.GetInputPort());
 	m_omx_tunnel_sched.Initialize(	&m_omx_sched,		m_omx_sched.GetOutputPort(),		&m_omx_render,	m_omx_render.GetInputPort());
 	m_omx_tunnel_clock.Initialize(	m_omx_clock,		m_omx_clock->GetInputPort() + 1,	&m_omx_sched,	m_omx_sched.GetOutputPort() + 1);
-
-	error = m_omx_tunnel_clock.Establish(false);
-	if(error != OMX_ErrorNone)
-	{
-		ofLogError(__func__) << "m_omx_tunnel_clock.Establish FAIL";
-		return false;
-	}
+	
 
 	error = m_omx_decoder.SetStateForComponent(OMX_StateIdle);
 	if (error != OMX_ErrorNone)
@@ -144,7 +137,7 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 		ofLog(OF_LOG_ERROR, "m_omx_decoder GET OMX_IndexParamVideoPortFormat FAIL error: 0x%08x\n", error);
 		return false;
 	}
-
+	
 	OMX_PARAM_PORTDEFINITIONTYPE portParam;
 	OMX_INIT_STRUCTURE(portParam);
 	portParam.nPortIndex = m_omx_decoder.GetInputPort();
@@ -159,10 +152,10 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 		return false;
 	}
 
-	// JVC: I think numVideoBuffers can be probed for an optimal amount
-	// omxplayer uses 60 but maybe that takes away GPU memory for other operations?
 	ofLogVerbose(__func__) << "portParam.nBufferCountActual GET VAR --------------------------:" << portParam.nBufferCountActual;
-	int numVideoBuffers = 60; //20 is minimum - can get up to 80
+	ofLogVerbose(__func__) << "portParam.format.video.nFrameWidth GET VAR --------------------------:" << portParam.format.video.nFrameWidth;
+
+	int numVideoBuffers = 80; //20 is minimum - can get up to 80
 	portParam.nBufferCountActual = numVideoBuffers; 
 
 	portParam.format.video.nFrameWidth  = m_decoded_width;
@@ -178,7 +171,15 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 		return false;
 	}
 	
-
+	
+	error = m_omx_tunnel_clock.Establish(false);
+	if(error != OMX_ErrorNone)
+	{
+		ofLogError(__func__) << "m_omx_tunnel_clock.Establish FAIL";
+		return false;
+	}
+	
+	
 	OMX_PARAM_BRCMVIDEODECODEERRORCONCEALMENTTYPE concanParam;
 	OMX_INIT_STRUCTURE(concanParam);
 	concanParam.bStartWithValidFrame = OMX_FALSE;
@@ -298,6 +299,7 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 		return false;
 	}
 	
+	
 	ofLogVerbose() << "m_omx_render.GetOutputPort(): " << m_omx_render.GetOutputPort();
 	m_omx_render.EnablePort(m_omx_render.GetOutputPort(), false);
 	if(error == OMX_ErrorNone)
@@ -308,7 +310,6 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 		ofLog(OF_LOG_ERROR, "m_omx_render Enable OUTPUT Port  FAIL error: 0x%08x", error);
 		return false;
 	}
-	
 	error = m_omx_render.UseEGLImage(&eglBuffer, m_omx_render.GetOutputPort(), NULL, GlobalEGLContainer::getInstance().eglImage);
 	if(error == OMX_ErrorNone)
 	{
@@ -346,6 +347,10 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 	}else 
 	{
 		ofLog(OF_LOG_ERROR, "m_omx_render FillThisBuffer FAIL error: 0x%08x", error);
+		if (error == OMX_ErrorIncorrectStateOperation) 
+		{
+			ofLogError(__func__) << "NEED EGL HACK";
+		}
 		return false;
 	}
 	
@@ -373,71 +378,15 @@ OMXEGLImage::~OMXEGLImage()
 	}
 }
 
-void OMXEGLImage::generateEGLImage(int videoWidth, int videoHeight)
-{	
-	
-	if (GlobalEGLContainer::getInstance().hasGenerated) 
-	{
-		return;
-	}
-	GlobalEGLContainer::getInstance().appEGLWindow = (ofAppEGLWindow *) ofGetWindowPtr();
-	GlobalEGLContainer::getInstance().display = GlobalEGLContainer::getInstance().appEGLWindow->getEglDisplay();
-	GlobalEGLContainer::getInstance().context = GlobalEGLContainer::getInstance().appEGLWindow->getEglContext();
-	
-	
-	GlobalEGLContainer::getInstance().texture.allocate(videoWidth, videoHeight, GL_RGBA);
-	GlobalEGLContainer::getInstance().texture.getTextureData().bFlipTexture = true;
-	GlobalEGLContainer::getInstance().texture.setTextureWrap(GL_REPEAT, GL_REPEAT);
-	GlobalEGLContainer::getInstance().textureID = GlobalEGLContainer::getInstance().texture.getTextureData().textureID;
-	
-	
-	ofLogVerbose(__func__) << "textureID: " << GlobalEGLContainer::getInstance().textureID;
-	ofLogVerbose(__func__) << "tex.isAllocated(): " << GlobalEGLContainer::getInstance().texture.isAllocated();
-	
-	glEnable(GL_TEXTURE_2D);
-	
-	// setup first texture
-	int dataSize = videoWidth * videoHeight * 4;
-	
-	GLubyte* pixelData = new GLubyte [dataSize];
-	
-	
-    memset(pixelData, 0xff, dataSize);  // white texture, opaque
-	
-	glBindTexture(GL_TEXTURE_2D, GlobalEGLContainer::getInstance().textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, videoWidth, videoHeight, 0,
-				 GL_RGBA, GL_UNSIGNED_BYTE, pixelData);
-	
-	delete[] pixelData;
-	
-	
-	// Create EGL Image
-	GlobalEGLContainer::getInstance().eglImage = eglCreateImageKHR(
-								 GlobalEGLContainer::getInstance().display,
-								 GlobalEGLContainer::getInstance().context,
-								 EGL_GL_TEXTURE_2D_KHR,
-								 (EGLClientBuffer)GlobalEGLContainer::getInstance().textureID,
-								 0);
-    glDisable(GL_TEXTURE_2D);
-	if (GlobalEGLContainer::getInstance().eglImage == EGL_NO_IMAGE_KHR)
-	{
-		ofLogError()	<< "Create EGLImage FAIL";
-	}
-	else
-	{
-		ofLogVerbose()	<< "Create EGLImage PASS";
-		GlobalEGLContainer::getInstance().hasGenerated = true;
-	}
-	
-}
+
+
 
 void OMXEGLImage::Close()
 {
-	//return; //yolo
 	ofLogVerbose(__func__) << " Start";
-	/*m_omx_tunnel_decoder.Flush();
+	m_omx_tunnel_decoder.Flush();
 	m_omx_tunnel_clock.Flush();
-	m_omx_tunnel_sched.Flush();*/
+	m_omx_tunnel_sched.Flush();
 	
 	bool noWait = true;
 	m_omx_tunnel_clock.Deestablish(noWait);
@@ -445,15 +394,15 @@ void OMXEGLImage::Close()
 	m_omx_tunnel_sched.Deestablish(noWait);
 	 
 	//This already happened in Flush above
-	/*m_omx_decoder.FlushInput();
-	m_omx_render.FlushOutput();
-	m_omx_render.FlushInput();*/
+	//m_omx_sched.FlushAll();
+	//m_omx_decoder.FlushAll();
+	//m_omx_render.DisablePort(m_omx_render.GetOutputPort(), false);
+
 	
 	bool doFlush = false;
 	m_omx_sched.Deinitialize(doFlush);
 	m_omx_decoder.Deinitialize(doFlush);
 	m_omx_render.Deinitialize(doFlush);
-
 	m_is_open       = false;
 
 	if(m_extradata)
@@ -466,22 +415,9 @@ void OMXEGLImage::Close()
 	m_video_codec_name  = "";
 	m_first_frame       = true;
 	
-	/*if (eglImage) 
-	{
-		if (eglDestroyImageKHR(display, eglImage)) 
-		{
-			ofLogVerbose(__func__) << "eglDestroyImageKHR PASS";
-		}else
-		{
-			ofLogError(__func__) << "eglDestroyImageKHR FAIL";
-		}
-		
-	}*/
-	
 	
 	ofLogVerbose(__func__) << " END";
 }
-
 
 
 int OMXEGLImage::Decode(uint8_t *pData, int iSize, double dts, double pts)

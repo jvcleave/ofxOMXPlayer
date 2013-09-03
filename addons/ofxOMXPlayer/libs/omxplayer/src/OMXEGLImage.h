@@ -21,9 +21,9 @@ public:
 	EGLImageKHR			eglImage;
 	ofTexture			tex;
 	GLuint				textureID;*/
-	
-	
-	
 	OMX_BUFFERHEADERTYPE* eglBuffer;
-	void generateEGLImage(int videoWidth, int videoHeight);
+	
+	
+	
+	
 };

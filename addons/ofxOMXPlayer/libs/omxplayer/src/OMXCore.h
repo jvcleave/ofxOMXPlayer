@@ -10,10 +10,6 @@
 #include <semaphore.h>
 
 
-#if 0
-	#define OMX_DEBUG_VERBOSE
-	#define OMX_DEBUG_EVENTHANDLER
-#endif
 //#define OMX_DEBUG_EVENTHANDLER
 
 #define OMX_INIT_STRUCTURE(a) \

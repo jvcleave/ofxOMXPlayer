@@ -8,7 +8,7 @@
 
 #include "XMemUtils.h"
 
-//#define ENABLE_WAIT_FOR_COMMANDS
+#define ENABLE_WAIT_FOR_COMMANDS
 //#define OMX_DEBUG_EVENTS
 //#define OMX_DEBUG_EVENTHANDLER
 
@@ -1081,7 +1081,41 @@ OMX_ERRORTYPE COMXCoreComponent::SetStateForComponent(OMX_STATETYPE state)
     }
     else
     {
-     ofLog(OF_LOG_VERBOSE, "COMXCoreComponent::SetStateForComponent - %s failed with omx_err(0x%x)\n",  m_componentName.c_str(), omx_err);
+		ofLog(OF_LOG_VERBOSE, "COMXCoreComponent::SetStateForComponent - %s failed with omx_err(0x%x)\n",  m_componentName.c_str(), omx_err);
+		switch (state) 
+		{
+			case OMX_StateExecuting:
+				ofLogError(__func__) << "ATTEMPTED STATE: OMX_StateExecuting";
+				break;
+			case OMX_StateIdle:
+				ofLogError(__func__) << "ATTEMPTED STATE: OMX_StateIdle";
+				break;
+			case OMX_StateLoaded:
+				ofLogError(__func__) << "ATTEMPTED STATE: OMX_StateLoaded";
+				break;
+			case OMX_StateInvalid:
+				ofLogError(__func__) << "ATTEMPTED STATE: OMX_StateInvalid";
+				break;
+			case OMX_StatePause:
+				ofLogError(__func__) << "ATTEMPTED STATE: OMX_StatePause";
+				break;
+			case OMX_StateWaitForResources:
+				ofLogError(__func__) << "ATTEMPTED STATE: OMX_StateWaitForResources";
+				break;
+			case OMX_StateKhronosExtensions:
+				ofLogError(__func__) << "ATTEMPTED STATE: OMX_StateKhronosExtensions";
+				break;
+			case OMX_StateVendorStartUnused:
+				ofLogError(__func__) << "ATTEMPTED STATE: OMX_StateVendorStartUnused";
+				break;
+			case OMX_StateMax:
+				ofLogError(__func__) << "ATTEMPTED STATE: OMX_StateMax";
+				break;
+			default:
+				ofLogError(__func__) << "ATTEMPTED STATE: UNKNOWN";
+				break;
+		}
+     
     }
   }
   else 
