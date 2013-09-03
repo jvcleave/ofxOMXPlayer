@@ -51,8 +51,7 @@ void playlistApp::createPlayer()
 	ofxOMXPlayerSettings settings;
 	settings.videoPath = files[videoCounter].path();
 	settings.useHDMIForAudio = true;	//default true
-	settings.enableTexture = true;
-	//settings.enableTexture = (ofGetElapsedTimeMillis() % 2 == 0);		//default true
+	//settings.enableTexture = false;		//default true
 	settings.enableLooping = false;		//default true
 	
 	settings.listener = this; //this app extends ofxOMXPlayerListener so it will receive events 

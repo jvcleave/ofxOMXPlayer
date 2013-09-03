@@ -8,7 +8,7 @@
 
 #include "XMemUtils.h"
 
-#define ENABLE_WAIT_FOR_COMMANDS
+//#define ENABLE_WAIT_FOR_COMMANDS
 //#define OMX_DEBUG_EVENTS
 //#define OMX_DEBUG_EVENTHANDLER
 

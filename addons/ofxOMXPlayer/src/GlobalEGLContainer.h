@@ -116,7 +116,7 @@ public:
 									   (EGLClientBuffer)textureID,
 									   0);
 		glDisable(GL_TEXTURE_2D);
-		if (eglImage == EGL_NO_IMAGE_KHR)
+		if (eglImage == EGL_NO_IMAGE_KHR) 
 		{
 			ofLogError()	<< "Create EGLImage FAIL";
 		}
@@ -143,7 +143,7 @@ private:
 	
 	void destroyEGLImage()
 	{
-		if (eglImage) 
+		/*if (eglImage) 
 		{
 			if (eglDestroyImageKHR(display, eglImage)) 
 			{
@@ -154,17 +154,14 @@ private:
 				ofLogError(__func__) << "eglDestroyImageKHR FAIL";
 			}
 			eglImage = NULL;
-		}
+		}*/
 		
 	}
 	
 	~GlobalEGLContainer()
 	{
-		ofLogVerbose() << "~GlobalEGLContainer";
 		destroyEGLImage();
-		
-		
 	};
-	GlobalEGLContainer(GlobalEGLContainer const&);              // Don't Implement.
-	void operator=(GlobalEGLContainer const&);					// Don't implement
+	GlobalEGLContainer(GlobalEGLContainer const&);
+	void operator=(GlobalEGLContainer const&);
 };

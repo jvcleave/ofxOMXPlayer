@@ -110,8 +110,6 @@ bool OMXPlayerAudio::Open(COMXStreamInfo &hints, OMXClock *av_clock, OMXReader *
   m_passthrough = IAudioRenderer::ENCODED_NONE;
   m_hw_decode   = false;
   m_use_passthrough = passthrough;
-	
-  ofLogVerbose(__PRETTY_FUNCTION__) << " m_use_passthrough: " << m_use_passthrough;
   m_use_hw_decode   = hw_decode;
   m_boost_on_downmix = boost_on_downmix;
   m_iCurrentPts = DVD_NOPTS_VALUE;
@@ -411,6 +409,40 @@ void OMXPlayerAudio::CloseAudioCodec()
 
 IAudioRenderer::EEncoded OMXPlayerAudio::IsPassthrough(COMXStreamInfo hints)
 {
+#ifndef STANDALONE
+  int  m_outputmode = 0;
+  bool bitstream = false;
+  IAudioRenderer::EEncoded passthrough = IAudioRenderer::ENCODED_NONE;
+
+  m_outputmode = g_guiSettings.GetInt("audiooutput.mode");
+
+  switch(m_outputmode)
+  {
+    case 0:
+      passthrough = IAudioRenderer::ENCODED_NONE;
+      break;
+    case 1:
+      bitstream = true;
+      break;
+    case 2:
+      bitstream = true;
+      break;
+  }
+
+  if(bitstream)
+  {
+    if(hints.codec == CODEC_ID_AC3 && g_guiSettings.GetBool("audiooutput.ac3passthrough"))
+    {
+      passthrough = IAudioRenderer::ENCODED_IEC61937_AC3;
+    }
+    if(hints.codec == CODEC_ID_DTS && g_guiSettings.GetBool("audiooutput.dtspassthrough"))
+    {
+      passthrough = IAudioRenderer::ENCODED_IEC61937_DTS;
+    }
+  }
+
+  return passthrough;
+#else
   if(m_device == "omx:local")
     return IAudioRenderer::ENCODED_NONE;
 
@@ -430,6 +462,7 @@ IAudioRenderer::EEncoded OMXPlayerAudio::IsPassthrough(COMXStreamInfo hints)
   }
 
   return passthrough;
+#endif
 }
 
 bool OMXPlayerAudio::OpenDecoder()
@@ -438,7 +471,7 @@ bool OMXPlayerAudio::OpenDecoder()
 
   m_decoder = new COMXAudio();
   m_decoder->SetClock(m_av_clock);
-	ofLogVerbose(__PRETTY_FUNCTION__) << " m_use_passthrough: " << m_use_passthrough;
+
   if(m_use_passthrough)
     m_passthrough = IsPassthrough(m_hints);
 
@@ -478,12 +511,12 @@ bool OMXPlayerAudio::OpenDecoder()
   {
     if(m_passthrough)
     {
-      ofLog(OF_LOG_VERBOSE, "m_passthrough TRUE Audio codec %s channels %d samplerate %d bitspersample %d\n",
+      ofLog(OF_LOG_VERBOSE, "Audio codec %s channels %d samplerate %d bitspersample %d\n",
         m_codec_name.c_str(), 2, m_hints.samplerate, m_hints.bitspersample);
     }
     else
     {
-      ofLog(OF_LOG_VERBOSE, "m_passthrough FALSE Audio codec %s channels %d samplerate %d bitspersample %d\n",
+      ofLog(OF_LOG_VERBOSE, "Audio codec %s channels %d samplerate %d bitspersample %d\n",
         m_codec_name.c_str(), m_hints.channels, m_hints.samplerate, m_hints.bitspersample);
     }
   }
