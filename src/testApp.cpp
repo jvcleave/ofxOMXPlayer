@@ -71,7 +71,7 @@ void testApp::updateFbo()
 	fbo.begin();
 		ofClear(0, 0, 0, 0);
 		shader.begin();
-			shader.setUniformTexture("tex0", omxPlayer.getTextureReference(), omxPlayer.textureID);
+			shader.setUniformTexture("tex0", omxPlayer.getTextureReference(), omxPlayer.getTextureID());
 			shader.setUniform1f("time", ofGetElapsedTimef());
 			shader.setUniform2f("resolution", ofGetWidth(), ofGetHeight());
 			ofRect(0, 0, ofGetWidth(), ofGetHeight());

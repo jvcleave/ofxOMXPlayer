@@ -7,7 +7,6 @@ ofxOMXPlayer::ofxOMXPlayer()
 	
 	videoWidth			= 0;
 	videoHeight			= 0;
-	isMPEG				= false;
 	hasVideo			= false;
 	hasAudio			= false;
 	packet				= NULL;
@@ -18,7 +17,6 @@ ofxOMXPlayer::ofxOMXPlayer()
 	nFrames				= 0;
 	//GlobalEGLContainer::getInstance().doLooping			= false;
 	useHDMIForAudio		= true;
-	isBufferEmpty		= true;
 	loop_offset = 0;
 	startpts              = 0.0;
 
@@ -34,8 +32,8 @@ ofxOMXPlayer::ofxOMXPlayer()
 	
 	listener			= NULL;
 	
-	clock		= NULL;
-	loopCounter = 0;	
+	clock				= NULL;
+	loopCounter			= 0;
 	omxCore.Initialize();
 	OMXDecoderBase::fillBufferCounter=0;
 }
@@ -99,6 +97,7 @@ bool ofxOMXPlayer::setup(ofxOMXPlayerSettings settings)
 	GlobalEGLContainer::getInstance().doLooping = settings.enableLooping;
 	useHDMIForAudio = settings.useHDMIForAudio;
 	addListener(settings.listener);
+	
 	ofLogVerbose() << "moviePath is " << moviePath;
 	ofLogVerbose() << "GlobalEGLContainer::getInstance().doLooping is " << GlobalEGLContainer::getInstance().doLooping;
 	isTextureEnabled = settings.enableTexture;
@@ -172,7 +171,6 @@ bool ofxOMXPlayer::openPlayer()
 		GlobalEGLContainer::getInstance().generateEGLImage(videoWidth, videoHeight);
 		didVideoOpen = eglPlayer->Open(videoStreamInfo, clock);
 		videoPlayer = (OMXPlayerVideoBase*)eglPlayer;
-		textureID	= GlobalEGLContainer::getInstance().textureID;
 	}else 
 	{
 		if (!nonEglPlayer) {
@@ -249,7 +247,10 @@ bool ofxOMXPlayer::openPlayer()
 	}
 }
 
-
+GLuint ofxOMXPlayer::getTextureID()
+{
+	return GlobalEGLContainer::getInstance().textureID;
+}
 
 
 ofTexture & ofxOMXPlayer::getTextureReference()
@@ -447,7 +448,6 @@ int ofxOMXPlayer::getCurrentFrame()
 {
 	
 	return OMXDecoderBase::fillBufferCounter;
-	//return (int)(videoPlayer->m_iCurrentPts/ DVD_TIME_BASE)*videoPlayer->GetFPS();
 }
 
 int ofxOMXPlayer::getTotalNumFrames()
@@ -455,12 +455,12 @@ int ofxOMXPlayer::getTotalNumFrames()
 	return nFrames;
 }
 
-float ofxOMXPlayer::getWidth()
+int ofxOMXPlayer::getWidth()
 {
 	return videoWidth;
 }
 
-float ofxOMXPlayer::getHeight()
+int ofxOMXPlayer::getHeight()
 {
 	return videoHeight;
 }
@@ -480,6 +480,8 @@ bool ofxOMXPlayer::isPaused()
 {
 	return clock->OMXIsPaused();
 }
+
+
 void ofxOMXPlayer::stepFrameForward()
 {
 	if (!isPaused()) 

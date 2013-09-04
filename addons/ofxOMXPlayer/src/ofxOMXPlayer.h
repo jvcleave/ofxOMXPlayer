@@ -70,62 +70,59 @@ public:
 	
 	bool setup(ofxOMXPlayerSettings settings);
 	
-	void			loadMovie();
+	void		loadMovie();
 	
-	void			play();
-	void			stop();
-	
-	float			duration;
-	float			getDuration();
-	
-	void			setPosition(float pct);
-	void			setVolume(float volume); // 0..1
-	float			getVolume();
-	ofTexture &		getTextureReference();
-	void			draw(float x, float y, float w, float h);
-	void			draw(float x, float y);
-	
-	void			setPaused(bool doPause);
-	
-	int				getCurrentFrame();
-	int				getTotalNumFrames();
+	void		play();
+	void		stop();
 	
 	
-	float			getHeight();
-	float			getWidth();
+	float		getDuration();
 	
-	bool			isPaused();
-	bool			isPlaying();
+	
+	void		setVolume(float volume); // 0..1
+	float		getVolume();
+	
+	ofTexture&	getTextureReference();
+	GLuint		getTextureID();
+	
+	void		draw(float x, float y, float w, float h);
+	void		draw(float x, float y);
+	
+	void		setPaused(bool doPause);
+	
+	int			getCurrentFrame();
+	int			getTotalNumFrames();
+	
+	
+	int			getHeight();
+	int			getWidth();
+	
+	bool		isPaused();
+	bool		isPlaying();
 		
-
-	int				videoWidth;
-	int				videoHeight;
-	GLuint			textureID;
-
-		
-	bool			openPlayer();
-	double			getMediaTime();
-	bool			useHDMIForAudio;
+	double		getMediaTime();
+	bool		useHDMIForAudio;
 	
-	bool			isTextureEnabled;
-	bool			didVideoOpen;
-	bool			didAudioOpen;
-	void			stepFrameForward();
-	void			increaseVolume();
-	void			decreaseVolume();
+	bool		isTextureEnabled;
 	
-	void			addListener(ofxOMXPlayerListener* listener_);
-	void			removeListener();
+	void		stepFrameForward();
+	void		increaseVolume();
+	void		decreaseVolume();
+	
+	void		addListener(ofxOMXPlayerListener* listener_);
+	void		removeListener();
 
-	void						Process();
-	void						Lock();
-	void						UnLock();
+	//OMXThread inheritance
+	void		Process();
+	void		Lock();
+	void		UnLock();
 	
 private:
 	
 	COMXCore				omxCore;
 	OMXClock*				clock;
 	
+	OMXPacket*				packet;
 	OMXPlayerVideo*			nonEglPlayer;
 	OMXPlayerEGLImage*		eglPlayer;
 	OMXPlayerVideoBase*		videoPlayer;
@@ -136,30 +133,26 @@ private:
 	COMXStreamInfo			videoStreamInfo;
 	COMXStreamInfo			audioStreamInfo;
 	
-	bool					isMPEG;
 	bool					hasVideo;
 	bool					hasAudio;
-	bool					isBufferEmpty;
 
+	bool					openPlayer();
+	bool					didVideoOpen;
+	bool					didAudioOpen;
 	
+	int						videoWidth;
+	int						videoHeight;
 	
-	
-	OMXPacket*				packet;
-	
-
-	
-	ofPixelFormat			internalPixelFormat;
 	string					moviePath;
 	int						nFrames;
 	bool					bPlaying;
 
-	
-	
 	double					loop_offset;
 	double					startpts;
 	int						loopCounter;
 	
-	
+	float					duration;
+		
 	void					onVideoEnd();
 };
 
