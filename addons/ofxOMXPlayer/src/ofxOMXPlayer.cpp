@@ -152,6 +152,23 @@ ofTexture & ofxOMXPlayer::getTextureReference()
 	return GlobalEGLContainer::getInstance().texture;
 }
 
+void ofxOMXPlayer::saveImage(string imagePath)//default imagePath=""
+{
+	if(imagePath == "")
+	{
+		imagePath = ofGetTimestampString()+".png";
+	}
+	updatePixels();
+	ofSaveImage(GlobalEGLContainer::getInstance().pixels, ofGetTimestampString()+".png");
+	
+}
+
+void ofxOMXPlayer::updatePixels()
+{
+	
+	GlobalEGLContainer::getInstance().updatePixels();
+}
+
 int ofxOMXPlayer::getCurrentFrame()
 {
 	if (engine) 

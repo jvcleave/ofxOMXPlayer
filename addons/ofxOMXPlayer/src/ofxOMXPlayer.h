@@ -45,7 +45,8 @@ public:
 	int			getTotalNumFrames();
 								  
 	void		setPaused(bool doPause);					
-	
+	void saveImage(string imagePath="");
+	void updatePixels();
 private:
 	void openEngine();
 	ofxOMXPlayerEngine* engine;

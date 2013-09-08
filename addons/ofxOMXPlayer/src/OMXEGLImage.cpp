@@ -154,6 +154,7 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 
 	ofLogVerbose(__func__) << "portParam.nBufferCountActual GET VAR --------------------------:" << portParam.nBufferCountActual;
 	ofLogVerbose(__func__) << "portParam.format.video.nFrameWidth GET VAR --------------------------:" << portParam.format.video.nFrameWidth;
+	ofLogVerbose(__func__) << "portParam.format.video.nFrameHeight GET VAR --------------------------:" << portParam.format.video.nFrameHeight;
 
 	int numVideoBuffers = 80; //20 is minimum - can get up to 80
 	portParam.nBufferCountActual = numVideoBuffers; 
@@ -161,6 +162,7 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 	portParam.format.video.nFrameWidth  = m_decoded_width;
 	portParam.format.video.nFrameHeight = m_decoded_height;
 
+	
 	error = m_omx_decoder.SetParameter(OMX_IndexParamPortDefinition, &portParam);
 	if(error == OMX_ErrorNone)
 	{
@@ -171,6 +173,24 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 		return false;
 	}
 	
+	
+	OMX_PARAM_PORTDEFINITIONTYPE portParamReCheck;
+	OMX_INIT_STRUCTURE(portParamReCheck);
+	portParamReCheck.nPortIndex = m_omx_decoder.GetInputPort();
+	
+	error = m_omx_decoder.GetParameter(OMX_IndexParamPortDefinition, &portParamReCheck);
+	if(error == OMX_ErrorNone)
+	{
+		ofLogVerbose() << "m_omx_decoder GET OMX_IndexParamPortDefinition PASS";
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "m_omx_decoder GET OMX_IndexParamPortDefinition FAIL error: 0x%08x\n", error);
+		return false;
+	}
+	
+	ofLogVerbose(__func__) << "portParamReCheck.nBufferCountActual GET VAR --------------------------:" << portParamReCheck.nBufferCountActual;
+	ofLogVerbose(__func__) << "portParamReCheck.format.video.nFrameWidth GET VAR --------------------------:" << portParamReCheck.format.video.nFrameWidth;
+	ofLogVerbose(__func__) << "portParamReCheck.format.video.nFrameHeight GET VAR --------------------------:" << portParamReCheck.format.video.nFrameHeight;
 	
 	error = m_omx_tunnel_clock.Establish(false);
 	if(error != OMX_ErrorNone)
@@ -247,7 +267,8 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 		return false;
 	}
 
-
+	
+	
 	error = m_omx_tunnel_decoder.Establish(false);
 	if(error == OMX_ErrorNone)
 	{
@@ -289,6 +310,46 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 		return false;
 	}
 	
+	
+	OMX_PARAM_PORTDEFINITIONTYPE portParamRenderInput;
+	OMX_INIT_STRUCTURE(portParamRenderInput);
+	portParamRenderInput.nPortIndex = m_omx_render.GetInputPort();
+	
+	error = m_omx_render.GetParameter(OMX_IndexParamPortDefinition, &portParamRenderInput);
+	if(error == OMX_ErrorNone)
+	{
+		ofLogVerbose() << "m_omx_render GET OMX_IndexParamPortDefinition PASS";
+		
+		ofLogVerbose(__func__) << "portParamRenderInput.nBufferCountActual GET VAR --------------------------:" << portParamRenderInput.nBufferCountActual;
+		ofLogVerbose(__func__) << "portParamRenderInput.format.video.nFrameWidth GET VAR --------------------------:" << portParamRenderInput.format.video.nFrameWidth;
+		ofLogVerbose(__func__) << "portParamRenderInput.format.video.nFrameHeight GET VAR --------------------------:" << portParamRenderInput.format.video.nFrameHeight;
+		
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "m_omx_render GET OMX_IndexParamPortDefinition FAIL error: 0x%08x\n", error);
+		
+	}
+	
+	OMX_PARAM_PORTDEFINITIONTYPE portParamRenderOutput;
+	OMX_INIT_STRUCTURE(portParamRenderOutput);
+	portParamRenderOutput.nPortIndex = m_omx_render.GetOutputPort();
+	
+	error = m_omx_render.GetParameter(OMX_IndexParamPortDefinition, &portParamRenderOutput);
+	if(error == OMX_ErrorNone)
+	{
+		ofLogVerbose() << "m_omx_render GET OMX_IndexParamPortDefinition PASS";
+		
+		ofLogVerbose(__func__) << "portParamRenderOutput.nBufferCountActual GET VAR --------------------------:" << portParamRenderOutput.nBufferCountActual;
+		ofLogVerbose(__func__) << "portParamRenderOutput.format.video.nFrameWidth GET VAR --------------------------:" << portParamRenderOutput.format.video.nFrameWidth;
+		ofLogVerbose(__func__) << "portParamRenderOutput.format.video.nFrameHeight GET VAR --------------------------:" << portParamRenderOutput.format.video.nFrameHeight;
+		
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "m_omx_render GET OMX_IndexParamPortDefinition FAIL error: 0x%08x\n", error);
+		
+	}
+	
+	
 	error = m_omx_render.SetStateForComponent(OMX_StateIdle);
 	if(error == OMX_ErrorNone)
 	{
@@ -310,6 +371,9 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 		ofLog(OF_LOG_ERROR, "m_omx_render Enable OUTPUT Port  FAIL error: 0x%08x", error);
 		return false;
 	}
+	
+	
+	
 	error = m_omx_render.UseEGLImage(&eglBuffer, m_omx_render.GetOutputPort(), NULL, GlobalEGLContainer::getInstance().eglImage);
 	if(error == OMX_ErrorNone)
 	{
@@ -329,6 +393,9 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 		ofLog(OF_LOG_ERROR, "SendDecoderConfig FAIL");
 		return false;
 	}
+	
+
+	
 	
 	m_omx_render.SetCustomDecoderFillBufferDoneHandler(onFillBufferDone);
 	error = m_omx_render.SetStateForComponent(OMX_StateExecuting);
