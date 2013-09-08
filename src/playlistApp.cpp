@@ -19,7 +19,7 @@ void playlistApp::onVideoEnd(ofxOMXPlayerListenerEventData& e)
 	{
 		videoCounter = 0;
 	}
-	createPlayer();
+	omxPlayer.loadMovie(files[videoCounter].path());
 }
 
 
@@ -27,7 +27,6 @@ void playlistApp::onVideoEnd(ofxOMXPlayerListenerEventData& e)
 void playlistApp::setup()
 {
 	ofSetLogLevel(OF_LOG_VERBOSE);
-	omxPlayer = NULL;
 	
 		
 	//this will let us just grab a video without recompiling
@@ -54,26 +53,16 @@ void playlistApp::createPlayer()
 	//settings.enableTexture = false;		//default true
 	settings.enableLooping = false;		//default true
 	
-	settings.listener = this; //this app extends ofxOMXPlayerListener so it will receive events 
-	if(omxPlayer)
-	{
-		delete omxPlayer;
-		omxPlayer = NULL;
-		
-	}
-	omxPlayer = new ofxOMXPlayer();
-	omxPlayer->setup(settings);
+	settings.listener = this; //this app extends ofxOMXPlayerListener so it will receive events ;
+	omxPlayer.setup(settings);
 	
 }
 
 //--------------------------------------------------------------
 void playlistApp::update()
 {
-	if (!omxPlayer) 
-	{
-		return;
-	}
-	if(!omxPlayer->isPlaying() || !omxPlayer->isTextureEnabled)
+	
+	if(!omxPlayer.isPlaying() || !omxPlayer.isTextureEnabled)
 	{
 		return;
 	}
@@ -88,37 +77,34 @@ bool doingSkipCheck = false;
 //--------------------------------------------------------------
 void playlistApp::draw(){
 	
-	if (!omxPlayer) 
+	
+	
+	if(!omxPlayer.isPlaying() && !omxPlayer.isTextureEnabled)
 	{
 		return;
 	}
 	
-	if(!omxPlayer->isPlaying() && !omxPlayer->isTextureEnabled)
-	{
-		return;
-	}
 	
-	
-	omxPlayer->draw(0, 0, ofGetWidth(), ofGetHeight());
+	omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
 		
 	//draw a smaller version in the lower right
-	int scaledHeight = omxPlayer->getHeight()/4;
-	int scaledWidth = omxPlayer->getWidth()/4;
-	omxPlayer->draw(ofGetWidth()-scaledWidth, ofGetHeight()-scaledHeight, scaledWidth, scaledHeight);
+	int scaledHeight = omxPlayer.getHeight()/4;
+	int scaledWidth = omxPlayer.getWidth()/4;
+	omxPlayer.draw(ofGetWidth()-scaledWidth, ofGetHeight()-scaledHeight, scaledWidth, scaledHeight);
 	
-/*
+
 	stringstream info;
 	info << "APP FPS: "+ ofToString(ofGetFrameRate());
-	info <<"\n" <<	"MEDIA TIME: "			<< omxPlayer->getMediaTime();
-	info <<"\n" <<	"DIMENSIONS: "			<< omxPlayer->getWidth()<<"x"<<omxPlayer->getHeight();
-	info <<"\n" <<	"DURATION: "			<< omxPlayer->getDuration();
-	info <<"\n" <<	"TOTAL FRAMES: "		<< omxPlayer->getTotalNumFrames();
-	info <<"\n" <<	"CURRENT FRAME: "		<< omxPlayer->getCurrentFrame();
-	info <<"\n" <<	"REMAINING FRAMES: "	<< omxPlayer->getTotalNumFrames() - omxPlayer->getCurrentFrame();
-	info <<"\n" <<	"CURRENT VOLUME: "		<< omxPlayer->getVolume();
+	info <<"\n" <<	"MEDIA TIME: "			<< omxPlayer.getMediaTime();
+	info <<"\n" <<	"DIMENSIONS: "			<< omxPlayer.getWidth()<<"x"<<omxPlayer.getHeight();
+	info <<"\n" <<	"DURATION: "			<< omxPlayer.getDuration();
+	info <<"\n" <<	"TOTAL FRAMES: "		<< omxPlayer.getTotalNumFrames();
+	info <<"\n" <<	"CURRENT FRAME: "		<< omxPlayer.getCurrentFrame();
+	info <<"\n" <<	"REMAINING FRAMES: "	<< omxPlayer.getTotalNumFrames() - omxPlayer.getCurrentFrame();
+	info <<"\n" <<	"CURRENT VOLUME: "		<< omxPlayer.getVolume();
 	
 	ofColor textColor = ofColor::yellow;
-	if(omxPlayer->getCurrentFrame() == 0)
+	if(omxPlayer.getCurrentFrame() == 0)
 	{
 		textColor = ofColor::white;
 		if(!doingSkipCheck)
@@ -136,7 +122,7 @@ void playlistApp::draw(){
 	}
 	
 	info <<"\n" <<	"MILLIS SKIPPED: "		<< amountSkipped;
-	ofDrawBitmapStringHighlight(info.str(), 60, 60, ofColor(ofColor::black, 90), textColor);*/
+	ofDrawBitmapStringHighlight(info.str(), 60, 60, ofColor(ofColor::black, 90), textColor);
 }
 
 //--------------------------------------------------------------

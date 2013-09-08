@@ -14,7 +14,7 @@ public:
 	~ofxOMXPlayer();
 	bool setup(ofxOMXPlayerSettings settings);
 	
-	
+	void loadMovie(string videoPath);
 	bool		isPaused();
 	bool		isPlaying();
 	
@@ -45,6 +45,9 @@ public:
 	int			getTotalNumFrames();
 								  
 	void		setPaused(bool doPause);					
+	
+private:
+	void openEngine();
 	ofxOMXPlayerEngine* engine;
-
+	ofxOMXPlayerSettings settings;
 };

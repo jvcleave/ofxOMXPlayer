@@ -14,7 +14,7 @@ class playlistApp : public ofBaseApp, public ofxOMXPlayerListener{
 	
 		void keyPressed(int key);
 		void createPlayer();
-		ofxOMXPlayer* omxPlayer;
+		ofxOMXPlayer omxPlayer;
 		void onVideoEnd(ofxOMXPlayerListenerEventData& e);
 		vector<ofFile> files;
 		int videoCounter;

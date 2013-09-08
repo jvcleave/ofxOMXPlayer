@@ -15,9 +15,25 @@ ofxOMXPlayer::ofxOMXPlayer()
 	engine = NULL;
 	isTextureEnabled = false;
 }
+void ofxOMXPlayer::loadMovie(string videoPath)
+{
+	settings.videoPath = videoPath;
+	setup(settings);
+}
 
 bool ofxOMXPlayer::setup(ofxOMXPlayerSettings settings)
 {
+	this->settings = settings;
+	openEngine();
+	
+}
+void ofxOMXPlayer::openEngine()
+{
+	if (engine) 
+	{
+		delete engine;
+		engine = NULL;
+	}
 	engine = new ofxOMXPlayerEngine();
 	engine->setup(settings);
 	isTextureEnabled = engine->isTextureEnabled;

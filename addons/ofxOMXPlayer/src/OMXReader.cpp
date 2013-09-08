@@ -349,7 +349,12 @@ bool OMXReader::SeekTime(int time, bool backwords, double *startpts)
 	int ret = m_dllAvFormat.av_seek_frame(m_pFormatContext, -1, seek_pts, backwords ? AVSEEK_FLAG_BACKWARD : 0);
 	
 	if(ret >= 0)
+	{
 		UpdateCurrentPTS();
+	}else {
+		ofLogVerbose(__func__) << "av_seek_frame returned >= 0, no UpdateCurrentPTS" << ret;
+	}
+
 	
 	// in this case the start time is requested time
 	if(startpts)
@@ -362,8 +367,8 @@ bool OMXReader::SeekTime(int time, bool backwords, double *startpts)
 		m_eof = true;
 		ret = 0;
 	}
-	
-	ofLog(OF_LOG_VERBOSE, "OMXReader::SeekTime(%d) - seek ended up on time %d",time,(int)(m_iCurrentPts / DVD_TIME_BASE * 1000));
+	//int landedTime = (int)(m_iCurrentPts / DVD_TIME_BASE * 1000);
+	//ofLogVerbose(__func__) << "Seek ended up on time: " << landedTime;
 	
 	UnLock();
 	
