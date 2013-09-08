@@ -2,7 +2,6 @@
 
 #include "ofMain.h"
 
-
 class SSHKeyListenerEventData
 {
 public:
@@ -22,28 +21,33 @@ public:
 	virtual void onCharacterReceived(SSHKeyListenerEventData& e) = 0;
 };
 
-class ConsoleListener: public ofThread
+class ConsoleListener: public Poco::Runnable
 {
 public:
 	SSHKeyListener* listener;
-	
-	
+	Poco::Thread thread;
 	ConsoleListener()
 	{
 		listener = NULL;
-		string oldName = getPocoThread().getName();
 		
-		getPocoThread().setName("ConsoleListener_"+oldName);
+	}
+	
+	~ConsoleListener()
+	{
+		thread.tryJoin(50);
+		ofLogVerbose() << "~ConsoleListener END";
 	}
 	
 	void setup(SSHKeyListener* listener_)
 	{
 		listener = listener_;
-		startThread(true, true);
+		//thread.setOSPriority(Poco::Thread::getMinOSPriority());
+		thread.start(*this);
 	}
-	void threadedFunction()
+	void run()
 	{
-		while (isThreadRunning()) 
+		
+		while (thread.isRunning()) 
 		{
 			if (listener != NULL) 
 			{
@@ -57,7 +61,6 @@ public:
 					
 				}
 			}
-			
 		}
 	}
 	
@@ -69,12 +72,12 @@ public:
 USAGE:
 
 1.add to testApp.h
- 
+
 #include "ConsoleListener.h"
- 
+
 //extend testApp 
 class testApp : public ofBaseApp, public SSHKeyListener
- 
+
 2. add required callback definition and instance
 
 void onCharacterReceived(SSHKeyListenerEventData& e);
@@ -82,21 +85,21 @@ ConsoleListener consoleListener;
 
 3. add to testApp.cpp
 
- void testApp::onCharacterReceived(SSHKeyListenerEventData& e)
- {
+void testApp::onCharacterReceived(SSHKeyListenerEventData& e)
+{
 	keyPressed((int)e.character);
- }
- 
+}
+
 add in testApp::setup()
 
 consoleListener.setup(this);
 
 4. and later
- void testApp::keyPressed  (int key){
- 
-	 if (key == 'e') 
-	 {
+void testApp::keyPressed  (int key){
+	
+	if (key == 'e') 
+	{
 		ofLogVerbose() << "e pressed!";
-	 }
- }
+	}
+}
 #endif

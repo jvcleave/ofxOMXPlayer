@@ -156,6 +156,7 @@ private:
 			eglImage = NULL;
 		}*/
 		
+		
 	}
 	
 	~GlobalEGLContainer()

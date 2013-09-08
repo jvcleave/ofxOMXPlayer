@@ -12,7 +12,6 @@ public:
 	void setup();
 	void update();
 	void draw();
-	void exit();
 	
 	void keyPressed(int key);
 
@@ -30,7 +29,6 @@ public:
 	ConsoleListener consoleListener;
 	
 	string videoPath;
-	bool isClosing;
 	bool usingTexturePlayer;
 	
 	void createNonTexturePlayer();

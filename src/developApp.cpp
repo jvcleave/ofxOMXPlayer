@@ -4,17 +4,15 @@ bool hasFrameChanged = false;
 int previousFrameNumber =0;
 void developApp::onCharacterReceived(SSHKeyListenerEventData& e)
 {
-	ConsoleListener* thread = (ConsoleListener*) e.listener;
-	thread->lock();
-		keyPressed((int)e.character);
-	thread->unlock();
+	//ConsoleListener* thread = (ConsoleListener*) e.listener;
+	keyPressed((int)e.character);
 }
+
 //--------------------------------------------------------------
 void developApp::setup()
 {
 	ofSetVerticalSync(false);
 	doRandomSelect		= true;
-	isClosing				= false;
 	
 	usingTexturePlayer		= false;
 	
@@ -96,7 +94,7 @@ void developApp::update()
 	}
 	if(omxPlayer.isPlaying())
 	{
-		int currentFrameNumber = omxPlayer.getCurrentFrame();
+		/*int currentFrameNumber = omxPlayer.getCurrentFrame();
 		if (currentFrameNumber != previousFrameNumber) 
 		{
 			hasFrameChanged = true;
@@ -109,7 +107,7 @@ void developApp::update()
 		if (!hasFrameChanged) 
 		{
 			return;
-		}
+		}*/
 		
 		if (usingTexturePlayer && doShader) 
 		{
@@ -130,9 +128,7 @@ void developApp::update()
 
 //--------------------------------------------------------------
 void developApp::draw(){
-	if (isClosing) {
-		return;
-	}
+	
 	if (!usingTexturePlayer) 
 	{
 		return;
@@ -183,9 +179,7 @@ void developApp::draw(){
 
 void developApp::updateFbo()
 {
-	if (isClosing) {
-		return;
-	}
+	
 	if(doShader)
 	{
 		fbo.begin();
@@ -198,13 +192,6 @@ void developApp::updateFbo()
 			shader.end();
 		fbo.end();
 	}
-	
-}
-
-void developApp::exit()
-{
-	ofLogVerbose() << "developApp::exit";
-	isClosing = true;
 	
 }
 //--------------------------------------------------------------

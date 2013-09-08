@@ -106,7 +106,7 @@ void playlistApp::draw(){
 	int scaledWidth = omxPlayer->getWidth()/4;
 	omxPlayer->draw(ofGetWidth()-scaledWidth, ofGetHeight()-scaledHeight, scaledWidth, scaledHeight);
 	
-
+/*
 	stringstream info;
 	info << "APP FPS: "+ ofToString(ofGetFrameRate());
 	info <<"\n" <<	"MEDIA TIME: "			<< omxPlayer->getMediaTime();
@@ -136,7 +136,7 @@ void playlistApp::draw(){
 	}
 	
 	info <<"\n" <<	"MILLIS SKIPPED: "		<< amountSkipped;
-	ofDrawBitmapStringHighlight(info.str(), 60, 60, ofColor(ofColor::black, 90), textColor);
+	ofDrawBitmapStringHighlight(info.str(), 60, 60, ofColor(ofColor::black, 90), textColor);*/
 }
 
 //--------------------------------------------------------------
