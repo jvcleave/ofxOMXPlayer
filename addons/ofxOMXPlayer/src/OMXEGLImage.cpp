@@ -445,9 +445,42 @@ OMXEGLImage::~OMXEGLImage()
 	}
 }
 
+#if 1
+void OMXEGLImage::Close()
+{
+	ofLogVerbose() << "OMXEGLImage::Close start";
+	m_omx_tunnel_decoder.Flush();
+	m_omx_tunnel_clock.Flush();
+	m_omx_tunnel_sched.Flush();
+	
+	/*m_omx_tunnel_clock.Deestablish(true);
+	m_omx_tunnel_decoder.Deestablish(true);
+	m_omx_tunnel_sched.Deestablish(true);
+	
+	m_omx_decoder.FlushInput();
+	m_omx_render.FlushOutput();
+	
+	m_omx_sched.Deinitialize();
+	m_omx_decoder.Deinitialize();
+	m_omx_render.Deinitialize();*/
+	
+	m_is_open       = false;
+	
+	if(m_extradata)
+	{
+		free(m_extradata);
+	}
+	m_extradata = NULL;
+	m_extrasize = 0;
+	
+	m_video_codec_name  = "";
+	m_first_frame       = true;
+	ofLogVerbose() << "OMXEGLImage::Close end";
 
+}
+#endif
 
-
+#if 0
 void OMXEGLImage::Close()
 {
 	ofLogVerbose(__func__) << " Start";
@@ -455,7 +488,7 @@ void OMXEGLImage::Close()
 	m_omx_tunnel_clock.Flush();
 	m_omx_tunnel_sched.Flush();
 	
-	bool noWait = true;
+	bool noWait = false;
 	m_omx_tunnel_clock.Deestablish(noWait);
 	m_omx_tunnel_decoder.Deestablish(noWait);
 	m_omx_tunnel_sched.Deestablish(noWait);
@@ -485,7 +518,7 @@ void OMXEGLImage::Close()
 	
 	ofLogVerbose(__func__) << " END";
 }
-
+#endif
 
 int OMXEGLImage::Decode(uint8_t *pData, int iSize, double dts, double pts)
 {

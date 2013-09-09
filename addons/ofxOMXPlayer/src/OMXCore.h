@@ -44,9 +44,10 @@ public:
 
   void Initialize(COMXCoreComponent *src_component, unsigned int src_port, COMXCoreComponent *dst_component, unsigned int dst_port);
   OMX_ERRORTYPE Flush();
-  OMX_ERRORTYPE Deestablish(bool noWait = false);
+  OMX_ERRORTYPE Deestablish(bool doWait = false);
   OMX_ERRORTYPE Establish(bool portSettingsChanged);
 private:
+	bool isEstablished;
   pthread_mutex_t   m_lock;
   bool              m_portSettingsChanged;
   COMXCoreComponent *m_src_component;

@@ -35,6 +35,7 @@ COMXCoreTunel::COMXCoreTunel()
   m_src_port            = 0;
   m_dst_port            = 0;
   m_portSettingsChanged = false;
+	isEstablished = false;
   m_DllOMX              = new DllOMX();
 
   pthread_mutex_init(&m_lock, NULL);
@@ -42,7 +43,12 @@ COMXCoreTunel::COMXCoreTunel()
 
 COMXCoreTunel::~COMXCoreTunel()
 {
-	Deestablish();
+	ofLogVerbose() << "~COMXCoreTunel START";
+	if(isEstablished)
+	{
+		ofLogVerbose("~COMXCoreTunel") << " ABOUT TO CALL Deestablish(true)";
+		Deestablish(true);
+	}
 	if (m_DllOMX) 
 	{
 		m_DllOMX->Unload();
@@ -50,6 +56,7 @@ COMXCoreTunel::~COMXCoreTunel()
 	}
 	
 	pthread_mutex_destroy(&m_lock);
+	ofLogVerbose() << "~COMXCoreTunel END";
 }
 
 void COMXCoreTunel::Lock()
@@ -106,66 +113,90 @@ OMX_ERRORTYPE COMXCoreTunel::Flush()
   return OMX_ErrorNone;
 }
 
-OMX_ERRORTYPE COMXCoreTunel::Deestablish(bool noWait)
+OMX_ERRORTYPE COMXCoreTunel::Deestablish(bool doWait)
 {
 
-  
+  if (!isEstablished) 
+  {
+	  ofLogVerbose("COMXCoreTunel::Deestablish") << "NOT ESTABLISHED -- BAILING";
+	  return OMX_ErrorNone;
+  }
   if(!m_src_component || !m_dst_component)
   {
 	  return OMX_ErrorUndefined;
-  }else 
-  {
-	  ofLogVerbose(__func__) << " m_src_component: " << m_src_component->GetName() << " m_dst_component: " << m_dst_component->GetName() << " START";
-
   }
-
-    
 
   Lock();
+	ofLogVerbose("COMXCoreTunel::Deestablish") << "m_src_component: " << m_src_component->GetName().c_str() << " m_dst_component: " << m_dst_component->GetName().c_str();
+	
+	OMX_ERRORTYPE omx_err = OMX_ErrorNone;
+	
+	/*if(m_src_component->GetComponent() && m_portSettingsChanged && doWait)
+	{
+		ofLogVerbose("COMXCoreTunel::Deestablish") << "WAITING";
+		omx_err = m_src_component->WaitForEvent(OMX_EventPortSettingsChanged);
+	}else 
+	{
+		ofLogVerbose("COMXCoreTunel::Deestablish") << m_src_component->GetName() << " NOT WAITING";
+	}*/
+	/*omx_err = m_src_component->WaitForEvent(OMX_EventPortSettingsChanged);
+	if(omx_err != OMX_ErrorNone) 
+	{
+		
+		ofLog(OF_LOG_ERROR, "COMXCoreTunel::Deestablish - m_src_component->WaitForEvent(OMX_EventPortSettingsChanged, 50) FAILED: omx_err(0x%08x)", omx_err);
+	}else 
+	{
+		ofLog(OF_LOG_VERBOSE, "COMXCoreTunel::Deestablish - m_src_component->WaitForEvent(OMX_EventPortSettingsChanged, 50) PASS");
 
-  OMX_ERRORTYPE omx_err = OMX_ErrorNone;
+	}*/
 
-  if(m_src_component->GetComponent() && m_portSettingsChanged && !noWait)
-    omx_err = m_src_component->WaitForEvent(OMX_EventPortSettingsChanged);
-
-  if(m_src_component->GetComponent())
-  {
-    omx_err = m_src_component->DisablePort(m_src_port, false);
-    if(omx_err != OMX_ErrorNone && omx_err != OMX_ErrorSameState)
-    {
-     ofLog(OF_LOG_VERBOSE, "COMXCoreComponent::Deestablish - Error disable port %d on component %s error: 0x%08x",  m_src_port, m_src_component->GetName().c_str(), omx_err);
-    }
-  }
-
-  if(m_dst_component->GetComponent())
-  {
-    omx_err = m_dst_component->DisablePort(m_dst_port, false);
-    if(omx_err != OMX_ErrorNone && omx_err != OMX_ErrorSameState) 
-    {
-     ofLog(OF_LOG_VERBOSE, "COMXCoreComponent::Deestablish - Error disable port %d on component %s error: 0x%08x", m_dst_port, m_dst_component->GetName().c_str(), omx_err);
-    }
-  }
-
-  if(m_src_component->GetComponent())
-  {
-    omx_err = m_DllOMX->OMX_SetupTunnel(m_src_component->GetComponent(), m_src_port, NULL, 0);
-    if(omx_err != OMX_ErrorNone && omx_err != OMX_ErrorIncorrectStateOperation) 
-    {
-     ofLog(OF_LOG_VERBOSE, "COMXCoreComponent::Deestablish - could not unset tunnel on comp src %s port %d error: 0x%08x",  m_src_component->GetName().c_str(), m_src_port, omx_err);
-    }
-  }
-
-  if(m_dst_component->GetComponent())
-  {
-    omx_err = m_DllOMX->OMX_SetupTunnel(m_dst_component->GetComponent(), m_dst_port, NULL, 0);
-    if(omx_err != OMX_ErrorNone && omx_err != OMX_ErrorIncorrectStateOperation) 
-    {
-     ofLog(OF_LOG_VERBOSE, "COMXCoreComponent::Deestablish - could not unset tunnel on comp dst %s port %d error: 0x%08x",  m_dst_component->GetName().c_str(), m_dst_port, omx_err);
-    }
-  }
-
+	ofLogVerbose(__func__) << "m_src_component DISABLE START";
+	if(m_src_component->GetComponent())
+	{
+		omx_err = m_src_component->DisablePort(m_src_port, false);
+		if(omx_err != OMX_ErrorNone && omx_err != OMX_ErrorSameState)
+		{
+			ofLog(OF_LOG_VERBOSE, "COMXCoreTunel::Deestablish - Error disable port %d on component %s omx_err(0x%08x)", 
+					  m_src_port, m_src_component->GetName().c_str(), (int)omx_err);
+		}
+	}
+	ofLogVerbose("COMXCoreTunel::Deestablish") << "m_src_component DISABLE END";
+	ofLogVerbose("COMXCoreTunel::Deestablish") << "m_dst_component DISABLE START";
+	if(m_dst_component->GetComponent())
+	{
+		omx_err = m_dst_component->DisablePort(m_dst_port, false);
+		if(omx_err != OMX_ErrorNone && omx_err != OMX_ErrorSameState) 
+		{
+			ofLog(OF_LOG_VERBOSE, "COMXCoreTunel::Deestablish - Error disable port %d on component %s omx_err(0x%08x)", 
+					  m_dst_port, m_dst_component->GetName().c_str(), (int)omx_err);
+		}
+	}
+	ofLogVerbose("COMXCoreTunel::Deestablish") << "m_dst_component DISABLE END";
+	ofLogVerbose("COMXCoreTunel::Deestablish") << "TUNNEL UNSET START";
+	if(m_src_component->GetComponent())
+	{
+		omx_err = m_DllOMX->OMX_SetupTunnel(m_src_component->GetComponent(), m_src_port, NULL, 0);
+		if(omx_err != OMX_ErrorNone && omx_err != OMX_ErrorIncorrectStateOperation) 
+		{
+			ofLog(OF_LOG_VERBOSE, "COMXCoreTunel::Deestablish - could not unset tunnel on comp src %s port %d omx_err(0x%08x)\n", 
+					  m_src_component->GetName().c_str(), m_src_port, (int)omx_err);
+		}
+	}
+	
+	if(m_dst_component->GetComponent())
+	{
+		omx_err = m_DllOMX->OMX_SetupTunnel(m_dst_component->GetComponent(), m_dst_port, NULL, 0);
+		if(omx_err != OMX_ErrorNone && omx_err != OMX_ErrorIncorrectStateOperation) 
+		{
+			ofLog(OF_LOG_VERBOSE, "COMXCoreTunel::Deestablish - could not unset tunnel on comp dst %s port %d omx_err(0x%08x)\n", 
+					  m_dst_component->GetName().c_str(), m_dst_port, (int)omx_err);
+		}
+	}
+	
+	ofLogVerbose("COMXCoreTunel::Deestablish") << "TUNNEL UNSET END";
   UnLock();
-	ofLogVerbose(__func__) << " END";
+	ofLogVerbose("COMXCoreTunel::Deestablish") << " END";
+	isEstablished = false;
   return OMX_ErrorNone;
 }
 
@@ -307,7 +338,7 @@ OMX_ERRORTYPE COMXCoreTunel::Establish(bool portSettingsChanged)
   m_portSettingsChanged = portSettingsChanged;
 
   UnLock();
-
+	isEstablished =true;
   return OMX_ErrorNone;
 }
 
@@ -1281,14 +1312,25 @@ OMX_ERRORTYPE COMXCoreComponent::EnablePort(unsigned int port,  bool wait)//defa
 
 OMX_ERRORTYPE COMXCoreComponent::DisablePort(unsigned int port, bool wait)//default: wait=false
 {
+	
   Lock();
 
+  ofLogVerbose(__func__) << " componentName: "  << m_componentName << " START" << " port: " << port << " wait: " << wait;
+ 
+	if (!m_handle) 
+	{
+		ofLogVerbose(__func__) << " componentName: "  << m_componentName << " NO HANDLE RETURNING";
+		UnLock();
+        return OMX_ErrorNone;
+	}
+	
   OMX_ERRORTYPE omx_err = OMX_ErrorNone;
 
   OMX_PARAM_PORTDEFINITIONTYPE portFormat;
   OMX_INIT_STRUCTURE(portFormat);
   portFormat.nPortIndex = port;
 
+	
   omx_err = OMX_GetParameter(m_handle, OMX_IndexParamPortDefinition, &portFormat);
   if(omx_err != OMX_ErrorNone)
   {
@@ -1312,7 +1354,7 @@ OMX_ERRORTYPE COMXCoreComponent::DisablePort(unsigned int port, bool wait)//defa
         omx_err = WaitForCommand(OMX_CommandPortDisable, port);
     }
   }
-
+ofLogVerbose(__func__) << " componentName: "  << m_componentName << " END";
   UnLock();
 
   return omx_err;
@@ -1427,7 +1469,8 @@ bool COMXCoreComponent::Deinitialize(bool doFlush)//default: true
     omx_err = m_DllOMX->OMX_FreeHandle(m_handle);
     if (omx_err != OMX_ErrorNone)
     {
-     ofLog(OF_LOG_VERBOSE, "COMXCoreComponent::Deinitialize - failed to free handle for component %s error: 0x%08x",  m_componentName.c_str(), omx_err);
+		ofLogVerbose(__func__) << "failed to free handle for:" << m_componentName; 
+		ofLog(OF_LOG_VERBOSE, "error: 0x%08x", omx_err);
     }  
 
     m_handle = NULL;

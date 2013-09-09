@@ -226,6 +226,8 @@ ofxOMXPlayer::~ofxOMXPlayer()
 	signal(SIGINT,  &killSwitch);
 	if(engine)
 	{
+		//OMXClock::OMXSleep(50);
+		engine->Lock();
 		delete engine;
 		engine = NULL;
 	}
