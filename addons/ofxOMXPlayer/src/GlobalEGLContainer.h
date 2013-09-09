@@ -37,7 +37,7 @@ public:
 	
 	void updatePixels()
 	{
-		fbo.begin();
+		fbo.begin(false);
 			//ofClear(0, 0, 0, 0);
 			texture.draw(0, 0);
 			glReadPixels(0,0,videoWidth, videoHeight, textureGLFormat, GL_UNSIGNED_BYTE, pixels.getPixels());
