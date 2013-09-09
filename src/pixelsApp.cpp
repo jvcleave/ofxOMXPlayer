@@ -67,7 +67,8 @@ void pixelsApp::draw(){
 	info <<"\n" <<	"CURRENT FRAME: "		<< omxPlayer.getCurrentFrame();
 	info <<"\n" <<	"REMAINING FRAMES: "	<< omxPlayer.getTotalNumFrames() - omxPlayer.getCurrentFrame();
 	info <<"\n" <<	"CURRENT VOLUME: "		<< omxPlayer.getVolume();
-	
+	info <<"\n" <<	"Press u to Update Pixels: " << doUpdatePixels;
+	info <<"\n" <<	"Press p to save Image";
 	
 	ofDrawBitmapStringHighlight(info.str(), 600, 60, ofColor(ofColor::black, 90), ofColor::yellow);
 }
@@ -75,7 +76,7 @@ void pixelsApp::draw(){
 //--------------------------------------------------------------
 void pixelsApp::keyPressed  (int key)
 {
-	if(key == 'p')
+	if(key == 's')
 	{
 		doSaveImage = true;	
 	}
