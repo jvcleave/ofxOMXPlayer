@@ -82,7 +82,7 @@ void pixelsApp::keyPressed  (int key)
 	
 	if(key == 'u')
 	{
-		doUpdatePixels = true;	
+		doUpdatePixels = !doUpdatePixels;	
 	}
 }
 

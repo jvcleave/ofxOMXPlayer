@@ -20,6 +20,7 @@ public:
 		static GlobalEGLContainer    instance;
 		return instance;
 	}
+	ofFbo fbo;
 	ofTexture texture;
 	EGLImageKHR eglImage;
 	GLuint textureID;
@@ -36,11 +37,14 @@ public:
 	
 	void updatePixels()
 	{
-		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, textureID);
-		glReadPixels(0,0, videoWidth, videoHeight, textureGLFormat, GL_UNSIGNED_BYTE, pixels.getPixels());
-		glDisable(GL_TEXTURE_2D);
+		fbo.begin();
+			ofClear(0, 0, 0, 0);
+			texture.draw(0, 0);
+		fbo.end();
 		
+		fbo.bind();
+			glReadPixels(0,0,videoWidth, videoHeight, textureGLFormat, GL_UNSIGNED_BYTE, pixels.getPixels());
+		fbo.unbind();
 	}
 	void generateEGLImage(int videoWidth_, int videoHeight_)
 	{	
@@ -93,6 +97,18 @@ public:
 			texture.clear();
 		}
 		
+		ofFbo::Settings fboSettings;
+		fboSettings.width = videoWidth;
+		fboSettings.height = videoHeight;
+		fboSettings.wrapModeVertical = GL_REPEAT;	// GL_REPEAT, GL_MIRRORED_REPEAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER etc.
+		fboSettings.wrapModeHorizontal = GL_REPEAT; // GL_REPEAT, GL_MIRRORED_REPEAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER etc.
+		//int		wrapModeHorizontal;		// GL_REPEAT, GL_MIRRORED_REPEAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER etc.
+		//int		wrapModeVertical;		// GL_REPEAT, GL_MIRRORED_REPEAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER etc.
+		
+		fbo.allocate(fboSettings);
+		//fbo.allocate(videoWidth, videoHeight, GL_RGBA);
+		
+		
 		texture.allocate(videoWidth, videoHeight, GL_RGBA);
 		//Video renders upside down and backwards when Broadcom proprietary tunnels are enabled
 		//may be resolved in future firmare
@@ -101,7 +117,6 @@ public:
 		texture.getTextureData().bFlipTexture = true;
 		texture.setTextureWrap(GL_REPEAT, GL_REPEAT);
 		textureID = texture.getTextureData().textureID;
-		
 		
 		ofLogVerbose(__func__) << "textureID: " << textureID;
 		ofLogVerbose(__func__) << "tex.isAllocated(): " << texture.isAllocated();
