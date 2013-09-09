@@ -38,14 +38,12 @@ public:
 	void updatePixels()
 	{
 		fbo.begin();
-			ofClear(0, 0, 0, 0);
+			//ofClear(0, 0, 0, 0);
 			texture.draw(0, 0);
-		fbo.end();
-		
-		fbo.bind();
 			glReadPixels(0,0,videoWidth, videoHeight, textureGLFormat, GL_UNSIGNED_BYTE, pixels.getPixels());
-		fbo.unbind();
+		fbo.end();
 	}
+	
 	void generateEGLImage(int videoWidth_, int videoHeight_)
 	{	
 		bool needsRegeneration = false;
