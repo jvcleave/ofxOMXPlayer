@@ -1315,14 +1315,8 @@ OMX_ERRORTYPE COMXCoreComponent::DisablePort(unsigned int port, bool wait)//defa
 	
   Lock();
 
-  ofLogVerbose(__func__) << " componentName: "  << m_componentName << " START" << " port: " << port << " wait: " << wait;
+  //ofLogVerbose(__func__) << " componentName: "  << m_componentName << " START" << " port: " << port << " wait: " << wait;
  
-	if (!m_handle) 
-	{
-		ofLogVerbose(__func__) << " componentName: "  << m_componentName << " NO HANDLE RETURNING";
-		UnLock();
-        return OMX_ErrorNone;
-	}
 	
   OMX_ERRORTYPE omx_err = OMX_ErrorNone;
 
@@ -1354,7 +1348,7 @@ OMX_ERRORTYPE COMXCoreComponent::DisablePort(unsigned int port, bool wait)//defa
         omx_err = WaitForCommand(OMX_CommandPortDisable, port);
     }
   }
-ofLogVerbose(__func__) << " componentName: "  << m_componentName << " END";
+	//ofLogVerbose(__func__) << " componentName: "  << m_componentName << " END";
   UnLock();
 
   return omx_err;

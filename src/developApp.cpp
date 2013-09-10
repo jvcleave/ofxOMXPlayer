@@ -149,8 +149,8 @@ void developApp::draw(){
 	}
 	
 	stringstream info;
-	
-	info << "APP FPS: "+ ofToString(ofGetFrameRate());
+	info <<			"PLEASE PRESS x TO EXIT APP CLEANLY ";
+	info <<"\n" <<  "APP FPS: "+ ofToString(ofGetFrameRate());
 	
 	
 	info <<"\n" <<	"MEDIA TIME: "			<< omxPlayer.getMediaTime();
@@ -193,6 +193,11 @@ void developApp::updateFbo()
 		fbo.end();
 	}
 	
+}
+void developApp::exit()
+{
+	omxPlayer.close();
+	ofLogVerbose() << "developApp::exit";
 }
 //--------------------------------------------------------------
 void developApp::keyPressed  (int key){
@@ -248,7 +253,13 @@ void developApp::keyPressed  (int key){
 		}
 		case 'c':
 		{
-			//omxPlayer.close();
+			omxPlayer.close();
+			break;
+		}
+		case 'x':
+		{
+			ofExit(0);
+			break;
 		}
 		default:
 		{

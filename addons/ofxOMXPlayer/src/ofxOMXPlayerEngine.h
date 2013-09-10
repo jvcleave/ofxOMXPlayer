@@ -68,8 +68,6 @@ public:
 
 	//OMXThread inheritance
 	void		Process();
-	void		Lock();
-	void		UnLock();
 	
 private:
 	

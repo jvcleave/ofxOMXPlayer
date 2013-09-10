@@ -3,7 +3,7 @@
 ofxOMXPlayerEngine::ofxOMXPlayerEngine()
 {
 	
-	pthread_mutex_init(&m_lock, NULL);
+	//pthread_mutex_init(&m_lock, NULL);
 	
 	videoWidth			= 0;
 	videoHeight			= 0;
@@ -36,15 +36,6 @@ ofxOMXPlayerEngine::ofxOMXPlayerEngine()
 	loopCounter			= 0;
 	omxCore.Initialize();
 	OMXDecoderBase::fillBufferCounter=0;
-}
-void ofxOMXPlayerEngine::Lock()
-{
-    pthread_mutex_lock(&m_lock);
-}
-
-void ofxOMXPlayerEngine::UnLock()
-{
-    pthread_mutex_unlock(&m_lock);
 }
 
 ofxOMXPlayerEngine::~ofxOMXPlayerEngine()

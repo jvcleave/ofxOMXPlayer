@@ -47,7 +47,16 @@ public:
 	void		setPaused(bool doPause);					
 	void saveImage(string imagePath="");
 	void updatePixels();
+	
+	
+   
+	void close();
+	bool isOpen;
+	
+	
+	
 private:
+	
 	void openEngine();
 	ofxOMXPlayerEngine* engine;
 	ofxOMXPlayerSettings settings;

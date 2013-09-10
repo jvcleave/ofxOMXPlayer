@@ -1343,9 +1343,9 @@ void COMXAudio::PrintPCM(OMX_AUDIO_PARAM_PCMMODETYPE *pcm)
 	info << "ePCMMode: "		<< pcm->ePCMMode				<< "\n";
 	info << "nChannels: "		<< (int)pcm->nChannels			<< "\n";
 	info << "nSamplingRate: "	<< (int)pcm->nSamplingRate		<< "\n";
-	ofLogVerbose(__func__) << "\n" <<  info.str();
+	//ofLogVerbose(__func__) << "\n" <<  info.str();
 
-  PrintChannels(pcm->eChannelMapping);
+	//PrintChannels(pcm->eChannelMapping);
 }
 
 void COMXAudio::PrintDDP(OMX_AUDIO_PARAM_DDPTYPE *ddparm)
@@ -1360,9 +1360,9 @@ void COMXAudio::PrintDDP(OMX_AUDIO_PARAM_DDPTYPE *ddparm)
 	info << "eBitStreamMode     : " <<  (int)ddparm->eBitStreamMode		<< "\n";
 	info << "eDolbySurroundMode : " <<  (int)ddparm->eDolbySurroundMode << "\n";
 	
-	ofLogVerbose(__func__) << "\n" <<  info.str();
+	//ofLogVerbose(__func__) << "\n" <<  info.str();
 	
-	PrintChannels(ddparm->eChannelMapping);
+	//PrintChannels(ddparm->eChannelMapping);
 }
 void COMXAudio::PrintDTS(OMX_AUDIO_PARAM_DTSTYPE *dtsparam)
 {
@@ -1376,9 +1376,9 @@ void COMXAudio::PrintDTS(OMX_AUDIO_PARAM_DTSTYPE *dtsparam)
 	info << "nDtsType           : " <<  (int)dtsparam->nDtsType 				<< "\n";	
 	info << "nDtsFrameSizeBytes : " <<  (int)dtsparam->nDtsFrameSizeBytes 		<< "\n";
 
-	ofLogVerbose(__func__) << "\n" <<  info.str();
+	//ofLogVerbose(__func__) << "\n" <<  info.str();
 	
-  PrintChannels(dtsparam->eChannelMapping);
+  //PrintChannels(dtsparam->eChannelMapping);
 }
 
 /* ========================== SYNC FUNCTIONS ========================== */

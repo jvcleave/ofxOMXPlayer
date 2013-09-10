@@ -166,6 +166,22 @@ public:
 		}
 		
 	}
+	void destroyEGLImage()
+	{
+		if (eglImage) 
+		{
+			if (eglDestroyImageKHR(display, eglImage)) 
+			{
+				ofLogVerbose(__func__) << "eglDestroyImageKHR PASS";
+			}
+			else
+			{
+				ofLogError(__func__) << "eglDestroyImageKHR FAIL";
+			}
+			eglImage = NULL;
+		}
+	}
+
 private:
 	GlobalEGLContainer() 
 	{
@@ -180,27 +196,9 @@ private:
 		doLooping = false;
 	};
 	
-	void destroyEGLImage()
-	{
-		/*if (eglImage) 
-		{
-			if (eglDestroyImageKHR(display, eglImage)) 
-			{
-				ofLogVerbose(__func__) << "eglDestroyImageKHR PASS";
-			}
-			else
-			{
-				ofLogError(__func__) << "eglDestroyImageKHR FAIL";
-			}
-			eglImage = NULL;
-		}*/
-		
-		
-	}
-	
 	~GlobalEGLContainer()
 	{
-		destroyEGLImage();
+		//destroyEGLImage();
 	};
 	GlobalEGLContainer(GlobalEGLContainer const&);
 	void operator=(GlobalEGLContainer const&);

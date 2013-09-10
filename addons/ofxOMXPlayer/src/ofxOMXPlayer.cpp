@@ -13,8 +13,10 @@
 ofxOMXPlayer::ofxOMXPlayer()
 {
 	engine = NULL;
+	isOpen = true;
 	isTextureEnabled = false;
 }
+
 void ofxOMXPlayer::loadMovie(string videoPath)
 {
 	settings.videoPath = videoPath;
@@ -220,16 +222,26 @@ void killSwitch(int sig) {
 
 }
 
-ofxOMXPlayer::~ofxOMXPlayer()
-{
-	ofLogVerbose() << "~ofxOMXPlayer";
+void ofxOMXPlayer::close()
+{	
+	ofLogVerbose(__func__) << " isOpen: " << isOpen;
+	if (!isOpen) 
+	{
+		return;
+	}
 	signal(SIGINT,  &killSwitch);
 	if(engine)
 	{
-		//OMXClock::OMXSleep(50);
-		engine->Lock();
 		delete engine;
 		engine = NULL;
 	}
+	GlobalEGLContainer::getInstance().destroyEGLImage();
+	isOpen = false;
 	signal(SIGINT,  NULL);
+	
+}
+ofxOMXPlayer::~ofxOMXPlayer()
+{
+	ofLogVerbose(__func__) << " isOpen: " << isOpen;
+	close();
 }

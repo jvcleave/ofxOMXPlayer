@@ -55,6 +55,11 @@ void testApp::setup()
 	
 }
 
+void testApp::exit()
+{
+	omxPlayer.close();
+}
+
 //--------------------------------------------------------------
 void testApp::update()
 {
@@ -103,7 +108,8 @@ void testApp::draw(){
 	}
 
 	stringstream info;
-	info << "APP FPS: "+ ofToString(ofGetFrameRate());
+	info <<			"PLEASE PRESS x TO EXIT APP CLEANLY ";
+	info <<"\n" <<  "APP FPS: "+ ofToString(ofGetFrameRate());
 	info <<"\n" <<	"MEDIA TIME: "			<< omxPlayer.getMediaTime();
 	info <<"\n" <<	"DIMENSIONS: "			<< omxPlayer.getWidth()<<"x"<<omxPlayer.getHeight();
 	info <<"\n" <<	"DURATION: "			<< omxPlayer.getDuration();
@@ -118,7 +124,20 @@ void testApp::draw(){
 
 //--------------------------------------------------------------
 void testApp::keyPressed  (int key){
-
+	switch (key) 
+	{
+		case 'c':
+		{
+			omxPlayer.close();
+			break;
+		}
+		case 'x':
+		{
+			omxPlayer.close();
+			ofExit(0);
+			break;
+		}
+	}
 	
 }
 

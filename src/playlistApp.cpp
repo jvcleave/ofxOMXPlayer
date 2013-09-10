@@ -23,12 +23,18 @@ void playlistApp::onVideoEnd(ofxOMXPlayerListenerEventData& e)
 }
 
 
+void playlistApp::onCharacterReceived(SSHKeyListenerEventData& e)
+{
+	keyPressed((int)e.character);
+}
+
+
 //--------------------------------------------------------------
 void playlistApp::setup()
 {
 	ofSetLogLevel(OF_LOG_VERBOSE);
 	
-		
+	consoleListener.setup(this);	
 	//this will let us just grab a video without recompiling
 	ofDirectory currentVideoDirectory("/home/pi/videos/current");
 	if (currentVideoDirectory.exists()) 
@@ -55,7 +61,7 @@ void playlistApp::createPlayer()
 	
 	settings.listener = this; //this app extends ofxOMXPlayerListener so it will receive events ;
 	omxPlayer.setup(settings);
-	
+	ofLogVerbose() << "PLEASE PRESS x TO EXIT APP CLEANLY ";
 }
 
 //--------------------------------------------------------------
@@ -94,7 +100,8 @@ void playlistApp::draw(){
 	
 
 	stringstream info;
-	info << "APP FPS: "+ ofToString(ofGetFrameRate());
+	info <<			"PLEASE PRESS x TO EXIT APP CLEANLY ";
+	info <<"\n" <<  "APP FPS: "+ ofToString(ofGetFrameRate());
 	info <<"\n" <<	"MEDIA TIME: "			<< omxPlayer.getMediaTime();
 	info <<"\n" <<	"DIMENSIONS: "			<< omxPlayer.getWidth()<<"x"<<omxPlayer.getHeight();
 	info <<"\n" <<	"DURATION: "			<< omxPlayer.getDuration();
@@ -128,6 +135,20 @@ void playlistApp::draw(){
 //--------------------------------------------------------------
 void playlistApp::keyPressed  (int key){
 
-	
+	ofLogVerbose() << "key received!";
+	switch (key) 
+	{
+		case 'c':
+		{
+			omxPlayer.close();
+			break;
+		}
+		case 'x':
+		{
+			omxPlayer.close();
+			ofExit(0);
+			break;
+		}
+	}
 }
 
