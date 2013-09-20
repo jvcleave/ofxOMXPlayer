@@ -180,6 +180,10 @@ public:
 			}
 			eglImage = NULL;
 		}
+		if (texture.isAllocated()) 
+		{
+			texture.clear();
+		}
 	}
 
 private:

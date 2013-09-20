@@ -52,7 +52,7 @@ public:
    
 	void close();
 	bool isOpen;
-	
+	static void exit();
 	
 	
 private:

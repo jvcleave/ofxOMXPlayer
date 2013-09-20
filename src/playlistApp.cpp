@@ -61,6 +61,8 @@ void playlistApp::createPlayer()
 	
 	settings.listener = this; //this app extends ofxOMXPlayerListener so it will receive events ;
 	omxPlayer.setup(settings);
+	
+	
 	ofLogVerbose() << "PLEASE PRESS x TO EXIT APP CLEANLY ";
 }
 

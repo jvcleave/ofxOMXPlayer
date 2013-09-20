@@ -8,6 +8,34 @@
  */
 
 #include "ofxOMXPlayer.h"
+ofxOMXPlayer* ofxOMXPlayerInstance;
+
+
+void ofxOMXPlayer::exit()
+{
+	if (ofxOMXPlayerInstance) 
+	{
+		ofxOMXPlayerInstance->close();
+	}
+	
+}
+
+void onExitHandler(int sig) {
+	cout << "\nonExitHandler" << endl;
+	GlobalEGLContainer::getInstance().destroyEGLImage();
+	raise(SIGKILL);
+	//signal(SIGINT,  NULL);
+	
+	//ofExit(0);
+	//GlobalEGLContainer::getInstance().appEGLWindow->yield();
+	//ofxOMXPlayer::exit();
+	//GlobalEGLContainer::getInstance().appEGLWindow->unlock();
+	//ofNotifyExit();
+	//signal(SIGINT,  SIG_DFL);
+	//
+	//ofNotifyExit();
+	
+}
 
 
 ofxOMXPlayer::ofxOMXPlayer()
@@ -15,6 +43,7 @@ ofxOMXPlayer::ofxOMXPlayer()
 	engine = NULL;
 	isOpen = true;
 	isTextureEnabled = false;
+	
 }
 
 void ofxOMXPlayer::loadMovie(string videoPath)
@@ -23,9 +52,14 @@ void ofxOMXPlayer::loadMovie(string videoPath)
 	setup(settings);
 }
 
+
 bool ofxOMXPlayer::setup(ofxOMXPlayerSettings settings)
 {
+	ofxOMXPlayerInstance = NULL;
+	ofxOMXPlayerInstance = this;
 	this->settings = settings;
+	signal(SIGINT,  NULL);
+	signal(SIGINT,  &onExitHandler);
 	openEngine();
 	
 }
@@ -229,7 +263,7 @@ void ofxOMXPlayer::close()
 	{
 		return;
 	}
-	signal(SIGINT,  &killSwitch);
+	//signal(SIGINT,  &killSwitch);
 	if(engine)
 	{
 		delete engine;
@@ -237,7 +271,8 @@ void ofxOMXPlayer::close()
 	}
 	GlobalEGLContainer::getInstance().destroyEGLImage();
 	isOpen = false;
-	signal(SIGINT,  NULL);
+	ofxOMXPlayerInstance = NULL;
+	//signal(SIGINT,  NULL);
 	
 }
 ofxOMXPlayer::~ofxOMXPlayer()
