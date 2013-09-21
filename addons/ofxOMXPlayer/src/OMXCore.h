@@ -46,6 +46,8 @@ public:
   OMX_ERRORTYPE Flush();
   OMX_ERRORTYPE Deestablish(bool doWait = false);
   OMX_ERRORTYPE Establish(bool portSettingsChanged);
+	string srcName;
+	string dstName;
 private:
 	bool isEstablished;
   pthread_mutex_t   m_lock;

@@ -30,9 +30,7 @@ OMXPlayerEGLImage::OMXPlayerEGLImage()
 
 bool OMXPlayerEGLImage::Open(COMXStreamInfo &hints, OMXClock *av_clock)
 {
-	ofLogVerbose(__func__) << " OMXPlayerEGLImage Open";
-
-	ofLogVerbose() << "OMXPlayerEGLImage::maxDataSize may need to be reduced for 256 boards, memory intensive apps";
+  ofLogVerbose(__func__) << " OMXPlayerEGLImage Open";
 
   if (!m_dllAvUtil.Load() || !m_dllAvCodec.Load() || !m_dllAvFormat.Load() || !av_clock)
   {

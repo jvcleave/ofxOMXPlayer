@@ -11,32 +11,79 @@
 ofxOMXPlayer* ofxOMXPlayerInstance;
 
 
-void ofxOMXPlayer::exit()
+/*void ofxOMXPlayer::exit()
 {
 	if (ofxOMXPlayerInstance) 
 	{
 		ofxOMXPlayerInstance->close();
 	}
 	
-}
+}*/
 
-void onExitHandler(int sig) {
-	cout << "\nonExitHandler" << endl;
-	GlobalEGLContainer::getInstance().destroyEGLImage();
-	raise(SIGKILL);
+void onSIGINTHandler(int sig) 
+{
+	cout << "\n onSIGINTHandler" << endl;
+	ofLogVerbose() << "IS MAIN THREAD: " << ofThread::isMainThread();
+	signal(SIGINT,  NULL);
+	//GlobalEGLContainer::getInstance().appEGLWindow->lock();
+	//GlobalEGLContainer::getInstance().appEGLWindow->waitForThread(true);
+	//GlobalEGLContainer::getInstance().appEGLWindow->sleep(2000);
+	//
+	OMXClock::OMXSleep(2000);
+	ofxOMXPlayerInstance->close();
+	//exit(0);
+	
+	//raise(SIGABRT);
+	//ofExit(0);
+	//ofxOMXPlayerInstance->close();
+	//GlobalEGLContainer::getInstance().isExiting = true;
+	//signal(SIGINT,  SIG_DFL);
+	//ofGetAppPtr()->exit();
+	//ofxOMXPlayerInstance->engine->StopThread();
+	
+	//delete ofxOMXPlayerInstance->engine;
+	//ofxOMXPlayerInstance->engine = NULL;
+	//GlobalEGLContainer::getInstance().appEGLWindow->stopThread();
+	//ofEvents().disable();
+	//exit(0);
+	//raise(SIGABRT);
+	
+	//signal(SIGINT,  NULL);
+	//ofGetAppPtr()->exit();
+	//ofxOMXPlayerInstance->close();
+	//exit(0);
 	//signal(SIGINT,  NULL);
 	
 	//ofExit(0);
 	//GlobalEGLContainer::getInstance().appEGLWindow->yield();
 	//ofxOMXPlayer::exit();
 	//GlobalEGLContainer::getInstance().appEGLWindow->unlock();
-	//ofNotifyExit();
+	//ofxOMXPlayerInstance->close();
+	//_Exit(0);
+	ofNotifyExit();
 	//signal(SIGINT,  SIG_DFL);
 	//
-	//ofNotifyExit();
+	//ofExit();
+	//raise(SIGABRT);
 	
 }
 
+void ofxOMXPlayerExit()
+{
+	cout << "ofxOMXPlayerExit" << endl;
+	
+	
+}
+bool hasThrownSig = false;
+
+void ofxOMXPlayer::onUpdate(ofEventArgs & args)
+{
+	if (ofGetElapsedTimeMillis() > 7000 && !hasThrownSig) 
+	{
+		hasThrownSig = true;
+		onSIGINTHandler(2);
+	}
+}
 
 ofxOMXPlayer::ofxOMXPlayer()
 {
@@ -59,7 +106,9 @@ bool ofxOMXPlayer::setup(ofxOMXPlayerSettings settings)
 	ofxOMXPlayerInstance = this;
 	this->settings = settings;
 	signal(SIGINT,  NULL);
-	signal(SIGINT,  &onExitHandler);
+	signal(SIGINT,  &onSIGINTHandler);
+	atexit(ofxOMXPlayerExit);
+	ofAddListener(ofEvents().update, this, &ofxOMXPlayer::onUpdate);
 	openEngine();
 	
 }
@@ -271,7 +320,8 @@ void ofxOMXPlayer::close()
 	}
 	GlobalEGLContainer::getInstance().destroyEGLImage();
 	isOpen = false;
-	ofxOMXPlayerInstance = NULL;
+	//atexit(NULL);
+	//ofxOMXPlayerInstance = NULL;
 	//signal(SIGINT,  NULL);
 	
 }

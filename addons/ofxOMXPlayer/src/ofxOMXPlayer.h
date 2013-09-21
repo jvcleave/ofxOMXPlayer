@@ -48,16 +48,16 @@ public:
 	void saveImage(string imagePath="");
 	void updatePixels();
 	
-	
+	void onUpdate(ofEventArgs & args);
    
 	void close();
 	bool isOpen;
 	static void exit();
 	
-	
+	ofxOMXPlayerEngine* engine;
 private:
 	
 	void openEngine();
-	ofxOMXPlayerEngine* engine;
+	
 	ofxOMXPlayerSettings settings;
 };

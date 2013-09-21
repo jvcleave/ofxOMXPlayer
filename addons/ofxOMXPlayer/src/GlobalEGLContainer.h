@@ -34,7 +34,7 @@ public:
 	ofPixels pixels;
 	int textureGLFormat;
 	ofImageType imageTypeFromGL;
-	
+	bool isExiting;
 	void updatePixels()
 	{
 		fbo.begin();
@@ -180,10 +180,10 @@ public:
 			}
 			eglImage = NULL;
 		}
-		if (texture.isAllocated()) 
+		/*if (texture.isAllocated()) 
 		{
 			texture.clear();
-		}
+		}*/
 	}
 
 private:
@@ -198,6 +198,7 @@ private:
 		display = NULL;
 		hasGenerated = false;
 		doLooping = false;
+		isExiting = false;
 	};
 	
 	~GlobalEGLContainer()
