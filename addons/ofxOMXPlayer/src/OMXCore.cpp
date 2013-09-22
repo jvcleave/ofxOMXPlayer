@@ -8,14 +8,48 @@
 
 #include "XMemUtils.h"
 
-//#define ENABLE_WAIT_FOR_COMMANDS
-//#define OMX_DEBUG_EVENTS
+#define ENABLE_WAIT_FOR_COMMANDS
+#define OMX_DEBUG_EVENTS
 //#define OMX_DEBUG_EVENTHANDLER
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 #define CLASSNAME "COMXCoreComponent"
 ////////////////////////////////////////////////////////////////////////////////////////////
-
+string printState(OMX_STATETYPE state)
+{
+	string returnString = "UNDEFINED_OMX_STATETYPE"; 
+	switch (state) 
+	{
+		case OMX_StateExecuting:
+			returnString = "OMX_StateExecuting";
+			break;
+		case OMX_StateIdle:
+			returnString = "OMX_StateIdle";
+			break;
+		case OMX_StateLoaded:
+			returnString = "OMX_StateLoaded";
+			break;
+		case OMX_StateInvalid:
+			returnString = "OMX_StateInvalid";
+			break;
+		case OMX_StatePause:
+			returnString = "OMX_StatePause";
+			break;
+		case OMX_StateWaitForResources:
+			returnString = "OMX_StateWaitForResources";
+			break;
+		case OMX_StateKhronosExtensions:
+			returnString = "OMX_StateKhronosExtensions";
+			break;
+		case OMX_StateVendorStartUnused:
+			returnString = "OMX_StateVendorStartUnused";
+			break;
+		case OMX_StateMax:
+			returnString = "OMX_StateMax";
+			break;
+	}
+	return returnString;
+}
 string printError(OMX_ERRORTYPE error)
 {
 	string errorString = "UNDEFINED";
@@ -70,6 +104,48 @@ string printError(OMX_ERRORTYPE error)
 	}
 	return errorString;
 }
+
+string printEventType(OMX_EVENTTYPE eventType)
+{
+   	string type = "UNDEFINED";
+   	switch(eventType)
+   	{
+		case OMX_EventCmdComplete: { type = "OMX_EventCmdComplete"; break; }
+		case OMX_EventMax: { type = "OMX_EventMax"; break; }
+   		case OMX_EventError: { type = "OMX_EventError"; break; }
+   		case OMX_EventMark: { type = "OMX_EventMark"; break; }
+   		case OMX_EventPortSettingsChanged: { type = "OMX_EventPortSettingsChanged"; break; }
+   		case OMX_EventBufferFlag: { type = "OMX_EventBufferFlag"; break; }
+   		case OMX_EventResourcesAcquired: { type = "OMX_EventResourcesAcquired"; break; }
+   		case OMX_EventComponentResumed: { type = "OMX_EventComponentResumed"; break; }
+   		case OMX_EventDynamicResourcesAvailable: { type = "OMX_EventDynamicResourcesAvailable"; break; }
+   		case OMX_EventPortFormatDetected: { type = "OMX_EventPortFormatDetected"; break; }
+   		case OMX_EventKhronosExtensions: { type = "OMX_EventKhronosExtensions"; break; }
+   		case OMX_EventVendorStartUnused: { type = "OMX_EventVendorStartUnused"; break; }
+   		case OMX_EventParamOrConfigChanged: { type = "OMX_EventParamOrConfigChanged"; break; }
+   	}
+   	return type;   
+}
+
+string printCmd(OMX_U32 cmd)
+{
+	
+	OMX_COMMANDTYPE coverted = (OMX_COMMANDTYPE) cmd;
+   	string type = "UNDEFINED";
+   	switch(coverted)
+   	{
+		case OMX_CommandVendorStartUnused: { type = "OMX_CommandVendorStartUnused"; break; }
+		case OMX_CommandMax: { type = "OMX_CommandMax"; break; }	
+   		case OMX_CommandStateSet: { type = "OMX_CommandStateSet"; break; }
+   		case OMX_CommandFlush: { type = "OMX_CommandFlush"; break; }
+   		case OMX_CommandPortDisable: { type = "OMX_CommandPortDisable"; break; }
+   		case OMX_CommandPortEnable: { type = "OMX_CommandPortEnable"; break; }
+   		case OMX_CommandMarkBuffer: { type = "OMX_CommandMarkBuffer"; break; }
+   		case OMX_CommandKhronosExtensions: { type = "OMX_CommandKhronosExtensions"; break; }
+   	}
+   	return type;   
+}
+
 static void add_timespecs(struct timespec &time, long millisecs)
 {
    time.tv_sec  += millisecs / 1000;
@@ -1125,25 +1201,6 @@ OMX_ERRORTYPE COMXCoreComponent::AddEvent(OMX_EVENTTYPE eEvent, OMX_U32 nData1, 
   return OMX_ErrorNone;
 }
 
-string printEventType(OMX_EVENTTYPE eventType)
-{
-   	string type = "UNDEFINED";
-   	switch(eventType)
-   	{
-   		case OMX_EventError: { type = "OMX_EventError"; break; }
-   		case OMX_EventMark: { type = "OMX_EventMark"; break; }
-   		case OMX_EventPortSettingsChanged: { type = "OMX_EventPortSettingsChanged"; break; }
-   		case OMX_EventBufferFlag: { type = "OMX_EventBufferFlag"; break; }
-   		case OMX_EventResourcesAcquired: { type = "OMX_EventResourcesAcquired"; break; }
-   		case OMX_EventComponentResumed: { type = "OMX_EventComponentResumed"; break; }
-   		case OMX_EventDynamicResourcesAvailable: { type = "OMX_EventDynamicResourcesAvailable"; break; }
-   		case OMX_EventPortFormatDetected: { type = "OMX_EventPortFormatDetected"; break; }
-   		case OMX_EventKhronosExtensions: { type = "OMX_EventKhronosExtensions"; break; }
-   		case OMX_EventVendorStartUnused: { type = "OMX_EventVendorStartUnused"; break; }
-   		case OMX_EventParamOrConfigChanged: { type = "OMX_EventParamOrConfigChanged"; break; }
-   	}
-   	return type;   
-}
 
 // timeout in milliseconds
 OMX_ERRORTYPE COMXCoreComponent::WaitForEvent(OMX_EVENTTYPE eventType, long timeout)
@@ -1223,147 +1280,137 @@ OMX_ERRORTYPE COMXCoreComponent::WaitForEvent(OMX_EVENTTYPE eventType, long time
 // timeout in milliseconds
 OMX_ERRORTYPE COMXCoreComponent::WaitForCommand(OMX_U32 command, OMX_U32 nData2, long timeout) //timeout default = 2000
 {
-#ifdef OMX_DEBUG_EVENTS
- ofLog(OF_LOG_VERBOSE, "COMXCoreComponent::WaitForCommand %s wait event.eEvent 0x%08x event.command 0x%08x event.nData2 %d\n", m_componentName.c_str(), (int)OMX_EventCmdComplete, (int)command, (int)nData2);
-#endif
+	#ifdef OMX_DEBUG_EVENTS
+	ofLogVerbose(__func__) << m_componentName << " WAITING " << timeout << "MS FOR COMMAND: " <<  printCmd(command);
+	#endif
 
-  pthread_mutex_lock(&m_omx_event_mutex);
-  struct timespec endtime;
-  clock_gettime(CLOCK_REALTIME, &endtime);
-  add_timespecs(endtime, timeout);
-  while(true) 
-  {
-    for (std::vector<omx_event>::iterator it = m_omx_events.begin(); it != m_omx_events.end(); it++) 
-    {
-      omx_event event = *it;
+	pthread_mutex_lock(&m_omx_event_mutex);
+	struct timespec endtime;
+	clock_gettime(CLOCK_REALTIME, &endtime);
+	add_timespecs(endtime, timeout);
+	while(true) 
+	{
+		for (std::vector<omx_event>::iterator it = m_omx_events.begin(); it != m_omx_events.end(); it++) 
+		{
+			omx_event event = *it;
 
-#ifdef OMX_DEBUG_EVENTS
-     ofLog(OF_LOG_VERBOSE, "COMXCoreComponent::WaitForCommand %s inlist event event.eEvent 0x%08x event.nData1 0x%08x event.nData2 %d\n", m_componentName.c_str(), (int)event.eEvent, (int)event.nData1, (int)event.nData2);
-#endif
-      if(event.eEvent == OMX_EventError && event.nData1 == (OMX_U32)OMX_ErrorSameState && event.nData2 == 1)
-      {
-#ifdef OMX_DEBUG_EVENTS
-       ofLog(OF_LOG_VERBOSE, "COMXCoreComponent::WaitForCommand %s remove event event.eEvent 0x%08x event.nData1 0x%08x event.nData2 %d\n", m_componentName.c_str(), (int)event.eEvent, (int)event.nData1, (int)event.nData2);
-#endif
+			#ifdef OMX_DEBUG_EVENTS
+			ofLog(OF_LOG_VERBOSE, 
+				  "COMXCoreComponent::WaitForCommand %s \n \
+				  inlist event event.eEvent 0x%08x		\n \
+				  event.nData1 0x%08x					\n \
+				  event.nData2 %d\n",
+				  m_componentName.c_str(),
+				  (int)event.eEvent,
+				  (int)event.nData1,
+				  (int)event.nData2);
+			#endif
+			
+			
+			
+			if(event.eEvent == OMX_EventError && event.nData1 == (OMX_U32)OMX_ErrorSameState && event.nData2 == 1)
+			{
+				#ifdef OMX_DEBUG_EVENTS
+				ofLogError(__func__) << m_componentName << "SAME STATE FOR COMMAND: " <<  printCmd(command);
+				//ofLog(OF_LOG_VERBOSE, "COMXCoreComponent::WaitForCommand %s remove event event.eEvent 0x%08x event.nData1 0x%08x event.nData2 %d\n", m_componentName.c_str(), (int)event.eEvent, (int)event.nData1, (int)event.nData2);
+				#endif
 
-        m_omx_events.erase(it);
-        pthread_mutex_unlock(&m_omx_event_mutex);
-        return OMX_ErrorNone;
-      } 
-      else if(event.eEvent == OMX_EventError) 
-      {
-        m_omx_events.erase(it);
-        pthread_mutex_unlock(&m_omx_event_mutex);
-        return (OMX_ERRORTYPE)event.nData1;
-      } 
-      else if(event.eEvent == OMX_EventCmdComplete && event.nData1 == command && event.nData2 == nData2) 
-      {
+				m_omx_events.erase(it);
+				pthread_mutex_unlock(&m_omx_event_mutex);
+				return OMX_ErrorNone;
+			}
+			
+			if(event.eEvent == OMX_EventError) 
+			{
+				ofLogError(__func__) << m_componentName << " " <<  printCmd(command);
+				m_omx_events.erase(it);
+				pthread_mutex_unlock(&m_omx_event_mutex);
+				return (OMX_ERRORTYPE)event.nData1;
+			}
+			
+			if(event.eEvent == OMX_EventCmdComplete && event.nData1 == command && event.nData2 == nData2) 
+			{
 
-#ifdef OMX_DEBUG_EVENTS
-       ofLog(OF_LOG_VERBOSE, "COMXCoreComponent::WaitForCommand %s remove event event.eEvent 0x%08x event.nData1 0x%08x event.nData2 %d\n", m_componentName.c_str(), (int)event.eEvent, (int)event.nData1, (int)event.nData2);
-#endif
+				#ifdef OMX_DEBUG_EVENTS
+				ofLogVerbose(__func__) << m_componentName << " " <<  printCmd(command) << "PASS"; 
+				//ofLog(OF_LOG_VERBOSE, "COMXCoreComponent::WaitForCommand %s remove event event.eEvent 0x%08x event.nData1 0x%08x event.nData2 %d\n", m_componentName.c_str(), (int)event.eEvent, (int)event.nData1, (int)event.nData2);
+				#endif
 
-        m_omx_events.erase(it);
-        pthread_mutex_unlock(&m_omx_event_mutex);
-        return OMX_ErrorNone;
-      }
-    }
+				m_omx_events.erase(it);
+				pthread_mutex_unlock(&m_omx_event_mutex);
+				return OMX_ErrorNone;
+			}
+		}
 
-    int retcode = pthread_cond_timedwait(&m_omx_event_cond, &m_omx_event_mutex, &endtime);
-    if (retcode != 0) {
-     ofLog(OF_LOG_VERBOSE, "COMXCoreComponent::WaitForCommand %s wait timeout event.eEvent 0x%08x event.command 0x%08x event.nData2 %d\n", m_componentName.c_str(), (int)OMX_EventCmdComplete, (int)command, (int)nData2);
-      
-      pthread_mutex_unlock(&m_omx_event_mutex);
-      return OMX_ErrorMax;
-    }
-  }
-  pthread_mutex_unlock(&m_omx_event_mutex);
-  return OMX_ErrorNone;
+		int retcode = pthread_cond_timedwait(&m_omx_event_cond, &m_omx_event_mutex, &endtime);
+		if (retcode != 0) 
+		{
+			ofLog(OF_LOG_VERBOSE, 
+				  "COMXCoreComponent::WaitForCommand %s		\n \
+				  wait timeout event.eEvent 0x%08x			\n \
+				  event.command 0x%08x						\n \
+				  event.nData2 %d\n",
+				  m_componentName.c_str(),
+				  (int)OMX_EventCmdComplete,
+				  (int)command,
+				  (int)nData2);
+			pthread_mutex_unlock(&m_omx_event_mutex);
+			return OMX_ErrorMax;
+		}
+	}
+	pthread_mutex_unlock(&m_omx_event_mutex);
+	return OMX_ErrorNone;
 }
 
 OMX_ERRORTYPE COMXCoreComponent::SetStateForComponent(OMX_STATETYPE state)
 {
-  Lock();
-  
-  OMX_ERRORTYPE omx_err = OMX_ErrorNone;
-  OMX_STATETYPE state_actual = OMX_StateMax;
+	OMX_ERRORTYPE omx_err = OMX_ErrorNone;
+	Lock();
+		
+		OMX_STATETYPE state_actual = OMX_StateMax;
 
-  if(!m_handle)
-  {
-    UnLock();
-    return OMX_ErrorUndefined;
-  }
-
-  OMX_GetState(m_handle, &state_actual);
-  if(state == state_actual)
-  {
-    UnLock();
-    return OMX_ErrorNone;
-  }
-
-  omx_err = OMX_SendCommand(m_handle, OMX_CommandStateSet, state, 0);
-  if (omx_err != OMX_ErrorNone)
-  {
-    if(omx_err == OMX_ErrorSameState)
-    {
-      omx_err = OMX_ErrorNone;
-    }
-    else
-    {
-		ofLog(OF_LOG_VERBOSE, "COMXCoreComponent::SetStateForComponent - %s failed with omx_err(0x%x)\n",  m_componentName.c_str(), omx_err);
-		switch (state) 
+		if(!m_handle)
 		{
-			case OMX_StateExecuting:
-				ofLogError(__func__) << "ATTEMPTED STATE: OMX_StateExecuting";
-				break;
-			case OMX_StateIdle:
-				ofLogError(__func__) << "ATTEMPTED STATE: OMX_StateIdle";
-				break;
-			case OMX_StateLoaded:
-				ofLogError(__func__) << "ATTEMPTED STATE: OMX_StateLoaded";
-				break;
-			case OMX_StateInvalid:
-				ofLogError(__func__) << "ATTEMPTED STATE: OMX_StateInvalid";
-				break;
-			case OMX_StatePause:
-				ofLogError(__func__) << "ATTEMPTED STATE: OMX_StatePause";
-				break;
-			case OMX_StateWaitForResources:
-				ofLogError(__func__) << "ATTEMPTED STATE: OMX_StateWaitForResources";
-				break;
-			case OMX_StateKhronosExtensions:
-				ofLogError(__func__) << "ATTEMPTED STATE: OMX_StateKhronosExtensions";
-				break;
-			case OMX_StateVendorStartUnused:
-				ofLogError(__func__) << "ATTEMPTED STATE: OMX_StateVendorStartUnused";
-				break;
-			case OMX_StateMax:
-				ofLogError(__func__) << "ATTEMPTED STATE: OMX_StateMax";
-				break;
-			default:
-				ofLogError(__func__) << "ATTEMPTED STATE: UNKNOWN";
-				break;
+			ofLogError(__func__) << "NO HANDLE";
+			UnLock();
+			return OMX_ErrorUndefined;
 		}
-     
-    }
-  }
-  else 
-  {
-	#ifdef ENABLE_WAIT_FOR_COMMANDS
 
-	  omx_err = WaitForCommand(OMX_CommandStateSet, state);
-	  if(omx_err == OMX_ErrorSameState)
-	  {
-		  ofLog(OF_LOG_VERBOSE, "COMXCoreComponent::SetStateForComponent - %s ignore OMX_ErrorSameState\n", m_componentName.c_str());
-		  UnLock();
-		  return OMX_ErrorNone;
-	  }
-	#endif
-  }
+		OMX_GetState(m_handle, &state_actual);
+		
+		if(state == state_actual)
+		{
+			UnLock();
+			return OMX_ErrorNone;
+		}
 
-  UnLock();
+		omx_err = OMX_SendCommand(m_handle, OMX_CommandStateSet, state, 0);
+		if (omx_err != OMX_ErrorNone)
+		{
+			if(omx_err == OMX_ErrorSameState)
+			{
+				omx_err = OMX_ErrorNone;
+			}
+			else
+			{
+				ofLogError(__func__) << m_componentName << " SetStateForComponent : " << printState(state) << " FAIL: " << printError(omx_err);
+			}
+		}
+		else 
+		{
+			#ifdef ENABLE_WAIT_FOR_COMMANDS
+			omx_err = WaitForCommand(OMX_CommandStateSet, state);
+			if(omx_err == OMX_ErrorSameState)
+			{
+				ofLog(OF_LOG_VERBOSE, "COMXCoreComponent::SetStateForComponent - %s ignore OMX_ErrorSameState\n", m_componentName.c_str());
+				UnLock();
+				return OMX_ErrorNone;
+			}
+			#endif
+		}
+	UnLock();
 
-  return omx_err;
+	return omx_err;
 }
 
 OMX_STATETYPE COMXCoreComponent::GetState()
