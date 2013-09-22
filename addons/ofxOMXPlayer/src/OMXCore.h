@@ -1,11 +1,11 @@
 #pragma once
 #include "ofMain.h"
-
-#include <string>
-#include <queue>
-
-
-#include "DllOMX.h"
+#include <IL/OMX_Core.h>
+#include <IL/OMX_Component.h>
+#include <IL/OMX_Index.h>
+#include <IL/OMX_Image.h>
+#include <IL/OMX_Video.h>
+#include <IL/OMX_Broadcom.h>
 
 #include <semaphore.h>
 
@@ -56,7 +56,6 @@ private:
   COMXCoreComponent *m_dst_component;
   unsigned int      m_src_port;
   unsigned int      m_dst_port;
-  DllOMX            *m_DllOMX;
   void              Lock();
   void              UnLock();
 };
@@ -170,7 +169,6 @@ private:
   sem_t         m_omx_fill_buffer_done;
 
   bool          m_exit;
-  DllOMX        *m_DllOMX;
   pthread_cond_t    m_input_buffer_cond;
   pthread_cond_t    m_output_buffer_cond;
   pthread_cond_t    m_omx_event_cond;
@@ -185,7 +183,6 @@ class COMXCore
 {
 public:
   COMXCore();
-  ~COMXCore();
 
   // initialize OMXCore and get decoder component
   bool Initialize();
@@ -194,6 +191,5 @@ public:
 protected:
   bool              m_is_open;
   bool              m_Initialized;
-  DllOMX            *m_DllOMX;
 };
 

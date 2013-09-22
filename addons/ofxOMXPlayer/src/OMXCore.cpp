@@ -168,7 +168,6 @@ COMXCoreTunel::COMXCoreTunel()
   m_dst_port            = 0;
   m_portSettingsChanged = false;
 	isEstablished = false;
-  m_DllOMX              = new DllOMX();
 
   pthread_mutex_init(&m_lock, NULL);
 }
@@ -181,11 +180,7 @@ COMXCoreTunel::~COMXCoreTunel()
 		ofLogVerbose("~COMXCoreTunel") << " ABOUT TO CALL Deestablish(true)";
 		Deestablish(true);
 	}
-	if (m_DllOMX) 
-	{
-		m_DllOMX->Unload();
-		delete m_DllOMX;
-	}
+	
 	
 	pthread_mutex_destroy(&m_lock);
 	ofLogVerbose() << "~COMXCoreTunel END";
@@ -309,7 +304,7 @@ OMX_ERRORTYPE COMXCoreTunel::Deestablish(bool doWait)
 		ofLogVerbose(__func__) << "TUNNEL UNSET START";
 		if(m_src_component->GetComponent())
 		{
-			omx_err = m_DllOMX->OMX_SetupTunnel(m_src_component->GetComponent(), m_src_port, NULL, 0);
+			omx_err = OMX_SetupTunnel(m_src_component->GetComponent(), m_src_port, NULL, 0);
 			if(omx_err == OMX_ErrorNone)
 			{
 				ofLogVerbose(__func__) << srcName << " TUNNEL UNSET PASS";
@@ -321,7 +316,7 @@ OMX_ERRORTYPE COMXCoreTunel::Deestablish(bool doWait)
 	
 		if(m_dst_component->GetComponent())
 		{
-			omx_err = m_DllOMX->OMX_SetupTunnel(m_dst_component->GetComponent(), m_dst_port, NULL, 0);
+			omx_err = OMX_SetupTunnel(m_dst_component->GetComponent(), m_dst_port, NULL, 0);
 			if(omx_err == OMX_ErrorNone)
 			{
 				ofLogVerbose(__func__) << dstName << " TUNNEL UNSET PASS";
@@ -395,7 +390,7 @@ OMX_ERRORTYPE COMXCoreTunel::Establish(bool portSettingsChanged)
 
 		if(m_src_component->GetComponent() && m_dst_component->GetComponent())
 		{
-			omx_err = m_DllOMX->OMX_SetupTunnel(m_src_component->GetComponent(), m_src_port, m_dst_component->GetComponent(), m_dst_port);
+			omx_err = OMX_SetupTunnel(m_src_component->GetComponent(), m_src_port, m_dst_component->GetComponent(), m_dst_port);
 			if(omx_err != OMX_ErrorNone) 
 			{
 				ofLogError(__func__) << " OMX_SetupTunnel " << srcName << " TO " << dstName << " FAIL: " << printError(omx_err);
@@ -521,7 +516,6 @@ COMXCoreComponent::COMXCoreComponent()
 	m_omx_input_use_buffers  = false;
 	m_omx_output_use_buffers = false;
 
-	m_DllOMX = new DllOMX();
 
 	pthread_mutex_init(&m_lock, NULL);
 	sem_init(&m_omx_fill_buffer_done, 0, 0);
@@ -542,11 +536,6 @@ COMXCoreComponent::~COMXCoreComponent()
 	pthread_mutex_destroy(&m_lock);
 	sem_destroy(&m_omx_fill_buffer_done);
 
-	if (m_DllOMX) 
-	{
-		m_DllOMX->Unload();
-		delete m_DllOMX;
-	}
   
 }
 void COMXCoreComponent::SetEOS(bool isEndofStream)
@@ -1628,7 +1617,7 @@ bool COMXCoreComponent::Initialize( const std::string &component_name, OMX_INDEX
 	m_callbacks.FillBufferDone  = &COMXCoreComponent::DecoderFillBufferDoneCallback;
 
 	// Get video component handle setting up callbacks, component is in loaded state on return.
-	omx_err = m_DllOMX->OMX_GetHandle(&m_handle, (char*)component_name.c_str(), this, &m_callbacks);
+	omx_err = OMX_GetHandle(&m_handle, (char*)component_name.c_str(), this, &m_callbacks);
 	
 	if (omx_err != OMX_ErrorNone)
 	{
@@ -1705,7 +1694,7 @@ bool COMXCoreComponent::Deinitialize(bool doFlush)//default: true
     if(GetState() != OMX_StateLoaded)
       SetStateForComponent(OMX_StateLoaded);
 
-    omx_err = m_DllOMX->OMX_FreeHandle(m_handle);
+    omx_err = OMX_FreeHandle(m_handle);
     if (omx_err != OMX_ErrorNone)
     {
 		ofLogVerbose(__func__) << "failed to free handle for:" << m_componentName; 
@@ -1972,24 +1961,14 @@ COMXCore::COMXCore()
 {
   m_is_open = false;
 
-  m_DllOMX  = new DllOMX();
 }
 
-COMXCore::~COMXCore()
-{
-	if(m_DllOMX)
-	{
-		m_DllOMX->Unload();
-		delete m_DllOMX;
-	}
-}
+
 
 bool COMXCore::Initialize()
 {
-  if(!m_DllOMX->Load())
-    return false;
 
-  OMX_ERRORTYPE omx_err = m_DllOMX->OMX_Init();
+  OMX_ERRORTYPE omx_err = OMX_Init();
   if (omx_err != OMX_ErrorNone)
   {
    ofLog(OF_LOG_VERBOSE, "\nCOMXCore::Initialize - OMXCore failed to init, error: 0x%08x", omx_err);
@@ -2004,7 +1983,7 @@ void COMXCore::Deinitialize()
 {
   if(m_is_open)
   {
-    OMX_ERRORTYPE omx_err = m_DllOMX->OMX_Deinit();
+    OMX_ERRORTYPE omx_err = OMX_Deinit();
     if (omx_err != OMX_ErrorNone)
     {
      ofLog(OF_LOG_VERBOSE, "\nCOMXCore::Deinitialize - OMXCore failed to deinit, error: 0x%08x", omx_err);
