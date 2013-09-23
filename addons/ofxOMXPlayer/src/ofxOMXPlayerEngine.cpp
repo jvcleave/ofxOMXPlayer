@@ -3,7 +3,6 @@
 ofxOMXPlayerEngine::ofxOMXPlayerEngine()
 {
 	
-	//pthread_mutex_init(&m_lock, NULL);
 	
 	videoWidth			= 0;
 	videoHeight			= 0;
@@ -40,14 +39,18 @@ ofxOMXPlayerEngine::ofxOMXPlayerEngine()
 
 ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
 {
-	
 	ofLogVerbose() << "~ofxOMXPlayerEngine START";
-	m_bStop = true;
+	//Lock();
+	
+	
 	if(ThreadHandle())
 	{
 		StopThread();
 	}
-	pthread_mutex_destroy(&m_lock);
+	m_bStop = true;
+	
+	
+	
 	bPlaying = false;
 	
 	
@@ -56,6 +59,7 @@ ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
 	{
 		listener = NULL;
 	}
+	
 	if (videoPlayer != NULL) 
 	{
 		delete videoPlayer;
@@ -71,13 +75,25 @@ ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
 		audioPlayer = NULL;
 	}
 	
+	if(packet)
+	{
+		omxReader.FreePacket(packet);
+		packet = NULL;
+	}
+	
+	omxReader.Close();
+	
+	clock->OMXDeinitialize();
+	
 	if (clock) 
 	{
+		ofLogVerbose(__func__) << "CLOCK STILL EXISTS";
 		delete clock;
 		clock = NULL;
 	}
 		
 	omxCore.Deinitialize();
+	//UnLock();
 	ofLogVerbose() << "~ofxOMXPlayerEngine END";
 	
 }
@@ -121,7 +137,7 @@ bool ofxOMXPlayerEngine::setup(ofxOMXPlayerSettings settings)
 		{
 			ofLogVerbose()	<< "Video streams detection PASS";
 			
-			if(clock->OMXInitialize(hasVideo, hasAudio))
+			if(clock->OMXInitialize())
 			{
 				ofLogVerbose() << "clock Init PASS";
 				return openPlayer();
@@ -227,7 +243,7 @@ bool ofxOMXPlayerEngine::openPlayer()
 			}
 		}
 		clock->OMXStateExecute();
-		clock->OMXStart(0.0);
+		//clock->OMXStart(0.0);
 				
 		ofLogVerbose() << "Opened video PASS";
 		Create();

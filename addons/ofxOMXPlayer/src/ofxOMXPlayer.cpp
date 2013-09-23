@@ -29,9 +29,12 @@ void onSIGINTHandler(int sig)
 	//GlobalEGLContainer::getInstance().appEGLWindow->waitForThread(true);
 	//GlobalEGLContainer::getInstance().appEGLWindow->sleep(2000);
 	//
-	OMXClock::OMXSleep(2000);
+	//OMXClock::OMXSleep(2000);
+	//ofxOMXPlayerInstance->engine->Lock();
+	//ofxOMXPlayerInstance->engine->StopThread();
 	ofxOMXPlayerInstance->close();
-	//exit(0);
+	ofxOMXPlayerInstance = NULL;
+	exit(0);
 	
 	//raise(SIGABRT);
 	//ofExit(0);
@@ -60,7 +63,7 @@ void onSIGINTHandler(int sig)
 	//GlobalEGLContainer::getInstance().appEGLWindow->unlock();
 	//ofxOMXPlayerInstance->close();
 	//_Exit(0);
-	ofNotifyExit();
+	//ofNotifyExit();
 	//signal(SIGINT,  SIG_DFL);
 	//
 	//ofExit();
@@ -102,13 +105,14 @@ void ofxOMXPlayer::loadMovie(string videoPath)
 
 bool ofxOMXPlayer::setup(ofxOMXPlayerSettings settings)
 {
+	
 	ofxOMXPlayerInstance = NULL;
 	ofxOMXPlayerInstance = this;
 	this->settings = settings;
 	signal(SIGINT,  NULL);
 	signal(SIGINT,  &onSIGINTHandler);
-	atexit(ofxOMXPlayerExit);
-	ofAddListener(ofEvents().update, this, &ofxOMXPlayer::onUpdate);
+	//atexit(ofxOMXPlayerExit);
+	//ofAddListener(ofEvents().update, this, &ofxOMXPlayer::onUpdate);
 	openEngine();
 	
 }
@@ -313,6 +317,7 @@ void ofxOMXPlayer::close()
 		return;
 	}
 	//signal(SIGINT,  &killSwitch);
+	
 	if(engine)
 	{
 		delete engine;

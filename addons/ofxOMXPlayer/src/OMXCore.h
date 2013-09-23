@@ -24,6 +24,7 @@
 
 #define OMX_MAX_PORTS 10
 
+
 typedef struct omx_event {
   OMX_EVENTTYPE eEvent;
   OMX_U32 nData1;
@@ -44,7 +45,7 @@ public:
 
   void Initialize(COMXCoreComponent *src_component, unsigned int src_port, COMXCoreComponent *dst_component, unsigned int dst_port);
   OMX_ERRORTYPE Flush();
-  OMX_ERRORTYPE Deestablish(bool doWait = false);
+  OMX_ERRORTYPE Deestablish(bool doWait = true);
   OMX_ERRORTYPE Establish(bool portSettingsChanged);
 	string srcName;
 	string dstName;
@@ -133,7 +134,7 @@ public:
 	void SetEOS(bool isEndOfStream);
   void SetCustomDecoderFillBufferDoneHandler(OMX_ERRORTYPE (*p)(OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*)){ CustomDecoderFillBufferDoneHandler = p;};
   void SetCustomDecoderEmptyBufferDoneHandler(OMX_ERRORTYPE (*p)(OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*)){ CustomDecoderEmptyBufferDoneHandler = p;};
-
+		
 private:
   OMX_HANDLETYPE m_handle;
   unsigned int   m_input_port;
@@ -182,12 +183,12 @@ private:
 class COMXCore
 {
 public:
-  COMXCore();
+	COMXCore();
 
-  // initialize OMXCore and get decoder component
-  bool Initialize();
-  void Deinitialize();
-
+	// initialize OMXCore and get decoder component
+	bool Initialize();
+	void Deinitialize();
+		
 protected:
   bool              m_is_open;
   bool              m_Initialized;

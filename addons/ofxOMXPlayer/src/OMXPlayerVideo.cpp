@@ -118,13 +118,14 @@ bool OMXPlayerVideo::OpenDecoder()
   m_frametime = (double)DVD_TIME_BASE / m_fps;
 
   nonTextureDecoder = new COMXVideo();
+	m_decoder = (OMXDecoderBase*)nonTextureDecoder;
   if(!nonTextureDecoder->Open(m_hints, m_av_clock, m_display_aspect, m_Deinterlace, m_hdmi_clock_sync))
   {
-	m_decoder = (OMXDecoderBase*)nonTextureDecoder;
+	
     CloseDecoder();
     return false;
   }
-
+	
   stringstream info;
   info << "Video codec: "	<<	m_decoder->GetDecoderName()		<< "\n";
   info << "Video width: "	<<	m_hints.width					<< "\n";

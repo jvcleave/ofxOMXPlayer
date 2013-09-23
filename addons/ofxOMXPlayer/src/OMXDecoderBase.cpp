@@ -28,6 +28,46 @@ OMXDecoderBase::OMXDecoderBase()
 	ofLogVerbose() << "OMXDecoderBase::CONSTRUCT";
 	
 }
+
+OMXDecoderBase::~OMXDecoderBase()
+{
+	ofLogVerbose() << "~OMXDecoderBase START ---------";
+	
+	m_omx_tunnel_decoder.Flush();
+	/*if(m_deinterlace)
+		m_omx_tunnel_image_fx.Flush();*/
+	m_omx_tunnel_clock.Flush();
+	m_omx_tunnel_sched.Flush();
+	
+	m_omx_tunnel_clock.Deestablish();
+	m_omx_tunnel_decoder.Deestablish();
+	/*if(m_deinterlace)
+		m_omx_tunnel_image_fx.Deestablish();*/
+	m_omx_tunnel_sched.Deestablish();
+	
+	m_omx_decoder.FlushInput();
+	
+	m_omx_sched.Deinitialize(true);
+	/*if(m_deinterlace)
+		m_omx_image_fx.Deinitialize();*/
+	m_omx_decoder.Deinitialize(true);
+	m_omx_render.Deinitialize(true);
+	
+	m_is_open       = false;
+	
+	if(m_extradata)
+		free(m_extradata);
+	m_extradata = NULL;
+	m_extrasize = 0;
+	
+	m_video_codec_name  = "";
+	//m_deinterlace       = false;
+	m_first_frame       = true;
+	m_setStartTime      = true;
+	ofLogVerbose() << "~OMXDecoderBase END ---------";
+}
+
+
 bool OMXDecoderBase::NaluFormatStartCodes(enum CodecID codec, uint8_t *in_extradata, int in_extrasize)
 {
 	switch(codec)
@@ -307,5 +347,5 @@ void OMXDecoderBase::ProcessCodec(COMXStreamInfo &hints)
 			ofLog(OF_LOG_VERBOSE, "Video codec id unknown: %x\n", hints.codec);
 			break;
 	}
-	
+	ofLogVerbose(__func__) << " m_video_codec_name: " << m_video_codec_name;
 }

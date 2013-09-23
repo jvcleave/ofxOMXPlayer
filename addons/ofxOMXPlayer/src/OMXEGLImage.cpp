@@ -436,25 +436,16 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 	return true;
 }
 
-OMXEGLImage::~OMXEGLImage()
+/*OMXEGLImage::~OMXEGLImage()
 {
-	ofLogVerbose(__func__) << "m_is_open: " << m_is_open;
-	if (m_is_open) 
-	{
-		Close();
-	}
-}
-
-void OMXEGLImage::Close()
-{
-	ofLogVerbose() << "OMXEGLImage::Close start";
+	ofLogVerbose(__func__) << "START";
 	m_omx_tunnel_decoder.Flush();
 	m_omx_tunnel_clock.Flush();
 	m_omx_tunnel_sched.Flush();
 	
-	m_omx_tunnel_clock.Deestablish(true);
-	m_omx_tunnel_decoder.Deestablish(true);
-	m_omx_tunnel_sched.Deestablish(true);
+	m_omx_tunnel_clock.Deestablish();
+	m_omx_tunnel_decoder.Deestablish();
+	m_omx_tunnel_sched.Deestablish();
 	
 	m_omx_decoder.FlushInput();
 	m_omx_render.FlushOutput();
@@ -474,9 +465,9 @@ void OMXEGLImage::Close()
 	
 	m_video_codec_name  = "";
 	m_first_frame       = true;
-	ofLogVerbose() << "OMXEGLImage::Close end";
+	ofLogVerbose(__func__) << "END";
 
-}
+}*/
 
 int OMXEGLImage::Decode(uint8_t *pData, int iSize, double dts, double pts)
 {

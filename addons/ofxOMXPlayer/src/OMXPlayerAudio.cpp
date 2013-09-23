@@ -233,9 +233,9 @@ bool OMXPlayerAudio::Decode(OMXPacket *pkt)
     if(!m_player_error)
       return false;
 
-    m_av_clock->OMXStateExecute();
-    m_av_clock->OMXReset();
-    m_av_clock->OMXResume();
+    //m_av_clock->OMXStateExecute();
+    //m_av_clock->OMXReset();
+    //m_av_clock->OMXResume();
 
   }
 

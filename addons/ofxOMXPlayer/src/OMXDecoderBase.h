@@ -34,21 +34,19 @@ class OMXDecoderBase
 {
 public:
 	OMXDecoderBase();
-	
-	virtual ~OMXDecoderBase(){};
-
+	~OMXDecoderBase();
 	OMX_VIDEO_CODINGTYPE m_codingType;
 
-	COMXCoreComponent*		m_omx_clock;
-	OMXClock*				m_av_clock;
+	COMXCoreTunel			m_omx_tunnel_clock;
+	COMXCoreTunel			m_omx_tunnel_sched;
+	COMXCoreTunel			m_omx_tunnel_decoder;
+	
 	COMXCoreComponent		m_omx_decoder;
 	COMXCoreComponent		m_omx_render;
 	COMXCoreComponent		m_omx_sched;
-
-	COMXCoreTunel			m_omx_tunnel_decoder;
-	COMXCoreTunel			m_omx_tunnel_clock;
-	COMXCoreTunel			m_omx_tunnel_sched;
-
+	
+	COMXCoreComponent*		m_omx_clock;
+	OMXClock*				m_av_clock;
 
 	bool					m_is_open;
 
@@ -76,9 +74,7 @@ public:
 	
 	
 	void					WaitCompletion();
-	
-	virtual void Close() = 0;
-	
+		
 	bool					Resume();
 	bool					Pause();
 	

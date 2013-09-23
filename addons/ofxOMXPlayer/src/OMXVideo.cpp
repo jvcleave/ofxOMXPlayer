@@ -362,7 +362,7 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, float display_aspec
 	return true;
 }
 
-void COMXVideo::Close()
+/*COMXVideo::~COMXVideo()
 {
   m_omx_tunnel_decoder.Flush();
   if(m_deinterlace)
@@ -395,7 +395,7 @@ void COMXVideo::Close()
   m_deinterlace       = false;
   m_first_frame       = true;
   m_setStartTime      = true;
-}
+}*/
 
 
 int COMXVideo::Decode(uint8_t *pData, int iSize, double dts, double pts)
