@@ -31,8 +31,10 @@ OMXDecoderBase::OMXDecoderBase()
 
 OMXDecoderBase::~OMXDecoderBase()
 {
+	return;
 	ofLogVerbose() << "~OMXDecoderBase START ---------";
-	
+	//m_av_clock->OMXStop();
+	//m_av_clock->OMXStateIdle();
 	m_omx_tunnel_decoder.Flush();
 	/*if(m_deinterlace)
 		m_omx_tunnel_image_fx.Flush();*/

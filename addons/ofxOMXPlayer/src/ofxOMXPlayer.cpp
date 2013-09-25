@@ -34,7 +34,8 @@ void onSIGINTHandler(int sig)
 	//ofxOMXPlayerInstance->engine->StopThread();
 	ofxOMXPlayerInstance->close();
 	ofxOMXPlayerInstance = NULL;
-	exit(0);
+	raise(SIGINT);
+	//exit(0);
 	
 	//raise(SIGABRT);
 	//ofExit(0);

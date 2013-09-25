@@ -31,7 +31,7 @@ ofxOMXPlayerEngine::ofxOMXPlayerEngine()
 	
 	listener			= NULL;
 	
-	clock				= NULL;
+	//clock				= NULL;
 	loopCounter			= 0;
 	omxCore.Initialize();
 	OMXDecoderBase::fillBufferCounter=0;
@@ -49,6 +49,7 @@ ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
 	}
 	m_bStop = true;
 	
+
 	
 	
 	bPlaying = false;
@@ -83,17 +84,16 @@ ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
 	
 	omxReader.Close();
 	
-	clock->OMXDeinitialize();
+	clock.OMXDeinitialize();
 	
-	if (clock) 
+	/*if (clock) 
 	{
 		ofLogVerbose(__func__) << "CLOCK STILL EXISTS";
 		delete clock;
 		clock = NULL;
-	}
+	}*/
 		
 	omxCore.Deinitialize();
-	//UnLock();
 	ofLogVerbose() << "~ofxOMXPlayerEngine END";
 	
 }
@@ -110,10 +110,7 @@ bool ofxOMXPlayerEngine::setup(ofxOMXPlayerSettings settings)
 	ofLogVerbose() << "GlobalEGLContainer::getInstance().doLooping is " << GlobalEGLContainer::getInstance().doLooping;
 	isTextureEnabled = settings.enableTexture;
 	
-	if (!clock) 
-	{
-		clock = new OMXClock(); 
-	}
+	
 	
 	bool doDumpFormat = false;
 	
@@ -137,7 +134,7 @@ bool ofxOMXPlayerEngine::setup(ofxOMXPlayerSettings settings)
 		{
 			ofLogVerbose()	<< "Video streams detection PASS";
 			
-			if(clock->OMXInitialize(hasVideo, hasAudio))
+			if(clock.OMXInitialize(hasVideo, hasAudio))
 			{
 				ofLogVerbose() << "clock Init PASS";
 				return openPlayer();
@@ -177,7 +174,7 @@ bool ofxOMXPlayerEngine::openPlayer()
 			eglPlayer = new OMXPlayerEGLImage();
 		}
 		GlobalEGLContainer::getInstance().generateEGLImage(videoWidth, videoHeight);
-		didVideoOpen = eglPlayer->Open(videoStreamInfo, clock);
+		didVideoOpen = eglPlayer->Open(videoStreamInfo, &clock);
 		videoPlayer = (OMXPlayerVideoBase*)eglPlayer;
 	}else 
 	{
@@ -188,7 +185,7 @@ bool ofxOMXPlayerEngine::openPlayer()
 		bool hdmi_clock_sync = true;
 		float display_aspect = 1.0;
 		
-		didVideoOpen = nonEglPlayer->Open(videoStreamInfo, clock, deinterlace, hdmi_clock_sync, display_aspect);
+		didVideoOpen = nonEglPlayer->Open(videoStreamInfo, &clock, deinterlace, hdmi_clock_sync, display_aspect);
 		videoPlayer = (OMXPlayerVideoBase*)nonEglPlayer;
 		
 	}
@@ -207,7 +204,7 @@ bool ofxOMXPlayerEngine::openPlayer()
 		bool m_boost_on_downmix		= false;
 		bool m_thread_player		= true;
 		audioPlayer = new OMXPlayerAudio();
-		didAudioOpen = audioPlayer->Open(audioStreamInfo, clock, &omxReader, deviceString, 
+		didAudioOpen = audioPlayer->Open(audioStreamInfo, &clock, &omxReader, deviceString, 
 										m_passthrough, m_use_hw_audio,
 										m_boost_on_downmix, m_thread_player);
 		if (didAudioOpen) 
@@ -242,8 +239,8 @@ bool ofxOMXPlayerEngine::openPlayer()
 				//omxReader.enableFileLoopinghack();
 			}
 		}
-		clock->OMXStateExecute();
-		clock->OMXStart(0.0);
+		clock.OMXStateExecute();
+		clock.OMXStart(0.0);
 				
 		ofLogVerbose() << "Opened video PASS";
 		Create();
@@ -264,7 +261,7 @@ void ofxOMXPlayerEngine::Process()
 	{
 		//struct timespec starttime, endtime;
 		/*printf("V : %8.02f %8d %8d A : %8.02f %8.02f Cv : %8d Ca : %8d                            \r",
-		 clock->OMXMediaTime(), videoPlayer->GetDecoderBufferSize(),
+		 clock.OMXMediaTime(), videoPlayer->GetDecoderBufferSize(),
 		 videoPlayer->GetDecoderFreeSpace(), audioPlayer->GetCurrentPTS() / DVD_TIME_BASE, 
 		 audioPlayer->GetDelay(), videoPlayer->GetCached(), audioPlayer->GetCached());*/
 		
@@ -405,10 +402,10 @@ void ofxOMXPlayerEngine::setPaused(bool doPause)
 	ofLogVerbose(__func__) << " doPause: " << doPause;
 	if(doPause)
 	{
-		clock->OMXPause();
+		clock.OMXPause();
 	}else 
 	{
-		clock->OMXResume();
+		clock.OMXResume();
 	}
 			
 }
@@ -447,7 +444,7 @@ double ofxOMXPlayerEngine::getMediaTime()
 	double mediaTime = 0.0;
 	if(isPlaying()) 
 	{
-		mediaTime =  clock->OMXMediaTime();
+		mediaTime =  clock.OMXMediaTime();
 	}
 	
 	return mediaTime;
@@ -455,7 +452,7 @@ double ofxOMXPlayerEngine::getMediaTime()
 
 bool ofxOMXPlayerEngine::isPaused()
 {
-	return clock->OMXIsPaused();
+	return clock.OMXIsPaused();
 }
 
 
@@ -465,7 +462,7 @@ void ofxOMXPlayerEngine::stepFrameForward()
 	{
 		setPaused(true);
 	}
-	clock->OMXStep(1);
+	clock.OMXStep(1);
 }
 
 

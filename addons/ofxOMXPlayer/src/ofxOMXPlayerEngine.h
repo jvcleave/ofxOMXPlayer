@@ -72,7 +72,7 @@ public:
 private:
 	
 	COMXCore				omxCore;
-	OMXClock*				clock;
+	OMXClock				clock;
 	
 	OMXPacket*				packet;
 	OMXPlayerVideo*			nonEglPlayer;

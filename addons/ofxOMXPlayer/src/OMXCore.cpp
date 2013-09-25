@@ -1472,7 +1472,7 @@ OMX_ERRORTYPE COMXCoreComponent::SetStateForComponent(OMX_STATETYPE state)
 
 OMX_STATETYPE COMXCoreComponent::GetState()
 {
-	Lock();
+	//Lock();
 	ofLogVerbose(__func__) << m_componentName << " START";
 		if(m_handle)
 		{
@@ -1482,11 +1482,11 @@ OMX_STATETYPE COMXCoreComponent::GetState()
 			{
 				ofLogError(__func__) << " OMX_GetState FAIL " << printOMXError(omx_err);
 			}
-			UnLock();
+			//UnLock();
 			return state;
 		}
 	ofLogVerbose(__func__) << m_componentName << " END";
-	UnLock();
+	//UnLock();
 	return (OMX_STATETYPE)0;
 }
 

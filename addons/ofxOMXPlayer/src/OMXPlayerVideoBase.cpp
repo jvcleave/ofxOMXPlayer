@@ -136,7 +136,7 @@ void OMXPlayerVideoBase::Flush()
 	if(m_decoder)
 	{
 		ofLogVerbose() << "OMXPlayerVideoBase::m_decoder->Reset";
-		m_decoder->Reset();
+		//m_decoder->Reset();
 	}
 	
 	UnLockDecoder();
@@ -289,7 +289,7 @@ bool OMXPlayerVideoBase::Close()
 		StopThread();
 	}
 	ofLogVerbose() << "OMXPlayerVideoBase::Close() pre CloseDecoder";
-	CloseDecoder();
+	//CloseDecoder();
 	
 	m_dllAvUtil.Unload();
 	m_dllAvCodec.Unload();
