@@ -137,7 +137,7 @@ bool ofxOMXPlayerEngine::setup(ofxOMXPlayerSettings settings)
 		{
 			ofLogVerbose()	<< "Video streams detection PASS";
 			
-			if(clock->OMXInitialize())
+			if(clock->OMXInitialize(hasVideo, hasAudio))
 			{
 				ofLogVerbose() << "clock Init PASS";
 				return openPlayer();
@@ -243,7 +243,7 @@ bool ofxOMXPlayerEngine::openPlayer()
 			}
 		}
 		clock->OMXStateExecute();
-		//clock->OMXStart(0.0);
+		clock->OMXStart(0.0);
 				
 		ofLogVerbose() << "Opened video PASS";
 		Create();

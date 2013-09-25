@@ -410,7 +410,7 @@ bool COMXAudio::Initialize(const CStdString& device, int iChannels, enum PCMChan
 
     m_av_clock = new OMXClock();
     
-    if(!m_av_clock->OMXInitialize())
+    if(!m_av_clock->OMXInitialize(false, true))
     {
       delete m_av_clock;
       m_av_clock = NULL;

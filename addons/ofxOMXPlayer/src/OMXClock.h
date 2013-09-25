@@ -1,24 +1,3 @@
-/*
- *      Copyright (C) 2005-2008 Team XBMC
- *      http://www.xbmc.org
- *
- *  This Program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2, or (at your option)
- *  any later version.
- *
- *  This Program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
- *
- */
-
 #pragma once
 
 #include "DllAvFormat.h"
@@ -36,7 +15,6 @@
 #define DVD_PLAYSPEED_PAUSE       0       // frame stepping
 #define DVD_PLAYSPEED_NORMAL      1000
 
-#ifdef OMX_SKIP64BIT
 static inline OMX_TICKS ToOMXTime(int64_t pts)
 {
 	OMX_TICKS ticks;
@@ -49,20 +27,15 @@ static inline int64_t FromOMXTime(OMX_TICKS ticks)
 	int64_t pts = ticks.nLowPart | ((uint64_t)(ticks.nHighPart) << 32);
 	return pts;
 }
-#else
-#define FromOMXTime(x) (x)
-#define ToOMXTime(x) (x)
-#endif
 
 class OMXClock
 {
 protected:
 	bool              m_pause;
-	pthread_mutex_t   m_lock;
+	bool              m_has_video;
+	bool              m_has_audio;
 	int               m_omx_speed;
-	OMX_U32           m_WaitMask;
-	OMX_TIME_CLOCKSTATE   m_eState;
-	OMX_TIME_REFCLOCKTYPE m_eClock;
+	pthread_mutex_t   m_lock;
 private:
 	COMXCoreComponent m_omx_clock;
 	DllAvFormat       m_dllAvFormat;
@@ -71,14 +44,13 @@ public:
 	~OMXClock();
 	void Lock();
 	void UnLock();
-	void OMXSetClockPorts(OMX_TIME_CONFIG_CLOCKSTATETYPE *clock, bool has_video, bool has_audio);
-	bool OMXSetReferenceClock(bool has_audio, bool lock = true);
-	bool OMXInitialize();
+	bool OMXInitialize(bool has_video, bool has_audio);
 	void OMXDeinitialize();
 	bool OMXIsPaused() { return m_pause; };
 	bool OMXStop(bool lock = true);
+	bool OMXStart(double pts, bool lock = true);
 	bool OMXStep(int steps = 1, bool lock = true);
-	bool OMXReset(bool has_video, bool has_audio, bool lock = true);
+	bool OMXReset(bool lock = true);
 	double OMXMediaTime(bool lock = true);
 	double OMXClockAdjustment(bool lock = true);
 	bool OMXMediaTime(double pts, bool lock = true);
@@ -94,5 +66,3 @@ public:
 	double GetClock(bool interpolated = true);
 	static void OMXSleep(unsigned int dwMilliSeconds);
 };
-
-
