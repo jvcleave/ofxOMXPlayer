@@ -8,93 +8,35 @@
  */
 
 #include "ofxOMXPlayer.h"
-ofxOMXPlayer* ofxOMXPlayerInstance;
 
 
-/*void ofxOMXPlayer::exit()
+bool doClose = false;
+
+void termination_handler(int signum)
 {
-	if (ofxOMXPlayerInstance) 
-	{
-		ofxOMXPlayerInstance->close();
-	}
-	
-}*/
-
-void onSIGINTHandler(int sig) 
-{
-	cout << "\n onSIGINTHandler" << endl;
-	ofLogVerbose() << "IS MAIN THREAD: " << ofThread::isMainThread();
-	signal(SIGINT,  NULL);
-	//GlobalEGLContainer::getInstance().appEGLWindow->lock();
-	//GlobalEGLContainer::getInstance().appEGLWindow->waitForThread(true);
-	//GlobalEGLContainer::getInstance().appEGLWindow->sleep(2000);
-	//
-	//OMXClock::OMXSleep(2000);
-	//ofxOMXPlayerInstance->engine->Lock();
-	//ofxOMXPlayerInstance->engine->StopThread();
-	ofxOMXPlayerInstance->close();
-	ofxOMXPlayerInstance = NULL;
-	raise(SIGINT);
-	//exit(0);
-	
-	//raise(SIGABRT);
-	//ofExit(0);
-	//ofxOMXPlayerInstance->close();
-	//GlobalEGLContainer::getInstance().isExiting = true;
-	//signal(SIGINT,  SIG_DFL);
-	//ofGetAppPtr()->exit();
-	//ofxOMXPlayerInstance->engine->StopThread();
-	
-	//delete ofxOMXPlayerInstance->engine;
-	//ofxOMXPlayerInstance->engine = NULL;
-	//GlobalEGLContainer::getInstance().appEGLWindow->stopThread();
-	//ofEvents().disable();
-	//exit(0);
-	//raise(SIGABRT);
-	
-	//signal(SIGINT,  NULL);
-	//ofGetAppPtr()->exit();
-	//ofxOMXPlayerInstance->close();
-	//exit(0);
-	//signal(SIGINT,  NULL);
-	
-	//ofExit(0);
-	//GlobalEGLContainer::getInstance().appEGLWindow->yield();
-	//ofxOMXPlayer::exit();
-	//GlobalEGLContainer::getInstance().appEGLWindow->unlock();
-	//ofxOMXPlayerInstance->close();
-	//_Exit(0);
-	//ofNotifyExit();
-	//signal(SIGINT,  SIG_DFL);
-	//
-	//ofExit();
-	//raise(SIGABRT);
-	
+	doClose = true;
 }
 
-void ofxOMXPlayerExit()
+void ofxOMXPlayer::exit()
 {
-	cout << "ofxOMXPlayerExit" << endl;
-	
-	
+	close();
+	ofExit();
 }
-bool hasThrownSig = false;
-
-void ofxOMXPlayer::onUpdate(ofEventArgs & args)
+void ofxOMXPlayer::update(ofEventArgs& args)
 {
-	if (ofGetElapsedTimeMillis() > 7000 && !hasThrownSig) 
+	if (doClose) 
 	{
-		hasThrownSig = true;
-		onSIGINTHandler(2);
+		doClose = false;
+		ofRemoveListener(ofEvents().update, this, &ofxOMXPlayer::update);
+		exit();
 	}
 }
-
 ofxOMXPlayer::ofxOMXPlayer()
 {
 	engine = NULL;
 	isOpen = true;
 	isTextureEnabled = false;
-	
+	ofAddListener(ofEvents().update, this, &ofxOMXPlayer::update);
 }
 
 void ofxOMXPlayer::loadMovie(string videoPath)
@@ -104,16 +46,41 @@ void ofxOMXPlayer::loadMovie(string videoPath)
 }
 
 
+//Structs that will describe the old action and the new action
+//associated to the SIGINT signal (Ctrl+c from keyboard).
+struct sigaction new_action, old_action;
+
 bool ofxOMXPlayer::setup(ofxOMXPlayerSettings settings)
 {
 	
-	ofxOMXPlayerInstance = NULL;
-	ofxOMXPlayerInstance = this;
 	this->settings = settings;
-	signal(SIGINT,  NULL);
-	signal(SIGINT,  &onSIGINTHandler);
-	//atexit(ofxOMXPlayerExit);
-	//ofAddListener(ofEvents().update, this, &ofxOMXPlayer::onUpdate);
+	
+    //Set the handler in the new_action struct
+    new_action.sa_handler = termination_handler;
+	
+    //Set to empty the sa_mask. It means that no signal is blocked
+    // while the handler run.
+    sigemptyset(&new_action.sa_mask);
+	
+    //Block the SEGTERM signal.
+    // It means that while the handler run, the SIGTERM signal is ignored
+    sigaddset(&new_action.sa_mask, SIGTERM);
+	
+    //Remove any flag from sa_flag. See documentation for flags allowed
+    new_action.sa_flags = 0;
+	
+    //Read the old signal associated to SIGINT (keyboard, see signal(7))
+    sigaction(SIGINT, NULL, &old_action);
+	
+    //If the old handler wasn't SIG_IGN (it's a handler that just
+    // "ignore" the signal)
+    if (old_action.sa_handler != SIG_IGN)
+    {
+        //Replace the signal handler of SIGINT with the one described by new_action
+        sigaction(SIGINT,&new_action,NULL);
+    }
+
+	
 	openEngine();
 	
 }

@@ -8,6 +8,10 @@
 
 //If your app extends ofxOMXPlayerListener you will receive an event when the video ends
 
+
+
+
+
 void playlistApp::onVideoEnd(ofxOMXPlayerListenerEventData& e)
 {
 	ofLogVerbose(__func__) << " RECEIVED";
@@ -20,6 +24,7 @@ void playlistApp::onVideoEnd(ofxOMXPlayerListenerEventData& e)
 		videoCounter = 0;
 	}
 	omxPlayer.loadMovie(files[videoCounter].path());
+	
 }
 
 

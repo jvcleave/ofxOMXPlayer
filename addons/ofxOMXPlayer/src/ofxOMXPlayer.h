@@ -52,9 +52,10 @@ public:
    
 	void close();
 	bool isOpen;
-	static void exit();
 	
 	ofxOMXPlayerEngine* engine;
+	void update(ofEventArgs& args);
+	void exit();
 private:
 	
 	void openEngine();
