@@ -1,42 +1,18 @@
 /*
  *  ofxOMXPlayer.cpp
- *  openFrameworksRPi
  *
  *  Created by jason van cleave on 9/8/13.
- *  Copyright 2013 jasonvancleave.com. All rights reserved.
  *
  */
 
 #include "ofxOMXPlayer.h"
 
-
-bool doClose = false;
-
-void termination_handler(int signum)
-{
-	doClose = true;
-}
-
-void ofxOMXPlayer::exit()
-{
-	close();
-	ofExit();
-}
-void ofxOMXPlayer::update(ofEventArgs& args)
-{
-	if (doClose) 
-	{
-		doClose = false;
-		ofRemoveListener(ofEvents().update, this, &ofxOMXPlayer::update);
-		exit();
-	}
-}
 ofxOMXPlayer::ofxOMXPlayer()
 {
 	engine = NULL;
 	isOpen = true;
 	isTextureEnabled = false;
-	ofAddListener(ofEvents().update, this, &ofxOMXPlayer::update);
+	
 }
 
 void ofxOMXPlayer::loadMovie(string videoPath)
@@ -46,44 +22,14 @@ void ofxOMXPlayer::loadMovie(string videoPath)
 }
 
 
-//Structs that will describe the old action and the new action
-//associated to the SIGINT signal (Ctrl+c from keyboard).
-struct sigaction new_action, old_action;
-
 bool ofxOMXPlayer::setup(ofxOMXPlayerSettings settings)
-{
-	
+{	
 	this->settings = settings;
-	
-    //Set the handler in the new_action struct
-    new_action.sa_handler = termination_handler;
-	
-    //Set to empty the sa_mask. It means that no signal is blocked
-    // while the handler run.
-    sigemptyset(&new_action.sa_mask);
-	
-    //Block the SEGTERM signal.
-    // It means that while the handler run, the SIGTERM signal is ignored
-    sigaddset(&new_action.sa_mask, SIGTERM);
-	
-    //Remove any flag from sa_flag. See documentation for flags allowed
-    new_action.sa_flags = 0;
-	
-    //Read the old signal associated to SIGINT (keyboard, see signal(7))
-    sigaction(SIGINT, NULL, &old_action);
-	
-    //If the old handler wasn't SIG_IGN (it's a handler that just
-    // "ignore" the signal)
-    if (old_action.sa_handler != SIG_IGN)
-    {
-        //Replace the signal handler of SIGINT with the one described by new_action
-        sigaction(SIGINT,&new_action,NULL);
-    }
-
-	
+	addExitHandler();
 	openEngine();
-	
 }
+
+
 void ofxOMXPlayer::openEngine()
 {
 	if (engine) 
@@ -262,21 +208,6 @@ void ofxOMXPlayer::draw(float x, float y)
 	getTextureReference().draw(x, y);
 }
 
-
-bool hasTriedToKill = false;
-void killSwitch(int sig) {
-	if(!hasTriedToKill)
-	{
-		cout << "\n Hit Ctrl+C again to exit hard" << endl;
-		hasTriedToKill = true;
-	}else 
-	{
-		cout << "Detected multiple attempts to kill - exiting hard" << endl;	
-		_Exit(0);
-	}
-
-}
-
 void ofxOMXPlayer::close()
 {	
 	ofLogVerbose(__func__) << " isOpen: " << isOpen;
@@ -284,7 +215,7 @@ void ofxOMXPlayer::close()
 	{
 		return;
 	}
-	//signal(SIGINT,  &killSwitch);
+	ofRemoveListener(ofEvents().update, this, &ofxOMXPlayer::onUpdate);
 	
 	if(engine)
 	{
@@ -293,13 +224,60 @@ void ofxOMXPlayer::close()
 	}
 	GlobalEGLContainer::getInstance().destroyEGLImage();
 	isOpen = false;
-	//atexit(NULL);
-	//ofxOMXPlayerInstance = NULL;
-	//signal(SIGINT,  NULL);
 	
 }
 ofxOMXPlayer::~ofxOMXPlayer()
 {
-	ofLogVerbose(__func__) << " isOpen: " << isOpen;
 	close();
 }
+
+bool doExit = false;
+void termination_handler(int signum)
+{
+	doExit = true;
+}
+
+void ofxOMXPlayer::onUpdate(ofEventArgs& args)
+{
+	if (doExit) 
+	{
+		ofLogVerbose(__func__) << " EXITING VIA SIGNAL";
+		doExit = false;
+		close();
+		ofExit();
+	}
+}
+
+void ofxOMXPlayer::addExitHandler()
+{
+	
+	//http://stackoverflow.com/questions/11465148/using-sigaction-c-cpp
+	//Structs that will describe the old action and the new action
+	//associated to the SIGINT signal (Ctrl+c from keyboard).
+	struct sigaction new_action, old_action;
+	
+	//Set the handler in the new_action struct
+    new_action.sa_handler = termination_handler;
+	
+    //Set to empty the sa_mask. It means that no signal is blocked while the handler run.
+    sigemptyset(&new_action.sa_mask);
+	
+    //Block the SEGTERM signal.
+    // It means that while the handler run, the SIGTERM signal is ignored
+    sigaddset(&new_action.sa_mask, SIGTERM);
+	
+    //Remove any flag from sa_flag. See documentation for flags allowed
+    new_action.sa_flags = 0;
+	
+    //Read the old signal associated to SIGINT (keyboard, see signal(7))
+    sigaction(SIGINT, NULL, &old_action);
+	
+    //If the old handler wasn't SIG_IGN (it's a handler that just "ignore" the signal)
+    if (old_action.sa_handler != SIG_IGN)
+    {
+        //Replace the signal handler of SIGINT with the one described by new_action
+        sigaction(SIGINT,&new_action,NULL);
+    }
+	ofAddListener(ofEvents().update, this, &ofxOMXPlayer::onUpdate);
+}
+
