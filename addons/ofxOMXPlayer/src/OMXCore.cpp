@@ -11,7 +11,7 @@
 //#define ENABLE_WAIT_FOR_COMMANDS
 //#define OMX_DEBUG_EVENTS
 //#define OMX_DEBUG_EVENTHANDLER
-#define COMMAND_WAIT_TIMEOUT 50
+#define COMMAND_WAIT_TIMEOUT 20
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 #define CLASSNAME "COMXCoreComponent"
