@@ -362,41 +362,6 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, float display_aspec
 	return true;
 }
 
-/*COMXVideo::~COMXVideo()
-{
-  m_omx_tunnel_decoder.Flush();
-  if(m_deinterlace)
-    m_omx_tunnel_image_fx.Flush();
-  m_omx_tunnel_clock.Flush();
-  m_omx_tunnel_sched.Flush();
-
-  m_omx_tunnel_clock.Deestablish();
-  m_omx_tunnel_decoder.Deestablish();
-  if(m_deinterlace)
-    m_omx_tunnel_image_fx.Deestablish();
-  m_omx_tunnel_sched.Deestablish();
-
-  m_omx_decoder.FlushInput();
-
-  m_omx_sched.Deinitialize();
-  if(m_deinterlace)
-    m_omx_image_fx.Deinitialize();
-  m_omx_decoder.Deinitialize();
-  m_omx_render.Deinitialize();
-
-  m_is_open       = false;
-
-  if(m_extradata)
-    free(m_extradata);
-  m_extradata = NULL;
-  m_extrasize = 0;
-
-  m_video_codec_name  = "";
-  m_deinterlace       = false;
-  m_first_frame       = true;
-  m_setStartTime      = true;
-}*/
-
 
 int COMXVideo::Decode(uint8_t *pData, int iSize, double dts, double pts)
 {

@@ -8,7 +8,7 @@
 
 #include "XMemUtils.h"
 
-#define ENABLE_WAIT_FOR_COMMANDS
+//#define ENABLE_WAIT_FOR_COMMANDS
 //#define OMX_DEBUG_EVENTS
 //#define OMX_DEBUG_EVENTHANDLER
 
@@ -187,7 +187,7 @@ COMXCoreTunel::~COMXCoreTunel()
 	ofLogVerbose() << "~COMXCoreTunel START";
 	if(isEstablished)
 	{
-		ofLogVerbose("~COMXCoreTunel") << " ABOUT TO CALL Deestablish(true)";
+		ofLogVerbose("~COMXCoreTunel") << " ABOUT TO CALL Deestablish()";
 		Deestablish();
 	}
 	
@@ -280,12 +280,6 @@ OMX_ERRORTYPE COMXCoreTunel::Deestablish(bool doWait)
 		}
 	
 		ofLogVerbose(__func__) << srcName << " DISABLE START m_src_port " << m_src_port;
-		if(srcName == "OMX.broadcom.clock")
-		{
-			//return OMX_ErrorUndefined;
-			//ofLogVerbose(__func__) << "SLEEPING";
-			//OMXClock::OMXSleep(2000);
-		}
 		if(m_src_component->GetComponent())
 		{
 			omx_err = m_src_component->DisablePort(m_src_port);
@@ -445,8 +439,7 @@ OMX_ERRORTYPE COMXCoreTunel::Establish(bool portSettingsChanged)
 		{
 			if(m_dst_component->GetState() == OMX_StateLoaded)
 			{
-				//important for audio
-				//#ifdef ENABLE_WAIT_FOR_COMMANDS
+				//important to wait for audio
 				omx_err = m_dst_component->WaitForCommand(OMX_CommandPortEnable, m_dst_port);
 				if(omx_err != OMX_ErrorNone)
 				{
@@ -454,7 +447,6 @@ OMX_ERRORTYPE COMXCoreTunel::Establish(bool portSettingsChanged)
 					UnLock();
 					return omx_err;
 				}
-				//#endif    
 				omx_err = m_dst_component->SetStateForComponent(OMX_StateIdle);
 				if(omx_err != OMX_ErrorNone)
 				{
@@ -1454,7 +1446,7 @@ OMX_ERRORTYPE COMXCoreComponent::SetStateForComponent(OMX_STATETYPE state)
 		}
 		else 
 		{
-			//#ifdef ENABLE_WAIT_FOR_COMMANDS
+			#ifdef ENABLE_WAIT_FOR_COMMANDS
 			omx_err = WaitForCommand(OMX_CommandStateSet, state, 50);
 			if(omx_err == OMX_ErrorSameState)
 			{
@@ -1462,7 +1454,7 @@ OMX_ERRORTYPE COMXCoreComponent::SetStateForComponent(OMX_STATETYPE state)
 				UnLock();
 				return OMX_ErrorNone;
 			}
-			//#endif
+			#endif
 		}
 	UnLock();
 
@@ -1472,21 +1464,22 @@ OMX_ERRORTYPE COMXCoreComponent::SetStateForComponent(OMX_STATETYPE state)
 
 OMX_STATETYPE COMXCoreComponent::GetState()
 {
-	//Lock();
+	
 	ofLogVerbose(__func__) << m_componentName << " START";
-		if(m_handle)
+	if(m_handle)
+	{
+		Lock();
+		OMX_STATETYPE state;
+		OMX_ERRORTYPE omx_err = OMX_GetState(m_handle, &state);
+		if(omx_err != OMX_ErrorNone) 
 		{
-			OMX_STATETYPE state;
-			OMX_ERRORTYPE omx_err = OMX_GetState(m_handle, &state);
-			if(omx_err != OMX_ErrorNone) 
-			{
-				ofLogError(__func__) << " OMX_GetState FAIL " << printOMXError(omx_err);
-			}
-			//UnLock();
-			return state;
+			ofLogError(__func__) << " OMX_GetState FAIL " << printOMXError(omx_err);
 		}
-	ofLogVerbose(__func__) << m_componentName << " END";
-	//UnLock();
+		ofLogVerbose(__func__) << m_componentName << " END";
+		UnLock();
+		return state;
+	}
+	
 	return (OMX_STATETYPE)0;
 }
 

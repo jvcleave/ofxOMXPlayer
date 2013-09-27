@@ -9,7 +9,6 @@ class COMXVideo : public OMXDecoderBase
 {
 public:
 	COMXVideo();
-	~COMXVideo();
 	bool Open(COMXStreamInfo &hints, OMXClock *clock, float display_aspect = 0.0f, bool deinterlace = false, bool hdmi_clock_sync = false);
 	int  Decode(uint8_t *pData, int iSize, double dts, double pts);
 

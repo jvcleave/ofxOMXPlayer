@@ -254,7 +254,7 @@ void OMXPlayerVideoBase::WaitCompletion()
 	
 	if(!m_decoder)
 	{
-		return;
+		return; 
 	}
 	
 	while(true)

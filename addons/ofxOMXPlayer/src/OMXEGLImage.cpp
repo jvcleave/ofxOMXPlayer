@@ -436,39 +436,6 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 	return true;
 }
 
-/*OMXEGLImage::~OMXEGLImage()
-{
-	ofLogVerbose(__func__) << "START";
-	m_omx_tunnel_decoder.Flush();
-	m_omx_tunnel_clock.Flush();
-	m_omx_tunnel_sched.Flush();
-	
-	m_omx_tunnel_clock.Deestablish();
-	m_omx_tunnel_decoder.Deestablish();
-	m_omx_tunnel_sched.Deestablish();
-	
-	m_omx_decoder.FlushInput();
-	m_omx_render.FlushOutput();
-	
-	m_omx_sched.Deinitialize();
-	m_omx_decoder.Deinitialize();
-	m_omx_render.Deinitialize();
-	
-	m_is_open       = false;
-	
-	if(m_extradata)
-	{
-		free(m_extradata);
-	}
-	m_extradata = NULL;
-	m_extrasize = 0;
-	
-	m_video_codec_name  = "";
-	m_first_frame       = true;
-	ofLogVerbose(__func__) << "END";
-
-}*/
-
 int OMXEGLImage::Decode(uint8_t *pData, int iSize, double dts, double pts)
 {
 	OMX_ERRORTYPE error;
