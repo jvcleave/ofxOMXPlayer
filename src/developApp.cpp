@@ -63,6 +63,9 @@ void developApp::setup()
 	doTextures	= true;
 	doShader	= false;
 	
+	
+	settings.enableAudio = false; //default true
+	
 	if (doShader) 
 	{
 		loadShader();		

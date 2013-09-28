@@ -32,9 +32,11 @@ struct ofxOMXPlayerSettings
 		enableTexture = true;
 		enableLooping = true;
 		listener	  = NULL;
+		enableAudio	  = true;
 	}
 	string videoPath;
 	bool enableTexture;
+	bool enableAudio;
 	bool useHDMIForAudio;
 	bool enableLooping;
 	ofxOMXPlayerListener* listener;

@@ -27,7 +27,7 @@ void testApp::setup()
 	settings.useHDMIForAudio = true;	//default true
 	settings.enableTexture = true;		//default true
 	settings.enableLooping = true;		//default true
-	
+	settings.enableAudio = true;		//default true, save resources by disabling
 	
 	
 	if (settings.enableTexture)

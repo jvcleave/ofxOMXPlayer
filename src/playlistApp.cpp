@@ -23,7 +23,9 @@ void playlistApp::onVideoEnd(ofxOMXPlayerListenerEventData& e)
 	{
 		videoCounter = 0;
 	}
-	omxPlayer.loadMovie(files[videoCounter].path());
+	//omxPlayer.loadMovie(files[videoCounter].path());
+	settings.enableTexture = !settings.enableTexture;
+	createPlayer();
 	
 }
 
@@ -58,17 +60,18 @@ void playlistApp::setup()
 }
 void playlistApp::createPlayer()
 {
-	ofxOMXPlayerSettings settings;
+	
 	settings.videoPath = files[videoCounter].path();
 	settings.useHDMIForAudio = true;	//default true
+	
 	//settings.enableTexture = false;		//default true
 	settings.enableLooping = false;		//default true
 	
+	
+	settings.enableAudio = !settings.enableAudio; //toggle for testing
 	settings.listener = this; //this app extends ofxOMXPlayerListener so it will receive events ;
 	omxPlayer.setup(settings);
 	
-	
-	ofLogVerbose() << "PLEASE PRESS x TO EXIT APP CLEANLY ";
 }
 
 //--------------------------------------------------------------

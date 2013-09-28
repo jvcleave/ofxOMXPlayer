@@ -19,11 +19,14 @@ class playlistApp : public ofBaseApp, public ofxOMXPlayerListener, public SSHKey
 		void createPlayer();
 		ofxOMXPlayer omxPlayer;
 		void onVideoEnd(ofxOMXPlayerListenerEventData& e);
+		void onVideoLoop(ofxOMXPlayerListenerEventData& e){ /*empty*/ };
+
 		
 		vector<ofFile> files;
 		int videoCounter;
 	
 		void onCharacterReceived(SSHKeyListenerEventData& e);
 		ConsoleListener consoleListener;
+		ofxOMXPlayerSettings settings;
 };
 

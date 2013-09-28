@@ -130,6 +130,10 @@ bool ofxOMXPlayerEngine::setup(ofxOMXPlayerSettings settings)
 		{
 			ofLogVerbose() << "NO AUDIO";
 		}
+		if (!settings.enableAudio) 
+		{
+			hasAudio = false;
+		}
 		if (hasVideo) 
 		{
 			ofLogVerbose()	<< "Video streams detection PASS";
