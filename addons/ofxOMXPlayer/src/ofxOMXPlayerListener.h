@@ -17,6 +17,8 @@ class ofxOMXPlayerListener
 {
 public:
 	virtual void onVideoEnd(ofxOMXPlayerListenerEventData& e) = 0;
+	virtual void onVideoLoop(ofxOMXPlayerListenerEventData& e) = 0;
+	
 };
 
 

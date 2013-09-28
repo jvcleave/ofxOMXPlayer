@@ -28,7 +28,6 @@ public:
 	EGLDisplay			display;
 	EGLContext			context;
 	bool hasGenerated;
-	bool doLooping;
 	int videoWidth;
 	int videoHeight;
 	ofPixels pixels;
@@ -197,7 +196,6 @@ private:
 		context = NULL;
 		display = NULL;
 		hasGenerated = false;
-		doLooping = false;
 		isExiting = false;
 	};
 	

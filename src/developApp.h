@@ -5,7 +5,7 @@
 
 #include "ConsoleListener.h"
 
-class developApp : public ofBaseApp, public SSHKeyListener{
+class developApp : public ofBaseApp, public SSHKeyListener, public ofxOMXPlayerListener{
 	
 public:
 	
@@ -20,24 +20,21 @@ public:
 	ofShader shader;
 	ofFbo fbo;
 	void updateFbo();
-	
+	void loadShader();
 	bool doShader;
 	bool doTextures;
 		
 	//allows key commands via Shell
 	void onCharacterReceived(SSHKeyListenerEventData& e);
 	ConsoleListener consoleListener;
-	
-	string videoPath;
-	bool usingTexturePlayer;
-	
-	void createNonTexturePlayer();
-	void createTexturePlayer();
+		
 	
 	ofxOMXPlayerSettings settings;
-	vector<ofFile> files;
-	bool doRandomSelect;
+	
+
 	
 	bool doWriteImage;
+	void onVideoEnd(ofxOMXPlayerListenerEventData& e);
+	void onVideoLoop(ofxOMXPlayerListenerEventData& e){};
 };
 

@@ -8,15 +8,28 @@ void developApp::onCharacterReceived(SSHKeyListenerEventData& e)
 	keyPressed((int)e.character);
 }
 
+
+void developApp::onVideoEnd(ofxOMXPlayerListenerEventData& e)
+{
+	ofLogVerbose("developApp") << " onVideoEnd";
+}
+/*void developApp::onVideoLoop(ofxOMXPlayerListenerEventData& e)
+{
+	ofLogVerbose("developApp") << " onVideoLoop";
+}*/
+
+
 //--------------------------------------------------------------
 void developApp::setup()
 {
 	ofSetVerticalSync(false);
-	doRandomSelect		= true;
 	
-	usingTexturePlayer		= false;
+	consoleListener.setup(this);
+	ofHideCursor();
+	doWriteImage		= false;
 	
-	videoPath = ofToDataPath("big_buck_bunny_MpegStreamclip_720p_h264_50Quality_48K_256k_AAC.mov", true);
+	
+	string videoPath = ofToDataPath("big_buck_bunny_MpegStreamclip_720p_h264_50Quality_48K_256k_AAC.mov", true);
 
 	
 	/* to get the videos I am testing run command:
@@ -26,11 +39,12 @@ void developApp::setup()
 	
 	//this will let us just grab a video without recompiling
 	ofDirectory currentVideoDirectory("/home/pi/videos/current");
+	bool doRandomSelect		= true;
 	if (currentVideoDirectory.exists()) 
 	{
 		//option to put multiple videos in folder to test
 		currentVideoDirectory.listDir();
-		files = currentVideoDirectory.getFiles();
+		vector<ofFile> files = currentVideoDirectory.getFiles();
 		if (files.size()>0) 
 		{
 			if (doRandomSelect && files.size()>1) {
@@ -43,36 +57,32 @@ void developApp::setup()
 	}
 	
 	ofLogVerbose() << "using videoPath : " << videoPath;
+	settings.videoPath = videoPath;
+	settings.listener = this; //this app extends ofxOMXPlayerListener so it will receive events ;
 	
 	doTextures	= true;
-	doShader	= true;
-	if (doShader || doTextures) 
+	doShader	= false;
+	
+	if (doShader) 
 	{
-		usingTexturePlayer = true;
-		createTexturePlayer();
-	}else 
-	{
-		createNonTexturePlayer();
+		loadShader();		
 	}
 	
-	consoleListener.setup(this);
-	ofHideCursor();
-	doWriteImage = false;
+	if (doShader || doTextures) 
+	{
+		settings.enableTexture = true;
+	}else 
+	{
+		settings.enableTexture = false;
+	}
+	omxPlayer.setup(settings);
+	
 }
 
-void developApp::createNonTexturePlayer()
+void developApp::loadShader()
 {
-	ofLogVerbose() << "createNonTexturePlayer";
-	
-	settings.videoPath = videoPath;
-	settings.enableTexture = false;
-	omxPlayer.setup(settings);
-}
-void developApp::createTexturePlayer()
-{
-	//ofSetLogLevel(OF_LOG_VERBOSE); set in main.cpp
 	ofEnableAlphaBlending();
-	if (doShader) 
+	if (!shader.isLoaded()) 
 	{
 		shader.load("PostProcessing.vert", "PostProcessing.frag", "");
 		
@@ -82,54 +92,49 @@ void developApp::createTexturePlayer()
 		fbo.end();
 		
 	}
-	settings.videoPath = videoPath;
-	omxPlayer.setup(settings);
 }
+
 //--------------------------------------------------------------
 void developApp::update()
 {
-	if (!usingTexturePlayer) 
+	if (!settings.enableTexture) 
 	{
 		return;
 	}
-	if(omxPlayer.isPlaying())
+	
+	if (doShader) 
 	{
-		/*int currentFrameNumber = omxPlayer.getCurrentFrame();
-		if (currentFrameNumber != previousFrameNumber) 
+		if (!shader.isLoaded()) 
 		{
-			hasFrameChanged = true;
-			previousFrameNumber = currentFrameNumber;
-		}else 
-		{
-			hasFrameChanged = false;
-		}
-
-		if (!hasFrameChanged) 
-		{
-			return;
-		}*/
-		
-		if (usingTexturePlayer && doShader) 
-		{
-			updateFbo();
-			if (doWriteImage) 
-			{
-				string path = ofToDataPath(ofGetTimestampString()+".png", true);
-				ofPixels pixels;
-				pixels.allocate(ofGetWidth(), ofGetHeight(), OF_PIXELS_RGBA);
-				fbo.readToPixels(pixels);
-				ofSaveImage(pixels, path);
-				doWriteImage = false;
-			}
+			loadShader();
 		}
 		
+		fbo.begin();
+			ofClear(0, 0, 0, 0);
+			shader.begin();
+			shader.setUniformTexture("tex0", omxPlayer.getTextureReference(), omxPlayer.getTextureID());
+			shader.setUniform1f("time", ofGetElapsedTimef());
+			shader.setUniform2f("resolution", ofGetWidth(), ofGetHeight());
+			ofRect(0, 0, ofGetWidth(), ofGetHeight());
+			shader.end();
+		fbo.end();
+		
+		if (doWriteImage) 
+		{
+			string path = ofToDataPath(ofGetTimestampString()+".png", true);
+			ofPixels pixels;
+			pixels.allocate(ofGetWidth(), ofGetHeight(), OF_PIXELS_RGBA);
+			fbo.readToPixels(pixels);
+			ofSaveImage(pixels, path);
+			doWriteImage = false;
+		}
 	}
 }
 
 //--------------------------------------------------------------
 void developApp::draw(){
 	
-	if (!usingTexturePlayer) 
+	if (!settings.enableTexture) 
 	{
 		return;
 	}
@@ -140,6 +145,11 @@ void developApp::draw(){
 	
 	if (doShader) 
 	{
+		if (!shader.isLoaded()) 
+		{
+			loadShader();
+		}
+		
 		fbo.draw(0, 0);
 		
 	}else 
@@ -149,7 +159,6 @@ void developApp::draw(){
 	}
 	
 	stringstream info;
-	info <<			"PLEASE PRESS x TO EXIT APP CLEANLY ";
 	info <<"\n" <<  "APP FPS: "+ ofToString(ofGetFrameRate());
 	
 	
@@ -166,7 +175,7 @@ void developApp::draw(){
 	info <<"\n" <<	"KEYS:";
 	info <<"\n" <<	"p to Toggle Pause";
 	info <<"\n" <<	"b to Step frame forward";
-	if (usingTexturePlayer) 
+	if (settings.enableTexture) 
 	{
 		info <<"\n" <<	"s to Toggle Shader";
 	}
@@ -177,23 +186,6 @@ void developApp::draw(){
 	
 }
 
-void developApp::updateFbo()
-{
-	
-	if(doShader)
-	{
-		fbo.begin();
-			ofClear(0, 0, 0, 0);
-				shader.begin();
-				shader.setUniformTexture("tex0", omxPlayer.getTextureReference(), omxPlayer.getTextureID());
-				shader.setUniform1f("time", ofGetElapsedTimef());
-				shader.setUniform2f("resolution", ofGetWidth(), ofGetHeight());
-				ofRect(0, 0, ofGetWidth(), ofGetHeight());
-			shader.end();
-		fbo.end();
-	}
-	
-}
 void developApp::exit()
 {
 	omxPlayer.close();
@@ -223,7 +215,7 @@ void developApp::keyPressed  (int key){
 			
 		case 's':
 		{
-			if (usingTexturePlayer)
+			if (settings.enableTexture)
 			{
 				doShader = !doShader;
 				ofLogVerbose() << "doShader " << doShader;
@@ -253,12 +245,6 @@ void developApp::keyPressed  (int key){
 		}
 		case 'c':
 		{
-			omxPlayer.close();
-			break;
-		}
-		case 'x':
-		{
-			ofExit(0);
 			break;
 		}
 		default:

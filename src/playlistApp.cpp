@@ -107,7 +107,6 @@ void playlistApp::draw(){
 	
 
 	stringstream info;
-	info <<			"PLEASE PRESS x TO EXIT APP CLEANLY ";
 	info <<"\n" <<  "APP FPS: "+ ofToString(ofGetFrameRate());
 	info <<"\n" <<	"MEDIA TIME: "			<< omxPlayer.getMediaTime();
 	info <<"\n" <<	"DIMENSIONS: "			<< omxPlayer.getWidth()<<"x"<<omxPlayer.getHeight();
@@ -142,23 +141,15 @@ void playlistApp::draw(){
 //--------------------------------------------------------------
 void playlistApp::keyPressed  (int key){
 
-	ofLogVerbose() << "key received!";
+	ofLogVerbose(__func__) << "key: " << key;
 	switch (key) 
 	{
 		case 'c':
 		{
-			omxPlayer.close();
-			break;
-		}
-		case 'x':
-		{
-			omxPlayer.close();
-			ofExit(0);
 			break;
 		}
 		case 'e':
 		{
-			raise(SIGINT);
 			break;
 		}
 	}

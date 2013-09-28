@@ -91,7 +91,7 @@ private:
 	bool					openPlayer();
 	bool					didVideoOpen;
 	bool					didAudioOpen;
-	
+	bool					doLooping;
 	int						videoWidth;
 	int						videoHeight;
 	
@@ -106,5 +106,7 @@ private:
 	float					duration;
 		
 	void					onVideoEnd();
+	void					onVideoLoop();
+	double					previousLoopOffset;
 };
 
