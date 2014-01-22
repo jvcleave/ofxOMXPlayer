@@ -1,4 +1,5 @@
 obj
+bin/ofxOMXPlayer.bin
 bin/ofxOMXPlayer
 bin/ofxOMXPlayer_debug
 bin/omxplayer*

@@ -23,9 +23,9 @@ void playlistApp::onVideoEnd(ofxOMXPlayerListenerEventData& e)
 	{
 		videoCounter = 0;
 	}
-	//omxPlayer.loadMovie(files[videoCounter].path());
-	settings.enableTexture = !settings.enableTexture;
-	createPlayer();
+	omxPlayer.loadMovie(files[videoCounter].path());
+	//settings.enableTexture = !settings.enableTexture;
+	//createPlayer();
 	
 }
 
@@ -40,7 +40,7 @@ void playlistApp::onCharacterReceived(SSHKeyListenerEventData& e)
 void playlistApp::setup()
 {
 	ofSetLogLevel(OF_LOG_VERBOSE);
-	
+	ofSetVerticalSync(false);
 	consoleListener.setup(this);	
 	//this will let us just grab a video without recompiling
 	ofDirectory currentVideoDirectory("/home/pi/videos/current");
@@ -65,10 +65,14 @@ void playlistApp::createPlayer()
 	settings.useHDMIForAudio = true;	//default true
 	
 	//settings.enableTexture = false;		//default true
-	settings.enableLooping = false;		//default true
+	if(files.size() > 1)
+	{
+		settings.enableLooping = false;		//default true
+	}
 	
 	
-	settings.enableAudio = !settings.enableAudio; //toggle for testing
+	
+	//settings.enableAudio = !settings.enableAudio; //toggle for testing
 	settings.listener = this; //this app extends ofxOMXPlayerListener so it will receive events ;
 	omxPlayer.setup(settings);
 	
