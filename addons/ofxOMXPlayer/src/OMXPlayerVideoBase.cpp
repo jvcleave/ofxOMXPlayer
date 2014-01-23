@@ -1,6 +1,14 @@
 
 #include "OMXPlayerVideoBase.h"
 
+unsigned count_bits(int32_t value)
+{
+	unsigned bits = 0;
+	for(;value;++bits)
+		value &= value - 1;
+	return bits;
+}
+
 OMXPlayerVideoBase::OMXPlayerVideoBase()
 {
 	m_decoder = NULL;
@@ -8,6 +16,8 @@ OMXPlayerVideoBase::OMXPlayerVideoBase()
 	pthread_cond_init(&m_packet_cond, NULL);
 	pthread_mutex_init(&m_lock, NULL);
 	pthread_mutex_init(&m_lock_decoder, NULL);
+	m_history_valid_pts = 0;
+	m_flush_requested = false;
 }
 
 OMXPlayerVideoBase::~OMXPlayerVideoBase()
@@ -73,7 +83,7 @@ bool OMXPlayerVideoBase::Decode(OMXPacket *pkt)
 	{
 		return false;
 	}
-	
+#if 0
 	bool ret = false;
 	
 	if(!((int)m_decoder->GetFreeSpace() > pkt->size))
@@ -111,6 +121,28 @@ bool OMXPlayerVideoBase::Decode(OMXPacket *pkt)
 		OMXClock::OMXSleep(10);
 	}
 	return ret;
+#endif
+	
+	m_history_valid_pts = (m_history_valid_pts << 1) | (pkt->pts != DVD_NOPTS_VALUE);
+    double pts = pkt->pts;
+    if(pkt->pts == DVD_NOPTS_VALUE && (m_iCurrentPts == DVD_NOPTS_VALUE || count_bits(m_history_valid_pts & 0xffff) < 4))
+		pts = pkt->dts;
+	
+    if (pts != DVD_NOPTS_VALUE)
+		pts += m_iVideoDelay;
+	
+    if(pts != DVD_NOPTS_VALUE)
+		m_iCurrentPts = pts;
+	
+    while((int) m_decoder->GetFreeSpace() < pkt->size)
+    {
+		OMXClock::OMXSleep(10);
+		if(m_flush_requested) return true;
+    }
+	
+   // CLog::Log(LOGINFO, "CDVDPlayerVideo::Decode dts:%.0f pts:%.0f cur:%.0f, size:%d", pkt->dts, pkt->pts, m_iCurrentPts, pkt->size);
+	ofLog(OF_LOG_VERBOSE, "OMXPlayerVideoBase::Decode dts:%.0f pts:%.0f cur:%.0f, size:%d", pkt->dts, pkt->pts, m_iCurrentPts, pkt->size);
+    m_decoder->Decode(pkt->data, pkt->size, pts);
 }
 	
 
@@ -118,8 +150,10 @@ bool OMXPlayerVideoBase::Decode(OMXPacket *pkt)
 void OMXPlayerVideoBase::Flush()
 {
 	ofLogVerbose() << "OMXPlayerVideoBase::Flush start";
+	m_flush_requested = true;
 	Lock();
 	LockDecoder();
+	 m_flush_requested = false;
 	m_flush = true;
 	while (!m_packets.empty())
 	{

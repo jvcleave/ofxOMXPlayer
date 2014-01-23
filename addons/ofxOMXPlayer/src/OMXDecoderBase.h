@@ -9,6 +9,7 @@
 
 #include "OMXClock.h"
 #include "OMXReader.h"
+#include "SingleLock.h"
 
 #define OMX_VIDEO_DECODER       "OMX.broadcom.video_decode"
 #define OMX_H264BASE_DECODER    OMX_VIDEO_DECODER
@@ -70,7 +71,7 @@ public:
 	
 
 	virtual int				Decode(uint8_t *pData, int iSize, double dts, double pts)=0;
-	
+	virtual int				Decode(uint8_t *pData, int iSize, double pts)=0;
 	
 	
 	void					WaitCompletion();
@@ -98,4 +99,5 @@ public:
 	std::string GetDecoderName() { return m_video_codec_name; };
 	static int fillBufferCounter;
 
+	CCriticalSection  m_critSection;
 };

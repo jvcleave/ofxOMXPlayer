@@ -361,7 +361,99 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, float display_aspec
 	m_history_valid_pts = ~0;
 	return true;
 }
+#define CLASSNAME "COMXVideo"
 
+int COMXVideo::Decode(uint8_t *pData, int iSize, double pts)
+{
+	CSingleLock lock (m_critSection);
+	OMX_ERRORTYPE omx_err;
+	
+	if( m_drop_state || !m_is_open )
+		return true;
+	
+    unsigned int demuxer_bytes = (unsigned int)iSize;
+    uint8_t *demuxer_content = pData;
+	
+	if (demuxer_content && demuxer_bytes > 0)
+	{
+		while(demuxer_bytes)
+		{
+			// 500ms timeout
+			OMX_BUFFERHEADERTYPE *omx_buffer = m_omx_decoder.GetInputBuffer(500);
+			if(omx_buffer == NULL)
+			{
+				ofLog(OF_LOG_ERROR, "OMXVideo::Decode timeout\n");
+				//printf("COMXVideo::Decode timeout\n");
+				return false;
+			}
+			
+			omx_buffer->nFlags = 0;
+			omx_buffer->nOffset = 0;
+			
+			if(m_setStartTime)
+			{
+				omx_buffer->nFlags |= OMX_BUFFERFLAG_STARTTIME;
+				ofLog(OF_LOG_VERBOSE, "OMXVideo::Decode VDec : setStartTime %f\n", (pts == DVD_NOPTS_VALUE ? 0.0 : pts) / DVD_TIME_BASE);
+				m_setStartTime = false;
+			}
+			else if(pts == DVD_NOPTS_VALUE)
+				omx_buffer->nFlags |= OMX_BUFFERFLAG_TIME_UNKNOWN;
+			
+			omx_buffer->nTimeStamp = ToOMXTime((uint64_t)(pts == DVD_NOPTS_VALUE) ? 0 : pts);
+			omx_buffer->nFilledLen = (demuxer_bytes > omx_buffer->nAllocLen) ? omx_buffer->nAllocLen : demuxer_bytes;
+			memcpy(omx_buffer->pBuffer, demuxer_content, omx_buffer->nFilledLen);
+			
+			demuxer_bytes -= omx_buffer->nFilledLen;
+			demuxer_content += omx_buffer->nFilledLen;
+			
+			if(demuxer_bytes == 0)
+				omx_buffer->nFlags |= OMX_BUFFERFLAG_ENDOFFRAME;
+			
+			int nRetry = 0;
+			while(true)
+			{
+				omx_err = m_omx_decoder.EmptyThisBuffer(omx_buffer);
+				if (omx_err == OMX_ErrorNone)
+				{
+					ofLog(OF_LOG_VERBOSE, "VideD:  pts:%.0f size:%d)\n", pts, iSize);
+					break;
+				}
+				else
+				{
+					ofLog(OF_LOG_ERROR, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, omx_err);
+					nRetry++;
+				}
+				if(nRetry == 5)
+				{
+					ofLog(OF_LOG_ERROR, "%s::%s - OMX_EmptyThisBuffer() finally failed\n", CLASSNAME, __func__);
+					printf("%s::%s - OMX_EmptyThisBuffer() finally failed\n", CLASSNAME, __func__);
+					return false;
+				}
+			}
+			
+			omx_err = m_omx_decoder.WaitForEvent(OMX_EventPortSettingsChanged, 0);
+			if (omx_err == OMX_ErrorNone)
+			{
+				if(!PortSettingsChanged())
+				{
+					ofLog(OF_LOG_ERROR, "%s::%s - error PortSettingsChanged omx_err(0x%08x)\n", CLASSNAME, __func__, omx_err);
+					return false;
+				}
+			}
+			omx_err = m_omx_decoder.WaitForEvent(OMX_EventParamOrConfigChanged, 0);
+			if (omx_err == OMX_ErrorNone)
+			{
+				if(!PortSettingsChanged())
+				{
+					ofLog(OF_LOG_ERROR, "%s::%s - error PortSettingsChanged (EventParamOrConfigChanged) omx_err(0x%08x)\n", CLASSNAME, __func__, omx_err);
+				}
+			}
+		}
+		return true;
+	}
+	
+	return false;
+}
 
 int COMXVideo::Decode(uint8_t *pData, int iSize, double dts, double pts)
 {
