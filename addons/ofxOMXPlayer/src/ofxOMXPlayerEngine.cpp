@@ -168,9 +168,9 @@ bool ofxOMXPlayerEngine::openPlayer()
 	videoWidth	= videoStreamInfo.width;
 	videoHeight = videoStreamInfo.height;
 	
-	ofLogVerbose() << "SET videoWidth: "	<< videoWidth;
-	ofLogVerbose() << "SET videoHeight: "	<< videoHeight;
-	ofLogVerbose() << "videoStreamInfo.nb_frames " <<videoStreamInfo.nb_frames;
+	ofLogVerbose(__func__) << "SET videoWidth: "	<< videoWidth;
+	ofLogVerbose(__func__) << "SET videoHeight: "	<< videoHeight;
+	ofLogVerbose(__func__) << "videoStreamInfo.nb_frames " <<videoStreamInfo.nb_frames;
 	if (isTextureEnabled) 
 	{
 		if (!eglPlayer) 
@@ -182,7 +182,8 @@ bool ofxOMXPlayerEngine::openPlayer()
 		videoPlayer = (OMXPlayerVideoBase*)eglPlayer;
 	}else 
 	{
-		if (!nonEglPlayer) {
+		if (!nonEglPlayer) 
+		{
 			nonEglPlayer = new OMXPlayerVideo();
 		}
 		bool deinterlace = false;
@@ -217,7 +218,6 @@ bool ofxOMXPlayerEngine::openPlayer()
 		}else
 		{
 			ofLogVerbose() << " AUDIO PLAYER OPEN FAIL";
-			
 		}
 	}
 	
