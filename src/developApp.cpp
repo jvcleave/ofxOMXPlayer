@@ -64,7 +64,7 @@ void developApp::setup()
 	doShader	= false;
 	
 	
-	settings.enableAudio = false; //default true
+	//settings.enableAudio = false; //default true
 	
 	if (doShader) 
 	{

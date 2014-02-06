@@ -1269,7 +1269,7 @@ OMX_ERRORTYPE COMXCoreComponent::WaitForEvent(OMX_EVENTTYPE eventType, long time
 		int retcode = pthread_cond_timedwait(&m_omx_event_cond, &m_omx_event_mutex, &endtime);
 		if (retcode != 0) 
 		{
-			ofLogError(__func__) << m_componentName << " WaitForEvent Event: " << printEventType(eventType) << " TIMED OUT at: " << timeout;
+			//ofLogError(__func__) << m_componentName << " WaitForEvent Event: " << printEventType(eventType) << " TIMED OUT at: " << timeout;
 			pthread_mutex_unlock(&m_omx_event_mutex);
 			return OMX_ErrorMax;
 		}

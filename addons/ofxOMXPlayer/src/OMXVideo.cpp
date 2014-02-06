@@ -415,7 +415,7 @@ int COMXVideo::Decode(uint8_t *pData, int iSize, double pts)
 				omx_err = m_omx_decoder.EmptyThisBuffer(omx_buffer);
 				if (omx_err == OMX_ErrorNone)
 				{
-					ofLog(OF_LOG_VERBOSE, "VideD:  pts:%.0f size:%d)\n", pts, iSize);
+					//ofLog(OF_LOG_VERBOSE, "VideD:  pts:%.0f size:%d)\n", pts, iSize);
 					break;
 				}
 				else
@@ -426,7 +426,6 @@ int COMXVideo::Decode(uint8_t *pData, int iSize, double pts)
 				if(nRetry == 5)
 				{
 					ofLog(OF_LOG_ERROR, "%s::%s - OMX_EmptyThisBuffer() finally failed\n", CLASSNAME, __func__);
-					printf("%s::%s - OMX_EmptyThisBuffer() finally failed\n", CLASSNAME, __func__);
 					return false;
 				}
 			}
