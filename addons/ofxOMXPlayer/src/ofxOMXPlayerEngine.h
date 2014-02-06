@@ -69,6 +69,9 @@ public:
 	//OMXThread inheritance
 	void		Process();
 	
+	COMXStreamInfo			videoStreamInfo;
+	COMXStreamInfo			audioStreamInfo;
+	
 private:
 	
 	COMXCore				omxCore;
@@ -82,8 +85,7 @@ private:
 	ofxOMXPlayerListener*	listener;
 	OMXReader				omxReader;
 	
-	COMXStreamInfo			videoStreamInfo;
-	COMXStreamInfo			audioStreamInfo;
+
 	
 	bool					hasVideo;
 	bool					hasAudio;
