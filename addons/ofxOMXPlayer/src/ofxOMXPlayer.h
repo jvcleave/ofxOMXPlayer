@@ -51,7 +51,9 @@ public:
 	void close();
 	bool isOpen;
 	
-	
+	COMXStreamInfo getVideoStreamInfo();
+	COMXStreamInfo getAudioStreamInfo();
+
 	
 private:
 	

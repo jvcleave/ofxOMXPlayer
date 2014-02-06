@@ -190,6 +190,37 @@ int ofxOMXPlayer::getTotalNumFrames()
 	return 0;
 }
 
+
+COMXStreamInfo ofxOMXPlayer::getVideoStreamInfo()
+{
+	
+	COMXStreamInfo videoInfo;
+	if (engine) 
+	{
+		videoInfo = engine->videoStreamInfo;
+		
+	}else
+	{
+		ofLogError(__func__) << "No engine avail - info returned is invalid";
+	}
+	return videoInfo;
+}
+
+COMXStreamInfo ofxOMXPlayer::getAudioStreamInfo()
+{
+	COMXStreamInfo audioInfo;
+	if (engine) 
+	{
+		audioInfo = engine->audioStreamInfo;
+
+	}else
+	{
+		ofLogError(__func__) << "No engine avail - info returned is invalid";
+	}
+	return audioInfo;
+}
+
+
 void ofxOMXPlayer::draw(float x, float y, float width, float height)
 {
 	if (!isTextureEnabled) 
