@@ -49,3 +49,28 @@ void COMXStreamInfo::Clear()
 	framesize  = 0;
 	syncword   = 0;
 }
+
+string COMXStreamInfo::toString()
+{
+	stringstream info;
+	info << "width: "				<<	width					<< "\n";
+	info << "height: "				<<	height					<< "\n";
+	info << "profile: "				<<	profile					<< "\n";
+	info << "numFrames: "			<<	nb_frames				<< "\n";
+	info << "duration: "			<<	duration				<< "\n";
+	info << "channels: "			<<	channels				<< "\n";
+	info << "samplerate: "			<<	samplerate				<< "\n";
+	info << "blockalign: "			<<	blockalign				<< "\n";
+	info << "bitrate: "				<<	bitrate					<< "\n";
+	info << "bitspersample: "		<<	bitspersample			<< "\n";
+	info << "framesize: "			<<	framesize				<< "\n";
+	info << "fpsscale: "			<<	fpsscale				<< "\n";
+	info << "fpsrate: "				<<	fpsrate					<< "\n";
+	info << "aspect: "				<<	aspect					<< "\n";
+	info << "level: "				<<	level					<< "\n";
+	info << "ptsinvalid: "			<<	ptsinvalid				<< "\n";
+	info << "identifier: "			<<	identifier				<< "\n";
+	info << "extrasize: "			<<	extrasize				<< "\n";
+	
+	return info.str();
+}

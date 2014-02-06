@@ -11,12 +11,12 @@ void developApp::onCharacterReceived(SSHKeyListenerEventData& e)
 
 void developApp::onVideoEnd(ofxOMXPlayerListenerEventData& e)
 {
-	ofLogVerbose("developApp") << " onVideoEnd";
+	ofLogVerbose(__func__) << "at: " << ofGetElapsedTimeMillis();
 }
-/*void developApp::onVideoLoop(ofxOMXPlayerListenerEventData& e)
+void developApp::onVideoLoop(ofxOMXPlayerListenerEventData& e)
 {
-	ofLogVerbose("developApp") << " onVideoLoop";
-}*/
+	ofLogVerbose(__func__) << "at: " << ofGetElapsedTimeMillis();
+}
 
 
 //--------------------------------------------------------------
@@ -60,11 +60,11 @@ void developApp::setup()
 	settings.videoPath = videoPath;
 	settings.listener = this; //this app extends ofxOMXPlayerListener so it will receive events ;
 	
-	doTextures	= true;
+	doTextures	= false;
 	doShader	= false;
 	
 	
-	//settings.enableAudio = false; //default true
+	settings.enableAudio = false; //default true
 	
 	if (doShader) 
 	{

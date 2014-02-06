@@ -83,56 +83,20 @@ bool OMXPlayerVideoBase::Decode(OMXPacket *pkt)
 	{
 		return false;
 	}
-#if 0
-	bool ret = false;
-	
-	if(!((int)m_decoder->GetFreeSpace() > pkt->size))
-	{
-		OMXClock::OMXSleep(10);
-	}
-	
-	if(pkt->pts != DVD_NOPTS_VALUE)
-	{
-		m_pts = pkt->pts;
-	}
-	
-	if((int)m_decoder->GetFreeSpace() > pkt->size)
-    {
-		if(pkt->pts != DVD_NOPTS_VALUE)
-		{
-			m_iCurrentPts = pkt->pts;
-		}
-		else if(pkt->dts != DVD_NOPTS_VALUE)
-		{
-			m_iCurrentPts = pkt->dts;
-		}
-		bool doDecodeFrameDebugging  = false;
-		if (doDecodeFrameDebugging) 
-		{
-			ofLog(OF_LOG_VERBOSE, "OMXPlayerVideoBase::Decode dts:%.0f pts:%.0f cur:%.0f, size:%d", pkt->dts, pkt->pts, m_iCurrentPts, pkt->size);
-
-		}
-		m_decoder->Decode(pkt->data, pkt->size, pkt->dts, pkt->pts);
-		ret = true;
-    }
-    else
-	{
-		// video fifo is full, allow other tasks to run
-		OMXClock::OMXSleep(10);
-	}
-	return ret;
-#endif
-	
 	m_history_valid_pts = (m_history_valid_pts << 1) | (pkt->pts != DVD_NOPTS_VALUE);
     double pts = pkt->pts;
     if(pkt->pts == DVD_NOPTS_VALUE && (m_iCurrentPts == DVD_NOPTS_VALUE || count_bits(m_history_valid_pts & 0xffff) < 4))
 		pts = pkt->dts;
 	
     if (pts != DVD_NOPTS_VALUE)
+	{
 		pts += m_iVideoDelay;
+	}
 	
     if(pts != DVD_NOPTS_VALUE)
+	{
 		m_iCurrentPts = pts;
+	}
 	
     while((int) m_decoder->GetFreeSpace() < pkt->size)
     {

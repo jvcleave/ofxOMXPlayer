@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ofMain.h"
 
 extern "C" {
   #include "libavcodec/avcodec.h"
@@ -54,4 +55,6 @@ public:
 	/* ac3/dts indof */
 	unsigned int framesize;
 	uint32_t     syncword;
+	
+	string toString();
 };

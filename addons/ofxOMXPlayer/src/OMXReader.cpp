@@ -304,7 +304,7 @@ bool OMXReader::Close()
 	m_chapter_count   = 0;
 	m_iCurrentPts     = DVD_NOPTS_VALUE;
 	m_speed           = DVD_PLAYSPEED_NORMAL;
-	
+	wasFileRewound = false;
 	ClearStreams();
 	
 	return true;
@@ -352,7 +352,10 @@ bool OMXReader::SeekTime(int time, bool backwords, double *startpts)
 	{
 		UpdateCurrentPTS();
 	}else {
-		ofLogVerbose(__func__) << "av_seek_frame returned >= 0, no UpdateCurrentPTS" << ret;
+		ofLogVerbose(__func__) << "av_seek_frame returned >= 0, - rewinding file" << ret;
+		m_pFile->rewindFile();
+		UpdateCurrentPTS();
+		wasFileRewound = true;
 	}
 
 	

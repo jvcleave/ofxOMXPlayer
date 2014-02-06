@@ -45,6 +45,7 @@ namespace XFILE
 		int GetChunkSize() { return 6144 /*FFMPEG_FILE_BUFFER_SIZE*/; };
 		int IoControl(EIoControl request, void* param);
 		bool IsEOF();
+		void rewindFile();
 	private:
 		unsigned int m_flags;
 		FILE  *m_pFile;

@@ -35,6 +35,6 @@ public:
 	
 	bool doWriteImage;
 	void onVideoEnd(ofxOMXPlayerListenerEventData& e);
-	void onVideoLoop(ofxOMXPlayerListenerEventData& e){};
+	void onVideoLoop(ofxOMXPlayerListenerEventData& e);
 };
 

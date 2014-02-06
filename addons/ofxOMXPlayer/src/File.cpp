@@ -29,7 +29,10 @@ CFile::~CFile()
 	if(m_pFile && !m_bPipe)
 		fclose(m_pFile);
 }
-
+void CFile::rewindFile()
+{
+	rewind(m_pFile);
+}
 //*********************************************************************************************
 bool CFile::Open(const CStdString& strFileName, unsigned int flags)
 {
