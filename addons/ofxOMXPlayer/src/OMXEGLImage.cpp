@@ -196,7 +196,8 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 		OMX_NALSTREAMFORMATTYPE nalStreamFormat;
 		OMX_INIT_STRUCTURE(nalStreamFormat);
 		nalStreamFormat.nPortIndex = m_omx_decoder.GetInputPort();
-		nalStreamFormat.eNaluFormat = OMX_NaluFormatOneNaluPerBuffer;
+		//nalStreamFormat.eNaluFormat = OMX_NaluFormatOneNaluPerBuffer;
+		nalStreamFormat.eNaluFormat = OMX_NaluFormatStartCodes;
 		
 		error = m_omx_decoder.SetParameter((OMX_INDEXTYPE)OMX_IndexParamNalStreamFormatSelect, &nalStreamFormat);
 		if (error == OMX_ErrorNone)
