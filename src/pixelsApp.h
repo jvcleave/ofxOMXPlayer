@@ -20,7 +20,8 @@ public:
 	
 	ConsoleListener consoleListener;
 	void onCharacterReceived(SSHKeyListenerEventData& e);
-	ofImage image;
+	//ofImage pixelOutput;
+	ofTexture pixelOutput;
 	bool doUpdatePixels;
 };
 

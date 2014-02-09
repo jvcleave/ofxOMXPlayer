@@ -1,6 +1,5 @@
 #include "pixelsApp.h"
 
-bool hasUpdatedImage = false;
 //--------------------------------------------------------------
 void pixelsApp::setup()
 {
@@ -39,9 +38,13 @@ void pixelsApp::update()
 		//doUpdatePixels = false;
 		
 		omxPlayer.updatePixels();
-		image.setFromPixels(GlobalEGLContainer::getInstance().pixels);
-		
-		hasUpdatedImage = true;
+		//ofImage version
+		//pixelOutput.setFromPixels(GlobalEGLContainer::getInstance().pixels, omxPlayer.getWidth(), omxPlayer.getHeight(), OF_IMAGE_COLOR_ALPHA, true);
+		if (!pixelOutput.isAllocated()) 
+		{
+			pixelOutput.allocate(omxPlayer.getWidth(), omxPlayer.getHeight(), GL_RGBA);
+		}
+		pixelOutput.loadData(GlobalEGLContainer::getInstance().pixels, omxPlayer.getWidth(), omxPlayer.getHeight(), GL_RGBA);
 	}
 	
 	
@@ -56,7 +59,7 @@ void pixelsApp::draw(){
 	}
 	
 	omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
-	if(hasUpdatedImage) image.draw(0, 0, 400, 300);
+	pixelOutput.draw(0, 0, omxPlayer.getWidth()/4, omxPlayer.getHeight()/4);
 	
 	stringstream info;
 	info << "APP FPS: "+ ofToString(ofGetFrameRate());
