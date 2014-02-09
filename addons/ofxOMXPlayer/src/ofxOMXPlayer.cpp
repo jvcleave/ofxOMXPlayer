@@ -162,7 +162,7 @@ void ofxOMXPlayer::saveImage(string imagePath)//default imagePath=""
 		imagePath = ofGetTimestampString()+".png";
 	}
 	updatePixels();
-	ofSaveImage(GlobalEGLContainer::getInstance().pixels, ofGetTimestampString()+".png");
+	//TODO ofSaveImage(GlobalEGLContainer::getInstance().pixels, ofGetTimestampString()+".png");
 	
 }
 
