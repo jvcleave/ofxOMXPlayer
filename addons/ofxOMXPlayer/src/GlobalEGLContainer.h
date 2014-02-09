@@ -30,16 +30,14 @@ public:
 	bool hasGenerated;
 	int videoWidth;
 	int videoHeight;
-	ofPixels pixels;
-	int textureGLFormat;
-	ofImageType imageTypeFromGL;
+	unsigned char * pixels;
 	bool isExiting;
 	void updatePixels()
 	{
-		fbo.begin();
+		fbo.begin(false);
 			ofClear(0, 0, 0, 0);
 			texture.draw(0, 0);
-			glReadPixels(0,0,videoWidth, videoHeight, textureGLFormat, GL_UNSIGNED_BYTE, pixels.getPixels());
+			glReadPixels(0,0,videoWidth, videoHeight, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 		fbo.end();
 	}
 	
@@ -150,17 +148,7 @@ public:
 		else
 		{
 			ofLogVerbose()	<< "Create EGLImage PASS";
-			textureGLFormat = ofGetGLFormatFromInternal(texture.getTextureData().glTypeInternal);
-			imageTypeFromGL = ofGetImageTypeFromGLType(texture.getTextureData().glTypeInternal);
-			pixels.allocate(texture.getWidth(), texture.getHeight(), imageTypeFromGL);
-			if (pixels.isAllocated()) 
-			{
-				ofLogVerbose(__func__)	<< "pixels Allocated PASS";
-			}else 
-			{
-				ofLogVerbose(__func__)	<< "pixels Allocated FAIL";
-			}
-
+			pixels = new unsigned char[dataSize];
 			hasGenerated = true;
 		}
 		
