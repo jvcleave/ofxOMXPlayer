@@ -60,11 +60,11 @@ void developApp::setup()
 	settings.videoPath = videoPath;
 	settings.listener = this; //this app extends ofxOMXPlayerListener so it will receive events ;
 	
-	doTextures	= false;
+	doTextures	= true;
 	doShader	= false;
 	
 	
-	settings.enableAudio = false; //default true
+	//settings.enableAudio = false; //default true
 	
 	if (doShader) 
 	{
@@ -240,6 +240,26 @@ void developApp::keyPressed  (int key){
 			break;
 		}
 			
+		case '4':
+		{
+			ofLogVerbose() << "rewind";
+			omxPlayer.rewind();
+			break;
+		}
+			
+		case '5':
+		{
+			ofLogVerbose() << "setNormalSpeed";
+			omxPlayer.setNormalSpeed();
+			break;
+		}
+	
+		case '6':
+		{
+			ofLogVerbose() << "fastForward";
+			omxPlayer.fastForward();
+			break;
+		}
 		case 'b':
 		{
 			ofLogVerbose() << "stepFrameForward";

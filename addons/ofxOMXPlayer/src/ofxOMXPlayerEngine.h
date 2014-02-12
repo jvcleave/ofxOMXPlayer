@@ -72,6 +72,12 @@ public:
 	COMXStreamInfo			videoStreamInfo;
 	COMXStreamInfo			audioStreamInfo;
 	
+	
+	void fastForward();
+	void rewind();
+	void setNormalSpeed();
+	int normalPlaySpeed;
+	int speedMultiplier;
 private:
 	
 	COMXCore				omxCore;

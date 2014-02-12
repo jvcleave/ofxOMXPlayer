@@ -36,11 +36,66 @@ ofxOMXPlayerEngine::ofxOMXPlayerEngine()
 	previousLoopOffset = 0;
 	omxCore.Initialize();
 	OMXDecoderBase::fillBufferCounter=0;
+	
+	normalPlaySpeed = 1000;
+	speedMultiplier = 1;
+	
 }
 
+void ofxOMXPlayerEngine::setNormalSpeed()
+{
+	
+	speedMultiplier = 1;
+	clock.OMXSetSpeed(normalPlaySpeed);
+	omxReader.SetSpeed(normalPlaySpeed);
+	ofLogVerbose(__func__) << "clock speed: " << clock.OMXPlaySpeed();
+	ofLogVerbose(__func__) << "reader speed: " << omxReader.GetSpeed();
+}
+
+void ofxOMXPlayerEngine::fastForward()
+{
+	ofLogVerbose(__func__) << "clock speed: " << clock.OMXPlaySpeed();
+	ofLogVerbose(__func__) << "reader speed: " << omxReader.GetSpeed();
+	speedMultiplier++;
+	if(speedMultiplier>8)
+	{
+		speedMultiplier = 1;
+	}
+	int newSpeed = normalPlaySpeed*speedMultiplier;
+	
+	clock.OMXSetSpeed(newSpeed);
+	omxReader.SetSpeed(newSpeed);
+	ofLogVerbose(__func__) << "newSpeed: " << newSpeed;
+	
+}
+
+void ofxOMXPlayerEngine::rewind()
+{
+	ofLogVerbose(__func__) << "clock speed: " << clock.OMXPlaySpeed();
+	ofLogVerbose(__func__) << "reader speed: " << omxReader.GetSpeed();
+	if(speedMultiplier-1 == 0)
+	{
+		speedMultiplier = -1;
+	}else 
+	{
+		speedMultiplier--;
+	}
+
+	
+	if(speedMultiplier<-8)
+	{
+		speedMultiplier = 1;
+	}
+	int newSpeed = normalPlaySpeed*speedMultiplier;
+	
+	clock.OMXSetSpeed(newSpeed);
+	omxReader.SetSpeed(newSpeed);
+	ofLogVerbose(__func__) << "newSpeed: " << newSpeed;
+	
+}
 ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
 {
-	ofLogVerbose() << "~ofxOMXPlayerEngine START";
+	ofLogVerbose(__func__) << " START";
 	//Lock();
 	
 	

@@ -54,7 +54,9 @@ public:
 	COMXStreamInfo getVideoStreamInfo();
 	COMXStreamInfo getAudioStreamInfo();
 
-	
+	void setNormalSpeed();
+	void fastForward();
+	void rewind();
 private:
 	
 	void openEngine();

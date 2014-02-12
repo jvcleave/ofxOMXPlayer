@@ -1,11 +1,6 @@
 #include "OMXEGLImage.h"
 
 
-
-unsigned long long currentFrameTime;
-unsigned long long lastFrameTime;
-
-bool isFirstCallback = true;
 OMXEGLImage::OMXEGLImage()
 {
 	eglBuffer = NULL;
@@ -16,20 +11,11 @@ OMX_ERRORTYPE onFillBufferDone(OMX_HANDLETYPE hComponent,
 							   OMX_PTR pAppData,
 							   OMX_BUFFERHEADERTYPE* pBuffer)
 {    
-	/*if (isFirstCallback) {
-		isFirstCallback = false;
-		currentFrameTime = ofGetElapsedTimeMillis();
-		ofLogVerbose(__func__) << "isFirstCallback";
-	}else 
-	{
-		lastFrameTime = currentFrameTime;
-		currentFrameTime = ofGetElapsedTimeMillis();
-		ofLogVerbose(__func__) << "Frame process time: " << currentFrameTime - lastFrameTime;
-		
-	}*/
-
-	//ofLogVerbose(__func__) << "onFillBufferDone<----------";
-	//COMXCoreComponent *ctx = static_cast<COMXCoreComponent*>(pAppData);
+	
+	/*
+	int64_t timestamp = pBuffer->nTimeStamp.nLowPart | ((uint64_t)(pBuffer->nTimeStamp.nHighPart) << 32);
+	ofLogVerbose(__func__) << "timestamp: " << timestamp;
+	*/
 	OMX_ERRORTYPE didFillBuffer = OMX_FillThisBuffer(hComponent, pBuffer);
 	if (didFillBuffer == OMX_ErrorNone) 
 	{
@@ -196,7 +182,6 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 		OMX_NALSTREAMFORMATTYPE nalStreamFormat;
 		OMX_INIT_STRUCTURE(nalStreamFormat);
 		nalStreamFormat.nPortIndex = m_omx_decoder.GetInputPort();
-		//nalStreamFormat.eNaluFormat = OMX_NaluFormatOneNaluPerBuffer;
 		nalStreamFormat.eNaluFormat = OMX_NaluFormatStartCodes;
 		
 		error = m_omx_decoder.SetParameter((OMX_INDEXTYPE)OMX_IndexParamNalStreamFormatSelect, &nalStreamFormat);

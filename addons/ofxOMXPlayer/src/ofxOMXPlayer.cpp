@@ -15,6 +15,29 @@ ofxOMXPlayer::ofxOMXPlayer()
 	
 }
 
+void ofxOMXPlayer::setNormalSpeed()
+{
+	engine->setNormalSpeed();
+}
+void ofxOMXPlayer::rewind()
+{
+	engine->rewind();
+}
+void ofxOMXPlayer::fastForward()
+{
+	/*if(!m_av_clock)
+		return;
+	
+	m_omx_reader.SetSpeed(iSpeed);
+	
+	// flush when in trickplay mode
+	if (TRICKPLAY(iSpeed) || TRICKPLAY(m_av_clock->OMXPlaySpeed()))
+		FlushStreams(DVD_NOPTS_VALUE);
+	
+	m_av_clock->OMXSetSpeed(iSpeed);*/
+	engine->fastForward();
+	
+}
 void ofxOMXPlayer::loadMovie(string videoPath)
 {
 	settings.videoPath = videoPath;
