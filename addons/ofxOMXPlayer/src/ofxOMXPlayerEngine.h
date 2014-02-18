@@ -78,6 +78,8 @@ public:
 	void setNormalSpeed();
 	int normalPlaySpeed;
 	int speedMultiplier;
+	
+	bool doSeek;
 private:
 	
 	COMXCore				omxCore;

@@ -39,6 +39,7 @@ ofxOMXPlayerEngine::ofxOMXPlayerEngine()
 	
 	normalPlaySpeed = 1000;
 	speedMultiplier = 1;
+	doSeek = false;
 	
 }
 
@@ -54,6 +55,12 @@ void ofxOMXPlayerEngine::setNormalSpeed()
 
 void ofxOMXPlayerEngine::fastForward()
 {
+	
+	Lock();
+	ofLogVerbose(__func__) << " START";
+	doSeek = true;
+	UnLock();
+	return;
 	ofLogVerbose(__func__) << "clock speed: " << clock.OMXPlaySpeed();
 	ofLogVerbose(__func__) << "reader speed: " << omxReader.GetSpeed();
 	speedMultiplier++;
@@ -392,11 +399,51 @@ void ofxOMXPlayerEngine::Process()
 			}
 			else
 			{
+				
 				OMXClock::OMXSleep(10);
 				continue;
 			}
 			
+		}else 
+		{
+			if (doSeek)
+			{
+				
+				
+				
+				float middle = (videoStreamInfo.duration/2)*1000;
+				
+				ofLogVerbose() << "ATTEMPTING SEEK TO " << middle;
+				omxReader.SeekTime(middle, AVSEEK_FLAG_BACKWARD, &startpts);
+				//clock.OMXStop();
+				clock.OMXPause();
+				
+				if(hasVideo)
+					videoPlayer->Flush();
+				
+				if(hasAudio)
+					audioPlayer->Flush();
+				
+				/*if(pts != DVD_NOPTS_VALUE)
+					clock.OMXMediaTime(0.0);*/
+				
+				
+				
+				if(packet)
+				{
+					omxReader.FreePacket(packet);
+					packet = NULL;
+				}
+				doSeek = false;
+				packet = omxReader.Read();
+				clock.OMXResume();
+			}else 
+			{
+				//ofLogVerbose() << " ?";
+			}
+			
 		}
+
 		
 		if (doLooping && OMXDecoderBase::fillBufferCounter>=getTotalNumFrames()) 
 		{

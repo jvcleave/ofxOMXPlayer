@@ -320,7 +320,7 @@ bool OMXReader::Close()
  ff_read_frame_flush(m_pFormatContext);
  }*/
 
-bool OMXReader::SeekTime(int time, bool backwords, double *startpts)
+bool OMXReader::SeekTime(int time, bool backwords, double *startpts, bool doLoopOnFail)//doLoopOnFail = true
 {
 	if(time < 0)
 		time = 0;
@@ -345,17 +345,24 @@ bool OMXReader::SeekTime(int time, bool backwords, double *startpts)
 	if (m_pFormatContext->start_time != (int64_t)AV_NOPTS_VALUE)
 		seek_pts += m_pFormatContext->start_time;
 	
-	
-	int ret = m_dllAvFormat.av_seek_frame(m_pFormatContext, -1, seek_pts, backwords ? AVSEEK_FLAG_BACKWARD : 0);
-	
+	//  virtual int av_seek_frame(AVFormatContext *s, int stream_index, int64_t timestamp, int flags) { return ::av_seek_frame(s, stream_index, timestamp, flags); }
+
+	//int ret = m_dllAvFormat.av_seek_frame(m_pFormatContext, -1, seek_pts, backwords ? AVSEEK_FLAG_BACKWARD : 0);
+	int ret =avformat_seek_file(m_pFormatContext, -1, 0, seek_pts, m_pFormatContext->duration*1000, AVSEEK_FLAG_ANY);
 	if(ret >= 0)
 	{
+		ofLogVerbose(__func__) << "av_seek_frame PASS: - returned: " << ret;
 		UpdateCurrentPTS();
 	}else {
 		ofLogVerbose(__func__) << "av_seek_frame returned >= 0, - rewinding file" << ret;
-		m_pFile->rewindFile();
+		if (doLoopOnFail) 
+		{
+			m_pFile->rewindFile();
+			wasFileRewound = true;
+		}
+		
 		UpdateCurrentPTS();
-		wasFileRewound = true;
+		
 	}
 
 	
