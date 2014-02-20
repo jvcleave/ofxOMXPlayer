@@ -347,8 +347,8 @@ bool OMXReader::SeekTime(int time, bool backwords, double *startpts, bool doLoop
 	
 	//  virtual int av_seek_frame(AVFormatContext *s, int stream_index, int64_t timestamp, int flags) { return ::av_seek_frame(s, stream_index, timestamp, flags); }
 
-	//int ret = m_dllAvFormat.av_seek_frame(m_pFormatContext, -1, seek_pts, backwords ? AVSEEK_FLAG_BACKWARD : 0);
-	int ret =avformat_seek_file(m_pFormatContext, -1, 0, seek_pts, m_pFormatContext->duration*1000, AVSEEK_FLAG_ANY);
+	int ret = m_dllAvFormat.av_seek_frame(m_pFormatContext, -1, seek_pts, backwords ? AVSEEK_FLAG_BACKWARD : 0);
+	//int ret =avformat_seek_file(m_pFormatContext, -1, 0, seek_pts, m_pFormatContext->duration*1000, AVSEEK_FLAG_ANY);
 	if(ret >= 0)
 	{
 		ofLogVerbose(__func__) << "av_seek_frame PASS: - returned: " << ret;
