@@ -70,7 +70,7 @@ OMXDecoderBase::~OMXDecoderBase()
 }
 
 
-bool OMXDecoderBase::NaluFormatStartCodes(enum CodecID codec, uint8_t *in_extradata, int in_extrasize)
+bool OMXDecoderBase::NaluFormatStartCodes(enum AVCodecID codec, uint8_t *in_extradata, int in_extrasize)
 {
 	switch(codec)
 	{

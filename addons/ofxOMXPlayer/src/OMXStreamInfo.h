@@ -18,7 +18,7 @@ public:
 	
 	void Clear(); // clears current information
 	
-	CodecID codec;
+	AVCodecID codec;
 	bool software;  //force software decoding
 	
 	

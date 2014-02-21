@@ -89,7 +89,7 @@ PROJECT_EXCLUSIONS =$(PROJECT_ROOT)/addons/ofxOMXPlayer/libs/ffmpeg/include%
 # incorporated directly into the final executable application binary.
 
 
-FFMPEG_LIBS = $(PROJECT_ROOT)/addons/ofxOMXPlayer/libs/ffmpeg/libs
+FFMPEG_LIBS = $(PROJECT_ROOT)/addons/ofxOMXPlayer/libs/ffmpeg/lib
 FORMAT_STATIC=$(FFMPEG_LIBS)/libavformat.a
 CODEC_STATIC=$(FFMPEG_LIBS)/libavcodec.a
 SCALE_STATIC=$(FFMPEG_LIBS)/libswscale.a
@@ -122,6 +122,7 @@ PROJECT_DEFINES += PIC
 PROJECT_DEFINES += _REENTRANT 
 PROJECT_DEFINES += OMX 
 PROJECT_DEFINES += OMX_SKIP64BIT 
+#PROJECT_DEFINES += FF_API_CODEC_ID 
 
 ################################################################################
 # PROJECT CFLAGS
@@ -138,7 +139,7 @@ PROJECT_DEFINES += OMX_SKIP64BIT
 #
 #   Note: Leave a leading space when adding list items with the += operator
 ################################################################################
-PROJECT_CFLAGS = -I$(PROJECT_ROOT)/addons/ofxOMXPlayer/libs/ffmpeg/include -fPIC -U_FORTIFY_SOURCE -Wall -ftree-vectorize -ftree-vectorize
+PROJECT_CFLAGS = -I$(PROJECT_ROOT)/addons/ofxOMXPlayer/libs/ffmpeg/include -fPIC -U_FORTIFY_SOURCE -Wall -ftree-vectorize -ftree-vectorize -Wno-deprecated-declarations
  
 
 ################################################################################

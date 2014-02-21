@@ -1186,7 +1186,7 @@ bool COMXAudio::SetClock(OMXClock *clock)
   return true;
 }
  
-void COMXAudio::SetCodingType(CodecID codec)
+void COMXAudio::SetCodingType(AVCodecID codec)
 {
 	switch(codec)
 	{ 
@@ -1206,7 +1206,7 @@ void COMXAudio::SetCodingType(CodecID codec)
 	} 
 }
 
-bool COMXAudio::CanHWDecode(CodecID codec)
+bool COMXAudio::CanHWDecode(AVCodecID codec)
 {
 	switch(codec)
 	{ 
@@ -1249,7 +1249,7 @@ bool COMXAudio::CanHWDecode(CodecID codec)
 	return m_HWDecode;
 }
 
-bool COMXAudio::HWDecode(CodecID codec)
+bool COMXAudio::HWDecode(AVCodecID codec)
 {
 	bool ret = false;
 	

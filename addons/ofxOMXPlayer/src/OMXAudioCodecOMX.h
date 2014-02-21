@@ -32,6 +32,8 @@
 #include "utils/PCMRemap.h"
 #include "linux/PlatformDefs.h"
 
+#define AVCODEC_MAX_AUDIO_FRAME_SIZE 192000
+
 class COMXAudioCodecOMX
 {
 public:

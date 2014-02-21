@@ -109,7 +109,7 @@ public:
 		//may be resolved in future firmare
 		//https://github.com/raspberrypi/firmware/issues/176
 		
-		texture.getTextureData().bFlipTexture = true;
+		//texture.getTextureData().bFlipTexture = true;
 		texture.setTextureWrap(GL_REPEAT, GL_REPEAT);
 		textureID = texture.getTextureData().textureID;
 		

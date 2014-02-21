@@ -80,7 +80,7 @@ public:
 	bool					Pause();
 	
 	bool					SendDecoderConfig();
-	bool					NaluFormatStartCodes(enum CodecID codec, uint8_t *in_extradata, int in_extrasize);
+	bool					NaluFormatStartCodes(enum AVCodecID codec, uint8_t *in_extradata, int in_extrasize);
 	
 	void					SetDropState(bool bDrop);
 	unsigned int			GetFreeSpace();
