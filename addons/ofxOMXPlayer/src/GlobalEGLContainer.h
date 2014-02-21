@@ -10,6 +10,7 @@
 
 #include "ofMain.h"
 #include "ofAppEGLWindow.h"
+#include "ofxOMXPlayerSettings.h"
 #include <IL/OMX_Core.h>
 
 class GlobalEGLContainer
@@ -32,6 +33,7 @@ public:
 	int videoHeight;
 	unsigned char * pixels;
 	bool isExiting;
+	ofxOMXPlayerSettings omxPlayerSettings;
 	void updatePixels()
 	{
 		fbo.begin(false);
@@ -40,7 +42,12 @@ public:
 			glReadPixels(0,0,videoWidth, videoHeight, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 		fbo.end();
 	}
-	
+	void setup(ofxOMXPlayerSettings& settings)
+	{
+		omxPlayerSettings =  settings;
+		generateEGLImage(omxPlayerSettings.videoWidth, omxPlayerSettings.videoHeight);
+		
+	}
 	void generateEGLImage(int videoWidth_, int videoHeight_)
 	{	
 		bool needsRegeneration = false;
@@ -109,7 +116,11 @@ public:
 		//may be resolved in future firmare
 		//https://github.com/raspberrypi/firmware/issues/176
 		
-		//texture.getTextureData().bFlipTexture = true;
+		if (omxPlayerSettings.doFlipTexture) 
+		{
+			texture.getTextureData().bFlipTexture = true;
+		}
+		
 		texture.setTextureWrap(GL_REPEAT, GL_REPEAT);
 		textureID = texture.getTextureData().textureID;
 		

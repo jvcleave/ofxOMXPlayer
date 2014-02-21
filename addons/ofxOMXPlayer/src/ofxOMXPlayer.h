@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxOMXPlayerSettings.h"
 #include "ofxOMXPlayerListener.h"
 #include "ofxOMXPlayerEngine.h"
 

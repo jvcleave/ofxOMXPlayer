@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 
+
 class ofxOMXPlayerListenerEventData
 {
 public:
@@ -22,30 +23,4 @@ public:
 };
 
 
-struct ofxOMXPlayerSettings 
-{
-	ofxOMXPlayerSettings()
-	{
-		videoPath = "";
-		
-		useHDMIForAudio = true;
-		enableTexture = true;
-		enableLooping = true;
-		listener	  = NULL;
-		enableAudio	  = true;
-	}
-	string videoPath;
-	bool enableTexture;
-	bool enableAudio;
-	bool useHDMIForAudio;
-	bool enableLooping;
-	ofxOMXPlayerListener* listener;
-	/*
-	 To use HDMI Audio you may need to add the below line to /boot/config.txt and reboot
-	 
-	 hdmi_drive=2
-	 
-	 see http://elinux.org/RPiconfig for more details
-	 */
-	
-};
+

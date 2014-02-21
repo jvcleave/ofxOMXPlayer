@@ -161,16 +161,16 @@ ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
 	
 }
 
-bool ofxOMXPlayerEngine::setup(ofxOMXPlayerSettings settings)
+bool ofxOMXPlayerEngine::setup(ofxOMXPlayerSettings& settings)
 {
-	
-	moviePath = settings.videoPath; 
-	useHDMIForAudio = settings.useHDMIForAudio;
-	doLooping = settings.enableLooping;
-	addListener(settings.listener);
+	omxPlayerSettings = settings;
+	moviePath = omxPlayerSettings.videoPath; 
+	useHDMIForAudio = omxPlayerSettings.useHDMIForAudio;
+	doLooping = omxPlayerSettings.enableLooping;
+	addListener(omxPlayerSettings.listener);
 	
 	ofLogVerbose() << "moviePath is " << moviePath;
-	isTextureEnabled = settings.enableTexture;
+	isTextureEnabled = omxPlayerSettings.enableTexture;
 	
 	
 	
@@ -192,7 +192,7 @@ bool ofxOMXPlayerEngine::setup(ofxOMXPlayerSettings settings)
 		{
 			ofLogVerbose() << "NO AUDIO";
 		}
-		if (!settings.enableAudio) 
+		if (!omxPlayerSettings.enableAudio) 
 		{
 			hasAudio = false;
 		}
@@ -229,6 +229,8 @@ bool ofxOMXPlayerEngine::openPlayer()
 
 	videoWidth	= videoStreamInfo.width;
 	videoHeight = videoStreamInfo.height;
+	omxPlayerSettings.videoWidth	= videoStreamInfo.width;
+	omxPlayerSettings.videoHeight	= videoStreamInfo.height;
 	
 	ofLogVerbose(__func__) << "SET videoWidth: "	<< videoWidth;
 	ofLogVerbose(__func__) << "SET videoHeight: "	<< videoHeight;
@@ -239,7 +241,7 @@ bool ofxOMXPlayerEngine::openPlayer()
 		{
 			eglPlayer = new OMXPlayerEGLImage();
 		}
-		GlobalEGLContainer::getInstance().generateEGLImage(videoWidth, videoHeight);
+		GlobalEGLContainer::getInstance().setup(omxPlayerSettings);
 		didVideoOpen = eglPlayer->Open(videoStreamInfo, &clock);
 		videoPlayer = (OMXPlayerVideoBase*)eglPlayer;
 	}else 

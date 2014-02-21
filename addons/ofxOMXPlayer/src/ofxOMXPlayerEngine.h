@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "ofAppEGLWindow.h"
+#include "ofxOMXPlayerSettings.h"
 #include "ofxOMXPlayerListener.h"
 
 extern "C" 
@@ -25,7 +26,7 @@ public:
 	ofxOMXPlayerEngine();
 	~ofxOMXPlayerEngine();
 	
-	bool setup(ofxOMXPlayerSettings settings);
+	bool setup(ofxOMXPlayerSettings& settings);
 	
 	void		loadMovie();
 	
@@ -118,5 +119,7 @@ private:
 	void					onVideoEnd();
 	void					onVideoLoop();
 	double					previousLoopOffset;
+	
+	ofxOMXPlayerSettings omxPlayerSettings;
 };
 
