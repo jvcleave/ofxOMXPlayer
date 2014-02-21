@@ -64,7 +64,7 @@ void playlistApp::createPlayer()
 	settings.videoPath = files[videoCounter].path();
 	settings.useHDMIForAudio = true;	//default true
 	
-	settings.enableTexture = false;		//default true
+	//settings.enableTexture = false;		//default true
 	if(files.size() > 1)
 	{
 		settings.enableLooping = false;		//default true
@@ -93,6 +93,7 @@ void playlistApp::update()
 unsigned long long skipTimeStart=0;
 unsigned long long skipTimeEnd=0;
 unsigned long long amountSkipped =0;
+unsigned long long totalAmountSkipped =0;
 bool doingSkipCheck = false;
 //--------------------------------------------------------------
 void playlistApp::draw(){
@@ -137,11 +138,14 @@ void playlistApp::draw(){
 	{
 		skipTimeEnd = ofGetElapsedTimeMillis();
 		amountSkipped = skipTimeEnd-skipTimeStart;
+		totalAmountSkipped+=amountSkipped;
 		doingSkipCheck = false;
 		
 	}
 	
 	info <<"\n" <<	"MILLIS SKIPPED: "		<< amountSkipped;
+	info <<"\n" <<	"TOTAL MILLIS SKIPPED: " << totalAmountSkipped;
+	
 	ofDrawBitmapStringHighlight(info.str(), 60, 60, ofColor(ofColor::black, 90), textColor);
 }
 
