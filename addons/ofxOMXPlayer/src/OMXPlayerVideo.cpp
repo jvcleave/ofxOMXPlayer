@@ -47,7 +47,16 @@ OMXPlayerVideo::OMXPlayerVideo()
 	m_speed         = DVD_PLAYSPEED_NORMAL;	
 	
 }
-
+OMXPlayerVideo::~OMXPlayerVideo()
+{
+	ofLogVerbose(__func__) << "START";
+	if (nonTextureDecoder) 
+	{
+		delete nonTextureDecoder;
+		nonTextureDecoder = NULL;
+	}
+	ofLogVerbose(__func__) << "END";
+}
 
 bool OMXPlayerVideo::Open(COMXStreamInfo &hints, OMXClock *av_clock, bool deinterlace, bool hdmi_clock_sync, float display_aspect)
 {
