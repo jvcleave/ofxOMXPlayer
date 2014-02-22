@@ -25,14 +25,16 @@ OMXDecoderBase::OMXDecoderBase()
 	decoder_name = OMX_VIDEO_DECODER;
 	
 	
-	ofLogVerbose() << "OMXDecoderBase::CONSTRUCT";
+	ofLogVerbose(__func__) << "OMXDecoderBase::CONSTRUCT";
 	
 }
 
 OMXDecoderBase::~OMXDecoderBase()
 {
-	return;
-	ofLogVerbose() << "~OMXDecoderBase START ---------";
+	
+	ofLogVerbose(__func__) << " START ---------";
+	ofLogVerbose(__func__) << " END ---------";
+	//return;
 	//m_av_clock->OMXStop();
 	//m_av_clock->OMXStateIdle();
 	m_omx_tunnel_decoder.Flush();
@@ -66,7 +68,7 @@ OMXDecoderBase::~OMXDecoderBase()
 	//m_deinterlace       = false;
 	m_first_frame       = true;
 	m_setStartTime      = true;
-	ofLogVerbose() << "~OMXDecoderBase END ---------";
+	ofLogVerbose(__func__) << "~OMXDecoderBase END ---------";
 }
 
 

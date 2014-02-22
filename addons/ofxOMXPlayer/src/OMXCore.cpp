@@ -1796,7 +1796,7 @@ OMX_ERRORTYPE COMXCoreComponent::DecoderEventHandlerCallback(
 
 	if (eEvent == OMX_EventPortSettingsChanged ) 
 	{
-		//ofLogVerbose() << "OMX_EventPortSettingsChanged at ofGetElapsedTimeMillis: " << ofGetElapsedTimeMillis();
+		//ofLogVerbose(__func__) << "OMX_EventPortSettingsChanged at ofGetElapsedTimeMillis: " << ofGetElapsedTimeMillis();
 	}
   COMXCoreComponent *ctx = static_cast<COMXCoreComponent*>(pAppData);
   return ctx->DecoderEventHandler(hComponent, pAppData, eEvent, nData1, nData2, pEventData);
@@ -1936,7 +1936,7 @@ OMX_ERRORTYPE COMXCoreComponent::DecoderEventHandler(
       #endif
       if(nData2 & OMX_BUFFERFLAG_EOS)
 	  {
-		  //ofLogVerbose() << "OMX_EventBufferFlag::OMX_BUFFERFLAG_EOS RECEIVED";
+		  //ofLogVerbose(__func__) << "OMX_EventBufferFlag::OMX_BUFFERFLAG_EOS RECEIVED";
 		  ctx->m_eos = true;
 	  }
        
@@ -1997,7 +1997,7 @@ COMXCore::COMXCore()
 
 bool COMXCore::Initialize()
 {
-	ofLogVerbose() << "COMXCore::Initialize";
+	ofLogVerbose(__func__) << "COMXCore::Initialize";
 	OMX_ERRORTYPE omx_err = OMX_Init();
 	
 	if (omx_err != OMX_ErrorNone)
@@ -2014,7 +2014,7 @@ void COMXCore::Deinitialize()
 {
 	if(m_is_open)
 	{
-		ofLogVerbose() << "COMXCore::Deinitialize";
+		ofLogVerbose(__func__) << "COMXCore::Deinitialize";
 		OMX_ERRORTYPE omx_err = OMX_Deinit();
 		if (omx_err != OMX_ErrorNone)
 		{

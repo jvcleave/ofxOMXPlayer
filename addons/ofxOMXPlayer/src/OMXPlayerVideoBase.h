@@ -78,5 +78,5 @@ public:
 	uint32_t                  m_history_valid_pts;
 	bool        m_flush_requested;
 
-	
+	bool isExiting;
 };

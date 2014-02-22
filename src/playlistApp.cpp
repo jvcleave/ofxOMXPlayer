@@ -63,11 +63,11 @@ void playlistApp::createPlayer()
 	
 	settings.videoPath = files[videoCounter].path();
 	settings.useHDMIForAudio = true;	//default true
-	
+	settings.enableLooping = false;
 	//settings.enableTexture = false;		//default true
 	if(files.size() > 1)
 	{
-		settings.enableLooping = false;		//default true
+				//default true
 	}
 	
 	

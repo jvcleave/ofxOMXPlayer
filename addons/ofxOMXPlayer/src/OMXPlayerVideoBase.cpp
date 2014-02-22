@@ -18,15 +18,20 @@ OMXPlayerVideoBase::OMXPlayerVideoBase()
 	pthread_mutex_init(&m_lock_decoder, NULL);
 	m_history_valid_pts = 0;
 	m_flush_requested = false;
+	isExiting = false;
 }
 
 OMXPlayerVideoBase::~OMXPlayerVideoBase()
 {
+	
+	ofLogVerbose(__func__) << "START";
+
 	Close();
 	
 	pthread_cond_destroy(&m_packet_cond);
 	pthread_mutex_destroy(&m_lock);
 	pthread_mutex_destroy(&m_lock_decoder);
+	ofLogVerbose(__func__) << "END";
 }
 
 void OMXPlayerVideoBase::SetSpeed(int speed)
@@ -113,7 +118,9 @@ bool OMXPlayerVideoBase::Decode(OMXPacket *pkt)
 
 void OMXPlayerVideoBase::Flush()
 {
-	ofLogVerbose() << "OMXPlayerVideoBase::Flush start";
+	ofLogVerbose(__func__) << "OMXPlayerVideoBase::Flush start";
+	
+	
 	m_flush_requested = true;
 	Lock();
 	LockDecoder();
@@ -123,7 +130,7 @@ void OMXPlayerVideoBase::Flush()
 	{
 		OMXPacket *pkt = m_packets.front(); 
 		m_packets.pop_front();
-		//ofLogVerbose() << "OMXPlayerVideoBase->OMXReader FreePacket";
+		//ofLogVerbose(__func__) << "OMXPlayerVideoBase->OMXReader FreePacket";
 		OMXReader::FreePacket(pkt);
 		
 	}
@@ -133,13 +140,13 @@ void OMXPlayerVideoBase::Flush()
 	
 	if(m_decoder)
 	{
-		ofLogVerbose() << "OMXPlayerVideoBase::m_decoder->Reset";
+		ofLogVerbose(__func__) << "OMXPlayerVideoBase::m_decoder->Reset";
 		//m_decoder->Reset();
 	}
 	
 	UnLockDecoder();
 	UnLock();
-	ofLogVerbose() << "OMXPlayerVideoBase::Flush end";
+	ofLogVerbose(__func__) << "OMXPlayerVideoBase::Flush end";
 }
 
 
@@ -272,11 +279,16 @@ void OMXPlayerVideoBase::WaitCompletion()
 
 bool OMXPlayerVideoBase::Close()
 {
-	ofLogVerbose() << "OMXPlayerVideoBase::Close()";
+	ofLogVerbose(__func__) << "OMXPlayerVideoBase::Close()";
 	m_bAbort  = true;
 	m_flush   = true;
 	
-	Flush();
+	ofLogVerbose(__func__) << "isExiting: " << isExiting;
+	if (!isExiting) 
+	{
+		Flush();
+	}
+	
 	
 	if(ThreadHandle())
 	{
@@ -286,7 +298,7 @@ bool OMXPlayerVideoBase::Close()
 		
 		StopThread();
 	}
-	ofLogVerbose() << "OMXPlayerVideoBase::Close() pre CloseDecoder";
+	ofLogVerbose(__func__) << "OMXPlayerVideoBase::Close() pre CloseDecoder";
 	//CloseDecoder();
 	
 	m_dllAvUtil.Unload();

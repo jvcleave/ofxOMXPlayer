@@ -158,7 +158,7 @@ public:
 		}
 		else
 		{
-			ofLogVerbose()	<< "Create EGLImage PASS";
+			ofLogVerbose(__func__)	<< "Create EGLImage PASS";
 			pixels = new unsigned char[dataSize];
 			hasGenerated = true;
 		}

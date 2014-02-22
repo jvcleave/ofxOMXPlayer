@@ -22,10 +22,19 @@ OMXPlayerEGLImage::OMXPlayerEGLImage()
 	m_pts           = DVD_NOPTS_VALUE;
 	m_speed         = DVD_PLAYSPEED_NORMAL;
 	eglImageDecoder = NULL;
-	ofLogVerbose() << "OMXPlayerEGLImage CONSTRUCT";
+	ofLogVerbose(__func__) << "OMXPlayerEGLImage CONSTRUCT";
 }
 
-
+OMXPlayerEGLImage::~OMXPlayerEGLImage()
+{
+	ofLogVerbose(__func__) << "START";
+	if (eglImageDecoder) 
+	{
+		delete eglImageDecoder;
+		eglImageDecoder = NULL;
+	}
+	ofLogVerbose(__func__) << "END";
+}
 
 
 bool OMXPlayerEGLImage::Open(COMXStreamInfo &hints, OMXClock *av_clock)

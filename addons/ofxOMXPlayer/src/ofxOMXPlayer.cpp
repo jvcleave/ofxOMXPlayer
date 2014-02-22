@@ -296,6 +296,11 @@ void ofxOMXPlayer::onUpdate(ofEventArgs& args)
 	if (doExit) 
 	{
 		ofLogVerbose(__func__) << " EXITING VIA SIGNAL";
+		if(engine)
+		{
+			engine->startExit();
+		}
+		
 		doExit = false;
 		close();
 		ofExit();
@@ -304,6 +309,8 @@ void ofxOMXPlayer::onUpdate(ofEventArgs& args)
 
 void ofxOMXPlayer::addExitHandler()
 {
+	
+	
 	
 	//http://stackoverflow.com/questions/11465148/using-sigaction-c-cpp
 	//Structs that will describe the old action and the new action

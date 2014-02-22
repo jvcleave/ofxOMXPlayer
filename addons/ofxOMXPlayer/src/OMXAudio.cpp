@@ -1126,7 +1126,7 @@ unsigned int COMXAudio::GetAudioRenderingLatency()
 
 void COMXAudio::WaitCompletion()
 {
- ofLogVerbose() << "COMXAudio::WaitCompletion";
+ ofLogVerbose(__func__) << "COMXAudio::WaitCompletion";
   if(!m_Initialized || m_Pause)
     return;
 

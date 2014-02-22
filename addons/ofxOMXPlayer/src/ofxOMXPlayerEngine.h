@@ -81,6 +81,8 @@ public:
 	int speedMultiplier;
 	
 	bool doSeek;
+	bool isExiting;
+	void startExit();
 private:
 	
 	COMXCore				omxCore;
@@ -121,5 +123,6 @@ private:
 	double					previousLoopOffset;
 	
 	ofxOMXPlayerSettings omxPlayerSettings;
+	
 };
 
