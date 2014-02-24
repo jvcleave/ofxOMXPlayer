@@ -1,5 +1,6 @@
 #pragma once
 #include "ofMain.h"
+#include "ofxOMXPlayerSettings.h"
 
 #include "DllAvUtil.h"
 #include "DllAvFormat.h"

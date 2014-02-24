@@ -168,14 +168,19 @@ float ofxOMXPlayer::getVolume()
 
 GLuint ofxOMXPlayer::getTextureID()
 {
-	return GlobalEGLContainer::getInstance().textureID;
+	
+	if (isTextureEnabled) 
+	{
+		return engine->getTextureID();
+	}
+	
 }
 
 
 ofTexture & ofxOMXPlayer::getTextureReference()
 {
 	
-	return GlobalEGLContainer::getInstance().texture;
+	return engine->getTextureReference();
 }
 
 void ofxOMXPlayer::saveImage(string imagePath)//default imagePath=""
@@ -192,7 +197,7 @@ void ofxOMXPlayer::saveImage(string imagePath)//default imagePath=""
 void ofxOMXPlayer::updatePixels()
 {
 	
-	GlobalEGLContainer::getInstance().updatePixels();
+	engine->updatePixels();
 }
 
 int ofxOMXPlayer::getCurrentFrame()
@@ -276,7 +281,6 @@ void ofxOMXPlayer::close()
 		delete engine;
 		engine = NULL;
 	}
-	GlobalEGLContainer::getInstance().destroyEGLImage();
 	isOpen = false;
 	
 }

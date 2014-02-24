@@ -16,9 +16,10 @@ public:
 	OMXPlayerEGLImage();
 	~OMXPlayerEGLImage();
 	
-	bool Open(COMXStreamInfo &hints, OMXClock *av_clock);
+	bool Open(COMXStreamInfo &hints, OMXClock *av_clock, ofxOMXPlayerSettings& settings);
 	bool OpenDecoder();
 	
+	ofxOMXPlayerSettings settings;
 	OMXEGLImage*				eglImageDecoder;
 };
 

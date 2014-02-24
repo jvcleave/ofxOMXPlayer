@@ -83,6 +83,12 @@ public:
 	bool doSeek;
 	bool isExiting;
 	void startExit();
+	
+	ofTexture emptyTexture;
+	int getTextureID();
+	ofTexture&	getTextureReference();
+	void updatePixels();
+	
 private:
 	
 	COMXCore				omxCore;

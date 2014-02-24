@@ -187,14 +187,14 @@ void ofxOMXPlayerEngine::rewind()
 
 bool ofxOMXPlayerEngine::setup(ofxOMXPlayerSettings& settings)
 {
-	omxPlayerSettings = settings;
-	moviePath = omxPlayerSettings.videoPath; 
-	useHDMIForAudio = omxPlayerSettings.useHDMIForAudio;
-	doLooping = omxPlayerSettings.enableLooping;
+	omxPlayerSettings		= settings;
+	moviePath				= omxPlayerSettings.videoPath; 
+	useHDMIForAudio			= omxPlayerSettings.useHDMIForAudio;
+	doLooping				= omxPlayerSettings.enableLooping;
 	addListener(omxPlayerSettings.listener);
 	
 	ofLogVerbose(__func__) << "moviePath is " << moviePath;
-	isTextureEnabled = omxPlayerSettings.enableTexture;
+	isTextureEnabled		= omxPlayerSettings.enableTexture;
 	
 	
 	
@@ -265,8 +265,8 @@ bool ofxOMXPlayerEngine::openPlayer()
 		{
 			eglPlayer = new OMXPlayerEGLImage();
 		}
-		GlobalEGLContainer::getInstance().setup(omxPlayerSettings);
-		didVideoOpen = eglPlayer->Open(videoStreamInfo, &clock);
+		//GlobalEGLContainer::getInstance().setup(omxPlayerSettings);
+		didVideoOpen = eglPlayer->Open(videoStreamInfo, &clock, omxPlayerSettings);
 		videoPlayer = (OMXPlayerVideoBase*)eglPlayer;
 	}else 
 	{
@@ -345,6 +345,33 @@ bool ofxOMXPlayerEngine::openPlayer()
 }
 
 
+int ofxOMXPlayerEngine::getTextureID()
+{
+	if (eglPlayer) 
+	{
+		return eglPlayer->eglImageDecoder->textureID;
+	}
+	return 0;
+}
+
+ofTexture&	ofxOMXPlayerEngine::getTextureReference()
+{
+	if (eglPlayer) 
+	{
+		return eglPlayer->eglImageDecoder->texture;
+	}
+	
+	return emptyTexture;
+	
+}
+
+void ofxOMXPlayerEngine::updatePixels()
+{
+	if (eglPlayer) 
+	{
+		return eglPlayer->eglImageDecoder->updatePixels();
+	}
+}
 
 
 void ofxOMXPlayerEngine::Process()
