@@ -21,7 +21,7 @@ ofxOMXPlayer::ofxOMXPlayer()
 	context = NULL;
 	display = NULL;
 	isExiting = false;
-	
+	pixels = NULL;
 }
 
 void ofxOMXPlayer::updatePixels()
@@ -58,35 +58,36 @@ void ofxOMXPlayer::generateEGLImage(int videoWidth, int videoHeight)
 		context = appEGLWindow->getEglContext();
 	}
 	
-	
-	if (texture.isAllocated()) 
+	if (!fbo.isAllocated()) 
 	{
-		texture.clear();
+		ofFbo::Settings fboSettings;
+		fboSettings.width = videoWidth;
+		fboSettings.height = videoHeight;
+		fboSettings.wrapModeVertical = GL_REPEAT;	// GL_REPEAT, GL_MIRRORED_REPEAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER etc.
+		fboSettings.wrapModeHorizontal = GL_REPEAT; // GL_REPEAT, GL_MIRRORED_REPEAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER etc.
+		//int		wrapModeHorizontal;		// GL_REPEAT, GL_MIRRORED_REPEAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER etc.
+		//int		wrapModeVertical;		// GL_REPEAT, GL_MIRRORED_REPEAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER etc.
+		
+		fbo.allocate(fboSettings);
 	}
 	
-	ofFbo::Settings fboSettings;
-	fboSettings.width = videoWidth;
-	fboSettings.height = videoHeight;
-	fboSettings.wrapModeVertical = GL_REPEAT;	// GL_REPEAT, GL_MIRRORED_REPEAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER etc.
-	fboSettings.wrapModeHorizontal = GL_REPEAT; // GL_REPEAT, GL_MIRRORED_REPEAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER etc.
-	//int		wrapModeHorizontal;		// GL_REPEAT, GL_MIRRORED_REPEAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER etc.
-	//int		wrapModeVertical;		// GL_REPEAT, GL_MIRRORED_REPEAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER etc.
-	
-	fbo.allocate(fboSettings);
 	//fbo.allocate(videoWidth, videoHeight, GL_RGBA);
 	
-	
-	texture.allocate(videoWidth, videoHeight, GL_RGBA);
-	//Video renders upside down and backwards when Broadcom proprietary tunnels are enabled
-	//may be resolved in future firmare
-	//https://github.com/raspberrypi/firmware/issues/176
-	
-	if (settings.doFlipTexture) 
+	if (!texture.isAllocated()) 
 	{
-		texture.getTextureData().bFlipTexture = true;
+		texture.allocate(videoWidth, videoHeight, GL_RGBA);
+		//Video renders upside down and backwards when Broadcom proprietary tunnels are enabled
+		//may be resolved in future firmare
+		//https://github.com/raspberrypi/firmware/issues/176
+		
+		if (settings.doFlipTexture) 
+		{
+			texture.getTextureData().bFlipTexture = true;
+		}
+		texture.setTextureWrap(GL_REPEAT, GL_REPEAT);
+		textureID = texture.getTextureData().textureID;
 	}
-	texture.setTextureWrap(GL_REPEAT, GL_REPEAT);
-	textureID = texture.getTextureData().textureID;
+	
 	
 	ofLogVerbose(__func__) << "textureID: " << textureID;
 	ofLogVerbose(__func__) << "tex.isAllocated(): " << texture.isAllocated();
@@ -123,13 +124,17 @@ void ofxOMXPlayer::generateEGLImage(int videoWidth, int videoHeight)
 	else
 	{
 		ofLogVerbose()	<< "Create EGLImage PASS";
-		pixels = new unsigned char[dataSize];
+		if (pixels == NULL) 
+		{
+			pixels = new unsigned char[dataSize];
+		}
+		
 	}
 }
 
 void ofxOMXPlayer::destroyEGLImage()
 {
-	//Lock();
+
 	if (eglImage) 
 	{
 		if (eglDestroyImageKHR(display, eglImage)) 
@@ -142,11 +147,7 @@ void ofxOMXPlayer::destroyEGLImage()
 		}
 		eglImage = NULL;
 	}
-	//UnLock();
-	/*if (texture.isAllocated()) 
-	 {
-	 texture.clear();
-	 }*/
+
 }
 
 
@@ -457,6 +458,11 @@ void ofxOMXPlayer::onUpdate(ofEventArgs& args)
 		doExit = false;
 		close();
 		destroyEGLImage();
+		if (pixels) 
+		{
+			delete[] pixels;
+			pixels = NULL;
+		}
 		ofExit();
 	}
 }
