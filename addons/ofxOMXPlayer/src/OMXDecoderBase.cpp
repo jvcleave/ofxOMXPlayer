@@ -34,7 +34,7 @@ OMXDecoderBase::~OMXDecoderBase()
 	
 	ofLogVerbose(__func__) << " START ---------";
 	ofLogVerbose(__func__) << " END ---------";
-	//return;
+	return;
 	//m_av_clock->OMXStop();
 	//m_av_clock->OMXStateIdle();
 	m_omx_tunnel_decoder.Flush();

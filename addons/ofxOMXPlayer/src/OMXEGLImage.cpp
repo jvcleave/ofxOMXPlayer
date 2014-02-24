@@ -3,21 +3,13 @@
 
 OMXEGLImage::OMXEGLImage()
 {
-	textureID = 0;
-	videoWidth =0;
-	videoHeight = 0;
-	appEGLWindow = NULL;
-	eglImage = NULL;
-	context = NULL;
-	display = NULL;
-	hasGenerated = false;
-	isExiting = false;
+	
 }
 
 OMXEGLImage::~OMXEGLImage()
 {
 	ofLogVerbose(__func__) << "START";
-	destroyEGLImage();
+	
 	ofLogVerbose(__func__) << "END";
 	
 }
@@ -43,10 +35,9 @@ OMX_ERRORTYPE onFillBufferDone(OMX_HANDLETYPE hComponent,
 	return didFillBuffer;
 }
 
-bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock, ofxOMXPlayerSettings& settings)
+bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglImage)
 {
-	this->settings = settings;
-	generateEGLImage(hints.width, hints.height);
+	
 	
 	OMX_ERRORTYPE error   = OMX_ErrorNone;
 	

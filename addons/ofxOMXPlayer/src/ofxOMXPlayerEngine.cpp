@@ -42,6 +42,8 @@ ofxOMXPlayerEngine::ofxOMXPlayerEngine()
 	doSeek = false;
 	isExiting = false;
 	
+	eglImage = NULL;
+	
 }
 
 ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
@@ -71,12 +73,12 @@ ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
 	}
 	if (!isExiting) 
 	{
-		if (eglPlayer != NULL) 
+		if (eglPlayer) 
 		{
 			delete eglPlayer;
 			eglPlayer = NULL;
 		}
-		if (nonEglPlayer != NULL) 
+		if (nonEglPlayer) 
 		{
 			delete nonEglPlayer;
 			nonEglPlayer = NULL;
@@ -108,8 +110,11 @@ ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
 	 delete clock;
 	 clock = NULL;
 	 }*/
+	if (isExiting) 
+	{
+		omxCore.Deinitialize();
+	}
 	
-	omxCore.Deinitialize();
 	ofLogVerbose(__func__) << "~ofxOMXPlayerEngine END";
 	
 	
@@ -227,7 +232,19 @@ bool ofxOMXPlayerEngine::setup(ofxOMXPlayerSettings& settings)
 			if(clock.OMXInitialize(hasVideo, hasAudio))
 			{
 				ofLogVerbose(__func__) << "clock Init PASS";
-				return openPlayer();
+				omxReader.GetHints(OMXSTREAM_VIDEO, videoStreamInfo);
+				omxReader.GetHints(OMXSTREAM_AUDIO, audioStreamInfo);
+				
+				videoWidth	= videoStreamInfo.width;
+				videoHeight = videoStreamInfo.height;
+				omxPlayerSettings.videoWidth	= videoStreamInfo.width;
+				omxPlayerSettings.videoHeight	= videoStreamInfo.height;
+				
+				ofLogVerbose(__func__) << "SET videoWidth: "	<< videoWidth;
+				ofLogVerbose(__func__) << "SET videoHeight: "	<< videoHeight;
+				ofLogVerbose(__func__) << "videoStreamInfo.nb_frames " <<videoStreamInfo.nb_frames;
+				
+				return true;
 				
 			}else 
 			{
@@ -248,17 +265,7 @@ bool ofxOMXPlayerEngine::setup(ofxOMXPlayerSettings& settings)
 
 bool ofxOMXPlayerEngine::openPlayer()
 {
-	omxReader.GetHints(OMXSTREAM_VIDEO, videoStreamInfo);
-	omxReader.GetHints(OMXSTREAM_AUDIO, audioStreamInfo);
-
-	videoWidth	= videoStreamInfo.width;
-	videoHeight = videoStreamInfo.height;
-	omxPlayerSettings.videoWidth	= videoStreamInfo.width;
-	omxPlayerSettings.videoHeight	= videoStreamInfo.height;
 	
-	ofLogVerbose(__func__) << "SET videoWidth: "	<< videoWidth;
-	ofLogVerbose(__func__) << "SET videoHeight: "	<< videoHeight;
-	ofLogVerbose(__func__) << "videoStreamInfo.nb_frames " <<videoStreamInfo.nb_frames;
 	if (isTextureEnabled) 
 	{
 		if (!eglPlayer) 
@@ -266,7 +273,7 @@ bool ofxOMXPlayerEngine::openPlayer()
 			eglPlayer = new OMXPlayerEGLImage();
 		}
 		//GlobalEGLContainer::getInstance().setup(omxPlayerSettings);
-		didVideoOpen = eglPlayer->Open(videoStreamInfo, &clock, omxPlayerSettings);
+		didVideoOpen = eglPlayer->Open(videoStreamInfo, &clock, eglImage);
 		videoPlayer = (OMXPlayerVideoBase*)eglPlayer;
 	}else 
 	{
@@ -345,33 +352,7 @@ bool ofxOMXPlayerEngine::openPlayer()
 }
 
 
-int ofxOMXPlayerEngine::getTextureID()
-{
-	if (eglPlayer) 
-	{
-		return eglPlayer->eglImageDecoder->textureID;
-	}
-	return 0;
-}
 
-ofTexture&	ofxOMXPlayerEngine::getTextureReference()
-{
-	if (eglPlayer) 
-	{
-		return eglPlayer->eglImageDecoder->texture;
-	}
-	
-	return emptyTexture;
-	
-}
-
-void ofxOMXPlayerEngine::updatePixels()
-{
-	if (eglPlayer) 
-	{
-		return eglPlayer->eglImageDecoder->updatePixels();
-	}
-}
 
 
 void ofxOMXPlayerEngine::Process()

@@ -84,11 +84,10 @@ public:
 	bool isExiting;
 	void startExit();
 	
-	ofTexture emptyTexture;
-	int getTextureID();
-	ofTexture&	getTextureReference();
-	void updatePixels();
+	bool openPlayer();
 	
+	EGLImageKHR eglImage;
+	ofxOMXPlayerSettings omxPlayerSettings;
 private:
 	
 	COMXCore				omxCore;
@@ -107,7 +106,7 @@ private:
 	bool					hasVideo;
 	bool					hasAudio;
 
-	bool					openPlayer();
+	
 	bool					didVideoOpen;
 	bool					didAudioOpen;
 	bool					doLooping;
@@ -128,7 +127,7 @@ private:
 	void					onVideoLoop();
 	double					previousLoopOffset;
 	
-	ofxOMXPlayerSettings omxPlayerSettings;
+	
 	
 };
 

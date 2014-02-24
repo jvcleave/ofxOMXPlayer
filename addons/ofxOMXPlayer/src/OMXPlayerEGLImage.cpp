@@ -28,6 +28,7 @@ OMXPlayerEGLImage::OMXPlayerEGLImage()
 OMXPlayerEGLImage::~OMXPlayerEGLImage()
 {
 	ofLogVerbose(__func__) << "START";
+	Close();
 	if (eglImageDecoder) 
 	{
 		delete eglImageDecoder;
@@ -37,10 +38,11 @@ OMXPlayerEGLImage::~OMXPlayerEGLImage()
 }
 
 
-bool OMXPlayerEGLImage::Open(COMXStreamInfo &hints, OMXClock *av_clock, ofxOMXPlayerSettings& settings)
+bool OMXPlayerEGLImage::Open(COMXStreamInfo &hints, OMXClock *av_clock, EGLImageKHR eglImage)
 {
+	
 	ofLogVerbose(__func__) << " OMXPlayerEGLImage Open";
-	this->settings = settings;
+	this->eglImage = eglImage;
 	
 	if (!m_dllAvUtil.Load() || !m_dllAvCodec.Load() || !m_dllAvFormat.Load() || !av_clock)
 	{
@@ -108,7 +110,7 @@ bool OMXPlayerEGLImage::OpenDecoder()
 	
 	m_decoder = (OMXDecoderBase*)eglImageDecoder;
 	
-	if(!eglImageDecoder->Open(m_hints, m_av_clock, settings))
+	if(!eglImageDecoder->Open(m_hints, m_av_clock, eglImage))
 	{
 		CloseDecoder();
 		return false;
