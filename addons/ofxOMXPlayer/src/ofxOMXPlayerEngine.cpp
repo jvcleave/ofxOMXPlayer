@@ -47,6 +47,8 @@ ofxOMXPlayerEngine::ofxOMXPlayerEngine()
 ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
 {
 	ofLogVerbose(__func__) << " START";
+	ofLogVerbose(__func__) << " isExiting: " << isExiting;
+	
 	//Lock();
 	
 	
@@ -73,27 +75,16 @@ ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
 		{
 			delete eglPlayer;
 			eglPlayer = NULL;
-			//videoPlayer = NULL;
 		}
 		if (nonEglPlayer != NULL) 
 		{
 			delete nonEglPlayer;
 			nonEglPlayer = NULL;
-			//videoPlayer = NULL;
 		}
-	}else 
-	{
-		/*if (videoPlayer != NULL) 
-		{
-			delete videoPlayer;
-			videoPlayer = NULL;
-		}*/
 	}
+	videoPlayer = NULL;
+	
 
-	
-	/**/
-	
-	nonEglPlayer = NULL;
 	
 	if (audioPlayer) 
 	{
@@ -489,6 +480,7 @@ void ofxOMXPlayerEngine::Process()
 			if(audioPlayer->Error())
 			 {
 				 ofLogError(__func__) << "audio player error.";
+				 hasAudio = false;
 			 }
 		}
 		

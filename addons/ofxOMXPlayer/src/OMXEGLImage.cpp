@@ -3,7 +3,7 @@
 
 OMXEGLImage::OMXEGLImage()
 {
-	eglBuffer = NULL;
+	
 	
 }
 
@@ -11,6 +11,7 @@ OMXEGLImage::~OMXEGLImage()
 {
 	ofLogVerbose(__func__) << "START";
 	ofLogVerbose(__func__) << "END";
+	
 }
 
 OMX_ERRORTYPE onFillBufferDone(OMX_HANDLETYPE hComponent,
@@ -342,7 +343,7 @@ bool OMXEGLImage::Open(COMXStreamInfo &hints, OMXClock *clock)
 	}
 	
 	
-	
+	OMX_BUFFERHEADERTYPE* eglBuffer = NULL;
 	error = m_omx_render.UseEGLImage(&eglBuffer, m_omx_render.GetOutputPort(), NULL, GlobalEGLContainer::getInstance().eglImage);
 	if(error == OMX_ErrorNone)
 	{
