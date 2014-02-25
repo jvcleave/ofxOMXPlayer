@@ -28,5 +28,7 @@ class playlistApp : public ofBaseApp, public ofxOMXPlayerListener, public SSHKey
 		void onCharacterReceived(SSHKeyListenerEventData& e);
 		ConsoleListener consoleListener;
 		ofxOMXPlayerSettings settings;
+	
+	void loadNextMovie();
 };
 

@@ -11,7 +11,7 @@
 
 
 
-bool doReloadMovie = false;
+bool doLoadNextMovie = false;
 void playlistApp::onVideoEnd(ofxOMXPlayerListenerEventData& e)
 {
 	ofLogVerbose(__func__) << " RECEIVED";
@@ -23,11 +23,15 @@ void playlistApp::onVideoEnd(ofxOMXPlayerListenerEventData& e)
 	{
 		videoCounter = 0;
 	}
-	doReloadMovie = true;
-	
-	//settings.enableTexture = !settings.enableTexture;
-	//createPlayer();
-	
+	if (omxPlayer.isTextureEnabled) 
+	{
+		//certain GL related operations must be done in the update() thread
+		doLoadNextMovie = true;
+	}else 
+	{
+		//with the non-textured player we don't have to wait
+		loadNextMovie();
+	}
 }
 
 
@@ -65,7 +69,7 @@ void playlistApp::createPlayer()
 	settings.videoPath = files[videoCounter].path();
 	settings.useHDMIForAudio = true;	//default true
 	settings.enableLooping = false;
-	//settings.enableTexture = false;		//default true
+	settings.enableTexture = false;		//default true
 	if(files.size() > 1)
 	{
 				//default true
@@ -79,15 +83,19 @@ void playlistApp::createPlayer()
 	
 }
 
+void playlistApp::loadNextMovie()
+{
+	omxPlayer.loadMovie(files[videoCounter].path());
+	doLoadNextMovie = false;
+}
 //--------------------------------------------------------------
 void playlistApp::update()
 {
-	if (doReloadMovie) 
+	if (doLoadNextMovie) 
 	{
 		ofLogVerbose(__func__) << "doing reload";
-		omxPlayer.loadMovie(files[videoCounter].path());
-		doReloadMovie = false;
-		
+		//with the texture based player this must be done here - especially if the videos are different resolutions
+		loadNextMovie();
 	}
 	if(!omxPlayer.isPlaying() || !omxPlayer.isTextureEnabled)
 	{

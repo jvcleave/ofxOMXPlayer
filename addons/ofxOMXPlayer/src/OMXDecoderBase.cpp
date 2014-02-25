@@ -33,8 +33,8 @@ OMXDecoderBase::~OMXDecoderBase()
 {
 	
 	ofLogVerbose(__func__) << " START ---------";
-	//ofLogVerbose(__func__) << " END ---------";
-	//return;
+	ofLogVerbose(__func__) << " END ---------";
+#if 0
 	//m_av_clock->OMXStop();
 	//m_av_clock->OMXStateIdle();
 	m_omx_tunnel_decoder.Flush();
@@ -69,6 +69,7 @@ OMXDecoderBase::~OMXDecoderBase()
 	m_first_frame       = true;
 	m_setStartTime      = true;
 	ofLogVerbose(__func__) << "~OMXDecoderBase END ---------";
+#endif
 }
 
 
