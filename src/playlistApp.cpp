@@ -16,13 +16,7 @@ void playlistApp::onVideoEnd(ofxOMXPlayerListenerEventData& e)
 {
 	ofLogVerbose(__func__) << " RECEIVED";
 		
-	if(videoCounter+1<files.size())
-	{
-		videoCounter++;
-	}else
-	{
-		videoCounter = 0;
-	}
+
 	if (omxPlayer.isTextureEnabled) 
 	{
 		//certain GL related operations must be done in the update() thread
@@ -70,7 +64,7 @@ void playlistApp::createPlayer()
 	settings.videoPath = files[videoCounter].path();
 	settings.useHDMIForAudio = true;	//default true
 	settings.enableLooping = false;
-	settings.enableTexture = false;		//default true
+	//settings.enableTexture = false;		//default true
 	if(files.size() > 1)
 	{
 				//default true
@@ -86,6 +80,13 @@ void playlistApp::createPlayer()
 
 void playlistApp::loadNextMovie()
 {
+	if(videoCounter+1<files.size())
+	{
+		videoCounter++;
+	}else
+	{
+		videoCounter = 0;
+	}
 	omxPlayer.loadMovie(files[videoCounter].path());
 	doLoadNextMovie = false;
 }
@@ -171,9 +172,9 @@ void playlistApp::keyPressed  (int key){
 	ofLogVerbose(__func__) << "key: " << key;
 	switch (key) 
 	{
-		case 'c':
+		case 'n':
 		{
-			break;
+			doLoadNextMovie = true;
 		}
 		case 'e':
 		{

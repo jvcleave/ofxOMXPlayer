@@ -39,7 +39,7 @@ void pixelsApp::update()
 		
 		omxPlayer.updatePixels();
 		//ofImage version
-		//pixelOutput.setFromPixels(GlobalEGLContainer::getInstance().pixels, omxPlayer.getWidth(), omxPlayer.getHeight(), OF_IMAGE_COLOR_ALPHA, true);
+		//pixelOutput.setFromPixels(omxPlayer.getPixels(), omxPlayer.getWidth(), omxPlayer.getHeight(), OF_IMAGE_COLOR_ALPHA, true);
 		if (!pixelOutput.isAllocated()) 
 		{
 			pixelOutput.allocate(omxPlayer.getWidth(), omxPlayer.getHeight(), GL_RGBA);
@@ -59,7 +59,7 @@ void pixelsApp::draw(){
 	}
 	
 	omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
-	pixelOutput.draw(0, 0, omxPlayer.getWidth()/4, omxPlayer.getHeight()/4);
+	pixelOutput.draw(20, 20, omxPlayer.getWidth()/4, omxPlayer.getHeight()/4);
 	
 	stringstream info;
 	info << "APP FPS: "+ ofToString(ofGetFrameRate());
