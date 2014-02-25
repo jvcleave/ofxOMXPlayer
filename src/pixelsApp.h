@@ -4,7 +4,6 @@
 #include "ofxOMXPlayer.h"
 
 #include "ConsoleListener.h"
-//#include "GlobalEGLContainer.h"	
 class pixelsApp : public ofBaseApp, public SSHKeyListener{
 	
 public:

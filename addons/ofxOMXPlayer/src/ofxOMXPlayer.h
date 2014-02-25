@@ -59,21 +59,7 @@ public:
 	void fastForward();
 	void rewind();
 	
-	ofFbo fbo;
-	ofTexture texture;
-	EGLImageKHR eglImage;
-	GLuint textureID;
-	ofAppEGLWindow*		appEGLWindow;
-	EGLDisplay			display;
-	EGLContext			context;
-
-	int videoWidth;
-	int videoHeight;
-	unsigned char * pixels;
-	bool isExiting;
-	
-	void generateEGLImage(int videoWidth, int videoHeight);
-	void destroyEGLImage();
+	unsigned char * getPixels();
 	
 private:
 	
@@ -82,4 +68,21 @@ private:
 	void onUpdate(ofEventArgs& args);
 	ofxOMXPlayerEngine* engine;
 	ofxOMXPlayerSettings settings;
+	
+	ofFbo fbo;
+	ofTexture texture;
+	EGLImageKHR eglImage;
+	GLuint textureID;
+	ofAppEGLWindow*		appEGLWindow;
+	EGLDisplay			display;
+	EGLContext			context;
+	
+	int videoWidth;
+	int videoHeight;
+	unsigned char * pixels;
+	bool isExiting;
+	
+	void generateEGLImage(int videoWidth_, int videoHeight_);
+	void destroyEGLImage();
+	
 };

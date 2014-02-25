@@ -11,7 +11,7 @@
 
 
 
-
+bool doReloadMovie = false;
 void playlistApp::onVideoEnd(ofxOMXPlayerListenerEventData& e)
 {
 	ofLogVerbose(__func__) << " RECEIVED";
@@ -23,7 +23,8 @@ void playlistApp::onVideoEnd(ofxOMXPlayerListenerEventData& e)
 	{
 		videoCounter = 0;
 	}
-	omxPlayer.loadMovie(files[videoCounter].path());
+	doReloadMovie = true;
+	
 	//settings.enableTexture = !settings.enableTexture;
 	//createPlayer();
 	
@@ -81,7 +82,13 @@ void playlistApp::createPlayer()
 //--------------------------------------------------------------
 void playlistApp::update()
 {
-	
+	if (doReloadMovie) 
+	{
+		ofLogVerbose(__func__) << "doing reload";
+		omxPlayer.loadMovie(files[videoCounter].path());
+		doReloadMovie = false;
+		
+	}
 	if(!omxPlayer.isPlaying() || !omxPlayer.isTextureEnabled)
 	{
 		return;

@@ -33,11 +33,50 @@ void ofxOMXPlayer::updatePixels()
 	fbo.end();
 }
 
+unsigned char * ofxOMXPlayer::getPixels()
+{
+	return pixels;
+}
 
-void ofxOMXPlayer::generateEGLImage(int videoWidth, int videoHeight)
+void ofxOMXPlayer::generateEGLImage(int videoWidth_, int videoHeight_)
 {	
-	this->videoWidth	= videoWidth;
-	this->videoHeight	= videoHeight;
+	bool needsRegeneration = false;
+	if (videoWidth != videoWidth_) 
+	{
+		needsRegeneration = true;
+		videoWidth = videoWidth_;
+	}
+	if (videoHeight != videoHeight_) 
+	{
+		needsRegeneration = true;
+		videoHeight = videoHeight_;
+	}
+	if (!fbo.isAllocated()) 
+	{
+		needsRegeneration = true;
+	}else 
+	{
+		if (fbo.getWidth() != videoWidth && fbo.getHeight() != videoHeight) 
+		{
+			needsRegeneration = true;
+		}
+	}
+	if (!texture.isAllocated()) 
+	{
+		needsRegeneration = true;
+	}else 
+	{
+		if (texture.getWidth() != videoWidth && texture.getHeight() != videoHeight) 
+		{
+			needsRegeneration = true;
+		}
+	}
+	
+	if(!needsRegeneration)
+	{
+		ofLogVerbose(__func__) << "NO CHANGES NEEDED - RETURNING EARLY";	
+		return;
+	}
 	
 	if (appEGLWindow == NULL) 
 	{
@@ -58,7 +97,7 @@ void ofxOMXPlayer::generateEGLImage(int videoWidth, int videoHeight)
 		context = appEGLWindow->getEglContext();
 	}
 	
-	if (!fbo.isAllocated()) 
+	if (needsRegeneration) 
 	{
 		ofFbo::Settings fboSettings;
 		fboSettings.width = videoWidth;
@@ -70,10 +109,8 @@ void ofxOMXPlayer::generateEGLImage(int videoWidth, int videoHeight)
 		
 		fbo.allocate(fboSettings);
 	}
-	
-	//fbo.allocate(videoWidth, videoHeight, GL_RGBA);
-	
-	if (!texture.isAllocated()) 
+		
+	if (needsRegeneration) 
 	{
 		texture.allocate(videoWidth, videoHeight, GL_RGBA);
 		//Video renders upside down and backwards when Broadcom proprietary tunnels are enabled
@@ -97,17 +134,28 @@ void ofxOMXPlayer::generateEGLImage(int videoWidth, int videoHeight)
 	// setup first texture
 	int dataSize = videoWidth * videoHeight * 4;
 	
-	GLubyte* pixelData = new GLubyte [dataSize];
+	if (pixels && needsRegeneration) 
+	{
+		delete[] pixels;
+		pixels = NULL;
+	}
 	
-	
-	memset(pixelData, 0xff, dataSize);  // white texture, opaque
+	if (pixels == NULL) 
+	{
+		pixels = new unsigned char[dataSize];
+	}
+		
+	//memset(pixels, 0xff, dataSize);  // white texture, opaque
 	
 	glBindTexture(GL_TEXTURE_2D, textureID);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, videoWidth, videoHeight, 0,
-				 GL_RGBA, GL_UNSIGNED_BYTE, pixelData);
+				 GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 	
-	delete[] pixelData;
 	
+	if (eglImage && needsRegeneration) 
+	{
+		destroyEGLImage();
+	}
 	
 	// Create EGL Image
 	eglImage = eglCreateImageKHR(
@@ -115,19 +163,15 @@ void ofxOMXPlayer::generateEGLImage(int videoWidth, int videoHeight)
 								 context,
 								 EGL_GL_TEXTURE_2D_KHR,
 								 (EGLClientBuffer)textureID,
-								 0);
+								 NULL);
 	glDisable(GL_TEXTURE_2D);
 	if (eglImage == EGL_NO_IMAGE_KHR) 
 	{
-		ofLogError()	<< "Create EGLImage FAIL";
+		ofLogError()	<< "Create EGLImage FAIL <---------------- :(";
 	}
 	else
 	{
-		ofLogVerbose()	<< "Create EGLImage PASS";
-		if (pixels == NULL) 
-		{
-			pixels = new unsigned char[dataSize];
-		}
+		ofLogVerbose()	<< "Create EGLImage PASS <---------------- :)";
 		
 	}
 }
@@ -139,11 +183,11 @@ void ofxOMXPlayer::destroyEGLImage()
 	{
 		if (eglDestroyImageKHR(display, eglImage)) 
 		{
-			ofLogVerbose(__func__) << "eglDestroyImageKHR PASS";
+			ofLogVerbose(__func__) << "eglDestroyImageKHR PASS <---------------- :)";
 		}
 		else
 		{
-			ofLogError(__func__) << "eglDestroyImageKHR FAIL";
+			ofLogError(__func__) << "eglDestroyImageKHR FAIL <---------------- :(";
 		}
 		eglImage = NULL;
 	}
@@ -207,18 +251,24 @@ void ofxOMXPlayer::openEngine()
 	if (setupPassed) 
 	{
 		settings = engine->omxPlayerSettings;
+		
 		if (settings.enableTexture) 
 		{
 			isTextureEnabled = settings.enableTexture;
-			if (!eglImage) 
-			{
-				generateEGLImage(settings.videoWidth, settings.videoHeight);
-			}
-			
+			generateEGLImage(settings.videoWidth, settings.videoHeight);
 			engine->eglImage = eglImage;
+		}else 
+		{
+			videoWidth	= settings.videoWidth;
+			videoHeight = settings.videoHeight;
 		}
+
 		engine->openPlayer();
+	}else 
+	{
+		ofLogError(__func__) << "engine->setup FAIL";
 	}
+
 
 }
 
@@ -250,21 +300,14 @@ bool ofxOMXPlayer::isPlaying()
 
 int ofxOMXPlayer::getHeight()
 {
-	if (engine) 
-	{
-		return engine->getHeight();
-	}
-	return 0;
+	return videoHeight;
 }
 
 int ofxOMXPlayer::getWidth()
 {
-	if (engine) 
-	{
-		return engine->getWidth();
-	}
-	return 0;
+	return videoWidth;
 }
+
 double ofxOMXPlayer::getMediaTime()
 {
 	if (engine) 
@@ -273,6 +316,7 @@ double ofxOMXPlayer::getMediaTime()
 	}
 	return 0;
 }
+
 void ofxOMXPlayer::stepFrameForward()
 {
 	if (engine) 

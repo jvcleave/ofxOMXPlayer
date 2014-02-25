@@ -44,7 +44,7 @@ void pixelsApp::update()
 		{
 			pixelOutput.allocate(omxPlayer.getWidth(), omxPlayer.getHeight(), GL_RGBA);
 		}
-		//pixelOutput.loadData(GlobalEGLContainer::getInstance().pixels, omxPlayer.getWidth(), omxPlayer.getHeight(), GL_RGBA);
+		pixelOutput.loadData(omxPlayer.getPixels(), omxPlayer.getWidth(), omxPlayer.getHeight(), GL_RGBA);
 	}
 	
 	
