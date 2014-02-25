@@ -33,43 +33,51 @@ OMXDecoderBase::~OMXDecoderBase()
 {
 	
 	ofLogVerbose(__func__) << " START ---------";
-	ofLogVerbose(__func__) << " END ---------";
-#if 0
+	//TODO fix this?
+	try
+	{
+		m_omx_tunnel_decoder.Flush();
+		/*if(m_deinterlace)
+		 m_omx_tunnel_image_fx.Flush();*/
+		m_omx_tunnel_clock.Flush();
+		m_omx_tunnel_sched.Flush();
+		
+		m_omx_tunnel_clock.Deestablish();
+		m_omx_tunnel_decoder.Deestablish();
+		/*if(m_deinterlace)
+		 m_omx_tunnel_image_fx.Deestablish();*/
+		m_omx_tunnel_sched.Deestablish();
+		
+		m_omx_decoder.FlushInput();
+		
+		m_omx_sched.Deinitialize(true);
+		/*if(m_deinterlace)
+		 m_omx_image_fx.Deinitialize();*/
+		m_omx_decoder.Deinitialize(true);
+		m_omx_render.Deinitialize(true);
+		
+		m_is_open       = false;
+		
+		if(m_extradata)
+			free(m_extradata);
+		m_extradata = NULL;
+		m_extrasize = 0;
+		
+		m_video_codec_name  = "";
+		//m_deinterlace       = false;
+		m_first_frame       = true;
+		m_setStartTime      = true;
+	}
+	catch (int e)
+	{
+		ofLogError(__func__) << "An exception occurred. Exception: " << e << '\n';
+	}
+	//ofLogVerbose(__func__) << " END ---------";
+
 	//m_av_clock->OMXStop();
 	//m_av_clock->OMXStateIdle();
-	m_omx_tunnel_decoder.Flush();
-	/*if(m_deinterlace)
-		m_omx_tunnel_image_fx.Flush();*/
-	m_omx_tunnel_clock.Flush();
-	m_omx_tunnel_sched.Flush();
-	
-	m_omx_tunnel_clock.Deestablish();
-	m_omx_tunnel_decoder.Deestablish();
-	/*if(m_deinterlace)
-		m_omx_tunnel_image_fx.Deestablish();*/
-	m_omx_tunnel_sched.Deestablish();
-	
-	m_omx_decoder.FlushInput();
-	
-	m_omx_sched.Deinitialize(true);
-	/*if(m_deinterlace)
-		m_omx_image_fx.Deinitialize();*/
-	m_omx_decoder.Deinitialize(true);
-	m_omx_render.Deinitialize(true);
-	
-	m_is_open       = false;
-	
-	if(m_extradata)
-		free(m_extradata);
-	m_extradata = NULL;
-	m_extrasize = 0;
-	
-	m_video_codec_name  = "";
-	//m_deinterlace       = false;
-	m_first_frame       = true;
-	m_setStartTime      = true;
-	ofLogVerbose(__func__) << "~OMXDecoderBase END ---------";
-#endif
+
+	ofLogVerbose(__func__) << "END ---------";
 }
 
 

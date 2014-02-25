@@ -279,7 +279,7 @@ void OMXPlayerVideoBase::WaitCompletion()
 
 bool OMXPlayerVideoBase::Close()
 {
-	ofLogVerbose(__func__) << "OMXPlayerVideoBase::Close()";
+	ofLogVerbose(__func__) << " START";
 	m_bAbort  = true;
 	m_flush   = true;
 	
@@ -298,7 +298,7 @@ bool OMXPlayerVideoBase::Close()
 		
 		StopThread();
 	}
-	ofLogVerbose(__func__) << "OMXPlayerVideoBase::Close() pre CloseDecoder";
+	//ofLogVerbose(__func__) << "OMXPlayerVideoBase::Close() pre CloseDecoder";
 	//CloseDecoder();
 	
 	m_dllAvUtil.Unload();
@@ -312,5 +312,6 @@ bool OMXPlayerVideoBase::Close()
 	m_pts           = 0;
 	m_speed         = DVD_PLAYSPEED_NORMAL;
 	
+	ofLogVerbose(__func__) << " END";
 	return true;
 }

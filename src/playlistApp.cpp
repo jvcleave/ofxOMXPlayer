@@ -52,6 +52,7 @@ void playlistApp::setup()
 	if (currentVideoDirectory.exists()) 
 	{
 		currentVideoDirectory.listDir();
+		currentVideoDirectory.sort();
 		files = currentVideoDirectory.getFiles();
 		if (files.size()>0) 
 		{
