@@ -175,8 +175,7 @@ bool COMXAudio::Initialize(const CStdString& device, int iChannels, enum PCMChan
     deviceuse = "local";
   }
 
-  if(!m_dllAvUtil.Load())
-    return false;
+
 
   m_Passthrough = false;
 
@@ -633,7 +632,6 @@ bool COMXAudio::Deinitialize()
   m_extradata = NULL;
   m_extrasize = 0;
 
-  m_dllAvUtil.Unload();
 
   m_setStartTime  = true;
   m_first_frame   = true;

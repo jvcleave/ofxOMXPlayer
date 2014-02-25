@@ -53,8 +53,7 @@ bool COMXAudioCodecOMX::Open(COMXStreamInfo &hints)
   AVCodec* pCodec;
   m_bOpenedCodec = false;
 
-  if (!m_dllAvUtil.Load() || !m_dllAvCodec.Load() || !m_dllSwResample.Load())
-    return false;
+
 
   m_dllAvCodec.avcodec_register_all();
 
@@ -122,9 +121,6 @@ void COMXAudioCodecOMX::Dispose()
     m_pCodecContext = NULL;
   }
 
-  m_dllAvCodec.Unload();
-  m_dllAvUtil.Unload();
-  m_dllSwResample.Unload();
 
   m_iBufferSize1 = 0;
   m_iBufferSize2 = 0;

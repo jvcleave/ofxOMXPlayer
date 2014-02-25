@@ -98,7 +98,7 @@ bool OMXPlayerAudio::Open(COMXStreamInfo &hints, OMXClock *av_clock, OMXReader *
   if(ThreadHandle())
     Close();
 
-  if (!m_dllAvUtil.Load() || !m_dllAvCodec.Load() || !m_dllAvFormat.Load() || !av_clock)
+  if (!av_clock)
     return false;
   
   m_dllAvFormat.av_register_all();
@@ -170,9 +170,6 @@ bool OMXPlayerAudio::Close()
   m_pStream       = NULL;
   m_speed         = DVD_PLAYSPEED_NORMAL;
 
-  m_dllAvUtil.Unload();
-  m_dllAvCodec.Unload();
-  m_dllAvFormat.Unload();
 
   return true;
 }

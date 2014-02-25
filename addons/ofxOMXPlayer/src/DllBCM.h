@@ -4,7 +4,7 @@ extern "C" {
 #include <bcm_host.h>
 }
 
-#include "DynamicDll.h"
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -46,7 +46,7 @@ public:
                                                   EDID_AudioSampleRate fs, uint32_t bitrate) = 0;
 };
 
-class DllBcmHost : public DllDynamic, DllBcmHostInterface
+class DllBcmHost : public DllBcmHostInterface
 {
 public:
   virtual void bcm_host_init()
@@ -103,10 +103,5 @@ public:
   { return ::vc_tv_hdmi_audio_supported(audio_format, num_channels, fs, bitrate); };
   virtual bool ResolveExports() 
     { return true; }
-  virtual bool Load() 
-  {
-    printf("DllBcm: Using omx system library \n");
-    return true;
-  }
-  virtual void Unload() {}
+
 };

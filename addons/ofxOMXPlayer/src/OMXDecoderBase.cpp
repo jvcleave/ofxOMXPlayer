@@ -33,6 +33,7 @@ OMXDecoderBase::~OMXDecoderBase()
 {
 	
 	ofLogVerbose(__func__) << " START ---------";
+	//return;
 	//TODO fix this?
 	try
 	{

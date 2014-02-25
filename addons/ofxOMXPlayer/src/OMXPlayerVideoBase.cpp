@@ -11,6 +11,18 @@ unsigned count_bits(int32_t value)
 
 OMXPlayerVideoBase::OMXPlayerVideoBase()
 {
+	m_open          = false;
+	m_stream_id     = -1;
+	m_pStream       = NULL;
+	m_av_clock      = NULL;
+	m_decoder       = NULL;
+	m_fps           = 25.0f;
+	m_flush         = false;
+	m_cached_size   = 0;
+	m_iVideoDelay   = 0;
+	m_pts           = DVD_NOPTS_VALUE;
+	m_speed         = DVD_PLAYSPEED_NORMAL;
+	
 	m_decoder = NULL;
 	m_pStream = NULL;
 	pthread_cond_init(&m_packet_cond, NULL);
@@ -300,10 +312,7 @@ bool OMXPlayerVideoBase::Close()
 	}
 	//ofLogVerbose(__func__) << "OMXPlayerVideoBase::Close() pre CloseDecoder";
 	//CloseDecoder();
-	
-	m_dllAvUtil.Unload();
-	m_dllAvCodec.Unload();
-	m_dllAvFormat.Unload();
+
 	
 	m_open          = false;
 	m_stream_id     = -1;

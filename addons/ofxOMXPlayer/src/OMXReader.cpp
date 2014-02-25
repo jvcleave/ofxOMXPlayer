@@ -77,8 +77,7 @@ static offset_t dvd_file_seek(void *h, offset_t pos, int whence)
 
 bool OMXReader::Open(std::string filename, bool dump_format)
 {
-	if (!m_dllAvUtil.Load() || !m_dllAvCodec.Load() || !m_dllAvFormat.Load())
-		return false;
+	
 	
 	m_iCurrentPts = DVD_NOPTS_VALUE;
 	m_filename    = filename; 
@@ -286,9 +285,6 @@ bool OMXReader::Close()
 	
 	m_dllAvFormat.avformat_network_deinit();
 	
-	m_dllAvUtil.Unload();
-	m_dllAvCodec.Unload();
-	m_dllAvFormat.Unload();
 	
 	m_open            = false;
 	m_filename        = "";

@@ -10,17 +10,7 @@
 
 OMXPlayerEGLImage::OMXPlayerEGLImage()
 {
-	m_open          = false;
-	m_stream_id     = -1;
-	m_pStream       = NULL;
-	m_av_clock      = NULL;
-	m_decoder       = NULL;
-	m_fps           = 25.0f;
-	m_flush         = false;
-	m_cached_size   = 0;
-	m_iVideoDelay   = 0;
-	m_pts           = DVD_NOPTS_VALUE;
-	m_speed         = DVD_PLAYSPEED_NORMAL;
+	
 	eglImageDecoder = NULL;
 	ofLogVerbose(__func__) << "OMXPlayerEGLImage CONSTRUCT";
 }
@@ -44,7 +34,7 @@ bool OMXPlayerEGLImage::Open(COMXStreamInfo &hints, OMXClock *av_clock, EGLImage
 	ofLogVerbose(__func__) << " OMXPlayerEGLImage Open";
 	this->eglImage = eglImage;
 	
-	if (!m_dllAvUtil.Load() || !m_dllAvCodec.Load() || !m_dllAvFormat.Load() || !av_clock)
+	if (!av_clock)
 	{
 	  return false;
 	}

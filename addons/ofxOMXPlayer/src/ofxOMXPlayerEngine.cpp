@@ -78,11 +78,11 @@ ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
 			delete eglPlayer;
 			eglPlayer = NULL;
 		}
-		if (nonEglPlayer) 
+		/*if (nonEglPlayer) 
 		{
 			delete nonEglPlayer;
 			nonEglPlayer = NULL;
-		}
+		}*/
 	}
 	videoPlayer = NULL;
 	

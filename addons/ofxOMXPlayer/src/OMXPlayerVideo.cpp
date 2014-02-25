@@ -33,18 +33,8 @@
 
 OMXPlayerVideo::OMXPlayerVideo()
 {
-	m_open          = false;
-	m_stream_id     = -1;
-	m_pStream       = NULL;
-	m_av_clock      = NULL;
-	m_decoder       = NULL;
-	m_fps           = 25.0f;
-	m_flush         = false;
-	m_cached_size   = 0;
 	m_hdmi_clock_sync = false;
-	m_iVideoDelay   = 0;
-	m_pts           = DVD_NOPTS_VALUE;
-	m_speed         = DVD_PLAYSPEED_NORMAL;	
+	
 	
 }
 OMXPlayerVideo::~OMXPlayerVideo()
@@ -62,7 +52,7 @@ bool OMXPlayerVideo::Open(COMXStreamInfo &hints, OMXClock *av_clock, bool deinte
 {
 	ofLogVerbose(__func__) << "OMXPlayerVideo Open";
 
-	if (!m_dllAvUtil.Load() || !m_dllAvCodec.Load() || !m_dllAvFormat.Load() || !av_clock)
+	if (!av_clock)
 	{
 		return false;
 	}

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "utils/StdString.h"
+
 #define FFMPEG_FILE_BUFFER_SIZE   32768
 
 namespace XFILE

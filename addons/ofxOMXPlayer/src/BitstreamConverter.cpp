@@ -384,7 +384,9 @@ const int CBitstreamConverter::isom_write_avcc(AVIOContext *pb, const uint8_t *d
         buf += size;
       }
       if (!sps || !pps || sps_size < 4 || sps_size > UINT16_MAX || pps_size > UINT16_MAX)
-        assert(0);
+	  {
+		  //assert(0);
+	  }
 
       m_dllAvFormat->avio_w8(pb, 1); /* version */
       m_dllAvFormat->avio_w8(pb, sps[1]); /* profile */
@@ -468,8 +470,7 @@ bool CBitstreamConverter::Open(enum AVCodecID codec, uint8_t *in_extradata, int 
             // NAL reformating to bitstream format needed
             m_dllAvUtil = new DllAvUtil;
             m_dllAvFormat = new DllAvFormat;
-            if (!m_dllAvUtil->Load() || !m_dllAvFormat->Load())
-              return false;
+          
 
             AVIOContext *pb;
             if (m_dllAvFormat->avio_open_dyn_buf(&pb) < 0)
@@ -504,8 +505,7 @@ bool CBitstreamConverter::Open(enum AVCodecID codec, uint8_t *in_extradata, int 
             // are valid, setup to convert 3 byte NAL sizes to 4 byte.
             m_dllAvUtil = new DllAvUtil;
             m_dllAvFormat = new DllAvFormat;
-            if (!m_dllAvUtil->Load() || !m_dllAvFormat->Load())
-              return false;
+            
 
             in_extradata[4] = 0xFF;
             m_convert_3byteTo4byteNALSize = true;

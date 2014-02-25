@@ -8,11 +8,7 @@ COMXVideo::COMXVideo()
 	m_hdmi_clock_sync   = false;
     
 }
-COMXVideo::~COMXVideo()
-{
-	ofLogVerbose(__func__) << "START";
-	ofLogVerbose(__func__) << "END";
-}
+
 
 bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, float display_aspect, bool deinterlace, bool hdmi_clock_sync)
 {

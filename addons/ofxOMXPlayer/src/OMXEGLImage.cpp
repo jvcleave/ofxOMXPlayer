@@ -6,13 +6,7 @@ OMXEGLImage::OMXEGLImage()
 	
 }
 
-OMXEGLImage::~OMXEGLImage()
-{
-	ofLogVerbose(__func__) << "START";
-	
-	ofLogVerbose(__func__) << "END";
-	
-}
+
 
 OMX_ERRORTYPE onFillBufferDone(OMX_HANDLETYPE hComponent,
 							   OMX_PTR pAppData,

@@ -2,7 +2,7 @@
 
 OMXClock::OMXClock()
 {
-	m_dllAvFormat.Load();
+	
 	
 	m_has_video   = false;
 	m_has_audio   = false;
@@ -19,7 +19,6 @@ OMXClock::~OMXClock()
 {
 	OMXDeinitialize();
 	
-	m_dllAvFormat.Unload();
 	pthread_mutex_destroy(&m_lock);
 }
 
