@@ -1,7 +1,6 @@
 #include "linux/PlatformDefs.h"
 #include <iostream>
 #include <stdio.h>
-#include "utils/StdString.h"
 
 #include "File.h"
 using namespace XFILE;
@@ -34,7 +33,7 @@ void CFile::rewindFile()
 	rewind(m_pFile);
 }
 //*********************************************************************************************
-bool CFile::Open(const CStdString& strFileName, unsigned int flags)
+bool CFile::Open(const std::string& strFileName, unsigned int flags)
 {
 	m_flags = flags;
 	
@@ -56,12 +55,12 @@ bool CFile::Open(const CStdString& strFileName, unsigned int flags)
 	return true;
 }
 
-bool CFile::OpenForWrite(const CStdString& strFileName, bool bOverWrite)
+bool CFile::OpenForWrite(const std::string& strFileName, bool bOverWrite)
 {
 	return false;
 }
 
-bool CFile::Exists(const CStdString& strFileName, bool bUseCache /* = true */)
+bool CFile::Exists(const std::string& strFileName, bool bUseCache /* = true */)
 {
 	FILE *fp;
 	

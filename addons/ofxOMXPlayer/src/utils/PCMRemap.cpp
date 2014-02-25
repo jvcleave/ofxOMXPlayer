@@ -404,7 +404,7 @@ void CPCMRemap::BuildMap()
   /* adjust the channels that are too loud */
   for(out_ch = 0; out_ch < m_outChannels; ++out_ch)
   {
-    CStdString s = "", f;
+    std::string s = "", f;
     for(dst = m_lookupMap[m_outMap[out_ch]]; dst->channel != PCM_INVALID; ++dst)
     {
       if (hasLoudest && dst->copy)
@@ -412,15 +412,25 @@ void CPCMRemap::BuildMap()
         dst->level = loudest;
         dst->copy  = false;
       }
-
-      f.Format("%s(%f%s) ",  PCMChannelStr(dst->channel).c_str(), dst->level, dst->copy ? "*" : "");
-      s += f;
+		stringstream formatted;
+		formatted << PCMChannelStr(dst->channel).c_str() << "(" << dst->level;
+		if (dst->copy) 
+		{
+			formatted << "*";
+		}else 
+		{
+			formatted << "";
+		}
+		formatted << ") ";
+		
+      //f.Format("%s(%f%s) ",  PCMChannelStr(dst->channel).c_str(), dst->level, dst->copy ? "*" : "");
+      s += formatted.str();
     }
     ofLog(OF_LOG_VERBOSE, "CPCMRemap: %s = %s\n", PCMChannelStr(m_outMap[out_ch]).c_str(), s.c_str());
   }
 }
 
-void CPCMRemap::DumpMap(CStdString info, unsigned int channels, enum PCMChannels *channelMap)
+void CPCMRemap::DumpMap(std::string info, unsigned int channels, enum PCMChannels *channelMap)
 {
   if (channelMap == NULL)
   {
@@ -428,7 +438,7 @@ void CPCMRemap::DumpMap(CStdString info, unsigned int channels, enum PCMChannels
     return;
   }
 
-  CStdString mapping;
+  std::string mapping;
   for(unsigned int i = 0; i < channels; ++i)
     mapping += ((i == 0) ? "" : ",") + PCMChannelStr(channelMap[i]);
 
@@ -731,7 +741,7 @@ int CPCMRemap::FramesToInBytes(int frames)
   return frames * m_inSampleSize * m_inChannels;
 }
 
-CStdString CPCMRemap::PCMChannelStr(enum PCMChannels ename)
+std::string CPCMRemap::PCMChannelStr(enum PCMChannels ename)
 {
   const char* PCMChannelName[] =
   {
@@ -756,17 +766,21 @@ CStdString CPCMRemap::PCMChannelStr(enum PCMChannels ename)
   };
 
   int namepos = (int)ename;
-  CStdString namestr;
+  std::string namestr;
 
   if (namepos < 0 || namepos >= (int)(sizeof(PCMChannelName) / sizeof(const char*)))
-    namestr.Format("UNKNOWN CHANNEL:%i", namepos);
-  else
-    namestr = PCMChannelName[namepos];
-
+  {
+	  stringstream formatted;
+	  formatted << "UNKNOWN CHANNEL:" << namepos;
+	  namestr = formatted.str();
+  }else
+  {
+	 namestr = PCMChannelName[namepos]; 
+  }    
   return namestr;
 }
 
-CStdString CPCMRemap::PCMLayoutStr(enum PCMLayout ename)
+std::string CPCMRemap::PCMLayoutStr(enum PCMLayout ename)
 {
   const char* PCMLayoutName[] =
   {
@@ -783,12 +797,17 @@ CStdString CPCMRemap::PCMLayoutStr(enum PCMLayout ename)
   };
 
   int namepos = (int)ename;
-  CStdString namestr;
+  std::string namestr;
 
   if (namepos < 0 || namepos >= (int)(sizeof(PCMLayoutName) / sizeof(const char*)))
-    namestr.Format("UNKNOWN LAYOUT:%i", namepos);
-  else
-    namestr = PCMLayoutName[namepos];
+  {
+	  stringstream formatted;
+	  formatted << "UNKNOWN LAYOUT:" << namepos;
+	  namestr = formatted.str();
+  }else
+  {
+	  namestr = PCMLayoutName[namepos]; 
+  }
 
   return namestr;
 }

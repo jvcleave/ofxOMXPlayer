@@ -146,7 +146,7 @@ public:
 	
 	int GetRelativeIndex(size_t index)
 	{
-		assert(index < MAX_STREAMS);
+		//assert(index < MAX_STREAMS);
 		return m_streams[index].index;
 	}
 	

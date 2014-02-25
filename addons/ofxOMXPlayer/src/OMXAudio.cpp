@@ -135,7 +135,7 @@ COMXAudio::~COMXAudio()
 }
 
 
-bool COMXAudio::Initialize(const CStdString& device, enum PCMChannels *channelMap,
+bool COMXAudio::Initialize(const std::string& device, enum PCMChannels *channelMap,
                            COMXStreamInfo &hints, OMXClock *clock, EEncoded bPassthrough, bool bUseHWDecode,
                            bool boostOnDownmix)
 {
@@ -166,7 +166,7 @@ bool COMXAudio::Initialize(const CStdString& device, enum PCMChannels *channelMa
   return Initialize(device, hints.channels, channelMap, hints.channels, hints.samplerate, hints.bitspersample, false, boostOnDownmix, false, bPassthrough);
 }
 
-bool COMXAudio::Initialize(const CStdString& device, int iChannels, enum PCMChannels *channelMap, unsigned int downmixChannels, unsigned int uiSamplesPerSec, unsigned int uiBitsPerSample, bool bResample, bool boostOnDownmix, bool bIsMusic, EEncoded bPassthrough)
+bool COMXAudio::Initialize(const std::string& device, int iChannels, enum PCMChannels *channelMap, unsigned int downmixChannels, unsigned int uiSamplesPerSec, unsigned int uiBitsPerSample, bool bResample, bool boostOnDownmix, bool bIsMusic, EEncoded bPassthrough)
 {
   std::string deviceuse;
   if(device == "hdmi") {

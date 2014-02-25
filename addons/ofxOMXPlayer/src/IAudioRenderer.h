@@ -2,7 +2,6 @@
 #pragma once
 
 
-#include "utils/StdString.h"
 #include "utils/PCMRemap.h"
 
 class IAudioRenderer
@@ -19,7 +18,7 @@ public:
 
   IAudioRenderer() {};
   virtual ~IAudioRenderer() {};
-  virtual bool Initialize(const CStdString& device, int iChannels, enum PCMChannels *channelMap, unsigned int downmixChannels, unsigned int uiSamplesPerSec, unsigned int uiBitsPerSample, bool bResample, bool boostOnDownmix, bool bIsMusic=false, EEncoded encoded = ENCODED_NONE) = 0;
+  virtual bool Initialize(const std::string& device, int iChannels, enum PCMChannels *channelMap, unsigned int downmixChannels, unsigned int uiSamplesPerSec, unsigned int uiBitsPerSample, bool bResample, bool boostOnDownmix, bool bIsMusic=false, EEncoded encoded = ENCODED_NONE) = 0;
   virtual float GetDelay() = 0;
   virtual float GetCacheTime() = 0;
   virtual float GetCacheTotal() { return 1.0f; }

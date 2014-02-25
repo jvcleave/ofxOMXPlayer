@@ -11,6 +11,7 @@
 #include "OMXClock.h"
 #include "OMXStreamInfo.h"
 #include "BitstreamConverter.h"
+#include <assert.h>
 
 #define AUDIO_BUFFER_SECONDS 2
 
@@ -23,9 +24,9 @@ public:
   float GetCacheTotal();
   unsigned int GetAudioRenderingLatency();
   COMXAudio();
-  bool Initialize(const CStdString& device, enum PCMChannels *channelMap,
+  bool Initialize(const std::string& device, enum PCMChannels *channelMap,
                            COMXStreamInfo &hints, OMXClock *clock, EEncoded bPassthrough, bool bUseHWDecode, bool boostOnDownmix);
-  bool Initialize(const CStdString& device, int iChannels, enum PCMChannels *channelMap, unsigned int downmixChannels, unsigned int uiSamplesPerSec, unsigned int uiBitsPerSample, bool bResample, bool boostOnDownmix, bool bIsMusic=false, EEncoded bPassthrough = IAudioRenderer::ENCODED_NONE);
+  bool Initialize(const std::string& device, int iChannels, enum PCMChannels *channelMap, unsigned int downmixChannels, unsigned int uiSamplesPerSec, unsigned int uiBitsPerSample, bool bResample, bool boostOnDownmix, bool bIsMusic=false, EEncoded bPassthrough = IAudioRenderer::ENCODED_NONE);
   ~COMXAudio();
 
   unsigned int AddPackets(const void* data, unsigned int len);

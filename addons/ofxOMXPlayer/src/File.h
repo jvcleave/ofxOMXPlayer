@@ -1,6 +1,5 @@
 #pragma once
 
-#include "utils/StdString.h"
 
 #define FFMPEG_FILE_BUFFER_SIZE   32768
 
@@ -35,15 +34,15 @@ namespace XFILE
 		CFile();
 		~CFile();
 		
-		bool Open(const CStdString& strFileName, unsigned int flags = 0);
-		bool OpenForWrite(const CStdString& strFileName, bool bOverWrite);
+		bool Open(const std::string& strFileName, unsigned int flags = 0);
+		bool OpenForWrite(const std::string& strFileName, bool bOverWrite);
 		unsigned int Read(void* lpBuf, int64_t uiBufSize);
 		int Write(const void* lpBuf, int64_t uiBufSize);
 		int64_t Seek(int64_t iFilePosition, int iWhence = SEEK_SET);
 		int64_t GetPosition();
 		int64_t GetLength();
 		void Close();
-		static bool Exists(const CStdString& strFileName, bool bUseCache = true);
+		static bool Exists(const std::string& strFileName, bool bUseCache = true);
 		int GetChunkSize() { return 6144 /*FFMPEG_FILE_BUFFER_SIZE*/; };
 		int IoControl(EIoControl request, void* param);
 		bool IsEOF();
