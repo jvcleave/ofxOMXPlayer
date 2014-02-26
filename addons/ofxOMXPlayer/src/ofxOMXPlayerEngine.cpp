@@ -59,10 +59,6 @@ ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
 		StopThread("ofxOMXPlayerEngine");
 	}
 	
-	
-	
-	
-	
 	bPlaying = false;
 	
 	
@@ -71,23 +67,21 @@ ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
 	{
 		listener = NULL;
 	}
-	//if (!isExiting) 
-	//{
-		if (eglPlayer) 
-		{
-			delete eglPlayer;
-			eglPlayer = NULL;
-		}
-		if (nonEglPlayer) 
-		{
-			delete nonEglPlayer;
-			nonEglPlayer = NULL;
-		}
-	//}
+	
+	if (eglPlayer) 
+	{
+		delete eglPlayer;
+		eglPlayer = NULL;
+	}
+	if (nonEglPlayer) 
+	{
+		delete nonEglPlayer;
+		nonEglPlayer = NULL;
+	}
+
 	videoPlayer = NULL;
 	
 
-	
 	if (audioPlayer) 
 	{
 		delete audioPlayer;
@@ -104,12 +98,7 @@ ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
 	
 	clock.OMXDeinitialize();
 	
-	/*if (clock) 
-	 {
-	 ofLogVerbose(__func__) << "CLOCK STILL EXISTS";
-	 delete clock;
-	 clock = NULL;
-	 }*/
+	
 	if (isExiting) 
 	{
 		omxCore.Deinitialize();

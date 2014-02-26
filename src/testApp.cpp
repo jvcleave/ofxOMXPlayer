@@ -55,15 +55,12 @@ void testApp::setup()
 	
 }
 
-void testApp::exit()
-{
-	omxPlayer.close();
-}
+
 
 //--------------------------------------------------------------
 void testApp::update()
 {
-	if(omxPlayer.isPlaying() || omxPlayer.isTextureEnabled)
+	if( omxPlayer.isTextureEnabled)
 	{
 		if (doShader) 
 		{
@@ -89,7 +86,7 @@ void testApp::updateFbo()
 
 //--------------------------------------------------------------
 void testApp::draw(){
-	if(!omxPlayer.isPlaying() && !omxPlayer.isTextureEnabled)
+	if(!omxPlayer.isTextureEnabled)
 	{
 		return;
 	}

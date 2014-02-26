@@ -38,6 +38,7 @@ void playlistApp::onCharacterReceived(SSHKeyListenerEventData& e)
 //--------------------------------------------------------------
 void playlistApp::setup()
 {
+	ofBackground(ofColor::black);
 	ofSetLogLevel(OF_LOG_VERBOSE);
 	ofSetVerticalSync(false);
 	consoleListener.setup(this);	
@@ -99,10 +100,7 @@ void playlistApp::update()
 		//with the texture based player this must be done here - especially if the videos are different resolutions
 		loadNextMovie();
 	}
-	if(!omxPlayer.isPlaying() || !omxPlayer.isTextureEnabled)
-	{
-		return;
-	}
+	
 	
 	
 }
@@ -115,9 +113,9 @@ bool doingSkipCheck = false;
 //--------------------------------------------------------------
 void playlistApp::draw(){
 	
-	return;
 	
-	if(!omxPlayer.isPlaying() && !omxPlayer.isTextureEnabled)
+	
+	if(!omxPlayer.isTextureEnabled)
 	{
 		return;
 	}

@@ -100,7 +100,7 @@ void developApp::loadShader()
 //--------------------------------------------------------------
 void developApp::update()
 {
-	if (!settings.enableTexture) 
+	if (!omxPlayer.isPlaying() || !omxPlayer.isTextureEnabled) 
 	{
 		return;
 	}
@@ -137,11 +137,7 @@ void developApp::update()
 //--------------------------------------------------------------
 void developApp::draw(){
 	
-	if (!settings.enableTexture) 
-	{
-		return;
-	}
-	if(!omxPlayer.isPlaying())
+	if (!omxPlayer.isPlaying() || !omxPlayer.isTextureEnabled) 
 	{
 		return;
 	}
@@ -268,6 +264,7 @@ void developApp::keyPressed  (int key){
 		}
 		case 'c':
 		{
+			omxPlayer.close();
 			break;
 		}
 		default:

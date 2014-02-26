@@ -330,7 +330,7 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, float display_aspec
 	float fAspect = (float)hints.aspect / (float)m_decoded_width * (float)m_decoded_height; 
 	float par = hints.aspect ? fAspect/display_aspect : 0.0f;
 	// only set aspect when we have a aspect and display doesn't match the aspect
-	bool doDisplayChange = false;
+	bool doDisplayChange = true;
 	if(doDisplayChange)
 	{
 		if(par != 0.0f && fabs(par - 1.0f) > 0.01f)

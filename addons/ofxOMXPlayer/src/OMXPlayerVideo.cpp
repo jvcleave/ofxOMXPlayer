@@ -150,10 +150,10 @@ bool OMXPlayerVideo::Close()
 	m_flush   = true;
 	
 	
-	if (!isExiting) 
-	{
+	//if (!isExiting) 
+	//{
 		Flush();
-	}
+	//}
 	
 	if(ThreadHandle())
 	{

@@ -19,11 +19,7 @@ OMXPlayerEGLImage::~OMXPlayerEGLImage()
 {
 	ofLogVerbose(__func__) << "START";
 	Close();
-	if (eglImageDecoder) 
-	{
-		delete eglImageDecoder;
-		eglImageDecoder = NULL;
-	}
+	
 	ofLogVerbose(__func__) << "END";
 }
 
@@ -129,10 +125,10 @@ bool OMXPlayerEGLImage::Close()
 	m_flush   = true;
 	
 	
-	if (!isExiting) 
-	{
+	//if (!isExiting) 
+	//{
 		Flush();
-	}
+	//}
 	
 	if(ThreadHandle())
 	{
@@ -144,10 +140,11 @@ bool OMXPlayerEGLImage::Close()
 		StopThread("OMXPlayerVideo");
 	}
 	
-	/*ofLogVerbose(__func__) << "isExiting: " << isExiting;
-	 */
-	//ofLogVerbose(__func__) << "OMXPlayerVideoBase::Close() pre CloseDecoder";
-	//CloseDecoder();
+	if (eglImageDecoder) 
+	{
+		delete eglImageDecoder;
+		eglImageDecoder = NULL;
+	};
 	
 	
 	m_open          = false;

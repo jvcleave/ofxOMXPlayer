@@ -53,7 +53,7 @@ void pixelsApp::update()
 
 //--------------------------------------------------------------
 void pixelsApp::draw(){
-	if(!omxPlayer.isPlaying() && !omxPlayer.isTextureEnabled)
+	if(!omxPlayer.isTextureEnabled)
 	{
 		return;
 	}

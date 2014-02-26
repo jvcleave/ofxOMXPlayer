@@ -21,7 +21,7 @@ void multiPlayer::setup()
 			settings.videoPath = files[i].path();
 			settings.useHDMIForAudio = true;	//default true
 			settings.enableTexture = true;		//default true
-			//settings.enableLooping = false;		//default true
+			settings.enableLooping = false;		//default true
 			settings.enableAudio = false;		//default true, save resources by disabling
 			ofxOMXPlayer* player = new ofxOMXPlayer();
 			
