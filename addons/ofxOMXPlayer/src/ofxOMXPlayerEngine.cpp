@@ -52,13 +52,13 @@ ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
 	ofLogVerbose(__func__) << " isExiting: " << isExiting;
 	
 	//Lock();
-	
+	m_bStop = true;
 	
 	if(ThreadHandle())
-	{
-		StopThread();
+	{	
+		StopThread("ofxOMXPlayerEngine");
 	}
-	m_bStop = true;
+	
 	
 	
 	
@@ -71,19 +71,19 @@ ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
 	{
 		listener = NULL;
 	}
-	if (!isExiting) 
-	{
+	//if (!isExiting) 
+	//{
 		if (eglPlayer) 
 		{
 			delete eglPlayer;
 			eglPlayer = NULL;
 		}
-		/*if (nonEglPlayer) 
+		if (nonEglPlayer) 
 		{
 			delete nonEglPlayer;
 			nonEglPlayer = NULL;
-		}*/
-	}
+		}
+	//}
 	videoPlayer = NULL;
 	
 

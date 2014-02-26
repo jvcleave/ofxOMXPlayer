@@ -122,3 +122,41 @@ bool OMXPlayerEGLImage::OpenDecoder()
 	return true;
 }
 
+bool OMXPlayerEGLImage::Close()
+{
+	ofLogVerbose(__func__) << " START, isExiting:" << isExiting;
+	m_bAbort  = true;
+	m_flush   = true;
+	
+	
+	if (!isExiting) 
+	{
+		Flush();
+	}
+	
+	if(ThreadHandle())
+	{
+		Lock();
+		ofLogVerbose(__func__) << "WE ARE STILL THREADED";
+		pthread_cond_broadcast(&m_packet_cond);
+		UnLock();
+		
+		StopThread("OMXPlayerVideo");
+	}
+	
+	/*ofLogVerbose(__func__) << "isExiting: " << isExiting;
+	 */
+	//ofLogVerbose(__func__) << "OMXPlayerVideoBase::Close() pre CloseDecoder";
+	//CloseDecoder();
+	
+	
+	m_open          = false;
+	m_stream_id     = -1;
+	m_iCurrentPts   = DVD_NOPTS_VALUE;
+	m_pStream       = NULL;
+	m_pts           = 0;
+	m_speed         = DVD_PLAYSPEED_NORMAL;
+	
+	ofLogVerbose(__func__) << " END";
+	return true;
+}

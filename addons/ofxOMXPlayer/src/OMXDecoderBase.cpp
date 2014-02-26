@@ -29,11 +29,12 @@ OMXDecoderBase::OMXDecoderBase()
 	
 }
 
+#if 0
 OMXDecoderBase::~OMXDecoderBase()
 {
 	
 	ofLogVerbose(__func__) << " START ---------";
-	//return;
+	return;
 	//TODO fix this?
 	try
 	{
@@ -80,7 +81,7 @@ OMXDecoderBase::~OMXDecoderBase()
 
 	ofLogVerbose(__func__) << "END ---------";
 }
-
+#endif
 
 bool OMXDecoderBase::NaluFormatStartCodes(enum AVCodecID codec, uint8_t *in_extradata, int in_extrasize)
 {

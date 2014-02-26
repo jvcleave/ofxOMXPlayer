@@ -64,7 +64,7 @@ void playlistApp::createPlayer()
 	settings.videoPath = files[videoCounter].path();
 	settings.useHDMIForAudio = true;	//default true
 	settings.enableLooping = false;
-	//settings.enableTexture = false;		//default true
+	settings.enableTexture = false;		//default true
 	if(files.size() > 1)
 	{
 				//default true
@@ -115,7 +115,7 @@ bool doingSkipCheck = false;
 //--------------------------------------------------------------
 void playlistApp::draw(){
 	
-	
+	return;
 	
 	if(!omxPlayer.isPlaying() && !omxPlayer.isTextureEnabled)
 	{

@@ -40,11 +40,12 @@ OMXPlayerVideo::OMXPlayerVideo()
 OMXPlayerVideo::~OMXPlayerVideo()
 {
 	ofLogVerbose(__func__) << "START";
-	if (nonTextureDecoder) 
-	{
-		delete nonTextureDecoder;
-		nonTextureDecoder = NULL;
-	}
+	
+	Close();
+	
+	pthread_cond_destroy(&m_packet_cond);
+	pthread_mutex_destroy(&m_lock);
+	pthread_mutex_destroy(&m_lock_decoder);
 	ofLogVerbose(__func__) << "END";
 }
 
@@ -140,5 +141,48 @@ bool OMXPlayerVideo::OpenDecoder()
   
 
   return true;
+}
+
+bool OMXPlayerVideo::Close()
+{
+	ofLogVerbose(__func__) << " START, isExiting:" << isExiting;
+	m_bAbort  = true;
+	m_flush   = true;
+	
+	
+	if (!isExiting) 
+	{
+		Flush();
+	}
+	
+	if(ThreadHandle())
+	{
+		Lock();
+		ofLogVerbose(__func__) << "WE ARE STILL THREADED";
+		pthread_cond_broadcast(&m_packet_cond);
+		UnLock();
+		
+		StopThread("OMXPlayerVideo");
+	}
+	
+	/*ofLogVerbose(__func__) << "isExiting: " << isExiting;
+	 */
+	//ofLogVerbose(__func__) << "OMXPlayerVideoBase::Close() pre CloseDecoder";
+	//CloseDecoder();
+	if (nonTextureDecoder) 
+	{
+		delete nonTextureDecoder;
+		nonTextureDecoder = NULL;
+	}
+	
+	m_open          = false;
+	m_stream_id     = -1;
+	m_iCurrentPts   = DVD_NOPTS_VALUE;
+	m_pStream       = NULL;
+	m_pts           = 0;
+	m_speed         = DVD_PLAYSPEED_NORMAL;
+	
+	ofLogVerbose(__func__) << " END";
+	return true;
 }
 

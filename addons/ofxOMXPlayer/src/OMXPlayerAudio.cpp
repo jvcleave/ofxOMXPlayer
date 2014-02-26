@@ -158,7 +158,7 @@ bool OMXPlayerAudio::Close()
     pthread_cond_broadcast(&m_packet_cond);
     UnLock();
 
-    StopThread();
+    StopThread("OMXPlayerAudio");
   }
 
   CloseDecoder();
@@ -464,6 +464,8 @@ IAudioRenderer::EEncoded OMXPlayerAudio::IsPassthrough(COMXStreamInfo hints)
 
 bool OMXPlayerAudio::OpenDecoder()
 {
+	ofLogVerbose(__func__) << "m_use_hw_decode: " << m_use_hw_decode;
+	ofLogVerbose(__func__) << "m_use_passthrough: " << m_use_passthrough;
   bool bAudioRenderOpen = false;
 
   m_decoder = new COMXAudio();
@@ -508,16 +510,16 @@ bool OMXPlayerAudio::OpenDecoder()
   {
     if(m_passthrough)
     {
-      ofLog(OF_LOG_VERBOSE, "Audio codec %s channels %d samplerate %d bitspersample %d\n",
+      ofLog(OF_LOG_VERBOSE, "USING PASSTHROUGH, Audio codec %s channels %d samplerate %d bitspersample %d\n",
         m_codec_name.c_str(), 2, m_hints.samplerate, m_hints.bitspersample);
     }
     else
     {
-      ofLog(OF_LOG_VERBOSE, "Audio codec %s channels %d samplerate %d bitspersample %d\n",
+      ofLog(OF_LOG_VERBOSE, "PASSTHROUGH DISABLED, Audio codec %s channels %d samplerate %d bitspersample %d\n",
         m_codec_name.c_str(), m_hints.channels, m_hints.samplerate, m_hints.bitspersample);
     }
   }
-
+	ofLogVerbose(__func__) << "m_hw_decode: " << m_hw_decode;
   return true;
 }
 

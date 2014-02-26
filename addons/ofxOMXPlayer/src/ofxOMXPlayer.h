@@ -80,7 +80,6 @@ private:
 	int videoWidth;
 	int videoHeight;
 	unsigned char * pixels;
-	bool isExiting;
 	
 	void generateEGLImage(int videoWidth_, int videoHeight_);
 	void destroyEGLImage();

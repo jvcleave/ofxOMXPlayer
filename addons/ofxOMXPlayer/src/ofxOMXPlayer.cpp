@@ -20,7 +20,6 @@ ofxOMXPlayer::ofxOMXPlayer()
 	eglImage = NULL;
 	context = NULL;
 	display = NULL;
-	isExiting = false;
 	pixels = NULL;
 }
 

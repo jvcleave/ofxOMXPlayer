@@ -8,7 +8,11 @@ COMXVideo::COMXVideo()
 	m_hdmi_clock_sync   = false;
     
 }
-
+COMXVideo::~COMXVideo()
+{
+	ofLogVerbose(__func__) << " START";
+	ofLogVerbose(__func__) << " END";
+}
 
 bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, float display_aspect, bool deinterlace, bool hdmi_clock_sync)
 {
@@ -326,7 +330,7 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, float display_aspec
 	float fAspect = (float)hints.aspect / (float)m_decoded_width * (float)m_decoded_height; 
 	float par = hints.aspect ? fAspect/display_aspect : 0.0f;
 	// only set aspect when we have a aspect and display doesn't match the aspect
-	bool doDisplayChange = true;
+	bool doDisplayChange = false;
 	if(doDisplayChange)
 	{
 		if(par != 0.0f && fabs(par - 1.0f) > 0.01f)
@@ -454,168 +458,6 @@ int COMXVideo::Decode(uint8_t *pData, int iSize, double pts)
 	return false;
 }
 
-int COMXVideo::Decode(uint8_t *pData, int iSize, double dts, double pts)
-{
-  OMX_ERRORTYPE omx_err;
-
-  if (pData || iSize > 0)
-  {
-    unsigned int demuxer_bytes = (unsigned int)iSize;
-    uint8_t *demuxer_content = pData;
-
-    while(demuxer_bytes)
-    {
-		// 500ms timeout
-		OMX_BUFFERHEADERTYPE *omx_buffer = m_omx_decoder.GetInputBuffer(500);
-		if(omx_buffer == NULL)
-		{
-			ofLog(OF_LOG_VERBOSE, "OMXVideo::Decode timeout\n");
-			return false;
-		}
-
-		/*
-		ofLog(OF_LOG_VERBOSE, "COMXVideo::Video VDec : pts %lld omx_buffer 0x%08x buffer 0x%08x number %d\n", 
-		  pts, omx_buffer, omx_buffer->pBuffer, (int)omx_buffer->pAppPrivate);
-		ofLog(OF_LOG_VERBOSE, "VDec : pts %f omx_buffer 0x%08x buffer 0x%08x number %d\n", 
-		  (float)pts / AV_TIME_BASE, omx_buffer, omx_buffer->pBuffer, (int)omx_buffer->pAppPrivate);
-		*/
-
-		omx_buffer->nFlags = 0;
-		omx_buffer->nOffset = 0;
-
-		// some packed bitstream AVI files set almost all pts values to DVD_NOPTS_VALUE, but have a scattering of real pts values.
-		// the valid pts values match the dts values.
-		// if a stream has had more than 4 valid pts values in the last 16, the use UNKNOWN, otherwise use dts
-		m_history_valid_pts = (m_history_valid_pts << 1) | (pts != DVD_NOPTS_VALUE);
-		if(pts == DVD_NOPTS_VALUE && count_bits(m_history_valid_pts & 0xffff) < 4)
-		{
-			pts = dts;
-		}
-
-		if(m_setStartTime)
-		{
-			// only send dts on first frame to get nearly correct starttime
-			if(pts == DVD_NOPTS_VALUE)
-			{
-				pts = dts;
-			}
-			omx_buffer->nFlags |= OMX_BUFFERFLAG_STARTTIME;
-			ofLog(OF_LOG_VERBOSE, "OMXVideo::Decode VDec : setStartTime %f\n", (pts == DVD_NOPTS_VALUE ? 0.0 : pts) / DVD_TIME_BASE);
-			m_setStartTime = false;
-		}
-		
-		if(pts == DVD_NOPTS_VALUE)
-		{
-			omx_buffer->nFlags |= OMX_BUFFERFLAG_TIME_UNKNOWN;
-		}
-		
-		omx_buffer->nTimeStamp = ToOMXTime(pts == DVD_NOPTS_VALUE ? 0 : pts);
-		omx_buffer->nFilledLen = (demuxer_bytes > omx_buffer->nAllocLen) ? omx_buffer->nAllocLen : demuxer_bytes;
-		memcpy(omx_buffer->pBuffer, demuxer_content, omx_buffer->nFilledLen);
-
-		demuxer_bytes -= omx_buffer->nFilledLen;
-		demuxer_content += omx_buffer->nFilledLen;
-
-		if(demuxer_bytes == 0)
-		{
-			omx_buffer->nFlags |= OMX_BUFFERFLAG_ENDOFFRAME;
-		}
-
-		int nRetry = 0;
-		while(true)
-		{
-			omx_err = m_omx_decoder.EmptyThisBuffer(omx_buffer);
-			if (omx_err == OMX_ErrorNone)
-			{
-				break;
-			}
-			else
-			{
-				ofLog(OF_LOG_VERBOSE, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", "OMXVideo", __func__, omx_err);
-				nRetry++;
-			}
-			if(nRetry == 5)
-			{
-				ofLog(OF_LOG_VERBOSE, "%s::%s - OMX_EmptyThisBuffer() finaly failed\n", "OMXVideo", __func__);
-				return false;
-			}
-      }
-
-      /*
-      omx_err = m_omx_decoder.EmptyThisBuffer(omx_buffer);
-
-      if(omx_err != OMX_ErrorNone)
-      {
-        ofLog(OF_LOG_VERBOSE, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", "OMXVideo", __func__, omx_err);
-
-        ofLog(OF_LOG_VERBOSE, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", "OMXVideo", __func__, omx_err);
-
-        return false;
-      }
-      */
-
-      if(m_first_frame && m_deinterlace)
-      {
-        OMX_PARAM_PORTDEFINITIONTYPE port_image;
-        OMX_INIT_STRUCTURE(port_image);
-        port_image.nPortIndex = m_omx_decoder.GetOutputPort();
-
-        omx_err = m_omx_decoder.GetParameter(OMX_IndexParamPortDefinition, &port_image);
-        if(omx_err != OMX_ErrorNone)
-        {
-          ofLog(OF_LOG_VERBOSE, "%s::%s - error OMX_IndexParamPortDefinition 1 omx_err(0x%08x)\n", "OMXVideo", __func__, omx_err);
-        }
-
-        /* we assume when the sizes equal we have the first decoded frame */
-        if(port_image.format.video.nFrameWidth == m_decoded_width && port_image.format.video.nFrameHeight == m_decoded_height)
-        {
-          m_first_frame = false;
-
-          omx_err = m_omx_decoder.WaitForEvent(OMX_EventPortSettingsChanged);
-          if(omx_err == OMX_ErrorStreamCorrupt)
-          {
-            ofLog(OF_LOG_VERBOSE, "%s::%s - image not unsupported\n", "OMXVideo", __func__);
-            return false;
-          }
-
-          m_omx_decoder.DisablePort(m_omx_decoder.GetOutputPort(), false);
-          m_omx_sched.DisablePort(m_omx_sched.GetInputPort(), false);
-
-          m_omx_image_fx.DisablePort(m_omx_image_fx.GetOutputPort(), false);
-          m_omx_image_fx.DisablePort(m_omx_image_fx.GetInputPort(), false);
-
-          port_image.nPortIndex = m_omx_image_fx.GetInputPort();
-
-          omx_err = m_omx_image_fx.SetParameter(OMX_IndexParamPortDefinition, &port_image);
-          if(omx_err != OMX_ErrorNone)
-          {
-            ofLog(OF_LOG_VERBOSE, "%s::%s - error OMX_IndexParamPortDefinition 2 omx_err(0x%08x)\n", "OMXVideo", __func__, omx_err);
-          }
-
-          port_image.nPortIndex = m_omx_image_fx.GetOutputPort();
-          omx_err = m_omx_image_fx.SetParameter(OMX_IndexParamPortDefinition, &port_image);
-          if(omx_err != OMX_ErrorNone)
-          {
-            ofLog(OF_LOG_VERBOSE, "%s::%s - error OMX_IndexParamPortDefinition 3 omx_err(0x%08x)\n", "OMXVideo", __func__, omx_err);
-          }
-
-          m_omx_decoder.EnablePort(m_omx_decoder.GetOutputPort(), false);
-
-          m_omx_image_fx.EnablePort(m_omx_image_fx.GetOutputPort(), false);
-
-          m_omx_image_fx.EnablePort(m_omx_image_fx.GetInputPort(), false);
-
-          m_omx_sched.EnablePort(m_omx_sched.GetInputPort(), false);
-        }
-      }
-    }
-
-    return true;
-
-  }
-  
-  return false;
-}
 
 
 

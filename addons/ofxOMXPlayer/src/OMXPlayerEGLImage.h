@@ -18,6 +18,7 @@ public:
 	
 	bool Open(COMXStreamInfo &hints, OMXClock *av_clock, EGLImageKHR eglImage);
 	bool OpenDecoder();
+	bool Close();
 	
 	ofxOMXPlayerSettings settings;
 	OMXEGLImage*				eglImageDecoder;

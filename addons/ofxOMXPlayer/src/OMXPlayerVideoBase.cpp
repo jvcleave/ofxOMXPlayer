@@ -33,18 +33,7 @@ OMXPlayerVideoBase::OMXPlayerVideoBase()
 	isExiting = false;
 }
 
-OMXPlayerVideoBase::~OMXPlayerVideoBase()
-{
-	
-	ofLogVerbose(__func__) << "START";
 
-	Close();
-	
-	pthread_cond_destroy(&m_packet_cond);
-	pthread_mutex_destroy(&m_lock);
-	pthread_mutex_destroy(&m_lock_decoder);
-	ofLogVerbose(__func__) << "END";
-}
 
 void OMXPlayerVideoBase::SetSpeed(int speed)
 {
@@ -153,7 +142,7 @@ void OMXPlayerVideoBase::Flush()
 	if(m_decoder)
 	{
 		ofLogVerbose(__func__) << "OMXPlayerVideoBase::m_decoder->Reset";
-		//m_decoder->Reset();
+		m_decoder->Reset();
 	}
 	
 	UnLockDecoder();
@@ -289,38 +278,3 @@ void OMXPlayerVideoBase::WaitCompletion()
 	m_decoder->WaitCompletion();
 }
 
-bool OMXPlayerVideoBase::Close()
-{
-	ofLogVerbose(__func__) << " START";
-	m_bAbort  = true;
-	m_flush   = true;
-	
-	ofLogVerbose(__func__) << "isExiting: " << isExiting;
-	if (!isExiting) 
-	{
-		Flush();
-	}
-	
-	
-	if(ThreadHandle())
-	{
-		Lock();
-		pthread_cond_broadcast(&m_packet_cond);
-		UnLock();
-		
-		StopThread();
-	}
-	//ofLogVerbose(__func__) << "OMXPlayerVideoBase::Close() pre CloseDecoder";
-	//CloseDecoder();
-
-	
-	m_open          = false;
-	m_stream_id     = -1;
-	m_iCurrentPts   = DVD_NOPTS_VALUE;
-	m_pStream       = NULL;
-	m_pts           = 0;
-	m_speed         = DVD_PLAYSPEED_NORMAL;
-	
-	ofLogVerbose(__func__) << " END";
-	return true;
-}

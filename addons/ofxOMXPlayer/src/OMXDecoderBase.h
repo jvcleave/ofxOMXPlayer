@@ -36,7 +36,7 @@ class OMXDecoderBase
 {
 public:
 	OMXDecoderBase();
-	~OMXDecoderBase();
+	//~OMXDecoderBase();
 	OMX_VIDEO_CODINGTYPE m_codingType;
 
 	COMXCoreTunel			m_omx_tunnel_clock;
@@ -71,7 +71,6 @@ public:
 	string decoder_name;
 	
 
-	virtual int				Decode(uint8_t *pData, int iSize, double dts, double pts)=0;
 	virtual int				Decode(uint8_t *pData, int iSize, double pts)=0;
 	
 	

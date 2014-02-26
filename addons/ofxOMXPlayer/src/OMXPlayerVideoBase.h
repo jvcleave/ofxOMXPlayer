@@ -19,7 +19,7 @@ class OMXPlayerVideoBase: public OMXThread
 {
 public:
 	OMXPlayerVideoBase();
-	~OMXPlayerVideoBase();
+	//~OMXPlayerVideoBase();
 	OMXDecoderBase*				m_decoder;
 	AVStream*					m_pStream;
 	int							m_stream_id;
@@ -53,7 +53,7 @@ public:
 	void						SetSpeed(int speed);
 	int							GetSpeed();
 	
-	bool						Close();
+	virtual bool						Close() = 0;
 	bool						Decode(OMXPacket *pkt);
 	void						Process();
 	void						Flush();

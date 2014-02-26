@@ -21,7 +21,7 @@ public:
   virtual void Process() = 0;
   bool Running();
   pthread_t ThreadHandle();
-  bool StopThread();
+	bool StopThread(std::string className = "UNDEFINED");
   void Lock();
   void UnLock();
 };

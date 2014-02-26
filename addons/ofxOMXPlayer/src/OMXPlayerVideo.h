@@ -21,6 +21,6 @@ public:
 	
 	bool Open(COMXStreamInfo &hints, OMXClock *av_clock, bool deinterlace, bool hdmi_clock_sync, float display_aspect);
 	bool OpenDecoder();
-
+	bool Close();
 	
 };

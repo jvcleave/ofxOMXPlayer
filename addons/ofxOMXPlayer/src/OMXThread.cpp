@@ -21,21 +21,25 @@ OMXThread::~OMXThread()
 	pthread_attr_destroy(&m_tattr);
 }
 
-bool OMXThread::StopThread()
+bool OMXThread::StopThread(std::string className)
 {
+	ofLogVerbose(__func__) << "className: " << className <<" START";
 	if(!m_running)
 	{
 		//ofLog(OF_LOG_ERROR, "%s::%s - No thread running ", CLASSNAME, __func__);
+		ofLogVerbose(__func__) << " END";
 		return false;
 	}
 
 	m_bStop = true;
-	pthread_join(m_thread, NULL);
+	int result = pthread_join(m_thread, NULL);
+	ofLogVerbose(__func__) << "join result: " << result;
 	m_running = false;
 
 	m_thread = 0;
 
 	//ofLog(OF_LOG_VERBOSE, "%s::%s - Thread stopped ", CLASSNAME, __func__);
+	ofLogVerbose(__func__) << " END";
 	return true;
 }
 

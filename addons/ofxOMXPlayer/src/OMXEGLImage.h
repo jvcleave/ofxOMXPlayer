@@ -12,7 +12,6 @@ public:
 	
 	bool Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglImage);
 	bool PortSettingsChanged() {return true;};
-	int  Decode(uint8_t *pData, int iSize, double dts, double pts);
 	int  Decode(uint8_t *pData, int iSize, double pts);
 	
 
