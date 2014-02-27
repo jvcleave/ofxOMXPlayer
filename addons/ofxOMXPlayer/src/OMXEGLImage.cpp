@@ -453,6 +453,7 @@ int OMXEGLImage::Decode(uint8_t *pData, int iSize, double pts)
 			int nRetry = 0;
 			while(true)
 			{
+				//ofLogVerbose(__func__) << "nRetry: " << nRetry;
 				omx_err = m_omx_decoder.EmptyThisBuffer(omx_buffer);
 				if (omx_err == OMX_ErrorNone)
 				{
@@ -489,9 +490,10 @@ int OMXEGLImage::Decode(uint8_t *pData, int iSize, double pts)
 				}
 			}
 		}
+		
 		return true;
 	}
-	
+	//ofLogVerbose(__func__) << "DECODE FINISHED????????????????????????";
 	return false;
 }
 

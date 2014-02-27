@@ -35,7 +35,7 @@ public:
 	bool ptsinvalid;  // pts cannot be trusted (avi's).
 	int nb_frames;
 	
-	float duration;
+	int64_t duration;
 	
 	// AUDIO
 	int channels;

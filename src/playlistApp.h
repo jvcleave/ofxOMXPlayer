@@ -16,8 +16,8 @@ class playlistApp : public ofBaseApp, public ofxOMXPlayerListener, public SSHKey
 	
 	
 		void keyPressed(int key);
-		void createPlayer();
 		ofxOMXPlayer omxPlayer;
+	
 		void onVideoEnd(ofxOMXPlayerListenerEventData& e);
 		void onVideoLoop(ofxOMXPlayerListenerEventData& e){ /*empty*/ };
 

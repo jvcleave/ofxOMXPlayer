@@ -11,21 +11,13 @@
 
 
 
+
+
 bool doLoadNextMovie = false;
 void playlistApp::onVideoEnd(ofxOMXPlayerListenerEventData& e)
 {
 	ofLogVerbose(__func__) << " RECEIVED";
-		
-
-	if (omxPlayer.isTextureEnabled) 
-	{
-		//certain GL related operations must be done in the update() thread
-		doLoadNextMovie = true;
-	}else 
-	{
-		//with the non-textured player we don't have to wait
-		loadNextMovie();
-	}
+	doLoadNextMovie = true;
 }
 
 
@@ -35,6 +27,11 @@ void playlistApp::onCharacterReceived(SSHKeyListenerEventData& e)
 }
 
 
+
+unsigned long long skipTimeStart=0;
+unsigned long long skipTimeEnd=0;
+unsigned long long amountSkipped =0;
+unsigned long long totalAmountSkipped =0;
 //--------------------------------------------------------------
 void playlistApp::setup()
 {
@@ -52,32 +49,19 @@ void playlistApp::setup()
 		if (files.size()>0) 
 		{
 			videoCounter = 0;
-			createPlayer();
+			settings.videoPath = files[videoCounter].path();
+			settings.useHDMIForAudio = true;	//default true
+			settings.enableLooping = false;
+			//settings.enableTexture = false;		//default true
+			
+			
+			//settings.enableAudio = !settings.enableAudio; //toggle for testing
+			settings.listener = this; //this app extends ofxOMXPlayerListener so it will receive events ;
+			omxPlayer.setup(settings);
 		}		
 	}
-		
-	
-	
 }
-void playlistApp::createPlayer()
-{
-	
-	settings.videoPath = files[videoCounter].path();
-	settings.useHDMIForAudio = true;	//default true
-	settings.enableLooping = false;
-	settings.enableTexture = false;		//default true
-	if(files.size() > 1)
-	{
-				//default true
-	}
-	
-	
-	
-	//settings.enableAudio = !settings.enableAudio; //toggle for testing
-	settings.listener = this; //this app extends ofxOMXPlayerListener so it will receive events ;
-	omxPlayer.setup(settings);
-	
-}
+
 
 void playlistApp::loadNextMovie()
 {
@@ -88,9 +72,14 @@ void playlistApp::loadNextMovie()
 	{
 		videoCounter = 0;
 	}
+	skipTimeStart = ofGetElapsedTimeMillis();
 	omxPlayer.loadMovie(files[videoCounter].path());
+	skipTimeEnd = ofGetElapsedTimeMillis();
+	amountSkipped = skipTimeEnd-skipTimeStart;
+	totalAmountSkipped+=amountSkipped;
 	doLoadNextMovie = false;
 }
+
 //--------------------------------------------------------------
 void playlistApp::update()
 {
@@ -98,18 +87,15 @@ void playlistApp::update()
 	{
 		ofLogVerbose(__func__) << "doing reload";
 		//with the texture based player this must be done here - especially if the videos are different resolutions
+		
 		loadNextMovie();
+		
 	}
-	
-	
+		
 	
 }
 
-unsigned long long skipTimeStart=0;
-unsigned long long skipTimeEnd=0;
-unsigned long long amountSkipped =0;
-unsigned long long totalAmountSkipped =0;
-bool doingSkipCheck = false;
+
 //--------------------------------------------------------------
 void playlistApp::draw(){
 	
@@ -136,32 +122,23 @@ void playlistApp::draw(){
 	info <<"\n" <<	"DURATION: "			<< omxPlayer.getDuration();
 	info <<"\n" <<	"TOTAL FRAMES: "		<< omxPlayer.getTotalNumFrames();
 	info <<"\n" <<	"CURRENT FRAME: "		<< omxPlayer.getCurrentFrame();
-	info <<"\n" <<	"REMAINING FRAMES: "	<< omxPlayer.getTotalNumFrames() - omxPlayer.getCurrentFrame();
+	if (omxPlayer.getTotalNumFrames() >0) 
+	{
+		info <<"\n" <<	"REMAINING FRAMES: "	<< omxPlayer.getTotalNumFrames() - omxPlayer.getCurrentFrame();
+	}else 
+	{
+		info <<"\n" <<	"FILE IS LIKELY H264 STREAM";
+	}
+
+	
 	info <<"\n" <<	"CURRENT VOLUME: "		<< omxPlayer.getVolume();
 	
-	ofColor textColor = ofColor::yellow;
-	if(omxPlayer.getCurrentFrame() == 0)
-	{
-		textColor = ofColor::white;
-		if(!doingSkipCheck)
-		{
-			doingSkipCheck = true;
-			skipTimeStart = ofGetElapsedTimeMillis();
-		}
-	}
-	if(doingSkipCheck && textColor == ofColor::yellow)
-	{
-		skipTimeEnd = ofGetElapsedTimeMillis();
-		amountSkipped = skipTimeEnd-skipTimeStart;
-		totalAmountSkipped+=amountSkipped;
-		doingSkipCheck = false;
-		
-	}
+	
 	
 	info <<"\n" <<	"MILLIS SKIPPED: "		<< amountSkipped;
 	info <<"\n" <<	"TOTAL MILLIS SKIPPED: " << totalAmountSkipped;
-	
-	ofDrawBitmapStringHighlight(info.str(), 60, 60, ofColor(ofColor::black, 90), textColor);
+	info <<"\n" <<	"CURRENT MOVIE: "		<< files[videoCounter].path();
+	ofDrawBitmapStringHighlight(info.str(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
 }
 
 //--------------------------------------------------------------

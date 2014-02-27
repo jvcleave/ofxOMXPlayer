@@ -413,6 +413,7 @@ OMXPacket *OMXReader::Read()
 	if (result < 0)
 	{
 		m_eof = true;
+		//ofLogVerbose(__func__) << "READER AT END OF FILE";
 		//FlushRead();
 		//m_dllAvCodec.av_free_packet(&pkt);
 		UnLock();

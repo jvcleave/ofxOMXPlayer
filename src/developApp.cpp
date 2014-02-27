@@ -59,7 +59,7 @@ void developApp::setup()
 	ofLogVerbose() << "using videoPath : " << videoPath;
 	settings.videoPath = videoPath;
 	settings.listener = this; //this app extends ofxOMXPlayerListener so it will receive events ;
-	
+	settings.enableLooping = false;
 	doTextures	= true;
 	doShader	= false;
 	

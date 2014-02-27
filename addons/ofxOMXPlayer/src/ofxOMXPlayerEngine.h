@@ -126,8 +126,6 @@ private:
 	void					onVideoEnd();
 	void					onVideoLoop();
 	double					previousLoopOffset;
-	
-	
-	
+		
 };
 
