@@ -60,7 +60,7 @@ void developApp::setup()
 	settings.videoPath = videoPath;
 	settings.listener = this; //this app extends ofxOMXPlayerListener so it will receive events ;
 	settings.enableLooping = false;
-	doTextures	= true;
+	doTextures	= false;
 	doShader	= false;
 	
 	

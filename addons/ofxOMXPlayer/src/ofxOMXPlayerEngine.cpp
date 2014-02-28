@@ -377,7 +377,7 @@ void ofxOMXPlayerEngine::Process()
 			}
 			
 		}
-		
+		ofLogVerbose(__func__) << "remainingFrames: " << getTotalNumFrames() - getCurrentFrame();
 		if(doLooping && omxReader.IsEof() && !packet) 
 		{
 		
