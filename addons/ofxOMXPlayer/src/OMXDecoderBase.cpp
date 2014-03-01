@@ -192,6 +192,7 @@ void OMXDecoderBase::WaitCompletion()
 	omx_buffer->nFlags = OMX_BUFFERFLAG_ENDOFFRAME | OMX_BUFFERFLAG_EOS | OMX_BUFFERFLAG_TIME_UNKNOWN;
 	
 	omx_err = m_omx_decoder.EmptyThisBuffer(omx_buffer);
+	ofLogVerbose(__func__) << "OMX_BUFFERFLAG_EOS";
 	if (omx_err != OMX_ErrorNone)
 	{
 		ofLog(OF_LOG_VERBOSE, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", "OMXDecoderBase", __func__, omx_err);

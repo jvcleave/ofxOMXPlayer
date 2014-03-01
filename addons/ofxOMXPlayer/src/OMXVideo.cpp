@@ -1,5 +1,31 @@
 #include "OMXVideo.h"
 
+int emptyBufferCounter = 0;
+
+OMX_ERRORTYPE onNonTextureDecoderFillBufferDone(OMX_HANDLETYPE hComponent,
+							   OMX_PTR pAppData,
+							   OMX_BUFFERHEADERTYPE* pBuffer)
+{    
+	
+	//OMXDecoderBase::fillBufferCounter++;
+	return OMX_ErrorNone;
+}
+
+OMX_ERRORTYPE onNonTextureDecoderEmptyBufferDone(OMX_HANDLETYPE hComponent,
+												OMX_PTR pAppData,
+												OMX_BUFFERHEADERTYPE* pBuffer)
+{    
+	
+	/*if (pBuffer->nFlags & OMX_BUFFERFLAG_ENDOFFRAME) 
+	{
+		ofLogVerbose() << "OMX_BUFFERFLAG_ENDOFFRAME";
+	}*/
+	//emptyBufferCounter++;
+	//ofLogVerbose(__func__) << "emptyBufferCounter: " << emptyBufferCounter;
+	OMXDecoderBase::fillBufferCounter++;
+	return OMX_ErrorNone;
+}
+
 
 COMXVideo::COMXVideo()
 {
@@ -8,6 +34,8 @@ COMXVideo::COMXVideo()
 	m_hdmi_clock_sync   = false;
     
 }
+
+
 COMXVideo::~COMXVideo()
 {
 	ofLogVerbose(__func__) << " START";
@@ -254,7 +282,11 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, float display_aspec
 	ofLog(OF_LOG_VERBOSE, "COMXVideo::Open m_omx_tunnel_decoder.Establish\n");
 	return false;
 	}
-
+	
+	
+	m_omx_decoder.SetCustomDecoderFillBufferDoneHandler(onNonTextureDecoderFillBufferDone);
+	m_omx_decoder.SetCustomDecoderEmptyBufferDoneHandler(onNonTextureDecoderEmptyBufferDone);
+	
 	omx_err = m_omx_decoder.SetStateForComponent(OMX_StateExecuting);
 	if (omx_err != OMX_ErrorNone)
 	{
@@ -411,7 +443,13 @@ int COMXVideo::Decode(uint8_t *pData, int iSize, double pts)
 			demuxer_content += omx_buffer->nFilledLen;
 			
 			if(demuxer_bytes == 0)
+			{
+				
 				omx_buffer->nFlags |= OMX_BUFFERFLAG_ENDOFFRAME;
+				
+				//OMXDecoderBase::fillBufferCounter++;
+				//ofLogVerbose(__func__) << "OMX_BUFFERFLAG_ENDOFFRAME COUNT: " << emptyBufferCounter;
+			}
 			
 			int nRetry = 0;
 			while(true)

@@ -1936,7 +1936,7 @@ OMX_ERRORTYPE COMXCoreComponent::DecoderEventHandler(
       #endif
       if(nData2 & OMX_BUFFERFLAG_EOS)
 	  {
-		  //ofLogVerbose(__func__) << "OMX_EventBufferFlag::OMX_BUFFERFLAG_EOS RECEIVED";
+		  ofLogVerbose(__func__) << "OMX_EventBufferFlag::OMX_BUFFERFLAG_EOS RECEIVED";
 		  ctx->m_eos = true;
 	  }
        
