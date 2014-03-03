@@ -129,7 +129,7 @@ public:
 
   OMX_ERRORTYPE FreeInputBuffers(bool wait);
   OMX_ERRORTYPE FreeOutputBuffers(bool wait);
-
+	void ResetEos();
   bool IsEOS() { return m_eos; };
 	void SetEOS(bool isEndOfStream);
   void SetCustomDecoderFillBufferDoneHandler(OMX_ERRORTYPE (*p)(OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*)){ CustomDecoderFillBufferDoneHandler = p;};
@@ -141,6 +141,8 @@ private:
   unsigned int   m_output_port;
   std::string    m_componentName;
   pthread_mutex_t   m_omx_event_mutex;
+  pthread_mutex_t   m_omx_eos_mutex;
+	
   pthread_mutex_t   m_lock;
   std::vector<omx_event> m_omx_events;
 

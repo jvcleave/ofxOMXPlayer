@@ -22,7 +22,7 @@ OMX_ERRORTYPE onNonTextureDecoderEmptyBufferDone(OMX_HANDLETYPE hComponent,
 	}*/
 	//emptyBufferCounter++;
 	//ofLogVerbose(__func__) << "emptyBufferCounter: " << emptyBufferCounter;
-	OMXDecoderBase::fillBufferCounter++;
+	//OMXDecoderBase::fillBufferCounter++;
 	return OMX_ErrorNone;
 }
 
@@ -284,8 +284,8 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, float display_aspec
 	}
 	
 	
-	m_omx_decoder.SetCustomDecoderFillBufferDoneHandler(onNonTextureDecoderFillBufferDone);
-	m_omx_decoder.SetCustomDecoderEmptyBufferDoneHandler(onNonTextureDecoderEmptyBufferDone);
+	//m_omx_decoder.SetCustomDecoderFillBufferDoneHandler(onNonTextureDecoderFillBufferDone);
+	//m_omx_decoder.SetCustomDecoderEmptyBufferDoneHandler(onNonTextureDecoderEmptyBufferDone);
 	
 	omx_err = m_omx_decoder.SetStateForComponent(OMX_StateExecuting);
 	if (omx_err != OMX_ErrorNone)

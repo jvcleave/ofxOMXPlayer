@@ -329,6 +329,8 @@ bool COMXAudio::Initialize(const std::string& device, int iChannels, enum PCMCha
 	{
 		return false;
 	}
+  
+  m_omx_render.ResetEos();
 	
   OMX_CONFIG_BRCMAUDIODESTINATIONTYPE audioDest;
   OMX_INIT_STRUCTURE(audioDest);
@@ -1122,9 +1124,9 @@ unsigned int COMXAudio::GetAudioRenderingLatency()
   return param.nU32;
 }
 
-void COMXAudio::WaitCompletion()
+void COMXAudio::SubmitEOS()
 {
- ofLogVerbose(__func__) << "COMXAudio::WaitCompletion";
+ ofLogVerbose(__func__) << "START";
   if(!m_Initialized || m_Pause)
     return;
 
@@ -1150,26 +1152,15 @@ void COMXAudio::WaitCompletion()
     return;
   }
 
-  // clock_gettime(CLOCK_REALTIME, &starttime);
-
-  while(true)
-  {
-    if(m_omx_render.IsEOS())
-      break;
-    OMXClock::OMXSleep(50);
-  }
-
-  while(true)
-  {
-    if(!GetAudioRenderingLatency())
-      break;
-
-    OMXClock::OMXSleep(50);
-  }
-
-  return;
 }
 
+bool COMXAudio::IsEOS()
+{
+	if(!m_Initialized || m_Pause)
+		return false;
+	unsigned int latency = GetAudioRenderingLatency();
+	return m_omx_render.IsEOS() && latency <= 0;
+}
 
 
 

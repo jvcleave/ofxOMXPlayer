@@ -74,7 +74,8 @@ public:
 	virtual int				Decode(uint8_t *pData, int iSize, double pts)=0;
 	
 	
-	void					WaitCompletion();
+	void SubmitEOS();
+	bool IsEOS();
 		
 	bool					Resume();
 	bool					Pause();

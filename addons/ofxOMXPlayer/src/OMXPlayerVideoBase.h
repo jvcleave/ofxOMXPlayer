@@ -68,7 +68,8 @@ public:
 	double						GetCurrentPTS() { return m_pts; };
 	double						GetFPS() { return m_fps; };
 	unsigned int				GetCached() { return m_cached_size; };
-	void						WaitCompletion();
+	void SubmitEOS();
+	bool IsEOS();
 	
 	void						Lock();
 	void						UnLock();

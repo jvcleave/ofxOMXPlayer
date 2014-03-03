@@ -514,6 +514,7 @@ COMXCoreComponent::COMXCoreComponent()
 	pthread_mutex_init(&m_omx_input_mutex, NULL);
 	pthread_mutex_init(&m_omx_output_mutex, NULL);
 	pthread_mutex_init(&m_omx_event_mutex, NULL);
+	pthread_mutex_init(&m_omx_eos_mutex, NULL);
 	pthread_cond_init(&m_input_buffer_cond, NULL);
 	pthread_cond_init(&m_output_buffer_cond, NULL);
 	pthread_cond_init(&m_omx_event_cond, NULL);
@@ -534,6 +535,7 @@ COMXCoreComponent::~COMXCoreComponent()
 	pthread_mutex_destroy(&m_omx_input_mutex);
 	pthread_mutex_destroy(&m_omx_output_mutex);
 	pthread_mutex_destroy(&m_omx_event_mutex);
+	pthread_mutex_destroy(&m_omx_eos_mutex);
 	pthread_cond_destroy(&m_input_buffer_cond);
 	pthread_cond_destroy(&m_output_buffer_cond);
 	pthread_cond_destroy(&m_omx_event_cond);
@@ -543,6 +545,15 @@ COMXCoreComponent::~COMXCoreComponent()
 
   
 }
+
+void COMXCoreComponent::ResetEos()
+{
+	pthread_mutex_lock(&m_omx_eos_mutex);
+	m_eos = false;
+	pthread_mutex_unlock(&m_omx_eos_mutex);
+}
+
+
 void COMXCoreComponent::SetEOS(bool isEndofStream)
 {
 	m_eos = isEndofStream;
@@ -1936,8 +1947,11 @@ OMX_ERRORTYPE COMXCoreComponent::DecoderEventHandler(
       #endif
       if(nData2 & OMX_BUFFERFLAG_EOS)
 	  {
-		  ofLogVerbose(__func__) << "OMX_EventBufferFlag::OMX_BUFFERFLAG_EOS RECEIVED";
+		  
+		  pthread_mutex_lock(&ctx->m_omx_eos_mutex);
+		  ofLogVerbose(__func__) << ctx->GetName() << "OMX_EventBufferFlag::OMX_BUFFERFLAG_EOS RECEIVED";
 		  ctx->m_eos = true;
+		  pthread_mutex_unlock(&ctx->m_omx_eos_mutex);
 	  }
        
     break;

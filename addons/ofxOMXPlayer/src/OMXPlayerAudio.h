@@ -89,6 +89,9 @@ public:
   double GetCacheTime();
   double GetCurrentPTS() { return m_iCurrentPts; };
   void WaitCompletion();
+	void SubmitEOS();
+	bool IsEOS();
+	
   unsigned int GetCached()
   {
     Lock();

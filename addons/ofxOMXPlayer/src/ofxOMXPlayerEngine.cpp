@@ -340,6 +340,7 @@ bool ofxOMXPlayerEngine::openPlayer()
 	}
 }
 
+
 void ofxOMXPlayerEngine::Process()
 {
 	
@@ -377,7 +378,13 @@ void ofxOMXPlayerEngine::Process()
 			}
 			
 		}
-		ofLogVerbose(__func__) << "remainingFrames: " << getTotalNumFrames() - getCurrentFrame();
+		
+		if (omxReader.IsEof() && !packet && isCacheEmpty) 
+		{
+			videoPlayer->SubmitEOS();
+			
+		}
+		
 		if(doLooping && omxReader.IsEof() && !packet) 
 		{
 		
@@ -417,6 +424,7 @@ void ofxOMXPlayerEngine::Process()
 			}else
 			{
 				OMXClock::OMXSleep(10);
+				ofLogVerbose(__func__) << "continuing";
 				continue;
 			}
 			
@@ -424,39 +432,19 @@ void ofxOMXPlayerEngine::Process()
 		{
 			if (!doLooping && omxReader.IsEof() && !packet && isCacheEmpty)
 			{
-				//not sure why losing frames here but better than before
-				if (!isPaused()) 
+				//ofLogVerbose(__func__) << "!doLooping && omxReader.IsEof() && !packet && isCacheEmpty";
+				if (videoPlayer->IsEOS()) 
 				{
-					int remainingFrames = getTotalNumFrames() - getCurrentFrame();
-					if (remainingFrames <=10) 
-					{
-						if (previousFrameNumber == 0) 
-						{
-							previousFrameNumber = remainingFrames;
-						}else
-						{
-							if (previousFrameNumber == remainingFrames) 
-							{
-								freezeFrameCounter++;
-							}
-						}
-						
-						previousFrameNumber = remainingFrames;
-						
-						ofLogVerbose(__func__) << "remainingFrames: " << remainingFrames;
-						ofLogVerbose(__func__) << "freezeFrameCounter: " << freezeFrameCounter;
-						ofLogVerbose(__func__) << "previousFrameNumber: " << previousFrameNumber;
-						if (freezeFrameCounter>=5) 
-						{
-							onVideoEnd();
-							freezeFrameCounter = 0;
-							previousFrameNumber = 0;
-							break;
-						}
-						
-					}
+					ofLogVerbose(__func__) << "onVideoEnd starting";
+					onVideoEnd();
+					break;
+				}else 
+				{
+					//ofLogVerbose(__func__) << "videoPlayer->IsEOS(): " << videoPlayer->IsEOS();
+					//continue;
 				}
 			}
+			
 		}
 		
 		

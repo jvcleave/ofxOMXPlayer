@@ -42,7 +42,8 @@ public:
   bool SetCurrentVolume(long nVolume);
   void SetDynamicRangeCompression(long drc) { m_drc = drc; }
   int SetPlaySpeed(int iSpeed);
-  void WaitCompletion();
+  void SubmitEOS();
+  bool IsEOS();
 
   void Flush();
   void DoAudioWork();

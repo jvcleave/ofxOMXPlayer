@@ -52,7 +52,7 @@ void playlistApp::setup()
 			settings.videoPath = files[videoCounter].path();
 			settings.useHDMIForAudio = true;	//default true
 			settings.enableLooping = false;
-			settings.enableTexture = false;		//default true
+			//settings.enableTexture = false;		//default true
 			
 			
 			//settings.enableAudio = !settings.enableAudio; //toggle for testing

@@ -254,27 +254,18 @@ bool OMXPlayerVideoBase::CloseDecoder()
 	return true;
 }
 
-void OMXPlayerVideoBase::WaitCompletion()
+void OMXPlayerVideoBase::SubmitEOS()
 {
-	ofLogVerbose(__func__) << "OMXPlayerVideoBase WaitCompletion";
-	
+	if(m_decoder)
+		m_decoder->SubmitEOS();
+}
+
+bool OMXPlayerVideoBase::IsEOS()
+{
 	if(!m_decoder)
-	{
-		return; 
-	}
-	
-	while(true)
-	{
-		Lock();
-		if(m_packets.empty())
-		{
-			UnLock();
-			break;
-		}
-		UnLock();
-		OMXClock::OMXSleep(50);
-	}
-	
-	m_decoder->WaitCompletion();
+		return false;
+	ofLogVerbose(__func__) << "m_decoder->IsEOS(): " << m_decoder->IsEOS();
+	ofLogVerbose(__func__) << "m_packets.empty(): " << m_packets.empty();
+	return m_packets.empty() && (!m_decoder || m_decoder->IsEOS());
 }
 

@@ -10,6 +10,7 @@
 #include <inttypes.h>
 
 int OMXDecoderBase::fillBufferCounter =0;
+
 OMXDecoderBase::OMXDecoderBase()
 {
 	
@@ -170,8 +171,7 @@ unsigned int OMXDecoderBase::GetSize()
 	return m_omx_decoder.GetInputBufferSize();
 }
 
-
-void OMXDecoderBase::WaitCompletion()
+void OMXDecoderBase::SubmitEOS()
 {
 	if(!m_is_open)
 		return;
@@ -181,7 +181,7 @@ void OMXDecoderBase::WaitCompletion()
 	
 	if(omx_buffer == NULL)
 	{
-		ofLog(OF_LOG_VERBOSE, "%s::%s - buffer error 0x%08x", "OMXDecoderBase", __func__, omx_err);
+		ofLog(OF_LOG_ERROR, "%s::%s - buffer error 0x%08x", "OMXDecoderBase", __func__, omx_err);
 		return;
 	}
 	
@@ -192,25 +192,24 @@ void OMXDecoderBase::WaitCompletion()
 	omx_buffer->nFlags = OMX_BUFFERFLAG_ENDOFFRAME | OMX_BUFFERFLAG_EOS | OMX_BUFFERFLAG_TIME_UNKNOWN;
 	
 	omx_err = m_omx_decoder.EmptyThisBuffer(omx_buffer);
-	ofLogVerbose(__func__) << "OMX_BUFFERFLAG_EOS";
 	if (omx_err != OMX_ErrorNone)
 	{
-		ofLog(OF_LOG_VERBOSE, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", "OMXDecoderBase", __func__, omx_err);
+		ofLog(OF_LOG_ERROR, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", "OMXDecoderBase", __func__, omx_err);
 		return;
 	}
-	
-	while(true)
-	{
-		if(m_omx_render.IsEOS())
-		{
-			break;
-		}
-		OMXClock::OMXSleep(50);
-	}
-	
-	return;
 }
 
+bool OMXDecoderBase::IsEOS()
+{
+	if(!m_is_open)
+	{
+		return true;
+	}
+	ofLogVerbose(__func__) << "m_omx_decoder.IsEOS() :" << m_omx_decoder.IsEOS();
+
+	return m_omx_decoder.IsEOS();
+	return m_omx_render.IsEOS();
+}
 bool OMXDecoderBase::Pause()
 {
 	if(m_omx_render.GetComponent() == NULL)
@@ -249,8 +248,8 @@ void OMXDecoderBase::Reset()
 {
 	ofLogVerbose(__func__) << " START";
 	
-	//m_omx_decoder.FlushInput();
-	//m_omx_tunnel_decoder.Flush();
+	m_omx_decoder.FlushInput();
+	m_omx_tunnel_decoder.Flush();
 	
 	ofLogVerbose(__func__) << " END";
 }
