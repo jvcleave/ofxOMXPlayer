@@ -262,10 +262,17 @@ void OMXPlayerVideoBase::SubmitEOS()
 
 bool OMXPlayerVideoBase::IsEOS()
 {
-	if(!m_decoder)
-		return false;
-	ofLogVerbose(__func__) << "m_decoder->IsEOS(): " << m_decoder->IsEOS();
-	ofLogVerbose(__func__) << "m_packets.empty(): " << m_packets.empty();
-	return m_packets.empty() && (!m_decoder || m_decoder->IsEOS());
+	bool atEndofStream = false;
+	
+	if (m_decoder) 
+	{
+		if (m_packets.empty() && m_decoder->IsEOS()) 
+		{
+			
+			atEndofStream = true;
+			ofLogVerbose(__func__) << "m_packets.empty() && m_decoder->IsEOS(): " << atEndofStream;
+		}
+	}
+	return atEndofStream;
 }
 

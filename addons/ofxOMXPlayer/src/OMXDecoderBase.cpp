@@ -201,15 +201,27 @@ void OMXDecoderBase::SubmitEOS()
 
 bool OMXDecoderBase::IsEOS()
 {
+	bool isEndOfStream = false;
 	if(!m_is_open)
 	{
-		return true;
+		isEndOfStream =  true;
+	}else 
+	{
+		if (m_omx_decoder.IsEOS()) 
+		{
+			
+			isEndOfStream =  true;
+			
+		}
+		//return m_omx_render.IsEOS();
 	}
-	ofLogVerbose(__func__) << "m_omx_decoder.IsEOS() :" << m_omx_decoder.IsEOS();
-
-	return m_omx_decoder.IsEOS();
-	return m_omx_render.IsEOS();
+	if (isEndOfStream) 
+	{
+		ofLogVerbose("OMXDecoderBase::IsEOS") << "isEndOfStream: " << isEndOfStream;
+	}
+	return isEndOfStream;
 }
+
 bool OMXDecoderBase::Pause()
 {
 	if(m_omx_render.GetComponent() == NULL)

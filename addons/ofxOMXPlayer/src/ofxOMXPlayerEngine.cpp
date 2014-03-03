@@ -432,16 +432,11 @@ void ofxOMXPlayerEngine::Process()
 		{
 			if (!doLooping && omxReader.IsEof() && !packet && isCacheEmpty)
 			{
-				//ofLogVerbose(__func__) << "!doLooping && omxReader.IsEof() && !packet && isCacheEmpty";
 				if (videoPlayer->IsEOS()) 
 				{
 					ofLogVerbose(__func__) << "onVideoEnd starting";
 					onVideoEnd();
 					break;
-				}else 
-				{
-					//ofLogVerbose(__func__) << "videoPlayer->IsEOS(): " << videoPlayer->IsEOS();
-					//continue;
 				}
 			}
 			
@@ -461,11 +456,6 @@ void ofxOMXPlayerEngine::Process()
 			}
 		}
 		
-		/*if(!packet)
-		{
-			packet = omxReader.Read();
-			
-		}*/
 		
 		if(hasVideo && packet && omxReader.IsActive(OMXSTREAM_VIDEO, packet->stream_index))
 		{

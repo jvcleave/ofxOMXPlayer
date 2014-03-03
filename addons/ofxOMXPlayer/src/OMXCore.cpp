@@ -1949,7 +1949,7 @@ OMX_ERRORTYPE COMXCoreComponent::DecoderEventHandler(
 	  {
 		  
 		  pthread_mutex_lock(&ctx->m_omx_eos_mutex);
-		  ofLogVerbose(__func__) << ctx->GetName() << "OMX_EventBufferFlag::OMX_BUFFERFLAG_EOS RECEIVED";
+		  ofLogVerbose(__func__) << ctx->GetName() << " OMX_EventBufferFlag::OMX_BUFFERFLAG_EOS RECEIVED";
 		  ctx->m_eos = true;
 		  pthread_mutex_unlock(&ctx->m_omx_eos_mutex);
 	  }
