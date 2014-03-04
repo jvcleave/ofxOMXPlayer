@@ -12,16 +12,16 @@
 
 class OMXPlayerEGLImage : public OMXPlayerVideoBase
 {
-public:
-	OMXPlayerEGLImage();
-	~OMXPlayerEGLImage();
-	
-	bool Open(COMXStreamInfo &hints, OMXClock *av_clock, EGLImageKHR eglImage);
-	bool OpenDecoder();
-	bool Close();
-	
-	ofxOMXPlayerSettings settings;
-	OMXEGLImage*				eglImageDecoder;
-	EGLImageKHR eglImage;
+	public:
+		OMXPlayerEGLImage();
+		~OMXPlayerEGLImage();
+
+		bool Open(COMXStreamInfo& hints, OMXClock *av_clock, EGLImageKHR eglImage);
+		bool OpenDecoder();
+		bool Close();
+
+		ofxOMXPlayerSettings settings;
+		OMXEGLImage*				eglImageDecoder;
+		EGLImageKHR eglImage;
 };
 

@@ -158,7 +158,6 @@ void playlistApp::keyPressed  (int key){
 		}
 		case 'x':
 		{
-			_Exit(0);
 			break;
 		}
 	}

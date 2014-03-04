@@ -26,16 +26,16 @@
 #include "DllSwResample.h"
 
 extern "C" {
-#ifndef HAVE_MMX
+	#ifndef HAVE_MMX
 #define HAVE_MMX
-#endif
-#ifndef __STDC_CONSTANT_MACROS
+	#endif
+	#ifndef __STDC_CONSTANT_MACROS
 #define __STDC_CONSTANT_MACROS
-#endif
+	#endif
 
-#ifndef __GNUC__
+	#ifndef __GNUC__
 #pragma warning(disable:4244)
-#endif
+	#endif
 
 #include <libavfilter/avfiltergraph.h>
 #include <libavfilter/buffersink.h>
@@ -59,11 +59,11 @@ class DllAvFilterInterface
 		virtual void avfilter_inout_free(AVFilterInOut **inout)=0;
 		virtual int avfilter_graph_parse(AVFilterGraph *graph, const char *filters, AVFilterInOut **inputs, AVFilterInOut **outputs, void *log_ctx)=0;
 		virtual int avfilter_graph_config(AVFilterGraph *graphctx, void *log_ctx)=0;
-#if LIBAVFILTER_VERSION_INT < AV_VERSION_INT(3,0,0)
+		#if LIBAVFILTER_VERSION_INT < AV_VERSION_INT(3,0,0)
 		virtual int av_vsrc_buffer_add_frame(AVFilterContext *buffer_filter, AVFrame *frame, int flags)=0;
-#else
+		#else
 		virtual int av_buffersrc_add_frame(AVFilterContext *buffer_filter, AVFrame *frame, int flags)=0;
-#endif
+		#endif
 		virtual void avfilter_unref_buffer(AVFilterBufferRef *ref)=0;
 		virtual int avfilter_link(AVFilterContext *src, unsigned srcpad, AVFilterContext *dst, unsigned dstpad)=0;
 		virtual int av_buffersink_get_buffer_ref(AVFilterContext *buffer_sink, AVFilterBufferRef **bufref, int flags)=0;
@@ -120,22 +120,22 @@ class DllAvFilter : public DllAvFilterInterface
 		{
 			return ::avfilter_graph_config(graphctx, log_ctx);
 		}
-#if LIBAVFILTER_VERSION_INT < AV_VERSION_INT(3,0,0)
+		#if LIBAVFILTER_VERSION_INT < AV_VERSION_INT(3,0,0)
 		virtual int av_vsrc_buffer_add_frame(AVFilterContext *buffer_filter, AVFrame *frame, int flags)
 		{
 			return ::av_vsrc_buffer_add_frame(buffer_filter, frame, flags);
 		}
-#elif LIBAVFILTER_VERSION_INT < AV_VERSION_INT(3,43,0)
+		#elif LIBAVFILTER_VERSION_INT < AV_VERSION_INT(3,43,0)
 		virtual int av_buffersrc_add_frame(AVFilterContext *buffer_filter, AVFrame* frame, int flags)
 		{
 			return ::av_buffersrc_add_frame(buffer_filter, frame, flags);
 		}
-#else
+		#else
 		virtual int av_buffersrc_add_frame(AVFilterContext *buffer_filter, AVFrame* frame, int flags)
 		{
 			return ::av_buffersrc_add_frame_flags(buffer_filter, frame, flags);
 		}
-#endif
+		#endif
 		virtual void avfilter_unref_buffer(AVFilterBufferRef *ref)
 		{
 			::avfilter_unref_buffer(ref);

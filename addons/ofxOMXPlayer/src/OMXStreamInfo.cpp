@@ -1,15 +1,15 @@
 #include "OMXStreamInfo.h"
 
-COMXStreamInfo::COMXStreamInfo()                                                     
-{ 
-	extradata = NULL; 
-	Clear(); 
+COMXStreamInfo::COMXStreamInfo()
+{
+	extradata = NULL;
+	Clear();
 }
 
 COMXStreamInfo::~COMXStreamInfo()
 {
 	//if( extradata && extrasize ) free(extradata);
-	
+
 	extradata = NULL;
 	extrasize = 0;
 }
@@ -20,12 +20,12 @@ void COMXStreamInfo::Clear()
 	codec = CODEC_ID_NONE;
 	software = false;
 	codec_tag  = 0;
-	
+
 	//if( extradata && extrasize ) free(extradata);
-	
+
 	extradata = NULL;
 	extrasize = 0;
-	
+
 	fpsscale = 0;
 	fpsrate  = 0;
 	height   = 0;
@@ -43,9 +43,9 @@ void COMXStreamInfo::Clear()
 	blockalign = 0;
 	bitrate    = 0;
 	bitspersample = 0;
-	
+
 	identifier = 0;
-	
+
 	framesize  = 0;
 	syncword   = 0;
 }
@@ -71,6 +71,6 @@ string COMXStreamInfo::toString()
 	info << "ptsinvalid: "			<<	ptsinvalid				<< "\n";
 	info << "identifier: "			<<	identifier				<< "\n";
 	info << "extrasize: "			<<	extrasize				<< "\n";
-	
+
 	return info.str();
 }

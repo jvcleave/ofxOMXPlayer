@@ -187,5 +187,5 @@ class DllAvUtilBase : public DllAvUtilInterface
 class DllAvUtil : public DllAvUtilBase
 {
 	public:
-		
+
 };

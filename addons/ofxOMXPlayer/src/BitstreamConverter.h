@@ -29,9 +29,10 @@
 #include "DllAvFilter.h"
 #include "DllAvCodec.h"
 
-typedef struct {
-  uint8_t *buffer, *start;
-  int      offbits, length, oflow;
+typedef struct
+{
+	uint8_t *buffer, *start;
+	int      offbits, length, oflow;
 } bits_reader_t;
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -65,107 +66,111 @@ typedef struct {
 
 typedef struct
 {
-  const uint8_t *data;
-  const uint8_t *end;
-  int head;
-  uint64_t cache;
+	const uint8_t *data;
+	const uint8_t *end;
+	int head;
+	uint64_t cache;
 } nal_bitstream;
 
 typedef struct
 {
-  int profile_idc;
-  int level_idc;
-  int sps_id;
+	int profile_idc;
+	int level_idc;
+	int sps_id;
 
-  int chroma_format_idc;
-  int separate_colour_plane_flag;
-  int bit_depth_luma_minus8;
-  int bit_depth_chroma_minus8;
-  int qpprime_y_zero_transform_bypass_flag;
-  int seq_scaling_matrix_present_flag;
+	int chroma_format_idc;
+	int separate_colour_plane_flag;
+	int bit_depth_luma_minus8;
+	int bit_depth_chroma_minus8;
+	int qpprime_y_zero_transform_bypass_flag;
+	int seq_scaling_matrix_present_flag;
 
-  int log2_max_frame_num_minus4;
-  int pic_order_cnt_type;
-  int log2_max_pic_order_cnt_lsb_minus4;
+	int log2_max_frame_num_minus4;
+	int pic_order_cnt_type;
+	int log2_max_pic_order_cnt_lsb_minus4;
 
-  int max_num_ref_frames;
-  int gaps_in_frame_num_value_allowed_flag;
-  int pic_width_in_mbs_minus1;
-  int pic_height_in_map_units_minus1;
+	int max_num_ref_frames;
+	int gaps_in_frame_num_value_allowed_flag;
+	int pic_width_in_mbs_minus1;
+	int pic_height_in_map_units_minus1;
 
-  int frame_mbs_only_flag;
-  int mb_adaptive_frame_field_flag;
+	int frame_mbs_only_flag;
+	int mb_adaptive_frame_field_flag;
 
-  int direct_8x8_inference_flag;
+	int direct_8x8_inference_flag;
 
-  int frame_cropping_flag;
-  int frame_crop_left_offset;
-  int frame_crop_right_offset;
-  int frame_crop_top_offset;
-  int frame_crop_bottom_offset;
+	int frame_cropping_flag;
+	int frame_crop_left_offset;
+	int frame_crop_right_offset;
+	int frame_crop_top_offset;
+	int frame_crop_bottom_offset;
 } sps_info_struct;
 
 class CBitstreamConverter
 {
-public:
-  CBitstreamConverter();
-  ~CBitstreamConverter();
-  // Required overrides
-  static void     bits_reader_set( bits_reader_t *br, uint8_t *buf, int len );
-  static uint32_t read_bits( bits_reader_t *br, int nbits );
-  static void     skip_bits( bits_reader_t *br, int nbits );
-  static uint32_t get_bits( bits_reader_t *br, int nbits );
+	public:
+		CBitstreamConverter();
+		~CBitstreamConverter();
+		// Required overrides
+		static void     bits_reader_set( bits_reader_t *br, uint8_t *buf, int len );
+		static uint32_t read_bits( bits_reader_t *br, int nbits );
+		static void     skip_bits( bits_reader_t *br, int nbits );
+		static uint32_t get_bits( bits_reader_t *br, int nbits );
 
-  bool Open(enum AVCodecID codec, uint8_t *in_extradata, int in_extrasize, bool to_annexb);
-  void Close(void);
-  bool NeedConvert(void) { return m_convert_bitstream; };
-  bool Convert(uint8_t *pData, int iSize);
-  uint8_t *GetConvertBuffer(void);
-  int GetConvertSize();
-  uint8_t *GetExtraData(void);
-  int GetExtraSize();
-  void parseh264_sps(uint8_t *sps, uint32_t sps_size, bool *interlaced, int32_t *max_ref_frames);
-protected:
-  // bytestream (Annex B) to bistream conversion support.
-  void nal_bs_init(nal_bitstream *bs, const uint8_t *data, size_t size);
-  uint32_t nal_bs_read(nal_bitstream *bs, int n);
-  bool nal_bs_eos(nal_bitstream *bs);
-  int nal_bs_read_ue(nal_bitstream *bs);
-  const uint8_t *avc_find_startcode_internal(const uint8_t *p, const uint8_t *end);
-  const uint8_t *avc_find_startcode(const uint8_t *p, const uint8_t *end);
-  const int avc_parse_nal_units(AVIOContext *pb, const uint8_t *buf_in, int size);
-  const int avc_parse_nal_units_buf(const uint8_t *buf_in, uint8_t **buf, int *size);
-  const int isom_write_avcc(AVIOContext *pb, const uint8_t *data, int len);
-  // bitstream to bytestream (Annex B) conversion support.
-  bool BitstreamConvertInit(void *in_extradata, int in_extrasize);
-  bool BitstreamConvert(uint8_t* pData, int iSize, uint8_t **poutbuf, int *poutbuf_size);
-  void BitstreamAllocAndCopy( uint8_t **poutbuf, int *poutbuf_size,
-    const uint8_t *sps_pps, uint32_t sps_pps_size, const uint8_t *in, uint32_t in_size);
+		bool Open(enum AVCodecID codec, uint8_t *in_extradata, int in_extrasize, bool to_annexb);
+		void Close(void);
+		bool NeedConvert(void)
+		{
+			return m_convert_bitstream;
+		};
+		bool Convert(uint8_t *pData, int iSize);
+		uint8_t *GetConvertBuffer(void);
+		int GetConvertSize();
+		uint8_t *GetExtraData(void);
+		int GetExtraSize();
+		void parseh264_sps(uint8_t *sps, uint32_t sps_size, bool *interlaced, int32_t *max_ref_frames);
+	protected:
+		// bytestream (Annex B) to bistream conversion support.
+		void nal_bs_init(nal_bitstream *bs, const uint8_t *data, size_t size);
+		uint32_t nal_bs_read(nal_bitstream *bs, int n);
+		bool nal_bs_eos(nal_bitstream *bs);
+		int nal_bs_read_ue(nal_bitstream *bs);
+		const uint8_t *avc_find_startcode_internal(const uint8_t *p, const uint8_t *end);
+		const uint8_t *avc_find_startcode(const uint8_t *p, const uint8_t *end);
+		const int avc_parse_nal_units(AVIOContext *pb, const uint8_t *buf_in, int size);
+		const int avc_parse_nal_units_buf(const uint8_t *buf_in, uint8_t **buf, int *size);
+		const int isom_write_avcc(AVIOContext *pb, const uint8_t *data, int len);
+		// bitstream to bytestream (Annex B) conversion support.
+		bool BitstreamConvertInit(void *in_extradata, int in_extrasize);
+		bool BitstreamConvert(uint8_t* pData, int iSize, uint8_t **poutbuf, int *poutbuf_size);
+		void BitstreamAllocAndCopy( uint8_t **poutbuf, int *poutbuf_size,
+		                            const uint8_t *sps_pps, uint32_t sps_pps_size, const uint8_t *in, uint32_t in_size);
 
-  typedef struct omx_bitstream_ctx {
-      uint8_t  length_size;
-      uint8_t  first_idr;
-      uint8_t *sps_pps_data;
-      uint32_t size;
-  } omx_bitstream_ctx;
+		typedef struct omx_bitstream_ctx
+		{
+			uint8_t  length_size;
+			uint8_t  first_idr;
+			uint8_t *sps_pps_data;
+			uint32_t size;
+		} omx_bitstream_ctx;
 
-  uint8_t           *m_convertBuffer;
-  int               m_convertSize;
-  uint8_t           *m_inputBuffer;
-  int               m_inputSize;
+		uint8_t           *m_convertBuffer;
+		int               m_convertSize;
+		uint8_t           *m_inputBuffer;
+		int               m_inputSize;
 
-  uint32_t          m_sps_pps_size;
-  omx_bitstream_ctx m_sps_pps_context;
-  bool              m_convert_bitstream;
-  bool              m_to_annexb;
+		uint32_t          m_sps_pps_size;
+		omx_bitstream_ctx m_sps_pps_context;
+		bool              m_convert_bitstream;
+		bool              m_to_annexb;
 
-  uint8_t           *m_extradata;
-  int               m_extrasize;
-  bool              m_convert_3byteTo4byteNALSize;
-  bool              m_convert_bytestream;
-  DllAvUtil         *m_dllAvUtil;
-  DllAvFormat       *m_dllAvFormat;
-  AVCodecID           m_codec;
+		uint8_t           *m_extradata;
+		int               m_extrasize;
+		bool              m_convert_3byteTo4byteNALSize;
+		bool              m_convert_bytestream;
+		DllAvUtil         *m_dllAvUtil;
+		DllAvFormat       *m_dllAvFormat;
+		AVCodecID           m_codec;
 };
 
 

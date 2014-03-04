@@ -28,31 +28,47 @@
 
 class CCriticalSection
 {
-public:
-  inline CCriticalSection()
-  {
-    pthread_mutexattr_t mta;
-    pthread_mutexattr_init(&mta);
-    pthread_mutexattr_settype(&mta, PTHREAD_MUTEX_RECURSIVE);
-    pthread_mutex_init(&m_lock, &mta);
-  }
-  inline ~CCriticalSection() { pthread_mutex_destroy(&m_lock); }
-  inline void Lock()         { pthread_mutex_lock(&m_lock); }
-  inline void Unlock()       { pthread_mutex_unlock(&m_lock); }
+	public:
+		inline CCriticalSection()
+		{
+			pthread_mutexattr_t mta;
+			pthread_mutexattr_init(&mta);
+			pthread_mutexattr_settype(&mta, PTHREAD_MUTEX_RECURSIVE);
+			pthread_mutex_init(&m_lock, &mta);
+		}
+		inline ~CCriticalSection()
+		{
+			pthread_mutex_destroy(&m_lock);
+		}
+		inline void Lock()
+		{
+			pthread_mutex_lock(&m_lock);
+		}
+		inline void Unlock()
+		{
+			pthread_mutex_unlock(&m_lock);
+		}
 
-protected:
-  pthread_mutex_t m_lock;
+	protected:
+		pthread_mutex_t m_lock;
 };
 
 
 class CSingleLock
 {
-public:
-  inline CSingleLock(CCriticalSection& cs) { m_section = cs; m_section.Lock(); }
-  inline ~CSingleLock()                    { m_section.Unlock(); }
+	public:
+		inline CSingleLock(CCriticalSection& cs)
+		{
+			m_section = cs;
+			m_section.Lock();
+		}
+		inline ~CSingleLock()
+		{
+			m_section.Unlock();
+		}
 
-protected:
-  CCriticalSection m_section;
+	protected:
+		CCriticalSection m_section;
 };
 
 

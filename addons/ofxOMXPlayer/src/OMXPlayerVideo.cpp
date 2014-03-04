@@ -34,22 +34,22 @@
 OMXPlayerVideo::OMXPlayerVideo()
 {
 	m_hdmi_clock_sync = false;
-	
-	
+
+
 }
 OMXPlayerVideo::~OMXPlayerVideo()
 {
 	ofLogVerbose(__func__) << "START";
-	
+
 	Close();
-	
+
 	pthread_cond_destroy(&m_packet_cond);
 	pthread_mutex_destroy(&m_lock);
 	pthread_mutex_destroy(&m_lock_decoder);
 	ofLogVerbose(__func__) << "END";
 }
 
-bool OMXPlayerVideo::Open(COMXStreamInfo &hints, OMXClock *av_clock, bool deinterlace, bool hdmi_clock_sync, float display_aspect)
+bool OMXPlayerVideo::Open(COMXStreamInfo& hints, OMXClock *av_clock, bool deinterlace, bool hdmi_clock_sync, float display_aspect)
 {
 	ofLogVerbose(__func__) << "OMXPlayerVideo Open";
 
@@ -99,48 +99,48 @@ bool OMXPlayerVideo::Open(COMXStreamInfo &hints, OMXClock *av_clock, bool deinte
 
 bool OMXPlayerVideo::OpenDecoder()
 {
-	
-  if (m_hints.fpsrate && m_hints.fpsscale)
-  {
-	  m_fps = DVD_TIME_BASE / OMXReader::NormalizeFrameduration((double)DVD_TIME_BASE * m_hints.fpsscale / m_hints.fpsrate);
-  }
-  else
-  {
-	  m_fps = 25;
-  }
 
-  if( m_fps > 100 || m_fps < 5 )
-  {
-    ofLog(OF_LOG_VERBOSE, "Invalid framerate %d, using forced 25fps and just trust timestamps\n", (int)m_fps);
-    m_fps = 25;
-  }
+	if (m_hints.fpsrate && m_hints.fpsscale)
+	{
+		m_fps = DVD_TIME_BASE / OMXReader::NormalizeFrameduration((double)DVD_TIME_BASE * m_hints.fpsscale / m_hints.fpsrate);
+	}
+	else
+	{
+		m_fps = 25;
+	}
 
-  m_frametime = (double)DVD_TIME_BASE / m_fps;
+	if( m_fps > 100 || m_fps < 5 )
+	{
+		ofLog(OF_LOG_VERBOSE, "Invalid framerate %d, using forced 25fps and just trust timestamps\n", (int)m_fps);
+		m_fps = 25;
+	}
 
-  nonTextureDecoder = new COMXVideo();
+	m_frametime = (double)DVD_TIME_BASE / m_fps;
+
+	nonTextureDecoder = new COMXVideo();
 	m_decoder = (OMXDecoderBase*)nonTextureDecoder;
-  if(!nonTextureDecoder->Open(m_hints, m_av_clock, m_display_aspect, m_Deinterlace, m_hdmi_clock_sync))
-  {
-	
-    CloseDecoder();
-    return false;
-  }
-	
-  stringstream info;
-  info << "Video codec: "	<<	m_decoder->GetDecoderName()		<< "\n";
-  info << "Video width: "	<<	m_hints.width					<< "\n";
-  info << "Video height: "	<<	m_hints.height					<< "\n";
-  info << "Video profile: "	<<	m_hints.profile					<< "\n";
-  info << "Video fps: "		<<	m_fps							<< "\n";	
-  ofLogVerbose(__func__) << "\n" << info;
-  
-/*ofLog(OF_LOG_VERBOSE, "Video codec %s width %d height %d profile %d fps %f\n",
-	m_decoder->GetDecoderName().c_str() , m_hints.width, m_hints.height, m_hints.profile, m_fps);*/
-  
+	if(!nonTextureDecoder->Open(m_hints, m_av_clock, m_display_aspect, m_Deinterlace, m_hdmi_clock_sync))
+	{
 
-  
+		CloseDecoder();
+		return false;
+	}
 
-  return true;
+	stringstream info;
+	info << "Video codec: "	<<	m_decoder->GetDecoderName()		<< "\n";
+	info << "Video width: "	<<	m_hints.width					<< "\n";
+	info << "Video height: "	<<	m_hints.height					<< "\n";
+	info << "Video profile: "	<<	m_hints.profile					<< "\n";
+	info << "Video fps: "		<<	m_fps							<< "\n";
+	ofLogVerbose(__func__) << "\n" << info;
+
+	/*ofLog(OF_LOG_VERBOSE, "Video codec %s width %d height %d profile %d fps %f\n",
+		m_decoder->GetDecoderName().c_str() , m_hints.width, m_hints.height, m_hints.profile, m_fps);*/
+
+
+
+
+	return true;
 }
 
 bool OMXPlayerVideo::Close()
@@ -148,40 +148,40 @@ bool OMXPlayerVideo::Close()
 	ofLogVerbose(__func__) << " START, isExiting:" << isExiting;
 	m_bAbort  = true;
 	m_flush   = true;
-	
-	
-	//if (!isExiting) 
+
+
+	//if (!isExiting)
 	//{
-		Flush();
+	Flush();
 	//}
-	
+
 	if(ThreadHandle())
 	{
 		Lock();
 		ofLogVerbose(__func__) << "WE ARE STILL THREADED";
 		pthread_cond_broadcast(&m_packet_cond);
 		UnLock();
-		
+
 		StopThread("OMXPlayerVideo");
 	}
-	
+
 	/*ofLogVerbose(__func__) << "isExiting: " << isExiting;
 	 */
 	//ofLogVerbose(__func__) << "OMXPlayerVideoBase::Close() pre CloseDecoder";
 	//CloseDecoder();
-	if (nonTextureDecoder) 
+	if (nonTextureDecoder)
 	{
 		delete nonTextureDecoder;
 		nonTextureDecoder = NULL;
 	}
-	
+
 	m_open          = false;
 	m_stream_id     = -1;
 	m_iCurrentPts   = DVD_NOPTS_VALUE;
 	m_pStream       = NULL;
 	m_pts           = 0;
 	m_speed         = DVD_PLAYSPEED_NORMAL;
-	
+
 	ofLogVerbose(__func__) << " END";
 	return true;
 }

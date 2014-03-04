@@ -36,43 +36,49 @@
 
 class COMXAudioCodecOMX
 {
-public:
-  COMXAudioCodecOMX();
-  ~COMXAudioCodecOMX();
-  bool Open(COMXStreamInfo &hints);
-  void Dispose();
-  int Decode(BYTE* pData, int iSize);
-  int GetData(BYTE** dst);
-  void Reset();
-  int GetChannels();
-  enum PCMChannels *GetChannelMap();
-  int GetSampleRate();
-  int GetBitsPerSample();
-  const char* GetName() { return "FFmpeg"; }
-  int GetBufferSize() { return m_iBuffered; }
-  int GetBitRate();
+	public:
+		COMXAudioCodecOMX();
+		~COMXAudioCodecOMX();
+		bool Open(COMXStreamInfo& hints);
+		void Dispose();
+		int Decode(BYTE* pData, int iSize);
+		int GetData(BYTE** dst);
+		void Reset();
+		int GetChannels();
+		enum PCMChannels *GetChannelMap();
+		int GetSampleRate();
+		int GetBitsPerSample();
+		const char* GetName()
+		{
+			return "FFmpeg";
+		}
+		int GetBufferSize()
+		{
+			return m_iBuffered;
+		}
+		int GetBitRate();
 
-protected:
-  AVCodecContext* m_pCodecContext;
-  SwrContext*     m_pConvert;
-  enum AVSampleFormat m_iSampleFormat;
-  enum PCMChannels m_channelMap[PCM_MAX_CH + 1];
+	protected:
+		AVCodecContext* m_pCodecContext;
+		SwrContext*     m_pConvert;
+		enum AVSampleFormat m_iSampleFormat;
+		enum PCMChannels m_channelMap[PCM_MAX_CH + 1];
 
-  AVFrame* m_pFrame1;
-  int   m_iBufferSize1;
+		AVFrame* m_pFrame1;
+		int   m_iBufferSize1;
 
-  BYTE *m_pBuffer2;
-  int   m_iBufferSize2;
+		BYTE *m_pBuffer2;
+		int   m_iBufferSize2;
 
-  bool m_bOpenedCodec;
-  int m_iBuffered;
+		bool m_bOpenedCodec;
+		int m_iBuffered;
 
-  int     m_channels;
-  uint64_t m_layout;
+		int     m_channels;
+		uint64_t m_layout;
 
-  DllAvCodec m_dllAvCodec;
-  DllAvUtil m_dllAvUtil;
-  DllSwResample m_dllSwResample;
+		DllAvCodec m_dllAvCodec;
+		DllAvUtil m_dllAvUtil;
+		DllSwResample m_dllSwResample;
 
-  void BuildChannelMap();
+		void BuildChannelMap();
 };

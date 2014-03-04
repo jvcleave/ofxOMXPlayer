@@ -9,18 +9,18 @@
 
 class OMXPlayerVideo : public OMXPlayerVideoBase
 {
-public:
+	public:
 
-	bool                      m_Deinterlace;
-	float                     m_display_aspect;
+		bool                      m_Deinterlace;
+		float                     m_display_aspect;
 
-	bool                      m_hdmi_clock_sync;
-	COMXVideo* nonTextureDecoder;
-	OMXPlayerVideo();
-	~OMXPlayerVideo();
-	
-	bool Open(COMXStreamInfo &hints, OMXClock *av_clock, bool deinterlace, bool hdmi_clock_sync, float display_aspect);
-	bool OpenDecoder();
-	bool Close();
-	
+		bool                      m_hdmi_clock_sync;
+		COMXVideo* nonTextureDecoder;
+		OMXPlayerVideo();
+		~OMXPlayerVideo();
+
+		bool Open(COMXStreamInfo& hints, OMXClock *av_clock, bool deinterlace, bool hdmi_clock_sync, float display_aspect);
+		bool OpenDecoder();
+		bool Close();
+
 };

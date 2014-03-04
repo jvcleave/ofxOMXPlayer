@@ -139,7 +139,7 @@ PROJECT_DEFINES += OMX_SKIP64BIT
 #
 #   Note: Leave a leading space when adding list items with the += operator
 ################################################################################
-PROJECT_CFLAGS = -I$(PROJECT_ROOT)/addons/ofxOMXPlayer/libs/ffmpeg/include -fPIC -U_FORTIFY_SOURCE -Wall -ftree-vectorize -ftree-vectorize -Wno-deprecated-declarations -Wno-sign-compare
+PROJECT_CFLAGS = -I$(PROJECT_ROOT)/addons/ofxOMXPlayer/libs/ffmpeg/include -fPIC -U_FORTIFY_SOURCE -Wall -ftree-vectorize -ftree-vectorize -Wno-deprecated-declarations -Wno-sign-compare -Wno-unknown-pragmas
  
 
 ################################################################################

@@ -13,7 +13,7 @@ int OMXDecoderBase::fillBufferCounter =0;
 
 OMXDecoderBase::OMXDecoderBase()
 {
-	
+
 	m_is_open           = false;
 	m_Pause             = false;
 	m_setStartTime      = true;
@@ -24,16 +24,16 @@ OMXDecoderBase::OMXDecoderBase()
 	m_av_clock			= NULL;
 	m_omx_clock			= NULL;
 	decoder_name = OMX_VIDEO_DECODER;
-	
-	
+
+
 	ofLogVerbose(__func__) << "OMXDecoderBase::CONSTRUCT";
-	
+
 }
 
 #if 0
 OMXDecoderBase::~OMXDecoderBase()
 {
-	
+
 	ofLogVerbose(__func__) << " START ---------";
 	return;
 	//TODO fix this?
@@ -44,28 +44,30 @@ OMXDecoderBase::~OMXDecoderBase()
 		 m_omx_tunnel_image_fx.Flush();*/
 		m_omx_tunnel_clock.Flush();
 		m_omx_tunnel_sched.Flush();
-		
+
 		m_omx_tunnel_clock.Deestablish();
 		m_omx_tunnel_decoder.Deestablish();
 		/*if(m_deinterlace)
 		 m_omx_tunnel_image_fx.Deestablish();*/
 		m_omx_tunnel_sched.Deestablish();
-		
+
 		m_omx_decoder.FlushInput();
-		
+
 		m_omx_sched.Deinitialize(true);
 		/*if(m_deinterlace)
 		 m_omx_image_fx.Deinitialize();*/
 		m_omx_decoder.Deinitialize(true);
 		m_omx_render.Deinitialize(true);
-		
+
 		m_is_open       = false;
-		
+
 		if(m_extradata)
+		{
 			free(m_extradata);
+		}
 		m_extradata = NULL;
 		m_extrasize = 0;
-		
+
 		m_video_codec_name  = "";
 		//m_deinterlace       = false;
 		m_first_frame       = true;
@@ -100,9 +102,10 @@ bool OMXDecoderBase::NaluFormatStartCodes(enum AVCodecID codec, uint8_t *in_extr
 				return true;
 			}
 		}
-		default: break;
+		default:
+			break;
 	}
-	return false;    
+	return false;
 }
 
 
@@ -110,21 +113,21 @@ bool OMXDecoderBase::NaluFormatStartCodes(enum AVCodecID codec, uint8_t *in_extr
 bool OMXDecoderBase::SendDecoderConfig()
 {
 	OMX_ERRORTYPE omx_err   = OMX_ErrorNone;
-	
+
 	/* send decoder config */
 	if(m_extrasize > 0 && m_extradata != NULL)
 	{
 		ofLogVerbose(__func__) << "m_extrasize: " << m_extrasize;
 		ofLogVerbose(__func__) << "m_extradata: " << m_extradata;
-		
+
 		OMX_BUFFERHEADERTYPE *omx_buffer = m_omx_decoder.GetInputBuffer();
-		
+
 		if(omx_buffer == NULL)
 		{
 			ofLog(OF_LOG_VERBOSE, "\n%s::%s - buffer error 0x%08x", "OMXDecoderBase", __func__, omx_err);
 			return false;
 		}
-		
+
 		omx_buffer->nOffset = 0;
 		omx_buffer->nFilledLen = m_extrasize;
 		if(omx_buffer->nFilledLen > omx_buffer->nAllocLen)
@@ -132,23 +135,24 @@ bool OMXDecoderBase::SendDecoderConfig()
 			ofLog(OF_LOG_VERBOSE, "\n%s::%s - omx_buffer->nFilledLen > omx_buffer->nAllocLen", "OMXDecoderBase", __func__);
 			return false;
 		}
-		
+
 		memset((unsigned char *)omx_buffer->pBuffer, 0x0, omx_buffer->nAllocLen);
 		memcpy((unsigned char *)omx_buffer->pBuffer, m_extradata, omx_buffer->nFilledLen);
 		omx_buffer->nFlags = OMX_BUFFERFLAG_CODECCONFIG | OMX_BUFFERFLAG_ENDOFFRAME;
-		
+
 		omx_err = m_omx_decoder.EmptyThisBuffer(omx_buffer);
 		if (omx_err != OMX_ErrorNone)
 		{
 			ofLog(OF_LOG_VERBOSE, "\n%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", "OMXDecoderBase", __func__, omx_err);
 			return false;
-		}else
-		{
-			ofLog(OF_LOG_VERBOSE, "OMXDecoderBase::SendDecoderConfig m_extradata: %i ", m_extradata); 
 		}
-		
+		else
+		{
+			ofLog(OF_LOG_VERBOSE, "OMXDecoderBase::SendDecoderConfig m_extradata: %i ", m_extradata);
+		}
+
 	}
-	
+
 	return true;
 }
 int OMXDecoderBase::GetInputBufferSize()
@@ -174,23 +178,25 @@ unsigned int OMXDecoderBase::GetSize()
 void OMXDecoderBase::SubmitEOS()
 {
 	if(!m_is_open)
+	{
 		return;
-	
+	}
+
 	OMX_ERRORTYPE omx_err = OMX_ErrorNone;
 	OMX_BUFFERHEADERTYPE *omx_buffer = m_omx_decoder.GetInputBuffer();
-	
+
 	if(omx_buffer == NULL)
 	{
 		ofLog(OF_LOG_ERROR, "%s::%s - buffer error 0x%08x", "OMXDecoderBase", __func__, omx_err);
 		return;
 	}
-	
+
 	omx_buffer->nOffset     = 0;
 	omx_buffer->nFilledLen  = 0;
 	omx_buffer->nTimeStamp  = ToOMXTime(0LL);
-	
+
 	omx_buffer->nFlags = OMX_BUFFERFLAG_ENDOFFRAME | OMX_BUFFERFLAG_EOS | OMX_BUFFERFLAG_TIME_UNKNOWN;
-	
+
 	omx_err = m_omx_decoder.EmptyThisBuffer(omx_buffer);
 	if (omx_err != OMX_ErrorNone)
 	{
@@ -205,17 +211,18 @@ bool OMXDecoderBase::IsEOS()
 	if(!m_is_open)
 	{
 		isEndOfStream =  true;
-	}else 
+	}
+	else
 	{
-		if (m_omx_decoder.IsEOS()) 
+		if (m_omx_decoder.IsEOS())
 		{
-			
+
 			isEndOfStream =  true;
-			
+
 		}
 		//return m_omx_render.IsEOS();
 	}
-	if (isEndOfStream) 
+	if (isEndOfStream)
 	{
 		ofLogVerbose("OMXDecoderBase::IsEOS") << "isEndOfStream: " << isEndOfStream;
 	}
@@ -228,46 +235,51 @@ bool OMXDecoderBase::Pause()
 	{
 		return false;
 	}
-	
+
 	if(m_Pause)
 	{
 		return true;
 	}
-	
+
 	m_Pause = true;
-	
+
 	m_omx_sched.SetStateForComponent(OMX_StatePause);
 	m_omx_render.SetStateForComponent(OMX_StatePause);
-	
+
 	return true;
 }
 
 bool OMXDecoderBase::Resume()
 {
 	if(m_omx_render.GetComponent() == NULL)
+	{
 		return false;
-	
-	if(!m_Pause) return true;
+	}
+
+	if(!m_Pause)
+	{
+		return true;
+	}
 	m_Pause = false;
-	
+
 	m_omx_sched.SetStateForComponent(OMX_StateExecuting);
 	m_omx_render.SetStateForComponent(OMX_StateExecuting);
-	
+
 	return true;
 }
 
 void OMXDecoderBase::Reset()
 {
 	ofLogVerbose(__func__) << " START";
-	
+
 	m_omx_decoder.FlushInput();
 	m_omx_tunnel_decoder.Flush();
-	
+
 	ofLogVerbose(__func__) << " END";
 }
 
 
-void OMXDecoderBase::ProcessCodec(COMXStreamInfo &hints)
+void OMXDecoderBase::ProcessCodec(COMXStreamInfo& hints)
 {
 	switch (hints.codec)
 	{
@@ -308,7 +320,7 @@ void OMXDecoderBase::ProcessCodec(COMXStreamInfo &hints)
 					break;
 			}
 		}
-			break;
+		break;
 		case CODEC_ID_MPEG4:
 			// (role name) video_decoder.mpeg4
 			// MPEG-4, DivX 4/5 and Xvid compatible
@@ -369,7 +381,7 @@ void OMXDecoderBase::ProcessCodec(COMXStreamInfo &hints)
 			decoder_name = OMX_VC1_DECODER;
 			m_codingType = OMX_VIDEO_CodingWMV;
 			m_video_codec_name = "omx-vc1";
-			break;    
+			break;
 		default:
 			ofLog(OF_LOG_VERBOSE, "Video codec id unknown: %x\n", hints.codec);
 			break;

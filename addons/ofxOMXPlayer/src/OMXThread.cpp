@@ -1,7 +1,7 @@
 #include "OMXThread.h"
 
 #ifdef CLASSNAME
-	#undef CLASSNAME
+#undef CLASSNAME
 #endif
 #define CLASSNAME "OMXThread"
 

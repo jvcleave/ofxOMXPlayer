@@ -6,14 +6,17 @@
 
 class OMXEGLImage : public OMXDecoderBase
 {
-public:
-	OMXEGLImage();
-	
-	
-	bool Open(COMXStreamInfo &hints, OMXClock *clock, EGLImageKHR eglImage);
-	bool PortSettingsChanged() {return true;};
-	int  Decode(uint8_t *pData, int iSize, double pts);
-	
+	public:
+		OMXEGLImage();
 
-	
+
+		bool Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglImage);
+		bool PortSettingsChanged()
+		{
+			return true;
+		};
+		bool  Decode(uint8_t *pData, int iSize, double pts);
+
+
+
 };

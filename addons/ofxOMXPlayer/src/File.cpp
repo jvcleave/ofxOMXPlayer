@@ -26,7 +26,9 @@ CFile::CFile()
 CFile::~CFile()
 {
 	if(m_pFile && !m_bPipe)
+	{
 		fclose(m_pFile);
+	}
 }
 void CFile::rewindFile()
 {
@@ -36,7 +38,7 @@ void CFile::rewindFile()
 bool CFile::Open(const std::string& strFileName, unsigned int flags)
 {
 	m_flags = flags;
-	
+
 	if (strFileName.compare(0, 5, "pipe:") == 0)
 	{
 		m_bPipe = true;
@@ -46,12 +48,14 @@ bool CFile::Open(const std::string& strFileName, unsigned int flags)
 	}
 	m_pFile = fopen64(strFileName.c_str(), "r");
 	if(!m_pFile)
+	{
 		return false;
-	
+	}
+
 	fseeko64(m_pFile, 0, SEEK_END);
 	m_iLength = ftello64(m_pFile);
 	fseeko64(m_pFile, 0, SEEK_SET);
-	
+
 	return true;
 }
 
@@ -63,29 +67,35 @@ bool CFile::OpenForWrite(const std::string& strFileName, bool bOverWrite)
 bool CFile::Exists(const std::string& strFileName, bool bUseCache /* = true */)
 {
 	FILE *fp;
-	
+
 	if (strFileName.compare(0, 5, "pipe:") == 0)
+	{
 		return true;
-	
+	}
+
 	fp = fopen64(strFileName.c_str(), "r");
-	
+
 	if(!fp)
+	{
 		return false;
-	
+	}
+
 	fclose(fp);
-	
+
 	return true;
 }
 
 unsigned int CFile::Read(void *lpBuf, int64_t uiBufSize)
 {
 	unsigned int ret = 0;
-	
+
 	if(!m_pFile)
+	{
 		return 0;
-	
+	}
+
 	ret = fread(lpBuf, 1, uiBufSize, m_pFile);
-	
+
 	return ret;
 }
 
@@ -93,7 +103,9 @@ unsigned int CFile::Read(void *lpBuf, int64_t uiBufSize)
 void CFile::Close()
 {
 	if(m_pFile && !m_bPipe)
+	{
 		fclose(m_pFile);
+	}
 	m_pFile = NULL;
 }
 
@@ -101,8 +113,10 @@ void CFile::Close()
 int64_t CFile::Seek(int64_t iFilePosition, int iWhence)
 {
 	if (!m_pFile)
+	{
 		return -1;
-	
+	}
+
 	return fseeko64(m_pFile, iFilePosition, iWhence);;
 }
 
@@ -116,8 +130,10 @@ int64_t CFile::GetLength()
 int64_t CFile::GetPosition()
 {
 	if (!m_pFile)
+	{
 		return -1;
-	
+	}
+
 	return ftello64(m_pFile);
 }
 
@@ -132,25 +148,31 @@ int CFile::IoControl(EIoControl request, void* param)
 	if(request == IOCTRL_SEEK_POSSIBLE && m_pFile)
 	{
 		if (m_bPipe)
+		{
 			return false;
-		
+		}
+
 		struct stat st;
 		if (fstat(fileno(m_pFile), &st) == 0)
 		{
 			return !S_ISFIFO(st.st_mode);
 		}
 	}
-	
+
 	return -1;
 }
 
 bool CFile::IsEOF()
 {
 	if (!m_pFile)
+	{
 		return -1;
-	
+	}
+
 	if (m_bPipe)
+	{
 		return false;
-	
+	}
+
 	return feof(m_pFile) != 0;
 }

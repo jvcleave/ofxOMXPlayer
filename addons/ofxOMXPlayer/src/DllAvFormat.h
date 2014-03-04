@@ -4,15 +4,15 @@
 #include "DllAvCodec.h"
 
 extern "C" {
-#ifndef HAVE_MMX
+	#ifndef HAVE_MMX
 #define HAVE_MMX
-#endif
-#ifndef __STDC_CONSTANT_MACROS
+	#endif
+	#ifndef __STDC_CONSTANT_MACROS
 #define __STDC_CONSTANT_MACROS
-#endif
-#ifndef __GNUC__
+	#endif
+	#ifndef __GNUC__
 #pragma warning(disable:4244)
-#endif
+	#endif
 #include <libavformat/avformat.h>
 }
 

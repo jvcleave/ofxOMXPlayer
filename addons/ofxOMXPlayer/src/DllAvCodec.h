@@ -5,19 +5,19 @@
 
 
 extern "C" {
-#ifndef HAVE_MMX
+	#ifndef HAVE_MMX
 #define HAVE_MMX
-#endif
-#ifndef __STDC_CONSTANT_MACROS
+	#endif
+	#ifndef __STDC_CONSTANT_MACROS
 #define __STDC_CONSTANT_MACROS
-#endif
-#ifndef __STDC_LIMIT_MACROS
+	#endif
+	#ifndef __STDC_LIMIT_MACROS
 #define __STDC_LIMIT_MACROS
-#endif
+	#endif
 
-#ifndef __GNUC__
+	#ifndef __GNUC__
 #pragma warning(disable:4244)
-#endif
+	#endif
 
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>

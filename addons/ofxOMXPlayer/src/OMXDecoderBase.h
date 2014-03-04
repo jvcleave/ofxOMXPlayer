@@ -34,71 +34,76 @@ class DllAvUtil;
 class DllAvFormat;
 class OMXDecoderBase
 {
-public:
-	OMXDecoderBase();
-	//~OMXDecoderBase();
-	OMX_VIDEO_CODINGTYPE m_codingType;
+	public:
+		OMXDecoderBase();
+		//~OMXDecoderBase();
+		OMX_VIDEO_CODINGTYPE m_codingType;
 
-	COMXCoreTunel			m_omx_tunnel_clock;
-	COMXCoreTunel			m_omx_tunnel_sched;
-	COMXCoreTunel			m_omx_tunnel_decoder;
-	
-	COMXCoreComponent		m_omx_decoder;
-	COMXCoreComponent		m_omx_render;
-	COMXCoreComponent		m_omx_sched;
-	
-	COMXCoreComponent*		m_omx_clock;
-	OMXClock*				m_av_clock;
+		COMXCoreTunel			m_omx_tunnel_clock;
+		COMXCoreTunel			m_omx_tunnel_sched;
+		COMXCoreTunel			m_omx_tunnel_decoder;
 
-	bool					m_is_open;
+		COMXCoreComponent		m_omx_decoder;
+		COMXCoreComponent		m_omx_render;
+		COMXCoreComponent		m_omx_sched;
 
-	bool					m_Pause;
-	bool					m_setStartTime;
+		COMXCoreComponent*		m_omx_clock;
+		OMXClock*				m_av_clock;
 
-	bool					m_drop_state;
-	unsigned int			m_decoded_width;
-	unsigned int			m_decoded_height;
+		bool					m_is_open;
 
-	uint8_t*				m_extradata;
-	int						m_extrasize;
+		bool					m_Pause;
+		bool					m_setStartTime;
 
-	string					m_video_codec_name;
+		bool					m_drop_state;
+		unsigned int			m_decoded_width;
+		unsigned int			m_decoded_height;
 
-	bool					m_first_frame;
-	uint32_t				m_history_valid_pts;
+		uint8_t*				m_extradata;
+		int						m_extrasize;
 
-	
-	string decoder_name;
-	
+		string					m_video_codec_name;
 
-	virtual int				Decode(uint8_t *pData, int iSize, double pts)=0;
-	
-	
-	void SubmitEOS();
-	bool IsEOS();
-		
-	bool					Resume();
-	bool					Pause();
-	
-	bool					SendDecoderConfig();
-	bool					NaluFormatStartCodes(enum AVCodecID codec, uint8_t *in_extradata, int in_extrasize);
-	
-	void					SetDropState(bool bDrop);
-	unsigned int			GetFreeSpace();
-	unsigned int			GetSize();
-	int						GetInputBufferSize();
-	void					Reset();
-	
-	void ProcessCodec(COMXStreamInfo &hints);
-	static unsigned count_bits(int32_t value)
-	{
-		unsigned bits = 0;
-		for(;value;++bits)
-			value &= value - 1;
-		return bits;
-	}
-	std::string GetDecoderName() { return m_video_codec_name; };
-	static int fillBufferCounter;
+		bool					m_first_frame;
+		uint32_t				m_history_valid_pts;
 
-	CCriticalSection  m_critSection;
+
+		string decoder_name;
+
+
+		virtual bool			Decode(uint8_t *pData, int iSize, double pts)=0;
+
+
+		void SubmitEOS();
+		bool IsEOS();
+
+		bool					Resume();
+		bool					Pause();
+
+		bool					SendDecoderConfig();
+		bool					NaluFormatStartCodes(enum AVCodecID codec, uint8_t *in_extradata, int in_extrasize);
+
+		void					SetDropState(bool bDrop);
+		unsigned int			GetFreeSpace();
+		unsigned int			GetSize();
+		int						GetInputBufferSize();
+		void					Reset();
+
+		void ProcessCodec(COMXStreamInfo& hints);
+		static unsigned count_bits(int32_t value)
+		{
+			unsigned bits = 0;
+			for(; value; ++bits)
+			{
+				value &= value - 1;
+			}
+			return bits;
+		}
+		std::string GetDecoderName()
+		{
+			return m_video_codec_name;
+		};
+		static int fillBufferCounter;
+
+		CCriticalSection  m_critSection;
 };
