@@ -234,11 +234,11 @@ bool ofxOMXPlayer::setup(ofxOMXPlayerSettings settings)
 {
 	this->settings = settings;
 	addExitHandler();
-	openEngine();
+	return openEngine();
 }
 
 
-void ofxOMXPlayer::openEngine()
+bool ofxOMXPlayer::openEngine()
 {
 	if (engine)
 	{
@@ -271,7 +271,7 @@ void ofxOMXPlayer::openEngine()
 	{
 		ofLogError(__func__) << "engine->setup FAIL";
 	}
-
+	return setupPassed;
 
 }
 

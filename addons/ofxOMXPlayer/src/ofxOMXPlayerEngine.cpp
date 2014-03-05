@@ -282,8 +282,13 @@ bool ofxOMXPlayerEngine::openPlayer()
 		bool hdmi_clock_sync = true;
 		float display_aspect = 1.0;
 
+		if (omxPlayerSettings.displayArea.getWidth()>0) 
+		{
+			nonEglPlayer->setDisplayRect(omxPlayerSettings.displayArea);
+		}
 		didVideoOpen = nonEglPlayer->Open(videoStreamInfo, &clock, deinterlace, hdmi_clock_sync, display_aspect);
 		videoPlayer = (OMXPlayerVideoBase*)nonEglPlayer;
+		
 
 	}
 

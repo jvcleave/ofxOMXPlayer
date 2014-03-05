@@ -17,17 +17,17 @@ string printOMXError(OMX_ERRORTYPE error)
 }
 
 
-string printState(OMX_STATETYPE& state)
+string printState(OMX_STATETYPE state)
 {
 	return OMXMaps::getInstance().omxStates[state];
 }
 
-string printEventType(OMX_EVENTTYPE& eventType)
+string printEventType(OMX_EVENTTYPE eventType)
 {
 	return OMXMaps::getInstance().omxEventTypes[eventType];
 }
 
-string printCmd(OMX_COMMANDTYPE& command)
+string printCmd(OMX_COMMANDTYPE command)
 {
 
 	return OMXMaps::getInstance().omxCommands[command];
@@ -42,6 +42,12 @@ static void add_timespecs(struct timespec& time, long millisecs)
 		time.tv_sec  += 1;
 		time.tv_nsec -= 1000000000;
 	}
+}
+
+
+string COMXCore::getOMXError(OMX_ERRORTYPE error)
+{
+	return printOMXError(error);
 }
 
 #pragma mark COMXCoreTunel

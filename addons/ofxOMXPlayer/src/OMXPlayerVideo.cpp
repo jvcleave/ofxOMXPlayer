@@ -118,6 +118,12 @@ bool OMXPlayerVideo::OpenDecoder()
 	m_frametime = (double)DVD_TIME_BASE / m_fps;
 
 	nonTextureDecoder = new COMXVideo();
+	
+	if (displayArea.getWidth() > 0) 
+	{
+		nonTextureDecoder->setDisplayRect(displayArea);
+	
+	}
 	m_decoder = (OMXDecoderBase*)nonTextureDecoder;
 	if(!nonTextureDecoder->Open(m_hints, m_av_clock, m_display_aspect, m_Deinterlace, m_hdmi_clock_sync))
 	{
@@ -125,7 +131,7 @@ bool OMXPlayerVideo::OpenDecoder()
 		CloseDecoder();
 		return false;
 	}
-
+	
 	stringstream info;
 	info << "Video codec: "	<<	m_decoder->GetDecoderName()		<< "\n";
 	info << "Video width: "	<<	m_hints.width					<< "\n";
@@ -149,11 +155,8 @@ bool OMXPlayerVideo::Close()
 	m_bAbort  = true;
 	m_flush   = true;
 
-
-	//if (!isExiting)
-	//{
 	Flush();
-	//}
+
 
 	if(ThreadHandle())
 	{
@@ -164,15 +167,13 @@ bool OMXPlayerVideo::Close()
 
 		StopThread("OMXPlayerVideo");
 	}
-
-	/*ofLogVerbose(__func__) << "isExiting: " << isExiting;
-	 */
-	//ofLogVerbose(__func__) << "OMXPlayerVideoBase::Close() pre CloseDecoder";
-	//CloseDecoder();
-	if (nonTextureDecoder)
+	
+	if (nonTextureDecoder && !isExiting)
 	{
+		ofLogVerbose(__func__) << "PRE DELETE nonTextureDecoder";
 		delete nonTextureDecoder;
 		nonTextureDecoder = NULL;
+		ofLogVerbose(__func__) << "POST DELETE nonTextureDecoder";
 	}
 
 	m_open          = false;
@@ -186,3 +187,8 @@ bool OMXPlayerVideo::Close()
 	return true;
 }
 
+
+void OMXPlayerVideo::setDisplayRect(ofRectangle displayArea)
+{
+	this->displayArea = displayArea;
+}

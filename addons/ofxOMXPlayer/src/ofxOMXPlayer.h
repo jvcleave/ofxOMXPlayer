@@ -63,7 +63,7 @@ class ofxOMXPlayer
 
 	private:
 
-		void openEngine();
+		bool openEngine();
 		void addExitHandler();
 		void onUpdate(ofEventArgs& args);
 		ofxOMXPlayerEngine* engine;

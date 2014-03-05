@@ -138,13 +138,15 @@ bool OMXPlayerEGLImage::Close()
 		pthread_cond_broadcast(&m_packet_cond);
 		UnLock();
 
-		StopThread("OMXPlayerVideo");
+		StopThread("OMXPlayerEGLImage");
 	}
 
 	if (eglImageDecoder)
 	{
+		ofLogVerbose(__func__) << "PRE DELETE eglImageDecoder";
 		delete eglImageDecoder;
 		eglImageDecoder = NULL;
+		ofLogVerbose(__func__) << "POST DELETE eglImageDecoder";
 	};
 
 

@@ -52,8 +52,14 @@ void playlistApp::setup()
 			settings.videoPath = files[videoCounter].path();
 			settings.useHDMIForAudio = true;	//default true
 			settings.enableLooping = false;
-			//settings.enableTexture = false;		//default true
-			
+			settings.enableTexture = false;		//default true
+			if (!settings.enableTexture) 
+			{
+				settings.displayArea.x = 100;
+				settings.displayArea.y = 200;
+				settings.displayArea.width = 400;
+				settings.displayArea.height = 300;
+			}
 			
 			//settings.enableAudio = !settings.enableAudio; //toggle for testing
 			settings.listener = this; //this app extends ofxOMXPlayerListener so it will receive events ;
@@ -99,20 +105,20 @@ void playlistApp::update()
 //--------------------------------------------------------------
 void playlistApp::draw(){
 	
+	ofBackgroundGradient(ofColor::red, ofColor::black, OF_GRADIENT_CIRCULAR);
 	
-	
-	if(!omxPlayer.isTextureEnabled)
+	if(omxPlayer.isTextureEnabled)
 	{
-		return;
+		omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
+		
+		//draw a smaller version in the lower right
+		int scaledHeight = omxPlayer.getHeight()/4;
+		int scaledWidth = omxPlayer.getWidth()/4;
+		omxPlayer.draw(ofGetWidth()-scaledWidth, ofGetHeight()-scaledHeight, scaledWidth, scaledHeight);
 	}
 	
 	
-	omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
-		
-	//draw a smaller version in the lower right
-	int scaledHeight = omxPlayer.getHeight()/4;
-	int scaledWidth = omxPlayer.getWidth()/4;
-	omxPlayer.draw(ofGetWidth()-scaledWidth, ofGetHeight()-scaledHeight, scaledWidth, scaledHeight);
+	
 	
 
 	stringstream info;
@@ -158,6 +164,7 @@ void playlistApp::keyPressed  (int key){
 		}
 		case 'x':
 		{
+			_Exit(0);
 			break;
 		}
 	}

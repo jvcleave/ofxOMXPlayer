@@ -30,12 +30,12 @@ OMXDecoderBase::OMXDecoderBase()
 
 }
 
-#if 0
+//#if 0
 OMXDecoderBase::~OMXDecoderBase()
 {
 
 	ofLogVerbose(__func__) << " START ---------";
-	return;
+	//return;
 	//TODO fix this?
 	try
 	{
@@ -84,7 +84,7 @@ OMXDecoderBase::~OMXDecoderBase()
 
 	ofLogVerbose(__func__) << "END ---------";
 }
-#endif
+//#endif
 
 bool OMXDecoderBase::NaluFormatStartCodes(enum AVCodecID codec, uint8_t *in_extradata, int in_extrasize)
 {
@@ -117,14 +117,12 @@ bool OMXDecoderBase::SendDecoderConfig()
 	/* send decoder config */
 	if(m_extrasize > 0 && m_extradata != NULL)
 	{
-		ofLogVerbose(__func__) << "m_extrasize: " << m_extrasize;
-		ofLogVerbose(__func__) << "m_extradata: " << m_extradata;
 
 		OMX_BUFFERHEADERTYPE *omx_buffer = m_omx_decoder.GetInputBuffer();
 
 		if(omx_buffer == NULL)
 		{
-			ofLog(OF_LOG_VERBOSE, "\n%s::%s - buffer error 0x%08x", "OMXDecoderBase", __func__, omx_err);
+			ofLogError(__func__) << "buffer error";
 			return false;
 		}
 
@@ -132,7 +130,7 @@ bool OMXDecoderBase::SendDecoderConfig()
 		omx_buffer->nFilledLen = m_extrasize;
 		if(omx_buffer->nFilledLen > omx_buffer->nAllocLen)
 		{
-			ofLog(OF_LOG_VERBOSE, "\n%s::%s - omx_buffer->nFilledLen > omx_buffer->nAllocLen", "OMXDecoderBase", __func__);
+			ofLogError(__func__) << "omx_buffer->nFilledLen > omx_buffer->nAllocLen";
 			return false;
 		}
 
@@ -143,12 +141,12 @@ bool OMXDecoderBase::SendDecoderConfig()
 		omx_err = m_omx_decoder.EmptyThisBuffer(omx_buffer);
 		if (omx_err != OMX_ErrorNone)
 		{
-			ofLog(OF_LOG_VERBOSE, "\n%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", "OMXDecoderBase", __func__, omx_err);
+			ofLogError(__func__) << "EmptyThisBuffer FAIL" << COMXCore::getOMXError(omx_err);
 			return false;
 		}
 		else
 		{
-			ofLog(OF_LOG_VERBOSE, "OMXDecoderBase::SendDecoderConfig m_extradata: %i ", m_extradata);
+			ofLogVerbose(__func__) << "EmptyThisBuffer PASS";
 		}
 
 	}
@@ -187,7 +185,7 @@ void OMXDecoderBase::SubmitEOS()
 
 	if(omx_buffer == NULL)
 	{
-		ofLog(OF_LOG_ERROR, "%s::%s - buffer error 0x%08x", "OMXDecoderBase", __func__, omx_err);
+		ofLogError(__func__) << "buffer error" << COMXCore::getOMXError(omx_err);
 		return;
 	}
 
@@ -200,7 +198,7 @@ void OMXDecoderBase::SubmitEOS()
 	omx_err = m_omx_decoder.EmptyThisBuffer(omx_buffer);
 	if (omx_err != OMX_ErrorNone)
 	{
-		ofLog(OF_LOG_ERROR, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", "OMXDecoderBase", __func__, omx_err);
+		ofLogError(__func__) << "EmptyThisBuffer FAIL" << COMXCore::getOMXError(omx_err);
 		return;
 	}
 }
