@@ -88,6 +88,7 @@ class ofxOMXPlayerEngine: public OMXThread
 
 		EGLImageKHR eglImage;
 		ofxOMXPlayerSettings omxPlayerSettings;
+		void setDisplayRect(float x, float y, float w, float h);
 	private:
 
 		COMXCore				omxCore;
@@ -126,6 +127,10 @@ class ofxOMXPlayerEngine: public OMXThread
 		void					onVideoEnd();
 		void					onVideoLoop();
 		double					previousLoopOffset;
+	
+	ofRectangle displayRect;
+	
+	void setDisplayRect(ofRectangle& rectangle);
 
 };
 

@@ -29,7 +29,7 @@ class ofxOMXPlayerSettings
 		bool useHDMIForAudio;
 		bool enableLooping;
 		ofxOMXPlayerListener* listener;
-		ofRectangle displayArea;
+		ofRectangle displayRect;
 		/*
 		 To use HDMI Audio you may need to add the below line to /boot/config.txt and reboot
 

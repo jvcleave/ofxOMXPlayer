@@ -26,6 +26,7 @@ class COMXVideo : public OMXDecoderBase
 		bool				m_deinterlace;
 		bool				m_hdmi_clock_sync;
 		bool				m_syncclock;
-		ofRectangle displayArea;
-		void setDisplayRect(ofRectangle displayArea);
+		ofRectangle displayRect;
+		void setDisplayRect(ofRectangle& rectangle);
+		void configureDisplay();
 };

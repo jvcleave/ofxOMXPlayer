@@ -55,10 +55,10 @@ void playlistApp::setup()
 			settings.enableTexture = false;		//default true
 			if (!settings.enableTexture) 
 			{
-				settings.displayArea.x = 100;
-				settings.displayArea.y = 200;
-				settings.displayArea.width = 400;
-				settings.displayArea.height = 300;
+				settings.displayRect.x = 100;
+				settings.displayRect.y = 200;
+				settings.displayRect.width = 400;
+				settings.displayRect.height = 300;
 			}
 			
 			//settings.enableAudio = !settings.enableAudio; //toggle for testing
@@ -115,7 +115,15 @@ void playlistApp::draw(){
 		int scaledHeight = omxPlayer.getHeight()/4;
 		int scaledWidth = omxPlayer.getWidth()/4;
 		omxPlayer.draw(ofGetWidth()-scaledWidth, ofGetHeight()-scaledHeight, scaledWidth, scaledHeight);
+	}else 
+	{
+		/*if (ofGetElapsedTimeMillis()>15000) 
+		{
+			omxPlayer.draw(ofRandom(100, 200), 200, ofRandom(100, ofGetWidth()), ofRandom(300, ofGetHeight()));
+		}*/
+		
 	}
+
 	
 	
 	

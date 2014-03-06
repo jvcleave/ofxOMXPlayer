@@ -259,6 +259,29 @@ bool ofxOMXPlayerEngine::setup(ofxOMXPlayerSettings& settings)
 	}
 }
 
+void ofxOMXPlayerEngine::setDisplayRect(float x, float y, float w, float h)
+{
+	Lock();
+		ofRectangle displayArea(x, y, w, h);
+		setDisplayRect(displayArea);
+	UnLock();
+}
+
+void ofxOMXPlayerEngine::setDisplayRect(ofRectangle& rectangle)
+{
+	if (displayRect == rectangle) 
+	{
+		ofLogVerbose(__func__) << " displayRect: " << displayRect << " rectangle: " << rectangle;
+
+		return;
+	}
+	displayRect = rectangle;
+	if (nonEglPlayer) 
+	{
+		nonEglPlayer->setDisplayRect(displayRect);
+	}
+}
+
 bool ofxOMXPlayerEngine::openPlayer()
 {
 
@@ -268,7 +291,6 @@ bool ofxOMXPlayerEngine::openPlayer()
 		{
 			eglPlayer = new OMXPlayerEGLImage();
 		}
-		//GlobalEGLContainer::getInstance().setup(omxPlayerSettings);
 		didVideoOpen = eglPlayer->Open(videoStreamInfo, &clock, eglImage);
 		videoPlayer = (OMXPlayerVideoBase*)eglPlayer;
 	}
@@ -280,12 +302,12 @@ bool ofxOMXPlayerEngine::openPlayer()
 		}
 		bool deinterlace = false;
 		bool hdmi_clock_sync = true;
-		float display_aspect = 1.0;
-
-		if (omxPlayerSettings.displayArea.getWidth()>0) 
-		{
-			nonEglPlayer->setDisplayRect(omxPlayerSettings.displayArea);
-		}
+		float display_aspect = 1.0; 
+		
+		//initially set this
+		displayRect = omxPlayerSettings.displayRect;
+		nonEglPlayer->setDisplayRect(displayRect);
+		
 		didVideoOpen = nonEglPlayer->Open(videoStreamInfo, &clock, deinterlace, hdmi_clock_sync, display_aspect);
 		videoPlayer = (OMXPlayerVideoBase*)nonEglPlayer;
 		

@@ -10,9 +10,7 @@
 
 OMXPlayerEGLImage::OMXPlayerEGLImage()
 {
-
 	eglImageDecoder = NULL;
-	ofLogVerbose(__func__) << "OMXPlayerEGLImage CONSTRUCT";
 }
 
 OMXPlayerEGLImage::~OMXPlayerEGLImage()

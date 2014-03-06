@@ -447,20 +447,20 @@ COMXStreamInfo ofxOMXPlayer::getAudioStreamInfo()
 
 void ofxOMXPlayer::draw(float x, float y, float width, float height)
 {
-	if (!texture.isAllocated())
+	if (texture.isAllocated())
 	{
-		return;
+		texture.draw(x, y, width, height);
+	}else
+	{
+		engine->setDisplayRect(x, y, width, height);
 	}
-	texture.draw(x, y, width, height);
+	
 }
 
 void ofxOMXPlayer::draw(float x, float y)
 {
-	if (!texture.isAllocated())
-	{
-		return;
-	}
-	texture.draw(x, y);
+	draw(x, y, getWidth(), getHeight());
+	
 }
 
 void ofxOMXPlayer::close()

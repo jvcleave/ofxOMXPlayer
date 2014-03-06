@@ -34,6 +34,7 @@
 OMXPlayerVideo::OMXPlayerVideo()
 {
 	m_hdmi_clock_sync = false;
+	nonTextureDecoder = NULL;
 
 
 }
@@ -79,7 +80,7 @@ bool OMXPlayerVideo::Open(COMXStreamInfo& hints, OMXClock *av_clock, bool deinte
 	m_hdmi_clock_sync = hdmi_clock_sync;
 	m_pts         = 0;
 	m_speed       = DVD_PLAYSPEED_NORMAL;
-
+	
 
 	m_FlipTimeStamp = m_av_clock->GetAbsoluteClock();
 
@@ -119,11 +120,8 @@ bool OMXPlayerVideo::OpenDecoder()
 
 	nonTextureDecoder = new COMXVideo();
 	
-	if (displayArea.getWidth() > 0) 
-	{
-		nonTextureDecoder->setDisplayRect(displayArea);
-	
-	}
+	nonTextureDecoder->setDisplayRect(displayRect);
+
 	m_decoder = (OMXDecoderBase*)nonTextureDecoder;
 	if(!nonTextureDecoder->Open(m_hints, m_av_clock, m_display_aspect, m_Deinterlace, m_hdmi_clock_sync))
 	{
@@ -187,8 +185,31 @@ bool OMXPlayerVideo::Close()
 	return true;
 }
 
-
-void OMXPlayerVideo::setDisplayRect(ofRectangle displayArea)
+bool OMXPlayerVideo::validateDisplayRect(ofRectangle& rectangle)
 {
-	this->displayArea = displayArea;
+	//ofLogVerbose(__func__) << "displayRect: " << displayRect;
+	//ofLogVerbose(__func__) << "rectangle: " << rectangle;
+	if (displayRect == rectangle) 
+	{
+		return false;
+	}
+	displayRect = rectangle;
+	return true;
+}
+void OMXPlayerVideo::setDisplayRect(ofRectangle& rectangle)
+{
+	if (ThreadHandle()) 
+	{
+		Lock();
+			if(validateDisplayRect(rectangle))
+			{
+				LockDecoder();
+					nonTextureDecoder->setDisplayRect(displayRect);
+				UnLockDecoder();
+			}
+		UnLock();
+	}else 
+	{
+		validateDisplayRect(rectangle);
+	}
 }

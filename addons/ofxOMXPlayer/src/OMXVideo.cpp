@@ -355,31 +355,14 @@ bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspec
 	m_is_open           = true;
 	m_drop_state        = false;
 	m_setStartTime      = true;
-	
 	OMX_CONFIG_DISPLAYREGIONTYPE configDisplay;
 	OMX_INIT_STRUCTURE(configDisplay);
 	configDisplay.nPortIndex = m_omx_render.GetInputPort();
 	
-	
-	if (displayArea.getWidth()>0) 
+	//we provided a rectangle but returned early as we were not ready
+	if (displayRect.getWidth()>0) 
 	{
-		configDisplay.set     = OMX_DISPLAY_SET_FULLSCREEN;
-		configDisplay.fullscreen = OMX_FALSE;
-		
-		m_omx_render.SetConfig(OMX_IndexConfigDisplayRegion, &configDisplay);
-		
-		configDisplay.set     = OMX_DISPLAY_SET_DEST_RECT;
-		configDisplay.dest_rect.x_offset  = displayArea.x;
-		configDisplay.dest_rect.y_offset  = displayArea.y;
-		configDisplay.dest_rect.width     = displayArea.getWidth();
-		configDisplay.dest_rect.height    = displayArea.getHeight();
-		
-		m_omx_render.SetConfig(OMX_IndexConfigDisplayRegion, &configDisplay);
-		
-		/*configDisplay.set     = OMX_DISPLAY_SET_ALPHA;
-		configDisplay.fullscreen = OMX_TRUE;
-		
-		m_omx_render.SetConfig(OMX_IndexConfigDisplayRegion, &configDisplay);*/
+		configureDisplay();
 	}else 
 	{
 		
@@ -526,41 +509,48 @@ bool COMXVideo::Decode(uint8_t *pData, int iSize, double pts)
 	return false;
 }
 
-
-void COMXVideo::setDisplayRect(ofRectangle displayArea)
+void COMXVideo::configureDisplay()
 {
-	this->displayArea = displayArea;
+	OMX_CONFIG_DISPLAYREGIONTYPE configDisplay;
+	OMX_INIT_STRUCTURE(configDisplay);
+	configDisplay.nPortIndex = m_omx_render.GetInputPort();
 	
 	
+	
+	configDisplay.set     = OMX_DISPLAY_SET_FULLSCREEN;
+	configDisplay.fullscreen = OMX_FALSE;
+	
+	m_omx_render.SetConfig(OMX_IndexConfigDisplayRegion, &configDisplay);
+	
+	configDisplay.set     = OMX_DISPLAY_SET_DEST_RECT;
+	configDisplay.dest_rect.x_offset  = displayRect.x;
+	configDisplay.dest_rect.y_offset  = displayRect.y;
+	configDisplay.dest_rect.width     = displayRect.getWidth();
+	configDisplay.dest_rect.height    = displayRect.getHeight();
+	
+	m_omx_render.SetConfig(OMX_IndexConfigDisplayRegion, &configDisplay);
 }
-
-///////////////////////////////////////////////////////////////////////////////////////////
-/*void COMXVideo::SetVideoRect(const CRect& SrcRect, const CRect& DestRect)
+void COMXVideo::setDisplayRect(ofRectangle& rectangle)
 {
-  if(!m_is_open)
-    return;
-
-  OMX_CONFIG_DISPLAYREGIONTYPE configDisplay;
-  OMX_INIT_STRUCTURE(configDisplay);
-  configDisplay.nPortIndex = m_omx_render.GetInputPort();
-
-  configDisplay.set     = OMX_DISPLAY_SET_FULLSCREEN;
-  configDisplay.fullscreen = OMX_FALSE;
-
-  m_omx_render.SetConfig(OMX_IndexConfigDisplayRegion, &configDisplay);
-
-  configDisplay.set     = OMX_DISPLAY_SET_DEST_RECT;
-  configDisplay.dest_rect.x_offset  = DestRect.x1;
-  configDisplay.dest_rect.y_offset  = DestRect.y1;
-  configDisplay.dest_rect.width     = DestRect.Width();
-  configDisplay.dest_rect.height    = DestRect.Height();
-
-  m_omx_render.SetConfig(OMX_IndexConfigDisplayRegion, &configDisplay);
-
-  ofLog(OF_LOG_VERBOSE, "dest_rect.x_offset %d dest_rect.y_offset %d dest_rect.width %d dest_rect.height %d\n",
-      configDisplay.dest_rect.x_offset, configDisplay.dest_rect.y_offset,
-      configDisplay.dest_rect.width, configDisplay.dest_rect.height);
-}*/
+	
+	bool hasChanged = (displayRect != rectangle);
+	
+	//ofLogVerbose(__func__) << "hasChanged: " << hasChanged << " displayRect: " << displayRect << " rectangle: " << rectangle;
+	if (hasChanged) 
+	{
+		displayRect = rectangle;
+	}
+	
+	if(!m_is_open)
+	{
+		return;
+	}
+	if (hasChanged) 
+	{
+		
+		configureDisplay();
+	}	
+}
 
 
 
