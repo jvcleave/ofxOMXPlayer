@@ -248,9 +248,9 @@ public:
 	{
 		return frame;
 	}
-	
-private:
 	int frame;
+private:
+	
 	FrameCounter()
 	{
 		frame =0;

@@ -71,10 +71,10 @@ void developApp::setup()
 		loadShader();		
 	}else 
 	{
-		/*settings.displayRect.x = 100;
+		settings.displayRect.x = 100;
 		settings.displayRect.y = 200;
 		settings.displayRect.width = 400;
-		settings.displayRect.height = 300;*/
+		settings.displayRect.height = 300;
 	}
 
 	
@@ -164,7 +164,7 @@ void developApp::draw(){
 		}
 	}else 
 	{
-		omxPlayer.draw(200, 200, omxPlayer.getWidth()/4, omxPlayer.getHeight()/4);
+		//omxPlayer.draw(200, 200, omxPlayer.getWidth()/4, omxPlayer.getHeight()/4);
 	}
 
 	

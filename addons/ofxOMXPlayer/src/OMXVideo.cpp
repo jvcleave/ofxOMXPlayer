@@ -18,8 +18,8 @@ OMX_ERRORTYPE onNonTextureDecoderEmptyBufferDone(OMX_HANDLETYPE hComponent,
         OMX_BUFFERHEADERTYPE* pBuffer)
 {
 
-	ofLogVerbose(__func__) << FrameCounter::getInstance().getCurrentFrame();
-	FrameCounter::getInstance().increment();
+	//ofLogVerbose(__func__) << FrameCounter::getInstance().getCurrentFrame();
+	//FrameCounter::getInstance().increment();
 	return OMX_ErrorNone;
 }
 
@@ -483,6 +483,34 @@ bool COMXVideo::Decode(uint8_t *pData, int iSize, double pts)
 					return false;
 				}
 			}
+			
+			OMX_CONFIG_BRCMPORTSTATSTYPE stats;
+			
+			OMX_INIT_STRUCTURE(stats);
+			
+			stats.nPortIndex = m_omx_render.GetInputPort();
+			
+			omx_err = m_omx_render.GetParameter(OMX_IndexConfigBrcmPortStats, &stats);
+			if (omx_err == OMX_ErrorNone)
+			{
+				/*OMX_U32 nImageCount;
+				OMX_U32 nBufferCount;
+				OMX_U32 nFrameCount;
+				OMX_U32 nFrameSkips;
+				OMX_U32 nDiscards;
+				OMX_U32 nEOS;
+				OMX_U32 nMaxFrameSize;
+				
+				OMX_TICKS nByteCount;
+				OMX_TICKS nMaxTimeDelta;
+				OMX_U32 nCorruptMBs;*/
+				ofLogVerbose(__func__) << "nFrameCount: " << stats.nFrameCount;
+				FrameCounter::getInstance().frame = stats.nFrameCount;
+			}else
+			{
+				ofLogError(__func__) << "m_omx_render OMX_CONFIG_BRCMPORTSTATSTYPE fail: " << COMXCore::getOMXError(omx_err);
+			}
+			//omx_err = m_omx_render.EmptyThisBuffer(omx_buffer);
 		}
 		return true;
 	}
