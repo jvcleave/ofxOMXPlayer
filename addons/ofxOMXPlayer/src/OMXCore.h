@@ -222,3 +222,41 @@ class COMXCore
 		bool              m_Initialized;
 };
 
+class FrameCounter
+{
+public:
+	static FrameCounter& getInstance()
+	{
+		static FrameCounter    instance;
+		return instance;
+	}
+	void reset()
+	{
+		frame = 0;
+	}
+	
+	int increment()
+	{
+		return frame++;
+	}
+	
+	int decrement()
+	{
+		return frame--;
+	}
+	int getCurrentFrame()
+	{
+		return frame;
+	}
+	
+private:
+	int frame;
+	FrameCounter()
+	{
+		frame =0;
+	}
+	~FrameCounter() {};
+	FrameCounter(FrameCounter const&);
+	void operator=(FrameCounter const&);
+	
+};

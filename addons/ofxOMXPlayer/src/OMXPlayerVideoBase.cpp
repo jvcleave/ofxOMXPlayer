@@ -116,7 +116,7 @@ bool OMXPlayerVideoBase::Decode(OMXPacket *pkt)
 			return true;
 		}
 	}
-
+	
 	// CLog::Log(LOGINFO, "CDVDPlayerVideo::Decode dts:%.0f pts:%.0f cur:%.0f, size:%d", pkt->dts, pkt->pts, m_iCurrentPts, pkt->size);
 	//ofLog(OF_LOG_VERBOSE, "OMXPlayerVideoBase::Decode dts:%.0f pts:%.0f cur:%.0f, size:%d", pkt->dts, pkt->pts, m_iCurrentPts, pkt->size);
 	return m_decoder->Decode(pkt->data, pkt->size, pts);
@@ -172,12 +172,12 @@ bool OMXPlayerVideoBase::AddPacket(OMXPacket *pkt)
 	{
 		return ret;
 	}
-	//ofLogVerbose(__func__) << "pkt->size: " << pkt->size;
+
 	if((m_cached_size + pkt->size) < MAX_DATA_SIZE)
 	{
 		Lock();
-		m_cached_size += pkt->size;
-		m_packets.push_back(pkt);
+			m_cached_size += pkt->size;
+			m_packets.push_back(pkt);
 		UnLock();
 		ret = true;
 		pthread_cond_broadcast(&m_packet_cond);
@@ -236,6 +236,7 @@ void OMXPlayerVideoBase::Process()
 		{
 			if(omx_pkt && Decode(omx_pkt))
 			{
+				
 				OMXReader::FreePacket(omx_pkt);
 				omx_pkt = NULL;
 			}

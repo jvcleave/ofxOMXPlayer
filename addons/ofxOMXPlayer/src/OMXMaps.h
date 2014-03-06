@@ -116,8 +116,4 @@ class OMXMaps
 		OMXMaps(OMXMaps const&);
 		void operator=(OMXMaps const&);
 
-
-
-
-
 };

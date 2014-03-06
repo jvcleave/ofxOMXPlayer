@@ -11,10 +11,7 @@ class OMXEGLImage : public OMXDecoderBase
 
 
 		bool Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglImage);
-		bool PortSettingsChanged()
-		{
-			return true;
-		};
+		
 		bool  Decode(uint8_t *pData, int iSize, double pts);
 
 

@@ -1626,7 +1626,9 @@ OMX_ERRORTYPE COMXCoreComponent::DecoderEmptyBufferDoneCallback(
 	}
 
 	COMXCoreComponent *ctx = static_cast<COMXCoreComponent*>(pAppData);
-
+	#ifdef OMX_DEBUG_EVENTS
+		ofLogVerbose(__func__) << ctx->GetName();
+	#endif
 	if(ctx->CustomDecoderEmptyBufferDoneHandler)
 	{
 		OMX_ERRORTYPE error = (*(ctx->CustomDecoderEmptyBufferDoneHandler))(hComponent, pAppData, pBuffer);
@@ -1651,7 +1653,9 @@ OMX_ERRORTYPE COMXCoreComponent::DecoderFillBufferDoneCallback(
 	}
 
 	COMXCoreComponent *ctx = static_cast<COMXCoreComponent*>(pAppData);
-
+	#ifdef OMX_DEBUG_EVENTS
+		ofLogVerbose(__func__) << ctx->GetName();
+	#endif
 	if(ctx->CustomDecoderFillBufferDoneHandler)
 	{
 		OMX_ERRORTYPE error = (*(ctx->CustomDecoderFillBufferDoneHandler))(hComponent, pAppData, pBuffer);
@@ -1718,7 +1722,7 @@ OMX_ERRORTYPE COMXCoreComponent::DecoderEventHandler(
 	COMXCoreComponent *ctx = static_cast<COMXCoreComponent*>(pAppData);
 
 	#ifdef OMX_DEBUG_EVENTS
-	ofLogVerbose(__func__) << printEventType(eEvent);
+		ofLogVerbose(__func__) << printEventType(eEvent);
 	#endif
 
 	AddEvent(eEvent, nData1, nData2);
@@ -1732,6 +1736,7 @@ OMX_ERRORTYPE COMXCoreComponent::DecoderEventHandler(
 			ctx->m_eos = true;
 			pthread_mutex_unlock(&ctx->m_omx_eos_mutex);
 		}
+		
 	}
 	else
 	{

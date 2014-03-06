@@ -21,8 +21,8 @@ OMX_ERRORTYPE onFillBufferDone(OMX_HANDLETYPE hComponent,
 	if (didFillBuffer == OMX_ErrorNone)
 	{
 		//OMXDecoderBase *ctx = static_cast<OMXDecoderBase*>(pAppData);
-
-		OMXDecoderBase::fillBufferCounter++;
+		FrameCounter::getInstance().increment();
+		//OMXDecoderBase::fillBufferCounter++;
 		//ofLogVerbose(__func__) << " fillBufferCounter: " << fillBufferCounter;
 	}
 
@@ -496,24 +496,6 @@ bool OMXEGLImage::Decode(uint8_t *pData, int iSize, double pts)
 				{
 					ofLog(OF_LOG_ERROR, "%s::%s - OMX_EmptyThisBuffer() finally failed\n", CLASSNAME, __func__);
 					return false;
-				}
-			}
-
-			omx_err = m_omx_decoder.WaitForEvent(OMX_EventPortSettingsChanged, 0);
-			if (omx_err == OMX_ErrorNone)
-			{
-				if(!PortSettingsChanged())
-				{
-					ofLog(OF_LOG_ERROR, "%s::%s - error PortSettingsChanged omx_err(0x%08x)\n", CLASSNAME, __func__, omx_err);
-					return false;
-				}
-			}
-			omx_err = m_omx_decoder.WaitForEvent(OMX_EventParamOrConfigChanged, 0);
-			if (omx_err == OMX_ErrorNone)
-			{
-				if(!PortSettingsChanged())
-				{
-					ofLog(OF_LOG_ERROR, "%s::%s - error PortSettingsChanged (EventParamOrConfigChanged) omx_err(0x%08x)\n", CLASSNAME, __func__, omx_err);
 				}
 			}
 		}

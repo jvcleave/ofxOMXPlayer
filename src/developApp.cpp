@@ -59,7 +59,7 @@ void developApp::setup()
 	ofLogVerbose() << "using videoPath : " << videoPath;
 	settings.videoPath = videoPath;
 	settings.listener = this; //this app extends ofxOMXPlayerListener so it will receive events ;
-	settings.enableLooping = false;
+	settings.enableLooping = true;
 	doTextures	= false;
 	doShader	= false;
 	
@@ -69,7 +69,14 @@ void developApp::setup()
 	if (doShader) 
 	{
 		loadShader();		
+	}else 
+	{
+		/*settings.displayRect.x = 100;
+		settings.displayRect.y = 200;
+		settings.displayRect.width = 400;
+		settings.displayRect.height = 300;*/
 	}
+
 	
 	if (doShader || doTextures) 
 	{
@@ -137,25 +144,29 @@ void developApp::update()
 //--------------------------------------------------------------
 void developApp::draw(){
 	
-	if (!omxPlayer.isPlaying() || !omxPlayer.isTextureEnabled) 
-	{
-		return;
-	}
 	
-	if (doShader) 
+	if (omxPlayer.isTextureEnabled) 
 	{
-		if (!shader.isLoaded()) 
+		
+		if (doShader) 
 		{
-			loadShader();
+			if (!shader.isLoaded()) 
+			{
+				loadShader();
+			}
+			
+			fbo.draw(0, 0);
+			
+		}else 
+		{
+			omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
+			//omxPlayer.draw(0, 0, omxPlayer.getWidth()/4, omxPlayer.getHeight()/4);
 		}
-		
-		fbo.draw(0, 0);
-		
 	}else 
 	{
-		omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
-		//omxPlayer.draw(0, 0, omxPlayer.getWidth()/4, omxPlayer.getHeight()/4);
+		omxPlayer.draw(200, 200, omxPlayer.getWidth()/4, omxPlayer.getHeight()/4);
 	}
+
 	
 	stringstream info;
 	info <<"\n" <<  "APP FPS: "+ ofToString(ofGetFrameRate());

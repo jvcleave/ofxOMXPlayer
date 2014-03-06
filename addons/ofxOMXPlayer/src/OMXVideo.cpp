@@ -1,6 +1,5 @@
 #include "OMXVideo.h"
 
-int emptyBufferCounter = 0;
 
 OMX_ERRORTYPE onNonTextureDecoderFillBufferDone(OMX_HANDLETYPE hComponent,
         OMX_PTR pAppData,
@@ -8,6 +7,9 @@ OMX_ERRORTYPE onNonTextureDecoderFillBufferDone(OMX_HANDLETYPE hComponent,
 {
 
 	//OMXDecoderBase::fillBufferCounter++;
+	//FrameCounter::getInstance().increment();
+	ofLogVerbose(__func__) << FrameCounter::getInstance().getCurrentFrame();
+	//FrameCounter::getInstance().increment();
 	return OMX_ErrorNone;
 }
 
@@ -16,13 +18,8 @@ OMX_ERRORTYPE onNonTextureDecoderEmptyBufferDone(OMX_HANDLETYPE hComponent,
         OMX_BUFFERHEADERTYPE* pBuffer)
 {
 
-	/*if (pBuffer->nFlags & OMX_BUFFERFLAG_ENDOFFRAME)
-	{
-		ofLogVerbose() << "OMX_BUFFERFLAG_ENDOFFRAME";
-	}*/
-	//emptyBufferCounter++;
-	//ofLogVerbose(__func__) << "emptyBufferCounter: " << emptyBufferCounter;
-	//OMXDecoderBase::fillBufferCounter++;
+	ofLogVerbose(__func__) << FrameCounter::getInstance().getCurrentFrame();
+	FrameCounter::getInstance().increment();
 	return OMX_ErrorNone;
 }
 
@@ -263,7 +260,7 @@ bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspec
 		}
 	}
 
-	// Alloc buffers for the omx inpput port.
+	// Alloc buffers for the omx input port.
 	omx_err = m_omx_decoder.AllocInputBuffers();
 	if (omx_err != OMX_ErrorNone)
 	{
@@ -279,9 +276,10 @@ bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspec
 	}
 
 
-	//m_omx_decoder.SetCustomDecoderFillBufferDoneHandler(onNonTextureDecoderFillBufferDone);
-	//m_omx_decoder.SetCustomDecoderEmptyBufferDoneHandler(onNonTextureDecoderEmptyBufferDone);
-
+	
+	m_omx_decoder.SetCustomDecoderFillBufferDoneHandler(onNonTextureDecoderFillBufferDone);
+	m_omx_decoder.SetCustomDecoderEmptyBufferDoneHandler(onNonTextureDecoderEmptyBufferDone);
+	
 	omx_err = m_omx_decoder.SetStateForComponent(OMX_StateExecuting);
 	if (omx_err != OMX_ErrorNone)
 	{
@@ -332,14 +330,16 @@ bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspec
 		return false;
 	}
 
-
+	
 	omx_err = m_omx_sched.SetStateForComponent(OMX_StateExecuting);
 	if (omx_err != OMX_ErrorNone)
 	{
 		ofLog(OF_LOG_VERBOSE, "COMXVideo::Open error m_omx_sched.SetStateForComponent\n");
 		return false;
 	}
-
+	
+	
+	
 	omx_err = m_omx_render.SetStateForComponent(OMX_StateExecuting);
 	if (omx_err != OMX_ErrorNone)
 	{
@@ -457,11 +457,9 @@ bool COMXVideo::Decode(uint8_t *pData, int iSize, double pts)
 
 			if(demuxer_bytes == 0)
 			{
-
+				//ofLogVerbose(__func__) << "OMX_BUFFERFLAG_ENDOFFRAME";
+				
 				omx_buffer->nFlags |= OMX_BUFFERFLAG_ENDOFFRAME;
-
-				//OMXDecoderBase::fillBufferCounter++;
-				//ofLogVerbose(__func__) << "OMX_BUFFERFLAG_ENDOFFRAME COUNT: " << emptyBufferCounter;
 			}
 
 			int nRetry = 0;
@@ -471,6 +469,7 @@ bool COMXVideo::Decode(uint8_t *pData, int iSize, double pts)
 				if (omx_err == OMX_ErrorNone)
 				{
 					//ofLog(OF_LOG_VERBOSE, "VideD:  pts:%.0f size:%d)\n", pts, iSize);
+					
 					break;
 				}
 				else
@@ -482,24 +481,6 @@ bool COMXVideo::Decode(uint8_t *pData, int iSize, double pts)
 				{
 					ofLog(OF_LOG_ERROR, "%s::%s - OMX_EmptyThisBuffer() finally failed\n", CLASSNAME, __func__);
 					return false;
-				}
-			}
-
-			omx_err = m_omx_decoder.WaitForEvent(OMX_EventPortSettingsChanged, 0);
-			if (omx_err == OMX_ErrorNone)
-			{
-				if(!PortSettingsChanged())
-				{
-					ofLog(OF_LOG_ERROR, "%s::%s - error PortSettingsChanged omx_err(0x%08x)\n", CLASSNAME, __func__, omx_err);
-					return false;
-				}
-			}
-			omx_err = m_omx_decoder.WaitForEvent(OMX_EventParamOrConfigChanged, 0);
-			if (omx_err == OMX_ErrorNone)
-			{
-				if(!PortSettingsChanged())
-				{
-					ofLog(OF_LOG_ERROR, "%s::%s - error PortSettingsChanged (EventParamOrConfigChanged) omx_err(0x%08x)\n", CLASSNAME, __func__, omx_err);
 				}
 			}
 		}

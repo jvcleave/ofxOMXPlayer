@@ -9,7 +9,6 @@
 #include <sys/time.h>
 #include <inttypes.h>
 
-int OMXDecoderBase::fillBufferCounter =0;
 
 OMXDecoderBase::OMXDecoderBase()
 {

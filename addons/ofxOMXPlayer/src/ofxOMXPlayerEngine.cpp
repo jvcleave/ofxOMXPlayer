@@ -36,8 +36,8 @@ ofxOMXPlayerEngine::ofxOMXPlayerEngine()
 	loopCounter			= 0;
 	previousLoopOffset = 0;
 	omxCore.Initialize();
-	OMXDecoderBase::fillBufferCounter=0;
-
+	//OMXDecoderBase::fillBufferCounter=0;
+	FrameCounter::getInstance().reset();
 	normalPlaySpeed = 1000;
 	speedMultiplier = 1;
 	doSeek = false;
@@ -473,9 +473,10 @@ void ofxOMXPlayerEngine::Process()
 		}
 
 
-		if (doLooping && OMXDecoderBase::fillBufferCounter>=getTotalNumFrames())
+		if (doLooping && FrameCounter::getInstance().getCurrentFrame()>=getTotalNumFrames())
 		{
-			OMXDecoderBase::fillBufferCounter=0;
+			//OMXDecoderBase::fillBufferCounter=0;
+			FrameCounter::getInstance().reset();
 		}
 		if (hasAudio)
 		{
@@ -497,6 +498,7 @@ void ofxOMXPlayerEngine::Process()
 			{
 				OMXClock::OMXSleep(10);
 			}
+			
 		}
 		else if(hasAudio && packet && packet->codec_type == AVMEDIA_TYPE_AUDIO)
 		{
@@ -559,7 +561,8 @@ float ofxOMXPlayerEngine::getDuration()
 int ofxOMXPlayerEngine::getCurrentFrame()
 {
 
-	return OMXDecoderBase::fillBufferCounter;
+	return FrameCounter::getInstance().getCurrentFrame();
+	//return OMXDecoderBase::fillBufferCounter;
 }
 
 int ofxOMXPlayerEngine::getTotalNumFrames()

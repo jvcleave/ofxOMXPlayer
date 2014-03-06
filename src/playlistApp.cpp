@@ -175,6 +175,13 @@ void playlistApp::keyPressed  (int key){
 			_Exit(0);
 			break;
 		}
+		case 'p':
+		{
+			ofLogVerbose() << "pause: " << !omxPlayer.isPaused();
+			omxPlayer.setPaused(!omxPlayer.isPaused());
+			break;
+			
+		}
 	}
 }
 

@@ -103,7 +103,7 @@ class OMXDecoderBase
 		{
 			return m_video_codec_name;
 		};
-		static int fillBufferCounter;
+		//static int fillBufferCounter;
 
 		CCriticalSection  m_critSection;
 };
