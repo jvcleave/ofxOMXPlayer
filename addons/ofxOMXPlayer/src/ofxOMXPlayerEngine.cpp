@@ -474,7 +474,10 @@ void ofxOMXPlayerEngine::Process()
 
 		if (doLooping && getCurrentFrame()>=getTotalNumFrames())
 		{
-			//FrameCounter::getInstance().reset();
+			if (videoPlayer) 
+			{
+				videoPlayer->resetFrameCounter();
+			}
 		}
 		if (hasAudio)
 		{
@@ -555,36 +558,14 @@ float ofxOMXPlayerEngine::getDuration()
 	return duration;
 }
 
-//we are counting our own frames
 int ofxOMXPlayerEngine::getCurrentFrame()
 {
-	int currentFrame = 0;
-	Lock();
-	if (eglPlayer)
+	if (videoPlayer) 
 	{
-		if (eglPlayer->eglImageDecoder) 
-		{
-			eglPlayer->Lock();
-			eglPlayer->LockDecoder(); 
-			currentFrame = eglPlayer->eglImageDecoder->getFrameCounter();
-			ofLogVerbose(__func__) << "currentFrame: " << currentFrame;
-			eglPlayer->UnLockDecoder(); 
-			eglPlayer->UnLock();
-		}else
-		{
-			ofLogError(__func__) << "NO eglPlayer->eglImageDecoder";
-		}
-		
-	}else 
-	{
-		if (nonEglPlayer && nonEglPlayer->nonTextureDecoder)
-		{
-			currentFrame = nonEglPlayer->nonTextureDecoder->frameCounter;
-		}
+		return videoPlayer->getCurrentFrame();
 	}
-	UnLock();
-	return currentFrame;
-	//FrameCounter::getInstance().getCurrentFrame();
+	
+	return 0;
 }
 
 int ofxOMXPlayerEngine::getTotalNumFrames()
@@ -693,6 +674,8 @@ void ofxOMXPlayerEngine::removeListener()
 
 void ofxOMXPlayerEngine::onVideoLoop()
 {
+	
+	
 	if (listener != NULL)
 	{
 

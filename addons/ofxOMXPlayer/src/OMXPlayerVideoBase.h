@@ -90,4 +90,7 @@ class OMXPlayerVideoBase: public OMXThread
 		bool						m_flush_requested;
 
 		bool						isExiting;
+	
+		int getCurrentFrame();
+		void resetFrameCounter();
 };

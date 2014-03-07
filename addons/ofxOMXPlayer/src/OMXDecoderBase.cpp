@@ -23,7 +23,8 @@ OMXDecoderBase::OMXDecoderBase()
 	m_av_clock			= NULL;
 	m_omx_clock			= NULL;
 	decoder_name = OMX_VIDEO_DECODER;
-
+	frameCounter = 0;
+	frameOffset = 0;
 	ofLogVerbose(__func__) << "OMXDecoderBase::CONSTRUCT";
 
 }

@@ -104,6 +104,7 @@ class OMXDecoderBase
 			return m_video_codec_name;
 		};
 		
-
+		int frameCounter;
+		int frameOffset;
 		CCriticalSection  m_critSection;
 };

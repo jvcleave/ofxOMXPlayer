@@ -7,7 +7,6 @@ COMXVideo::COMXVideo()
 
 	m_deinterlace       = false;
 	m_hdmi_clock_sync   = false;
-	frameCounter = 0;
 
 }
 
@@ -479,8 +478,8 @@ bool COMXVideo::Decode(uint8_t *pData, int iSize, double pts)
 				OMX_TICKS nByteCount;
 				OMX_TICKS nMaxTimeDelta;
 				OMX_U32 nCorruptMBs;*/
-				ofLogVerbose(__func__) << "nFrameCount: " << stats.nFrameCount;
-				frameCounter = stats.nFrameCount;
+				//ofLogVerbose(__func__) << "nFrameCount: " << stats.nFrameCount;
+				frameCounter = stats.nFrameCount-frameOffset;
 			}else
 			{
 				ofLogError(__func__) << "m_omx_render OMX_CONFIG_BRCMPORTSTATSTYPE fail: " << COMXCore::getOMXError(omx_err);
