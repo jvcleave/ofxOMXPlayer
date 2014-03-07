@@ -222,6 +222,7 @@ class COMXCore
 		bool              m_Initialized;
 };
 
+#if 0
 class FrameCounter
 {
 public:
@@ -260,3 +261,5 @@ private:
 	void operator=(FrameCounter const&);
 	
 };
+
+#endif

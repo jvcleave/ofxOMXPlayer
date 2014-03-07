@@ -278,6 +278,11 @@ void developApp::keyPressed  (int key){
 			omxPlayer.close();
 			break;
 		}
+		case 'x':
+		{
+			_Exit(0);
+			break;
+		}
 		default:
 		{
 			break;

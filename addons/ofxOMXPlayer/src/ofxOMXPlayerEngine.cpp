@@ -36,7 +36,7 @@ ofxOMXPlayerEngine::ofxOMXPlayerEngine()
 	loopCounter			= 0;
 	previousLoopOffset = 0;
 	omxCore.Initialize();
-	FrameCounter::getInstance().reset();
+	//FrameCounter::getInstance().reset();
 	normalPlaySpeed = 1000;
 	speedMultiplier = 1;
 	doSeek = false;
@@ -472,9 +472,9 @@ void ofxOMXPlayerEngine::Process()
 		}
 
 
-		if (doLooping && FrameCounter::getInstance().getCurrentFrame()>=getTotalNumFrames())
+		if (doLooping && getCurrentFrame()>=getTotalNumFrames())
 		{
-			FrameCounter::getInstance().reset();
+			//FrameCounter::getInstance().reset();
 		}
 		if (hasAudio)
 		{
@@ -558,7 +558,33 @@ float ofxOMXPlayerEngine::getDuration()
 //we are counting our own frames
 int ofxOMXPlayerEngine::getCurrentFrame()
 {
-	return FrameCounter::getInstance().getCurrentFrame();
+	int currentFrame = 0;
+	Lock();
+	if (eglPlayer)
+	{
+		if (eglPlayer->eglImageDecoder) 
+		{
+			eglPlayer->Lock();
+			eglPlayer->LockDecoder(); 
+			currentFrame = eglPlayer->eglImageDecoder->getFrameCounter();
+			ofLogVerbose(__func__) << "currentFrame: " << currentFrame;
+			eglPlayer->UnLockDecoder(); 
+			eglPlayer->UnLock();
+		}else
+		{
+			ofLogError(__func__) << "NO eglPlayer->eglImageDecoder";
+		}
+		
+	}else 
+	{
+		if (nonEglPlayer && nonEglPlayer->nonTextureDecoder)
+		{
+			currentFrame = nonEglPlayer->nonTextureDecoder->frameCounter;
+		}
+	}
+	UnLock();
+	return currentFrame;
+	//FrameCounter::getInstance().getCurrentFrame();
 }
 
 int ofxOMXPlayerEngine::getTotalNumFrames()

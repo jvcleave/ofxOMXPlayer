@@ -26,4 +26,6 @@ class COMXVideo : public OMXDecoderBase
 		ofRectangle displayRect;
 		void setDisplayRect(ofRectangle& rectangle);
 		void configureDisplay();
+	
+		int frameCounter;
 };

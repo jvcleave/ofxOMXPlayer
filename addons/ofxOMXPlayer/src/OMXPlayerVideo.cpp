@@ -155,7 +155,6 @@ bool OMXPlayerVideo::Close()
 
 	Flush();
 
-
 	if(ThreadHandle())
 	{
 		Lock();

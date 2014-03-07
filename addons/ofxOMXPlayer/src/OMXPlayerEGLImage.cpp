@@ -122,12 +122,9 @@ bool OMXPlayerEGLImage::Close()
 	ofLogVerbose(__func__) << " START, isExiting:" << isExiting;
 	m_bAbort  = true;
 	m_flush   = true;
-
-
-	//if (!isExiting)
-	//{
+	
 	Flush();
-	//}
+	
 
 	if(ThreadHandle())
 	{

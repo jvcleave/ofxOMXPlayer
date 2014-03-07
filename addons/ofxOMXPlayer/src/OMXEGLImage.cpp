@@ -3,11 +3,11 @@
 
 OMXEGLImage::OMXEGLImage()
 {
-
+	myFrameCounter = 0;
 }
 
 
-
+int localCounter = 0;
 OMX_ERRORTYPE onFillBufferDone(OMX_HANDLETYPE hComponent,
                                OMX_PTR pAppData,
                                OMX_BUFFERHEADERTYPE* pBuffer)
@@ -20,12 +20,26 @@ OMX_ERRORTYPE onFillBufferDone(OMX_HANDLETYPE hComponent,
 	OMX_ERRORTYPE didFillBuffer = OMX_FillThisBuffer(hComponent, pBuffer);
 	if (didFillBuffer == OMX_ErrorNone)
 	{
-		//OMXDecoderBase *ctx = static_cast<OMXDecoderBase*>(pAppData);
-		FrameCounter::getInstance().increment();
-		//ofLogVerbose(__func__) << " fillBufferCounter: " << fillBufferCounter;
+		OMXEGLImage *ctx = static_cast<OMXEGLImage*>(pAppData);
+		//FrameCounter::getInstance().increment();
+		localCounter++;
+		ctx->updateFrameCounter(localCounter);
+		//ctx->frameCounter = localCounter;
+		ofLogVerbose(__func__) << " ctx->getFrameCounter(): " << ctx->getFrameCounter();
 	}
 
 	return didFillBuffer;
+}
+
+void OMXEGLImage::updateFrameCounter(int frameNumber)
+{
+	myFrameCounter = frameNumber;
+	ofLogVerbose(__func__) << "myFrameCounter: " << myFrameCounter;
+}
+int OMXEGLImage::getFrameCounter()
+{
+	ofLogVerbose(__func__) << "myFrameCounter: " << myFrameCounter;
+	return myFrameCounter;
 }
 
 bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglImage)
@@ -497,6 +511,7 @@ bool OMXEGLImage::Decode(uint8_t *pData, int iSize, double pts)
 					return false;
 				}
 			}
+			ofLogVerbose(__func__) << "myFrameCounter: " << myFrameCounter;
 		}
 
 		return true;
