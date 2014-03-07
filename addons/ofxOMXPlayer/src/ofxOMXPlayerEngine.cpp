@@ -36,7 +36,6 @@ ofxOMXPlayerEngine::ofxOMXPlayerEngine()
 	loopCounter			= 0;
 	previousLoopOffset = 0;
 	omxCore.Initialize();
-	//OMXDecoderBase::fillBufferCounter=0;
 	FrameCounter::getInstance().reset();
 	normalPlaySpeed = 1000;
 	speedMultiplier = 1;
@@ -475,7 +474,6 @@ void ofxOMXPlayerEngine::Process()
 
 		if (doLooping && FrameCounter::getInstance().getCurrentFrame()>=getTotalNumFrames())
 		{
-			//OMXDecoderBase::fillBufferCounter=0;
 			FrameCounter::getInstance().reset();
 		}
 		if (hasAudio)
@@ -560,9 +558,7 @@ float ofxOMXPlayerEngine::getDuration()
 //we are counting our own frames
 int ofxOMXPlayerEngine::getCurrentFrame()
 {
-
 	return FrameCounter::getInstance().getCurrentFrame();
-	//return OMXDecoderBase::fillBufferCounter;
 }
 
 int ofxOMXPlayerEngine::getTotalNumFrames()

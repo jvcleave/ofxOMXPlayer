@@ -22,7 +22,6 @@ OMX_ERRORTYPE onFillBufferDone(OMX_HANDLETYPE hComponent,
 	{
 		//OMXDecoderBase *ctx = static_cast<OMXDecoderBase*>(pAppData);
 		FrameCounter::getInstance().increment();
-		//OMXDecoderBase::fillBufferCounter++;
 		//ofLogVerbose(__func__) << " fillBufferCounter: " << fillBufferCounter;
 	}
 

@@ -1,28 +1,6 @@
 #include "OMXVideo.h"
 
 
-OMX_ERRORTYPE onNonTextureDecoderFillBufferDone(OMX_HANDLETYPE hComponent,
-        OMX_PTR pAppData,
-        OMX_BUFFERHEADERTYPE* pBuffer)
-{
-
-	//OMXDecoderBase::fillBufferCounter++;
-	//FrameCounter::getInstance().increment();
-	ofLogVerbose(__func__) << FrameCounter::getInstance().getCurrentFrame();
-	//FrameCounter::getInstance().increment();
-	return OMX_ErrorNone;
-}
-
-OMX_ERRORTYPE onNonTextureDecoderEmptyBufferDone(OMX_HANDLETYPE hComponent,
-        OMX_PTR pAppData,
-        OMX_BUFFERHEADERTYPE* pBuffer)
-{
-
-	//ofLogVerbose(__func__) << FrameCounter::getInstance().getCurrentFrame();
-	//FrameCounter::getInstance().increment();
-	return OMX_ErrorNone;
-}
-
 
 COMXVideo::COMXVideo()
 {
@@ -275,10 +253,6 @@ bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspec
 		return false;
 	}
 
-
-	
-	m_omx_decoder.SetCustomDecoderFillBufferDoneHandler(onNonTextureDecoderFillBufferDone);
-	m_omx_decoder.SetCustomDecoderEmptyBufferDoneHandler(onNonTextureDecoderEmptyBufferDone);
 	
 	omx_err = m_omx_decoder.SetStateForComponent(OMX_StateExecuting);
 	if (omx_err != OMX_ErrorNone)
