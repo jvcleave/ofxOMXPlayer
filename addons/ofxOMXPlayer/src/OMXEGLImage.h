@@ -14,6 +14,6 @@ class OMXEGLImage : public OMXDecoderBase
 		
 		bool  Decode(uint8_t *pData, int iSize, double pts);
 
-	
+		void updateFrameCount(){ return; };
 	
 };

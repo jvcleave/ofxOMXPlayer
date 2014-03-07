@@ -9,7 +9,7 @@ class COMXVideo : public OMXDecoderBase
 {
 	public:
 		COMXVideo();
-
+		~COMXVideo();
 		bool Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspect = 0.0f, bool deinterlace = false, bool hdmi_clock_sync = false);
 		
 
@@ -26,5 +26,6 @@ class COMXVideo : public OMXDecoderBase
 		ofRectangle displayRect;
 		void setDisplayRect(ofRectangle& rectangle);
 		void configureDisplay();
-	
+		void updateFrameCount();
+		void onUpdate(ofEventArgs& args);
 };

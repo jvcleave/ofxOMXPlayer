@@ -29,7 +29,6 @@ OMXDecoderBase::OMXDecoderBase()
 
 }
 
-//#if 0
 OMXDecoderBase::~OMXDecoderBase()
 {
 
@@ -76,6 +75,7 @@ OMXDecoderBase::~OMXDecoderBase()
 	{
 		ofLogError(__func__) << "An exception occurred. Exception: " << e << '\n';
 	}
+	m_is_open       = false;
 	//ofLogVerbose(__func__) << " END ---------";
 
 	//m_av_clock->OMXStop();
@@ -83,7 +83,6 @@ OMXDecoderBase::~OMXDecoderBase()
 
 	ofLogVerbose(__func__) << "END ---------";
 }
-//#endif
 
 bool OMXDecoderBase::NaluFormatStartCodes(enum AVCodecID codec, uint8_t *in_extradata, int in_extrasize)
 {

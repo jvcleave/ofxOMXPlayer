@@ -60,14 +60,14 @@ class ofxOMXPlayer
 		void rewind();
 
 		unsigned char * getPixels();
-
+		ofxOMXPlayerSettings settings;
 	private:
 
 		bool openEngine();
 		void addExitHandler();
 		void onUpdate(ofEventArgs& args);
 		ofxOMXPlayerEngine* engine;
-		ofxOMXPlayerSettings settings;
+		
 
 		ofFbo fbo;
 		ofTexture texture;

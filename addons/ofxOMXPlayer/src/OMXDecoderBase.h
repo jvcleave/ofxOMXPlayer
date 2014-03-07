@@ -106,5 +106,6 @@ class OMXDecoderBase
 		
 		int frameCounter;
 		int frameOffset;
+		virtual void updateFrameCount() =0;
 		CCriticalSection  m_critSection;
 };

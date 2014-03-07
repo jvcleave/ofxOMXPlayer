@@ -10,6 +10,12 @@ COMXVideo::COMXVideo()
 
 }
 
+COMXVideo::~COMXVideo()
+{
+	ofRemoveListener(ofEvents().update, this, &COMXVideo::onUpdate);
+	ofLogVerbose(__func__) << "removed update listener";
+}
+
 bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspect, bool deinterlace, bool hdmi_clock_sync)
 {
 	OMX_ERRORTYPE omx_err   = OMX_ErrorNone;
@@ -320,7 +326,7 @@ bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspec
 		ofLog(OF_LOG_VERBOSE, "COMXVideo::Open error m_omx_render.SetStateForComponent\n");
 		return false;
 	}
-
+	ofAddListener(ofEvents().update, this, &COMXVideo::onUpdate);
 	if(!SendDecoderConfig())
 	{
 		return false;
@@ -382,6 +388,43 @@ bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspec
 }
 #define CLASSNAME "COMXVideo"
 
+void COMXVideo::onUpdate(ofEventArgs& args)
+{
+	updateFrameCount();
+}
+void COMXVideo::updateFrameCount()
+{
+	if (!m_is_open) {
+		return;
+	}
+	OMX_ERRORTYPE omx_err;
+	OMX_CONFIG_BRCMPORTSTATSTYPE stats;
+	
+	OMX_INIT_STRUCTURE(stats);
+	
+	stats.nPortIndex = m_omx_render.GetInputPort();
+	
+	omx_err = m_omx_render.GetParameter(OMX_IndexConfigBrcmPortStats, &stats);
+	if (omx_err == OMX_ErrorNone)
+	{
+		/*OMX_U32 nImageCount;
+		 OMX_U32 nBufferCount;
+		 OMX_U32 nFrameCount;
+		 OMX_U32 nFrameSkips;
+		 OMX_U32 nDiscards;
+		 OMX_U32 nEOS;
+		 OMX_U32 nMaxFrameSize;
+		 
+		 OMX_TICKS nByteCount;
+		 OMX_TICKS nMaxTimeDelta;
+		 OMX_U32 nCorruptMBs;*/
+		//ofLogVerbose(__func__) << "nFrameCount: " << stats.nFrameCount;
+		frameCounter = stats.nFrameCount-frameOffset;
+	}else
+	{
+		ofLogError(__func__) << "m_omx_render OMX_CONFIG_BRCMPORTSTATSTYPE fail: " << COMXCore::getOMXError(omx_err);
+	}
+}
 bool COMXVideo::Decode(uint8_t *pData, int iSize, double pts)
 {
 	CSingleLock lock (m_critSection);
@@ -391,7 +434,7 @@ bool COMXVideo::Decode(uint8_t *pData, int iSize, double pts)
 	{
 		return true;
 	}
-
+	
 	unsigned int demuxer_bytes = (unsigned int)iSize;
 	uint8_t *demuxer_content = pData;
 
@@ -458,34 +501,10 @@ bool COMXVideo::Decode(uint8_t *pData, int iSize, double pts)
 				}
 			}
 			
-			OMX_CONFIG_BRCMPORTSTATSTYPE stats;
 			
-			OMX_INIT_STRUCTURE(stats);
-			
-			stats.nPortIndex = m_omx_render.GetInputPort();
-			
-			omx_err = m_omx_render.GetParameter(OMX_IndexConfigBrcmPortStats, &stats);
-			if (omx_err == OMX_ErrorNone)
-			{
-				/*OMX_U32 nImageCount;
-				OMX_U32 nBufferCount;
-				OMX_U32 nFrameCount;
-				OMX_U32 nFrameSkips;
-				OMX_U32 nDiscards;
-				OMX_U32 nEOS;
-				OMX_U32 nMaxFrameSize;
-				
-				OMX_TICKS nByteCount;
-				OMX_TICKS nMaxTimeDelta;
-				OMX_U32 nCorruptMBs;*/
-				//ofLogVerbose(__func__) << "nFrameCount: " << stats.nFrameCount;
-				frameCounter = stats.nFrameCount-frameOffset;
-			}else
-			{
-				ofLogError(__func__) << "m_omx_render OMX_CONFIG_BRCMPORTSTATSTYPE fail: " << COMXCore::getOMXError(omx_err);
-			}
 			//omx_err = m_omx_render.EmptyThisBuffer(omx_buffer);
 		}
+		
 		return true;
 	}
 

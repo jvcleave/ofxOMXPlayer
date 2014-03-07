@@ -258,11 +258,12 @@ void OMXPlayerVideoBase::Process()
 				omx_pkt = NULL;
 			}
 		}
+		
 		UnLockDecoder();
 
 
 	}
-
+	
 	if(omx_pkt)
 	{
 		OMXReader::FreePacket(omx_pkt);
