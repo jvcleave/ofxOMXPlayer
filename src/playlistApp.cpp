@@ -52,7 +52,7 @@ void playlistApp::setup()
 			settings.videoPath = files[videoCounter].path();
 			settings.useHDMIForAudio = true;	//default true
 			settings.enableLooping = false;
-			settings.enableTexture = false;		//default true
+			settings.enableTexture = true;		//default true
 			if (!settings.enableTexture) 
 			{
 				settings.displayRect.x = 100;

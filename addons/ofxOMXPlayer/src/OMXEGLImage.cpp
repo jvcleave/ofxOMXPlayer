@@ -151,7 +151,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 		return false;
 	}
 
-	int numVideoBuffers = 80; //20 is minimum - can get up to 80
+	int numVideoBuffers = 32; //20 is minimum - can get up to 80
 	portParam.nBufferCountActual = numVideoBuffers;
 
 	portParam.format.video.nFrameWidth  = m_decoded_width;
@@ -348,6 +348,54 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 		ofLog(OF_LOG_ERROR, "m_omx_render OMX_StateIdle FAIL error: 0x%08x", error);
 		return false;
 	}
+	
+	// Alloc buffers for the m_omx_render input port.
+	error = m_omx_render.AllocInputBuffers();
+	if(error == OMX_ErrorNone)
+	{
+		ofLogVerbose(__func__) << "m_omx_render AllocInputBuffers PASS";
+	}
+	else
+	{
+		ofLog(OF_LOG_ERROR, "m_omx_render AllocInputBuffers FAIL error: 0x%08x\n", error);
+		return false;
+	}
+	
+	/*
+	OMX_PARAM_PORTDEFINITIONTYPE renderInput;
+	OMX_INIT_STRUCTURE(renderInput);
+	renderInput.nPortIndex = m_omx_render.GetInputPort();
+	
+	error = m_omx_render.GetParameter(OMX_IndexParamPortDefinition, &renderInput);
+	if(error == OMX_ErrorNone)
+	{
+		ofLogVerbose(__func__) << "m_omx_render GET OMX_IndexParamPortDefinition PASS";
+	}
+	else
+	{
+		ofLog(OF_LOG_ERROR, "m_omx_render GET OMX_IndexParamPortDefinition FAIL error: 0x%08x\n", error);
+		return false;
+	}
+	
+	int numVideoBuffers = 32; //20 is minimum - can get up to 80
+	renderInput.nBufferCountActual = numVideoBuffers;
+	
+	renderInput.format.video.nFrameWidth  = m_decoded_width;
+	renderInput.format.video.nFrameHeight = m_decoded_height;
+	
+	
+	error = m_omx_render.SetParameter(OMX_IndexParamPortDefinition, &renderInput);
+	if(error == OMX_ErrorNone)
+	{
+		ofLogVerbose(__func__) << "renderInput SET OMX_IndexParamPortDefinition PASS";
+	}
+	else
+	{
+		ofLog(OF_LOG_ERROR, "renderInput SET OMX_IndexParamPortDefinition FAIL error: 0x%08x\n", error);
+		return false;
+	}
+	*/
+#if 0
 	OMX_CONFIG_PORTBOOLEANTYPE discardMode;
 	OMX_INIT_STRUCTURE(discardMode);
 	discardMode.nPortIndex = m_omx_render.GetInputPort();
@@ -357,7 +405,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	{
 		ofLog(OF_LOG_ERROR, "m_omx_render OMX_SetParameter OMX_IndexParamBrcmVideoEGLRenderDiscardMode FAIL error: 0x%08x", error);
 	}
-	
+#endif	
 	ofLogVerbose(__func__) << "m_omx_render.GetOutputPort(): " << m_omx_render.GetOutputPort();
 	m_omx_render.EnablePort(m_omx_render.GetOutputPort(), false);
 	if(error == OMX_ErrorNone)

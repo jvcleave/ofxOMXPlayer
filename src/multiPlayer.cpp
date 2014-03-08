@@ -61,7 +61,7 @@ void multiPlayer::setup()
 		videoPath = files[0].path();
 	}
 		
-	for (int i=0; i<4; i++) 
+	for (int i=0; i<3; i++) 
 	{
 		//Somewhat like ofFboSettings we may have a lot of options so this is the current model
 		ofxOMXPlayerSettings settings;
@@ -70,13 +70,16 @@ void multiPlayer::setup()
 		settings.enableTexture = true;		//default true
 		settings.enableLooping = true;		//default true
 		//settings.enableAudio = true;		//default true, save resources by disabling
-		settings.enableAudio = false;
+		//settings.enableAudio = false;
 		//settings.enableTexture = false;		//default true
-		/*
 		
-		
+		if(i>0)
+		 {
+			settings.enableAudio = false;
+		 }
+		settings.enableAudio = false;
 	
-		rects.push_back(settings.displayRect);*/
+		//rects.push_back(settings.displayRect);
 		
 		int width	= 320;
 		int height	= 180;
@@ -115,15 +118,19 @@ void multiPlayer::update()
 //--------------------------------------------------------------
 void multiPlayer::draw(){
 	//ofBackgroundGradient(ofColor::red, ofColor::black, OF_GRADIENT_BAR);
-
-	for (int i=0; i<omxPlayers.size(); i++) 
+	int numPlayers = omxPlayers.size();
+	int width = ofGetWidth();
+	int height = ofGetHeight();
+	for (int i=0; i<numPlayers; i++) 
 	{
 		ofxOMXPlayer* player = omxPlayers[i];
 		if (player->isPlaying()) 
 		{
 			ofPushMatrix();
-			ofTranslate(player->getWidth()*i, 200);
-			player->draw(0, 0);
+			ofTranslate((width/numPlayers)*i, 200);
+			ofTranslate(20, 0);
+
+			player->draw(0, 0, (width/numPlayers), (height/numPlayers));
 			ofPopMatrix();
 			
 			

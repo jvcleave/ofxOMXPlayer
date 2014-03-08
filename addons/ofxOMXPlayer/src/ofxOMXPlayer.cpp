@@ -25,6 +25,18 @@ ofxOMXPlayer::ofxOMXPlayer()
 
 void ofxOMXPlayer::updatePixels()
 {
+	if (!fbo.isAllocated())
+	{
+		ofFbo::Settings fboSettings;
+		fboSettings.width = videoWidth;
+		fboSettings.height = videoHeight;
+		fboSettings.wrapModeVertical = GL_REPEAT;	// GL_REPEAT, GL_MIRRORED_REPEAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER etc.
+		fboSettings.wrapModeHorizontal = GL_REPEAT; // GL_REPEAT, GL_MIRRORED_REPEAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER etc.
+		//int		wrapModeHorizontal;		// GL_REPEAT, GL_MIRRORED_REPEAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER etc.
+		//int		wrapModeVertical;		// GL_REPEAT, GL_MIRRORED_REPEAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER etc.
+		
+		fbo.allocate(fboSettings);
+	}
 	fbo.begin(false);
 	ofClear(0, 0, 0, 0);
 	texture.draw(0, 0);
@@ -98,18 +110,7 @@ void ofxOMXPlayer::generateEGLImage(int videoWidth_, int videoHeight_)
 		context = appEGLWindow->getEglContext();
 	}
 
-	if (needsRegeneration)
-	{
-		ofFbo::Settings fboSettings;
-		fboSettings.width = videoWidth;
-		fboSettings.height = videoHeight;
-		fboSettings.wrapModeVertical = GL_REPEAT;	// GL_REPEAT, GL_MIRRORED_REPEAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER etc.
-		fboSettings.wrapModeHorizontal = GL_REPEAT; // GL_REPEAT, GL_MIRRORED_REPEAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER etc.
-		//int		wrapModeHorizontal;		// GL_REPEAT, GL_MIRRORED_REPEAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER etc.
-		//int		wrapModeVertical;		// GL_REPEAT, GL_MIRRORED_REPEAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER etc.
-
-		fbo.allocate(fboSettings);
-	}
+	
 
 	if (needsRegeneration)
 	{
