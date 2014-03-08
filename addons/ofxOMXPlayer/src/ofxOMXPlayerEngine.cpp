@@ -270,7 +270,7 @@ void ofxOMXPlayerEngine::setDisplayRect(ofRectangle& rectangle)
 {
 	if (displayRect == rectangle) 
 	{
-		ofLogVerbose(__func__) << " displayRect: " << displayRect << " rectangle: " << rectangle;
+		//ofLogVerbose(__func__) << " displayRect: " << displayRect << " rectangle: " << rectangle;
 
 		return;
 	}
