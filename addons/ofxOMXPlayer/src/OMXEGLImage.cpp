@@ -7,7 +7,10 @@ OMXEGLImage::OMXEGLImage()
 	someBullshit = this;
 }
 
-
+OMXEGLImage::~OMXEGLImage()
+{
+	someBullshit = NULL;
+}
 OMX_ERRORTYPE onFillBufferDone(OMX_HANDLETYPE hComponent,
                                OMX_PTR pAppData,
                                OMX_BUFFERHEADERTYPE* pBuffer)
@@ -21,7 +24,11 @@ OMX_ERRORTYPE onFillBufferDone(OMX_HANDLETYPE hComponent,
 	if (didFillBuffer == OMX_ErrorNone)
 	{
 	
-		someBullshit->frameCounter++;
+		if (someBullshit) 
+		{
+			someBullshit->frameCounter++;
+		}
+		
 
 	}
 
@@ -341,8 +348,16 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 		ofLog(OF_LOG_ERROR, "m_omx_render OMX_StateIdle FAIL error: 0x%08x", error);
 		return false;
 	}
-
-
+	OMX_CONFIG_PORTBOOLEANTYPE discardMode;
+	OMX_INIT_STRUCTURE(discardMode);
+	discardMode.nPortIndex = m_omx_render.GetInputPort();
+	discardMode.bEnabled = OMX_FALSE;
+	error = m_omx_render.SetParameter(OMX_IndexParamBrcmVideoEGLRenderDiscardMode, &discardMode);	
+	if (error != OMX_ErrorNone) 
+	{
+		ofLog(OF_LOG_ERROR, "m_omx_render OMX_SetParameter OMX_IndexParamBrcmVideoEGLRenderDiscardMode FAIL error: 0x%08x", error);
+	}
+	
 	ofLogVerbose(__func__) << "m_omx_render.GetOutputPort(): " << m_omx_render.GetOutputPort();
 	m_omx_render.EnablePort(m_omx_render.GetOutputPort(), false);
 	if(error == OMX_ErrorNone)
@@ -498,12 +513,10 @@ bool OMXEGLImage::Decode(uint8_t *pData, int iSize, double pts)
 					return false;
 				}
 			}
-			//ofLogVerbose(__func__) << "frameCounter: " << frameCounter;
 		}
 
 		return true;
 	}
-	//ofLogVerbose(__func__) << "DECODE FINISHED????????????????????????";
 	return false;
 }
 

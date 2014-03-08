@@ -61,30 +61,35 @@ void multiPlayer::setup()
 		videoPath = files[0].path();
 	}
 		
-	for (int i=0; i<6; i++) 
+	for (int i=0; i<4; i++) 
 	{
 		//Somewhat like ofFboSettings we may have a lot of options so this is the current model
 		ofxOMXPlayerSettings settings;
 		settings.videoPath = videoPath;
 		settings.useHDMIForAudio = true;	//default true
-		//settings.enableTexture = true;		//default true
+		settings.enableTexture = true;		//default true
 		settings.enableLooping = true;		//default true
 		//settings.enableAudio = true;		//default true, save resources by disabling
-		/*if (i%2 == 0) 
-		{
-			settings.enableAudio = false;
-		}*/
-		settings.enableTexture = false;		//default true
-		int width	= 400;
-		int height	= 300;
-		settings.displayRect.width		= width;
-		settings.displayRect.height		= height;
-		settings.displayRect.x			= width * (i % numCols);
-		settings.displayRect.y			= height * int(i / numCols);
+		settings.enableAudio = false;
+		//settings.enableTexture = false;		//default true
+		/*
 		
-		settings.displayRect.x+=40;
-		settings.displayRect.y+=40;
-		rects.push_back(settings.displayRect);
+		
+	
+		rects.push_back(settings.displayRect);*/
+		
+		int width	= 320;
+		int height	= 180;
+		
+		ofRectangle rect;
+		rect.width		= width;
+		rect.height		= height;
+		rect.x			= width * (i % numCols);
+		rect.y			= height * int(i / numCols);
+		
+		rect.x+=40;
+		rect.y+=40;
+		rects.push_back(rect);
 		
 		ofxOMXPlayer* player = new ofxOMXPlayer();
 		
@@ -98,11 +103,6 @@ void multiPlayer::setup()
 	
 }
 
-void multiPlayer::exit()
-{
-	//omxPlayer.close();
-}
-
 //--------------------------------------------------------------
 void multiPlayer::update()
 {
@@ -114,16 +114,17 @@ void multiPlayer::update()
 
 //--------------------------------------------------------------
 void multiPlayer::draw(){
-	ofBackgroundGradient(ofColor::red, ofColor::black, OF_GRADIENT_BAR);
-#if 0
+	//ofBackgroundGradient(ofColor::red, ofColor::black, OF_GRADIENT_BAR);
+
 	for (int i=0; i<omxPlayers.size(); i++) 
 	{
 		ofxOMXPlayer* player = omxPlayers[i];
 		if (player->isPlaying()) 
 		{
-			
-			player->draw(rects[i].x, rects[i].y, rects[i].width, rects[i].height);
-
+			ofPushMatrix();
+			ofTranslate(player->getWidth()*i, 200);
+			player->draw(0, 0);
+			ofPopMatrix();
 			
 			
 			/*stringstream info;
@@ -140,7 +141,6 @@ void multiPlayer::draw(){
 		}
 		
 	}
-#endif
 	stringstream fpsInfo;
 	fpsInfo <<"\n" <<  "APP FPS: "+ ofToString(ofGetFrameRate());
 	ofDrawBitmapStringHighlight(fpsInfo.str(), 60, 20, ofColor::black, ofColor::yellow);
@@ -156,47 +156,5 @@ void multiPlayer::keyPressed  (int key){
 		}
 	}
 	
-}
-
-//--------------------------------------------------------------
-void multiPlayer::keyReleased(int key){
-
-}
-
-//--------------------------------------------------------------
-void multiPlayer::mouseMoved(int x, int y ){
-
-}
-
-//--------------------------------------------------------------
-void multiPlayer::mouseDragged(int x, int y, int button){
-
-
-}
-
-//--------------------------------------------------------------
-void multiPlayer::mousePressed(int x, int y, int button){
-
-}
-
-//--------------------------------------------------------------
-void multiPlayer::mouseReleased(int x, int y, int button){
-
-}
-
-
-//--------------------------------------------------------------
-void multiPlayer::windowResized(int w, int h){
-
-}
-
-//--------------------------------------------------------------
-void multiPlayer::gotMessage(ofMessage msg){
-
-}
-
-//--------------------------------------------------------------
-void multiPlayer::dragEvent(ofDragInfo dragInfo){ 
-
 }
 
