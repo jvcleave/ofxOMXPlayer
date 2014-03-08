@@ -132,7 +132,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	}
 	else
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_decoder GET OMX_IndexParamVideoPortFormat FAIL error: 0x%08x\n", error);
+		ofLog(OF_LOG_ERROR, "m_omx_decoder GET OMX_IndexParamVideoPortFormat FAIL error: %s", COMXCore::getOMXError(error).c_str());
 		return false;
 	}
 
@@ -147,7 +147,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	}
 	else
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_decoder GET OMX_IndexParamPortDefinition FAIL error: 0x%08x\n", error);
+		ofLog(OF_LOG_ERROR, "m_omx_decoder GET OMX_IndexParamPortDefinition FAIL error: %s", COMXCore::getOMXError(error).c_str());
 		return false;
 	}
 
@@ -165,7 +165,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	}
 	else
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_decoder SET OMX_IndexParamPortDefinition FAIL error: 0x%08x\n", error);
+		ofLog(OF_LOG_ERROR, "m_omx_decoder SET OMX_IndexParamPortDefinition FAIL error: %s", COMXCore::getOMXError(error).c_str());
 		return false;
 	}
 
@@ -189,7 +189,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	}
 	else
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_decoder OMX_IndexParamBrcmVideoDecodeErrorConcealment FAIL error: 0x%08x\n", error);
+		ofLog(OF_LOG_ERROR, "m_omx_decoder OMX_IndexParamBrcmVideoDecodeErrorConcealment FAIL error: %s", COMXCore::getOMXError(error).c_str());
 		return false;
 	}
 
@@ -245,7 +245,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	}
 	else
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_decoder AllocInputBuffers FAIL error: 0x%08x\n", error);
+		ofLog(OF_LOG_ERROR, "m_omx_decoder AllocInputBuffers FAIL error: %s", COMXCore::getOMXError(error).c_str());
 		return false;
 	}
 
@@ -258,7 +258,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	}
 	else
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_tunnel_decoder Establish FAIL error: 0x%08x\n", error);
+		ofLog(OF_LOG_ERROR, "m_omx_tunnel_decoder Establish FAIL error: %s", COMXCore::getOMXError(error).c_str());
 		return false;
 	}
 
@@ -269,7 +269,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	}
 	else
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_decoder OMX_StateExecuting FAIL error: 0x%08x", error);
+		ofLog(OF_LOG_ERROR, "m_omx_decoder OMX_StateExecuting FAIL error: %s", COMXCore::getOMXError(error).c_str());
 		return false;
 	}
 
@@ -281,7 +281,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	}
 	else
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_tunnel_sched Establish FAIL error: 0x%08x", error);
+		ofLog(OF_LOG_ERROR, "m_omx_tunnel_sched Establish FAIL error: %s", COMXCore::getOMXError(error).c_str());
 		return false;
 	}
 
@@ -292,10 +292,20 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	}
 	else
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_sched OMX_StateExecuting FAIL error: 0x%08x", error);
+		ofLog(OF_LOG_ERROR, "m_omx_sched OMX_StateExecuting FAIL error: %s", COMXCore::getOMXError(error).c_str());
 		return false;
 	}
-
+#if 0
+	OMX_CONFIG_PORTBOOLEANTYPE discardMode;
+	OMX_INIT_STRUCTURE(discardMode);
+	discardMode.nPortIndex = m_omx_render.GetInputPort();
+	discardMode.bEnabled = OMX_FALSE;
+	error = m_omx_render.SetParameter(OMX_IndexParamBrcmVideoEGLRenderDiscardMode, &discardMode);	
+	if (error != OMX_ErrorNone) 
+	{
+		ofLog(OF_LOG_ERROR, "m_omx_render OMX_SetParameter OMX_IndexParamBrcmVideoEGLRenderDiscardMode FAIL error: %s", COMXCore::getOMXError(error).c_str());
+	}
+#endif	
 
 	OMX_PARAM_PORTDEFINITIONTYPE portParamRenderInput;
 	OMX_INIT_STRUCTURE(portParamRenderInput);
@@ -306,14 +316,14 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	{
 		ofLogVerbose(__func__) << "m_omx_render GET OMX_IndexParamPortDefinition PASS";
 
-		//ofLogVerbose(__func__) << "portParamRenderInput.nBufferCountActual GET VAR --------------------------:" << portParamRenderInput.nBufferCountActual;
+		ofLogVerbose(__func__) << "portParamRenderInput.nBufferCountActual GET VAR --------------------------:" << portParamRenderInput.nBufferCountActual;
 		//ofLogVerbose(__func__) << "portParamRenderInput.format.video.nFrameWidth GET VAR --------------------------:" << portParamRenderInput.format.video.nFrameWidth;
 		//ofLogVerbose(__func__) << "portParamRenderInput.format.video.nFrameHeight GET VAR --------------------------:" << portParamRenderInput.format.video.nFrameHeight;
 
 	}
 	else
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_render GET OMX_IndexParamPortDefinition FAIL error: 0x%08x\n", error);
+		ofLog(OF_LOG_ERROR, "m_omx_render GET OMX_IndexParamPortDefinition FAIL error: %s", COMXCore::getOMXError(error).c_str());
 
 	}
 
@@ -326,27 +336,15 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	{
 		ofLogVerbose(__func__) << "m_omx_render GET OMX_IndexParamPortDefinition PASS";
 
-		//ofLogVerbose(__func__) << "portParamRenderOutput.nBufferCountActual GET VAR --------------------------:" << portParamRenderOutput.nBufferCountActual;
-		//ofLogVerbose(__func__) << "portParamRenderOutput.format.video.nFrameWidth GET VAR --------------------------:" << portParamRenderOutput.format.video.nFrameWidth;
-		//ofLogVerbose(__func__) << "portParamRenderOutput.format.video.nFrameHeight GET VAR --------------------------:" << portParamRenderOutput.format.video.nFrameHeight;
+		ofLogVerbose(__func__) << "portParamRenderOutput.nBufferCountActual GET VAR --------------------------:" << portParamRenderOutput.nBufferCountActual;
+		ofLogVerbose(__func__) << "portParamRenderOutput.format.video.nFrameWidth GET VAR --------------------------:" << portParamRenderOutput.format.video.nFrameWidth;
+		ofLogVerbose(__func__) << "portParamRenderOutput.format.video.nFrameHeight GET VAR --------------------------:" << portParamRenderOutput.format.video.nFrameHeight;
 
 	}
 	else
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_render GET OMX_IndexParamPortDefinition FAIL error: 0x%08x\n", error);
+		ofLog(OF_LOG_ERROR, "m_omx_render GET OMX_IndexParamPortDefinition FAIL error: %s", COMXCore::getOMXError(error).c_str());
 
-	}
-
-
-	error = m_omx_render.SetStateForComponent(OMX_StateIdle);
-	if(error == OMX_ErrorNone)
-	{
-		ofLogVerbose(__func__) << "m_omx_render OMX_StateIdle PASS";
-	}
-	else
-	{
-		ofLog(OF_LOG_ERROR, "m_omx_render OMX_StateIdle FAIL error: 0x%08x", error);
-		return false;
 	}
 	
 	// Alloc buffers for the m_omx_render input port.
@@ -357,12 +355,27 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	}
 	else
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_render AllocInputBuffers FAIL error: 0x%08x\n", error);
+		ofLog(OF_LOG_ERROR, "m_omx_render AllocInputBuffers FAIL error: %s", COMXCore::getOMXError(error).c_str());
 		return false;
 	}
 	
-	/*
-	OMX_PARAM_PORTDEFINITIONTYPE renderInput;
+	error = m_omx_render.GetParameter(OMX_IndexParamPortDefinition, &portParamRenderOutput);
+	if(error == OMX_ErrorNone)
+	{
+		ofLogVerbose(__func__) << "m_omx_render GET OMX_IndexParamPortDefinition PASS";
+		
+		ofLogVerbose(__func__) << "portParamRenderOutput.nBufferCountActual GET VAR ----------RECHECK----------------:" << portParamRenderOutput.nBufferCountActual;
+		ofLogVerbose(__func__) << "portParamRenderOutput.format.video.nFrameWidth GET VAR --------RECHECK------------------:" << portParamRenderOutput.format.video.nFrameWidth;
+		ofLogVerbose(__func__) << "portParamRenderOutput.format.video.nFrameHeight GET VAR --------RECHECK------------------:" << portParamRenderOutput.format.video.nFrameHeight;
+		
+	}
+	else
+	{
+		ofLog(OF_LOG_ERROR, "m_omx_render GET OMX_IndexParamPortDefinition FAIL error: %s", COMXCore::getOMXError(error).c_str());
+		
+	}
+	
+	/*OMX_PARAM_PORTDEFINITIONTYPE renderInput;
 	OMX_INIT_STRUCTURE(renderInput);
 	renderInput.nPortIndex = m_omx_render.GetInputPort();
 	
@@ -373,11 +386,11 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	}
 	else
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_render GET OMX_IndexParamPortDefinition FAIL error: 0x%08x\n", error);
+		ofLog(OF_LOG_ERROR, "m_omx_render GET OMX_IndexParamPortDefinition FAIL error: %s", COMXCore::getOMXError(error).c_str());
 		return false;
 	}
 	
-	int numVideoBuffers = 32; //20 is minimum - can get up to 80
+	//int numVideoBuffers = 32; //20 is minimum - can get up to 80
 	renderInput.nBufferCountActual = numVideoBuffers;
 	
 	renderInput.format.video.nFrameWidth  = m_decoded_width;
@@ -391,21 +404,26 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	}
 	else
 	{
-		ofLog(OF_LOG_ERROR, "renderInput SET OMX_IndexParamPortDefinition FAIL error: 0x%08x\n", error);
+		ofLog(OF_LOG_ERROR, "renderInput SET OMX_IndexParamPortDefinition FAIL error: %s", COMXCore::getOMXError(error).c_str());
 		return false;
 	}
 	*/
-#if 0
-	OMX_CONFIG_PORTBOOLEANTYPE discardMode;
-	OMX_INIT_STRUCTURE(discardMode);
-	discardMode.nPortIndex = m_omx_render.GetInputPort();
-	discardMode.bEnabled = OMX_FALSE;
-	error = m_omx_render.SetParameter(OMX_IndexParamBrcmVideoEGLRenderDiscardMode, &discardMode);	
-	if (error != OMX_ErrorNone) 
+
+	error = m_omx_render.SetStateForComponent(OMX_StateIdle);
+	if(error == OMX_ErrorNone)
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_render OMX_SetParameter OMX_IndexParamBrcmVideoEGLRenderDiscardMode FAIL error: 0x%08x", error);
+		ofLogVerbose(__func__) << "m_omx_render OMX_StateIdle PASS";
 	}
-#endif	
+	else
+	{
+		ofLog(OF_LOG_ERROR, "m_omx_render OMX_StateIdle FAIL error: %s", COMXCore::getOMXError(error).c_str());
+		return false;
+	}
+	
+		
+
+	
+
 	ofLogVerbose(__func__) << "m_omx_render.GetOutputPort(): " << m_omx_render.GetOutputPort();
 	m_omx_render.EnablePort(m_omx_render.GetOutputPort(), false);
 	if(error == OMX_ErrorNone)
@@ -414,7 +432,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	}
 	else
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_render Enable OUTPUT Port  FAIL error: 0x%08x", error);
+		ofLog(OF_LOG_ERROR, "m_omx_render Enable OUTPUT Port  FAIL error: %s", COMXCore::getOMXError(error).c_str());
 		return false;
 	}
 
@@ -427,7 +445,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	}
 	else
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_render UseEGLImage  FAIL error: 0x%08x", error);
+		ofLog(OF_LOG_ERROR, "m_omx_render UseEGLImage  FAIL error: %s", COMXCore::getOMXError(error).c_str());
 		return false;
 	}
 
@@ -453,7 +471,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	}
 	else
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_render OMX_StateExecuting FAIL error: 0x%08x", error);
+		ofLog(OF_LOG_ERROR, "m_omx_render OMX_StateExecuting FAIL error: %s", COMXCore::getOMXError(error).c_str());
 		return false;
 	}
 	error = m_omx_render.FillThisBuffer(eglBuffer);
@@ -463,7 +481,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	}
 	else
 	{
-		ofLog(OF_LOG_ERROR, "m_omx_render FillThisBuffer FAIL error: 0x%08x", error);
+		ofLog(OF_LOG_ERROR, "m_omx_render FillThisBuffer FAIL error: %s", COMXCore::getOMXError(error).c_str());
 		if (error == OMX_ErrorIncorrectStateOperation)
 		{
 			ofLogError(__func__) << "NEED EGL HACK";
