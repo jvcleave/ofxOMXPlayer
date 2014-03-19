@@ -25,6 +25,8 @@ ofxOMXPlayer::ofxOMXPlayer()
 
 void ofxOMXPlayer::updatePixels()
 {
+	//old way - may not need anymore?
+#if 0
 	if (!fbo.isAllocated())
 	{
 		ofFbo::Settings fboSettings;
@@ -37,10 +39,23 @@ void ofxOMXPlayer::updatePixels()
 		
 		fbo.allocate(fboSettings);
 	}
+#endif
+	if (!fbo.isAllocated())
+	{
+		fbo.allocate(videoWidth, videoHeight);
+	}else
+	{
+		if (fbo.getWidth() != videoWidth && fbo.getHeight() != videoHeight)
+		{
+			fbo.allocate(videoWidth, videoHeight);
+		}
+	}
+
 	fbo.begin(false);
-	ofClear(0, 0, 0, 0);
-	texture.draw(0, 0);
-	glReadPixels(0,0,videoWidth, videoHeight, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+		ofClear(0, 0, 0, 0);
+		texture.draw(0, 0);
+		//ofLogVerbose() << "updatePixels";
+		glReadPixels(0,0,videoWidth, videoHeight, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 	fbo.end();
 }
 
@@ -62,17 +77,7 @@ void ofxOMXPlayer::generateEGLImage(int videoWidth_, int videoHeight_)
 		needsRegeneration = true;
 		videoHeight = videoHeight_;
 	}
-	if (!fbo.isAllocated())
-	{
-		needsRegeneration = true;
-	}
-	else
-	{
-		if (fbo.getWidth() != videoWidth && fbo.getHeight() != videoHeight)
-		{
-			needsRegeneration = true;
-		}
-	}
+	
 	if (!texture.isAllocated())
 	{
 		needsRegeneration = true;

@@ -60,8 +60,8 @@ void developApp::setup()
 	settings.videoPath = videoPath;
 	settings.listener = this; //this app extends ofxOMXPlayerListener so it will receive events ;
 	settings.enableLooping = true;
-	doTextures	= false;
-	doShader	= false;
+	doTextures	= true;
+	doShader	= true;
 	
 	
 	//settings.enableAudio = false; //default true
@@ -81,6 +81,7 @@ void developApp::setup()
 	if (doShader || doTextures) 
 	{
 		settings.enableTexture = true;
+		settings.doFlipTexture = true;
 	}else 
 	{
 		settings.enableTexture = false;
@@ -126,6 +127,7 @@ void developApp::update()
 			shader.setUniform1f("time", ofGetElapsedTimef());
 			shader.setUniform2f("resolution", ofGetWidth(), ofGetHeight());
 			ofRect(0, 0, ofGetWidth(), ofGetHeight());
+			//omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
 			shader.end();
 		fbo.end();
 		

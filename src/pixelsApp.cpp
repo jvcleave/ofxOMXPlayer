@@ -59,7 +59,7 @@ void pixelsApp::draw(){
 	}
 	
 	omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
-	pixelOutput.draw(20, 20, omxPlayer.getWidth()/4, omxPlayer.getHeight()/4);
+	pixelOutput.draw(20, 20, omxPlayer.getWidth()/2, omxPlayer.getHeight()/2);
 	
 	stringstream info;
 	info << "APP FPS: "+ ofToString(ofGetFrameRate());

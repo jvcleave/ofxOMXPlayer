@@ -23,7 +23,8 @@ public:
 	void loadShader();
 	bool doShader;
 	bool doTextures;
-		
+	
+	
 	//allows key commands via Shell
 	void onCharacterReceived(SSHKeyListenerEventData& e);
 	ConsoleListener consoleListener;
