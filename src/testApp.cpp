@@ -28,7 +28,7 @@ void testApp::setup()
 	settings.enableTexture = true;		//default true
 	settings.enableLooping = true;		//default true
 	settings.enableAudio = true;		//default true, save resources by disabling
-	
+	//settings.doFlipTexture = true;
 	
 	if (settings.enableTexture)
 	{
@@ -37,7 +37,7 @@ void testApp::setup()
 		{
 			ofEnableAlphaBlending();
 			
-			shader.load("PostProcessing.vert", "PostProcessing.frag", "");
+			shader.load("shaderExample");
 			
 			fbo.allocate(ofGetWidth(), ofGetHeight());
 			fbo.begin();
@@ -60,14 +60,14 @@ void testApp::setup()
 //--------------------------------------------------------------
 void testApp::update()
 {
-	if( omxPlayer.isTextureEnabled)
+	if(!omxPlayer.isTextureEnabled)
 	{
-		if (doShader) 
-		{
-			updateFbo();
-		}
+		return;
 	}
-	
+	if (doShader) 
+	{
+		updateFbo();
+	}
 	
 }
 
@@ -79,7 +79,7 @@ void testApp::updateFbo()
 			shader.setUniformTexture("tex0", omxPlayer.getTextureReference(), omxPlayer.getTextureID());
 			shader.setUniform1f("time", ofGetElapsedTimef());
 			shader.setUniform2f("resolution", ofGetWidth(), ofGetHeight());
-			ofRect(0, 0, ofGetWidth(), ofGetHeight());
+			omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
 		shader.end();
 	fbo.end();
 }
@@ -90,11 +90,11 @@ void testApp::draw(){
 	{
 		return;
 	}
-	
 	if (doShader) 
 	{
 		fbo.draw(0, 0);
-	}else 
+	}
+	else 
 	{
 		omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
 		
@@ -104,26 +104,19 @@ void testApp::draw(){
 		omxPlayer.draw(ofGetWidth()-scaledWidth, ofGetHeight()-scaledHeight, scaledWidth, scaledHeight);
 	}
 
-	stringstream info;
-	info <<"\n" <<  "APP FPS: "+ ofToString(ofGetFrameRate());
-	info <<"\n" <<	"MEDIA TIME: "			<< omxPlayer.getMediaTime();
-	info <<"\n" <<	"DIMENSIONS: "			<< omxPlayer.getWidth()<<"x"<<omxPlayer.getHeight();
-	info <<"\n" <<	"DURATION: "			<< omxPlayer.getDuration();
-	info <<"\n" <<	"TOTAL FRAMES: "		<< omxPlayer.getTotalNumFrames();
-	info <<"\n" <<	"CURRENT FRAME: "		<< omxPlayer.getCurrentFrame();
-	info <<"\n" <<	"REMAINING FRAMES: "	<< omxPlayer.getTotalNumFrames() - omxPlayer.getCurrentFrame();
-	info <<"\n" <<	"CURRENT VOLUME: "		<< omxPlayer.getVolume();
 	
 	
-	ofDrawBitmapStringHighlight(info.str(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
+	
+	ofDrawBitmapStringHighlight(omxPlayer.getInfo(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
 }
 
 //--------------------------------------------------------------
 void testApp::keyPressed  (int key){
 	switch (key) 
 	{
-		case 'c':
+		case 's':
 		{
+			doShader = !doShader;
 			break;
 		}
 	}

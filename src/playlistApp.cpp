@@ -73,7 +73,7 @@ void playlistApp::setup()
 			settings.videoPath = files[videoCounter].path();
 			settings.useHDMIForAudio = true;	//default true
 			settings.enableLooping = false;
-			settings.enableTexture = true;		//default true
+			settings.enableTexture = false;		//default true
 			if (!settings.enableTexture) 
 			{
 				settings.displayRect.x = 100;
@@ -200,29 +200,10 @@ void playlistApp::draw(){
 	
 
 	stringstream info;
-	info <<"\n" <<  "APP FPS: "+ ofToString(ofGetFrameRate());
-	info <<"\n" <<	"MEDIA TIME: "			<< omxPlayer.getMediaTime();
-	info <<"\n" <<	"DIMENSIONS: "			<< omxPlayer.getWidth()<<"x"<<omxPlayer.getHeight();
-	info <<"\n" <<	"DURATION: "			<< omxPlayer.getDuration();
-	info <<"\n" <<	"TOTAL FRAMES: "		<< omxPlayer.getTotalNumFrames();
-	info <<"\n" <<	"CURRENT FRAME: "		<< omxPlayer.getCurrentFrame();
-	if (omxPlayer.getTotalNumFrames() >0) 
-	{
-		info <<"\n" <<	"REMAINING FRAMES: "	<< omxPlayer.getTotalNumFrames() - omxPlayer.getCurrentFrame();
-	}else 
-	{
-		info <<"\n" <<	"FILE IS LIKELY H264 STREAM";
-	}
-
-	
-	info <<"\n" <<	"CURRENT VOLUME: "		<< omxPlayer.getVolume();
-	
-	
-	
 	info <<"\n" <<	"MILLIS SKIPPED: "		<< amountSkipped;
 	info <<"\n" <<	"TOTAL MILLIS SKIPPED: " << totalAmountSkipped;
 	info <<"\n" <<	"CURRENT MOVIE: "		<< files[videoCounter].path();
-	ofDrawBitmapStringHighlight(info.str(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
+	ofDrawBitmapStringHighlight(omxPlayer.getInfo() + info.str(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
 }
 
 //--------------------------------------------------------------
@@ -245,7 +226,7 @@ void playlistApp::keyPressed  (int key){
 			_Exit(0);
 			break;
 		}
-		case ' ':
+		case 'p':
 		{
 			ofLogVerbose() << "pause: " << !omxPlayer.isPaused();
 			omxPlayer.setPaused(!omxPlayer.isPaused());
@@ -260,7 +241,7 @@ void playlistApp::keyPressed  (int key){
 			}
 			break;
 		}
-		case 'p':
+		case 'P':
 		{
 			if (settings.enableTexture ) 
 			{

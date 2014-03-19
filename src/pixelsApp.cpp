@@ -62,18 +62,11 @@ void pixelsApp::draw(){
 	pixelOutput.draw(20, 20, omxPlayer.getWidth()/2, omxPlayer.getHeight()/2);
 	
 	stringstream info;
-	info << "APP FPS: "+ ofToString(ofGetFrameRate());
-	info <<"\n" <<	"MEDIA TIME: "			<< omxPlayer.getMediaTime();
-	info <<"\n" <<	"DIMENSIONS: "			<< omxPlayer.getWidth()<<"x"<<omxPlayer.getHeight();
-	info <<"\n" <<	"DURATION: "			<< omxPlayer.getDuration();
-	info <<"\n" <<	"TOTAL FRAMES: "		<< omxPlayer.getTotalNumFrames();
-	info <<"\n" <<	"CURRENT FRAME: "		<< omxPlayer.getCurrentFrame();
-	info <<"\n" <<	"REMAINING FRAMES: "	<< omxPlayer.getTotalNumFrames() - omxPlayer.getCurrentFrame();
-	info <<"\n" <<	"CURRENT VOLUME: "		<< omxPlayer.getVolume();
 	info <<"\n" <<	"Press u to Update Pixels: " << doUpdatePixels;
 	info <<"\n" <<	"Press s to save Image";
 	
-	ofDrawBitmapStringHighlight(info.str(), 600, 60, ofColor(ofColor::black, 90), ofColor::yellow);
+	ofDrawBitmapStringHighlight(omxPlayer.getInfo() + info.str(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
+
 }
 
 //--------------------------------------------------------------

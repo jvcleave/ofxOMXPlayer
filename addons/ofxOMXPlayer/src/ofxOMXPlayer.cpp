@@ -488,6 +488,20 @@ void ofxOMXPlayer::close()
 
 }
 
+string ofxOMXPlayer::getInfo()
+{
+	stringstream info;
+	info <<"\n" <<  "APP FPS: "+ ofToString(ofGetFrameRate());
+	info <<"\n" <<	"MEDIA TIME: "			<< getMediaTime();
+	info <<"\n" <<	"DIMENSIONS: "			<< getWidth()<<"x"<<getHeight();
+	info <<"\n" <<	"DURATION: "			<< getDuration();
+	info <<"\n" <<	"TOTAL FRAMES: "		<< getTotalNumFrames();
+	info <<"\n" <<	"CURRENT FRAME: "		<< getCurrentFrame();
+	info <<"\n" <<	"REMAINING FRAMES: "	<< getTotalNumFrames() - getCurrentFrame();
+	info <<"\n" <<	"CURRENT VOLUME: "		<< getVolume();
+	return info.str();
+}
+
 ofxOMXPlayer::~ofxOMXPlayer()
 {
 	close();

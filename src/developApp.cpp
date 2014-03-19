@@ -171,19 +171,6 @@ void developApp::draw(){
 
 	
 	stringstream info;
-	info <<"\n" <<  "APP FPS: "+ ofToString(ofGetFrameRate());
-	
-	
-	info <<"\n" <<	"MEDIA TIME: "			<< omxPlayer.getMediaTime();
-	info <<"\n" <<	"OF DIMENSIONS: "		<< ofGetWidth()<<"x"<<ofGetHeight();
-	info <<"\n" <<	"DIMENSIONS: "			<< omxPlayer.getWidth()<<"x"<<omxPlayer.getHeight();
-	info <<"\n" <<	"DURATION: "			<< omxPlayer.getDuration();
-	info <<"\n" <<	"TOTAL FRAMES: "		<< omxPlayer.getTotalNumFrames();
-	info <<"\n" <<	"CURRENT FRAME: "		<< omxPlayer.getCurrentFrame();
-	info <<"\n" <<	"REMAINING FRAMES: "	<< omxPlayer.getTotalNumFrames() - omxPlayer.getCurrentFrame();
-
-	info <<"\n" <<	"CURRENT VOLUME: "		<< omxPlayer.getVolume();
-	
 	info <<"\n" <<	"KEYS:";
 	info <<"\n" <<	"p to Toggle Pause";
 	info <<"\n" <<	"b to Step frame forward";
@@ -193,7 +180,8 @@ void developApp::draw(){
 	}
 	info <<"\n" <<	"1 to Decrease Volume";
 	info <<"\n" <<	"2 to Increase Volume";
-	ofDrawBitmapStringHighlight(info.str(), 60, 60, ofColor(0, 0, 0, 90), ofColor::yellow);
+	ofDrawBitmapStringHighlight(omxPlayer.getInfo() + info.str(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
+
 	
 	
 }

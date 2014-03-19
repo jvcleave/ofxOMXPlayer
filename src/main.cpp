@@ -3,8 +3,8 @@
 //Ugly but I change these a lot 
 
 //#define USE_DEVELOP_APP
-#define USE_PLAYLIST_APP
-//#define USE_TEST_APP
+//#define USE_PLAYLIST_APP
+#define USE_TEST_APP
 //#define USE_PIXELS_APP
 //#define USE_MULTIPLAYER_APP
 
