@@ -3,23 +3,10 @@
 //--------------------------------------------------------------
 void testApp::setup()
 {
-	ofSetLogLevel(OF_LOG_VERBOSE);
+	//ofSetLogLevel(OF_LOG_VERBOSE);
 	ofSetVerticalSync(false);
 	
-	
-	string videoPath = ofToDataPath("big_buck_bunny_MpegStreamclip_720p_h264_50Quality_48K_256k_AAC.mov", true);
-	
-	//this will let us just grab a video without recompiling
-	ofDirectory currentVideoDirectory("/home/pi/videos/current");
-	if (currentVideoDirectory.exists()) 
-	{
-		currentVideoDirectory.listDir();
-		vector<ofFile> files = currentVideoDirectory.getFiles();
-		if (files.size()>0) 
-		{
-			videoPath = files[0].path();
-		}		
-	}
+	string videoPath = ofToDataPath("../../../video/Timecoded_Big_bunny_1.mov", true);
 	
 	//Somewhat like ofFboSettings we may have a lot of options so this is the current model
 	ofxOMXPlayerSettings settings;
@@ -28,24 +15,8 @@ void testApp::setup()
 	settings.enableTexture = true;		//default true
 	settings.enableLooping = true;		//default true
 	settings.enableAudio = true;		//default true, save resources by disabling
-	//settings.doFlipTexture = true;
+	//settings.doFlipTexture = true;		//default false
 	
-	if (settings.enableTexture)
-	{
-		doShader = true;
-		if (doShader) 
-		{
-			ofEnableAlphaBlending();
-			
-			shader.load("shaderExample");
-			
-			fbo.allocate(ofGetWidth(), ofGetHeight());
-			fbo.begin();
-			ofClear(0, 0, 0, 0);
-			fbo.end();
-			
-		}
-	}
 	
 	//so either pass in the settings
 	omxPlayer.setup(settings);
@@ -60,29 +31,9 @@ void testApp::setup()
 //--------------------------------------------------------------
 void testApp::update()
 {
-	if(!omxPlayer.isTextureEnabled)
-	{
-		return;
-	}
-	if (doShader) 
-	{
-		updateFbo();
-	}
-	
+		
 }
 
-void testApp::updateFbo()
-{
-	fbo.begin();
-		ofClear(0, 0, 0, 0);
-		shader.begin();
-			shader.setUniformTexture("tex0", omxPlayer.getTextureReference(), omxPlayer.getTextureID());
-			shader.setUniform1f("time", ofGetElapsedTimef());
-			shader.setUniform2f("resolution", ofGetWidth(), ofGetHeight());
-			omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
-		shader.end();
-	fbo.end();
-}
 
 //--------------------------------------------------------------
 void testApp::draw(){
@@ -90,78 +41,15 @@ void testApp::draw(){
 	{
 		return;
 	}
-	if (doShader) 
-	{
-		fbo.draw(0, 0);
-	}
-	else 
-	{
-		omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
-		
-		//draw a smaller version in the lower right
-		int scaledHeight = omxPlayer.getHeight()/4;
-		int scaledWidth = omxPlayer.getWidth()/4;
-		omxPlayer.draw(ofGetWidth()-scaledWidth, ofGetHeight()-scaledHeight, scaledWidth, scaledHeight);
-	}
+	
+	omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
+	
+	//draw a smaller version in the lower right
+	int scaledHeight	= omxPlayer.getHeight()/4;
+	int scaledWidth		= omxPlayer.getWidth()/4;
+	omxPlayer.draw(ofGetWidth()-scaledWidth, ofGetHeight()-scaledHeight, scaledWidth, scaledHeight);
 
-	
-	
-	
 	ofDrawBitmapStringHighlight(omxPlayer.getInfo(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
 }
 
-//--------------------------------------------------------------
-void testApp::keyPressed  (int key){
-	switch (key) 
-	{
-		case 's':
-		{
-			doShader = !doShader;
-			break;
-		}
-	}
-	
-}
-
-//--------------------------------------------------------------
-void testApp::keyReleased(int key){
-
-}
-
-//--------------------------------------------------------------
-void testApp::mouseMoved(int x, int y ){
-
-}
-
-//--------------------------------------------------------------
-void testApp::mouseDragged(int x, int y, int button){
-
-
-}
-
-//--------------------------------------------------------------
-void testApp::mousePressed(int x, int y, int button){
-
-}
-
-//--------------------------------------------------------------
-void testApp::mouseReleased(int x, int y, int button){
-
-}
-
-
-//--------------------------------------------------------------
-void testApp::windowResized(int w, int h){
-
-}
-
-//--------------------------------------------------------------
-void testApp::gotMessage(ofMessage msg){
-
-}
-
-//--------------------------------------------------------------
-void testApp::dragEvent(ofDragInfo dragInfo){ 
-
-}
 

@@ -391,13 +391,19 @@ ofTexture& ofxOMXPlayer::getTextureReference()
 
 void ofxOMXPlayer::saveImage(string imagePath)//default imagePath=""
 {
+	if(!isTextureEnabled) return;
 	if(imagePath == "")
 	{
-		imagePath = ofGetTimestampString()+".png";
+		imagePath = ofToDataPath(ofGetTimestampString()+".png", true);
 	}
 	updatePixels();
-	//TODO ofSaveImage(GlobalEGLContainer::getInstance().pixels, ofGetTimestampString()+".png");
-
+	//TODO make smarter, re-allocating every time
+	ofImage image;
+	image.setFromPixels(getPixels(), getWidth(), getHeight(), OF_IMAGE_COLOR_ALPHA);
+	image.saveImage(imagePath);
+	
+	//ofSaveImage(getPixels(), imagePath);
+	ofLogVerbose() << "SAVED IMAGE TO: " << imagePath;
 }
 
 int ofxOMXPlayer::getCurrentFrame()

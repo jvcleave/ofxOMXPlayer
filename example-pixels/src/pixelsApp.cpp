@@ -7,19 +7,8 @@ void pixelsApp::setup()
 	ofSetVerticalSync(false);
 	doSaveImage = false;
 	doUpdatePixels = true;
-	string videoPath = ofToDataPath("big_buck_bunny_MpegStreamclip_720p_h264_50Quality_48K_256k_AAC.mov", true);
-	
-	//this will let us just grab a video without recompiling
-	ofDirectory currentVideoDirectory("/home/pi/videos/current");
-	if (currentVideoDirectory.exists()) 
-	{
-		currentVideoDirectory.listDir();
-		vector<ofFile> files = currentVideoDirectory.getFiles();
-		if (files.size()>0) 
-		{
-			videoPath = files[0].path();
-		}		
-	}
+	string videoPath = ofToDataPath("../../../video/Timecoded_Big_bunny_1.mov", true);
+
 	consoleListener.setup(this);
 	omxPlayer.loadMovie(videoPath);
 	
@@ -35,11 +24,9 @@ void pixelsApp::update()
 	}
 	if (doUpdatePixels) 
 	{
-		//doUpdatePixels = false;
-		
+		//since updatePixels() is expensive it is not automatically called in the player		
 		omxPlayer.updatePixels();
-		//ofImage version
-		//pixelOutput.setFromPixels(omxPlayer.getPixels(), omxPlayer.getWidth(), omxPlayer.getHeight(), OF_IMAGE_COLOR_ALPHA, true);
+
 		if (!pixelOutput.isAllocated()) 
 		{
 			pixelOutput.allocate(omxPlayer.getWidth(), omxPlayer.getHeight(), GL_RGBA);
@@ -62,8 +49,7 @@ void pixelsApp::draw(){
 	pixelOutput.draw(20, 20, omxPlayer.getWidth()/2, omxPlayer.getHeight()/2);
 	
 	stringstream info;
-	info <<"\n" <<	"Press u to Update Pixels: " << doUpdatePixels;
-	info <<"\n" <<	"Press s to save Image";
+	info <<"\n" <<	"Press u to toggle doUpdatePixels: " << doUpdatePixels;
 	
 	ofDrawBitmapStringHighlight(omxPlayer.getInfo() + info.str(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
 

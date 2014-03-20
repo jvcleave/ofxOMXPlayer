@@ -9,26 +9,6 @@
 //If your app extends ofxOMXPlayerListener you will receive an event when the video ends
 
 
-void checkForError() {
-	GLenum err (glGetError());
-	
-	while(err!=GL_NO_ERROR) 
-	{
-		string error;
-		
-		switch(err) 
-		{
-			case GL_INVALID_OPERATION:      error="INVALID_OPERATION";      break;
-			case GL_INVALID_ENUM:           error="INVALID_ENUM";           break;
-			case GL_INVALID_VALUE:          error="INVALID_VALUE";          break;
-			case GL_OUT_OF_MEMORY:          error="OUT_OF_MEMORY";          break;
-			case GL_INVALID_FRAMEBUFFER_OPERATION:  error="INVALID_FRAMEBUFFER_OPERATION";  break;
-		}
-		
-		ofLogError() << "error: " << error;
-		err=glGetError();
-	}
-}
 
 
 
@@ -55,13 +35,12 @@ unsigned long long totalAmountSkipped =0;
 void playlistApp::setup()
 {
 	ofBackground(ofColor::black);
-	ofSetLogLevel(OF_LOG_VERBOSE);
+	//ofSetLogLevel(OF_LOG_VERBOSE);
 	ofSetVerticalSync(false);
 	consoleListener.setup(this);	
-	doShader = false;
-	doPixels = false;
+	
 	//this will let us just grab a video without recompiling
-	ofDirectory currentVideoDirectory("/home/pi/videos/current");
+	ofDirectory currentVideoDirectory(ofToDataPath("../../../video", true));
 	if (currentVideoDirectory.exists()) 
 	{
 		currentVideoDirectory.listDir();
@@ -72,18 +51,9 @@ void playlistApp::setup()
 			videoCounter = 0;
 			settings.videoPath = files[videoCounter].path();
 			settings.useHDMIForAudio = true;	//default true
-			settings.enableLooping = false;
-			settings.enableTexture = false;		//default true
-			if (!settings.enableTexture) 
-			{
-				settings.displayRect.x = 100;
-				settings.displayRect.y = 200;
-				settings.displayRect.width = 400;
-				settings.displayRect.height = 300;
-			}
-			
-			//settings.enableAudio = !settings.enableAudio; //toggle for testing
-			settings.listener = this; //this app extends ofxOMXPlayerListener so it will receive events ;
+			settings.enableLooping = false;		//default true
+			settings.enableTexture = true;		//default true
+			settings.listener = this;			//this app extends ofxOMXPlayerListener so it will receive events ;
 			omxPlayer.setup(settings);
 		}		
 	}
@@ -114,33 +84,9 @@ void playlistApp::update()
 	{
 		ofLogVerbose(__func__) << "doing reload";
 		//with the texture based player this must be done here - especially if the videos are different resolutions
-		
 		loadNextMovie();
-		if (doShader && shader.isLoaded()) 
-		{
-			shader.unload();
-			loadShader();
-		}
-		
 	}
-	if (doShader && settings.enableTexture) 
-	{
-		if (!shader.isLoaded()) 
-		{
-			loadShader();
-		}
 		
-		fbo.begin();
-			ofClear(0, 0, 0, 0);
-			shader.begin();
-				shader.setUniformTexture("tex0", omxPlayer.getTextureReference(), omxPlayer.getTextureID());
-				shader.setUniform1f("time", ofGetElapsedTimef());
-				shader.setUniform2f("resolution", ofGetWidth(), ofGetHeight());
-				omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
-			shader.end();
-		fbo.end();	
-	}
-	
 	
 }
 
@@ -150,54 +96,14 @@ void playlistApp::draw(){
 	
 	//ofBackgroundGradient(ofColor::red, ofColor::black, OF_GRADIENT_CIRCULAR);
 	
-	if(omxPlayer.isTextureEnabled)
-	{
-		
-		
-		if (doShader) 
-		{
-			fbo.draw(0, 0);
-		}else 
-		{
-			omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
-			
-			//draw a smaller version in the lower right
-			int scaledHeight = omxPlayer.getHeight()/4;
-			int scaledWidth = omxPlayer.getWidth()/4;
-			omxPlayer.draw(ofGetWidth()-scaledWidth, ofGetHeight()-scaledHeight, scaledWidth, scaledHeight);
-		}
-		if (doPixels) 
-		{
-			omxPlayer.updatePixels();
-			//ofImage version
-			//pixelOutput.setFromPixels(omxPlayer.getPixels(), omxPlayer.getWidth(), omxPlayer.getHeight(), OF_IMAGE_COLOR_ALPHA, true);
-			if (!pixelOutput.isAllocated() || (omxPlayer.getWidth()!=pixelOutput.getWidth()) ||  (omxPlayer.getHeight()!=pixelOutput.getHeight())) 
-			{
-				pixelOutput.allocate(omxPlayer.getWidth(), omxPlayer.getHeight(), GL_RGBA);
-			}
-			pixelOutput.loadData(omxPlayer.getPixels(), omxPlayer.getWidth(), omxPlayer.getHeight(), GL_RGBA);
-			int pixelDrawWidth = pixelOutput.getWidth()/2;
-			int pixelDrawHeight = pixelOutput.getHeight()/2;
-			
-			ofPushMatrix();
-				ofTranslate(ofGetWidth()-pixelDrawWidth, 0);
-				pixelOutput.draw(0, 0, pixelDrawWidth, pixelDrawHeight);
-			ofPopMatrix();
-		}
-		
-	}else 
-	{
-		/*if (ofGetElapsedTimeMillis()>15000) 
-		{
-			omxPlayer.draw(ofRandom(100, 200), 200, ofRandom(100, ofGetWidth()), ofRandom(300, ofGetHeight()));
-		}*/
-		
-	}
-
+	if(!omxPlayer.isTextureEnabled) return;
 	
+	omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
 	
-	
-	
+	//draw a smaller version in the lower right
+	int scaledHeight = omxPlayer.getHeight()/4;
+	int scaledWidth = omxPlayer.getWidth()/4;
+	omxPlayer.draw(ofGetWidth()-scaledWidth, ofGetHeight()-scaledHeight, scaledWidth, scaledHeight);
 
 	stringstream info;
 	info <<"\n" <<	"MILLIS SKIPPED: "		<< amountSkipped;
@@ -223,7 +129,6 @@ void playlistApp::keyPressed  (int key){
 		}
 		case 'x':
 		{
-			_Exit(0);
 			break;
 		}
 		case 'p':
@@ -231,40 +136,13 @@ void playlistApp::keyPressed  (int key){
 			ofLogVerbose() << "pause: " << !omxPlayer.isPaused();
 			omxPlayer.setPaused(!omxPlayer.isPaused());
 			break;
-			
 		}
 		case 's':
 		{
-			if (settings.enableTexture ) 
-			{
-				doShader = !doShader;
-			}
+			
 			break;
 		}
-		case 'P':
-		{
-			if (settings.enableTexture ) 
-			{
-				doPixels = !doPixels;
-			}
-			break;
-		}
-
 	}
 }
 
-void playlistApp::loadShader()
-{
-	ofEnableAlphaBlending();
-	if (!shader.isLoaded()) 
-	{
-		shader.load("shaderExample.vert", "shaderExample.frag", "");
-		check_gl_error(__FILE__,__LINE__);
-		fbo.allocate(ofGetWidth(), ofGetHeight());
-		check_gl_error(__FILE__,__LINE__);
-		fbo.begin();
-			ofClear(0, 0, 0, 0);
-		fbo.end();
-	}
-}
 
