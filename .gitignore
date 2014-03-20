@@ -1,5 +1,9 @@
 obj
-bin/ofxOMXPlayer
-bin/ofxOMXPlayer_debug
-bin/omxplayer*
-!bin/data/big_buck_bunny_MpegStreamclip_720p_h264_50Quality_48K_256k_AAC.mov
+readMe.txt
+example-basic/bin
+example-multiple-players/bin
+example-pixels/bin
+example-playlist/bin
+example-shader/bin/example-shader
+example-*/bin/libs
+*._*
