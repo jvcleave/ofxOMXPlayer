@@ -16,28 +16,27 @@
 
 meta:
 	ADDON_NAME = ofxOMXPlayer
-	ADDON_DESCRIPTION = whatever
-	ADDON_AUTHOR = Your mom
-	ADDON_TAGS = ""
-	ADDON_URL = http://github.com
+	ADDON_DESCRIPTION = Hardware accelerated video player for the Raspberry Pi
+	ADDON_AUTHOR = Jason Van Cleave
+	ADDON_TAGS = "raspberry pi, video player"
+	ADDON_URL = https://github.com/jvcleave/ofxOMXPlayer
 
 common:
 	# dependencies with other addons, a list of them separated by spaces 
 	# or use += in several lines
 	# ADDON_DEPENDENCIES =
 	
-	OFXOMXPLAYER_ROOT = /home/pi/openFrameworks/addons/ofxOMXPlayer
+	OFXOMXPLAYER_ROOT = $(OF_ROOT)/addons/ofxOMXPlayer
 	
 	# include search paths, this will be usually parsed from the file system
 	# but if the addon or addon libraries need special search paths they can be
 	# specified here separated by spaces or one per line using +=
-	ADDON_INCLUDES = $(OFXOMXPLAYER_ROOT)/libs/ffmpeg/include $(OFXOMXPLAYER_ROOT)/src /opt/vc/include /opt/vc/include/interface/vcos/pthreads
-	#ADDON_INCLUDES += $(OFXOMXPLAYER_ROOT)/src
-	
-	
+	ADDON_INCLUDES = $(OFXOMXPLAYER_ROOT)/src $(OFXOMXPLAYER_ROOT)/libs/ffmpeg/include 
+		
 	# any special flag that should be passed to the compiler when using this
 	# addon
-	
+	ADDON_CFLAGS = -I$(OFXOMXPLAYER_ROOT)/src -I$(OFXOMXPLAYER_ROOT)/libs/ffmpeg/include -fPIC -U_FORTIFY_SOURCE -Wall -ftree-vectorize -ftree-vectorize -Wno-deprecated-declarations -Wno-sign-compare -Wno-unknown-pragmas
+
 	# any special flag that should be passed to the linker when using this
 	# addon, also used for system libraries with -lname
 	
@@ -55,9 +54,6 @@ common:
 
 	ADDON_LDFLAGS=-L$(FFMPEG_LIBS) $(FORMAT_STATIC) $(CODEC_STATIC) $(SCALE_STATIC) $(UTIL_STATIC) $(RESAMPLE_STATIC) $(FILTER_STATIC) -lm
 	
-	ADDON_CFLAGS = -I$(OFXOMXPLAYER_ROOT)/src/linux -I$(OFXOMXPLAYER_ROOT)/src -I$(OFXOMXPLAYER_ROOT)/libs/ffmpeg/include -fPIC -U_FORTIFY_SOURCE -Wall -ftree-vectorize -ftree-vectorize -Wno-deprecated-declarations -Wno-sign-compare -Wno-unknown-pragmas
-
-	# ADDON_LDFLAGS =
 	
 	# linux only, any library that should be included in the project using
 	# pkg-config
@@ -78,9 +74,5 @@ common:
 	
 	# when parsing the file system looking for libraries exclude this for all or
 	# a specific platform
-	ADDON_LIBS_EXCLUDE = =$(OFXOMXPLAYER_ROOT)/libs/ffmpeg/include%
+	#ADDON_LIBS_EXCLUDE = $(OFXOMXPLAYER_ROOT)/libs/ffmpeg/include%
 	
-
-
-	#-D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -DTARGET_POSIX -D_LINUX -DPIC -D_REENTRANT -DOMX -DOMX_SKIP64BIT 
-
