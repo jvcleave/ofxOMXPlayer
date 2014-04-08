@@ -1,7 +1,7 @@
 STATUS: PERPETUAL DEVELOPMENT
 
 DESCRIPTION:   
-This is an ofxAddon that allows textures to be read by openFrameworks on the Raspberry Pi via OpenMax based video. Textures can then be manipulated and used for shaders, etc.
+This is an openFrameworks video player addon for the Raspberry Pi. The video player is hardware accelerated and can provide textures to openFrameworks to be used for shaders, etc.
 
 REQUIREMENTS:   
 GPU split set to 128 (may need to be higher for larger videos)
