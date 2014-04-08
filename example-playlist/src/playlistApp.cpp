@@ -36,6 +36,7 @@ void playlistApp::setup()
 {
 	ofBackground(ofColor::black);
 	//ofSetLogLevel(OF_LOG_VERBOSE);
+	ofSetLogLevel("ofThread", OF_LOG_ERROR);
 	ofSetVerticalSync(false);
 	consoleListener.setup(this);	
 	
@@ -83,6 +84,12 @@ void playlistApp::update()
 	if (doLoadNextMovie) 
 	{
 		ofLogVerbose(__func__) << "doing reload";
+		
+		if(omxPlayer.isTextureEnabled)
+		{
+			//clear the texture if you want
+			//omxPlayer.getTextureReference().clear();
+		}
 		//with the texture based player this must be done here - especially if the videos are different resolutions
 		loadNextMovie();
 	}

@@ -10,7 +10,7 @@
 ofxOMXPlayer::ofxOMXPlayer()
 {
 	engine = NULL;
-	isOpen = true;
+	isOpen = false;
 	isTextureEnabled = false;
 
 	textureID = 0;
@@ -277,6 +277,7 @@ bool ofxOMXPlayer::openEngine()
 	{
 		ofLogError(__func__) << "engine->setup FAIL";
 	}
+	isOpen = setupPassed;
 	return setupPassed;
 
 }
