@@ -1,4 +1,6 @@
 STATUS: PERPETUAL DEVELOPMENT
+CURRENT KNOWN MAJOR ISSUES:
+Videos with and audio track (even silent) work best and allow more accurate looping/frame tracking
 
 DESCRIPTION:   
 This is an openFrameworks video player addon for the Raspberry Pi. The video player is hardware accelerated and can provide textures to openFrameworks to be used for shaders, etc.
