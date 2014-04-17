@@ -1,5 +1,5 @@
-STATUS: PERPETUAL DEVELOPMENT
-CURRENT KNOWN MAJOR ISSUES:
+STATUS: PERPETUAL DEVELOPMENT   
+CURRENT KNOWN MAJOR ISSUES:   
 Videos with and audio track (even silent) work best and allow more accurate looping/frame tracking
 
 DESCRIPTION:   
