@@ -21,6 +21,11 @@ ofxOMXPlayer::ofxOMXPlayer()
 	context = NULL;
 	display = NULL;
 	pixels = NULL;
+	
+	hasNewFrame = false;
+	prevFrame = 0;
+	ofAddListener(ofEvents().update, this, &ofxOMXPlayer::isFrameNewCheck);
+	
 }
 
 void ofxOMXPlayer::updatePixels()
@@ -308,6 +313,33 @@ bool ofxOMXPlayer::isPlaying()
 	return false;
 }
 
+void ofxOMXPlayer::isFrameNewCheck(ofEventArgs& args)
+{
+	
+	if (engine)
+	{
+		int currentFrame = engine->getCurrentFrame();
+		if (prevFrame != currentFrame) 
+		{
+			hasNewFrame = true;
+			prevFrame = currentFrame;
+		}else 
+		{
+			hasNewFrame = false;
+		}
+
+	}else 
+	{
+		hasNewFrame = false;
+	}
+
+
+}
+
+bool ofxOMXPlayer::isFrameNew()
+{
+	return hasNewFrame;
+}
 int ofxOMXPlayer::getHeight()
 {
 	return videoHeight;

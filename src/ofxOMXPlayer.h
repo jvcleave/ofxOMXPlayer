@@ -18,7 +18,7 @@ class ofxOMXPlayer
 		void loadMovie(string videoPath);
 		bool		isPaused();
 		bool		isPlaying();
-
+		bool		isFrameNew();
 		bool isTextureEnabled;
 
 		ofTexture&	getTextureReference();
@@ -84,5 +84,9 @@ class ofxOMXPlayer
 
 		void generateEGLImage(int videoWidth_, int videoHeight_);
 		void destroyEGLImage();
+	
+		bool hasNewFrame;
+		int prevFrame;
+		void isFrameNewCheck(ofEventArgs& args);
 
 };
