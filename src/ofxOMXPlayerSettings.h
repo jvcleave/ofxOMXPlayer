@@ -16,6 +16,7 @@ class ofxOMXPlayerSettings
 			enableLooping = true;
 			listener	  = NULL;
 			enableAudio	  = true;
+			initialVolume = 0.5;
 			videoWidth	= 0;
 			videoHeight = 0;
 
@@ -26,6 +27,7 @@ class ofxOMXPlayerSettings
 		bool enableTexture;
 		bool doFlipTexture;
 		bool enableAudio;
+		float initialVolume;
 		bool useHDMIForAudio;
 		bool enableLooping;
 		ofxOMXPlayerListener* listener;

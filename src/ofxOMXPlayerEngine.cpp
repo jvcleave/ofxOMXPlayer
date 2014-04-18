@@ -333,6 +333,7 @@ bool ofxOMXPlayerEngine::openPlayer()
 		if (didAudioOpen)
 		{
 			ofLogVerbose(__func__) << " AUDIO PLAYER OPEN PASS";
+			setVolume(omxPlayerSettings.initialVolume);
 		}
 		else
 		{
