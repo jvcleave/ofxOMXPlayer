@@ -494,3 +494,7 @@ typedef struct tWAVEFORMATEXTENSIBLE
 	DWORD dwChannelMask;
 	GUID SubFormat;
 } __attribute__((__packed__)) WAVEFORMATEXTENSIBLE;
+
+#define STRINGIZE(x) STRINGIZE2(x)
+#define STRINGIZE2(x) #x
+#define LINE_STRING STRINGIZE(__LINE__)

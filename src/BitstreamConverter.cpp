@@ -493,7 +493,7 @@ bool CBitstreamConverter::Open(enum AVCodecID codec, uint8_t *in_extradata, int 
 		case CODEC_ID_H264:
 			if (in_extrasize < 7 || in_extradata == NULL)
 			{
-				ofLog(OF_LOG_VERBOSE, "CBitstreamConverter::Open avcC data too small or missing\n");
+				ofLogVerbose(__func__) << "avcC data too small or missing";
 				return false;
 			}
 			// valid avcC data (bitstream) always starts with the value 1 (version)
@@ -501,7 +501,7 @@ bool CBitstreamConverter::Open(enum AVCodecID codec, uint8_t *in_extradata, int 
 			{
 				if ( *(char*)in_extradata == 1 )
 				{
-					ofLog(OF_LOG_VERBOSE, "CBitstreamConverter::Open bitstream to annexb init\n");
+					ofLogVerbose(__func__) << "bitstream to annexb init";
 					m_convert_bitstream = BitstreamConvertInit(in_extradata, in_extrasize);
 					return true;
 				}
@@ -513,7 +513,7 @@ bool CBitstreamConverter::Open(enum AVCodecID codec, uint8_t *in_extradata, int 
 				{
 					if (in_extradata[0] == 0 && in_extradata[1] == 0 && in_extradata[2] == 0 && in_extradata[3] == 1)
 					{
-						ofLog(OF_LOG_VERBOSE, "CBitstreamConverter::Open annexb to bitstream init\n");
+						ofLogVerbose(__func__) << "annexb to bitstream init";
 						// video content is from x264 or from bytestream h264 (AnnexB format)
 						// NAL reformating to bitstream format needed
 						m_dllAvUtil = new DllAvUtil;
@@ -542,7 +542,7 @@ bool CBitstreamConverter::Open(enum AVCodecID codec, uint8_t *in_extradata, int 
 					}
 					else
 					{
-						ofLog(OF_LOG_VERBOSE, "CBitstreamConverter::Open invalid avcC atom data");
+						ofLogError(__func__) << "invalid avcC atom data";
 						return false;
 					}
 				}
@@ -550,7 +550,7 @@ bool CBitstreamConverter::Open(enum AVCodecID codec, uint8_t *in_extradata, int 
 				{
 					if (in_extradata[4] == 0xFE)
 					{
-						ofLog(OF_LOG_VERBOSE, "CBitstreamConverter::Open annexb to bitstream init 3 byte to 4 byte nal\n");
+						ofLogVerbose(__func__) << "annexb to bitstream init 3 byte to 4 byte nal";
 						// video content is from so silly encoder that think 3 byte NAL sizes
 						// are valid, setup to convert 3 byte NAL sizes to 4 byte.
 						m_dllAvUtil = new DllAvUtil;
@@ -665,7 +665,7 @@ bool CBitstreamConverter::Convert(uint8_t *pData, int iSize)
 						Close();
 						m_inputBuffer = pData;
 						m_inputSize   = iSize;
-						ofLog(OF_LOG_VERBOSE, "CBitstreamConverter::Convert error converting. disable converter\n");
+						ofLogError(__func__) << " error converting. disable converter";
 					}
 				}
 				else

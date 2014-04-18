@@ -81,7 +81,7 @@ bool OMXPlayerEGLImage::OpenDecoder()
 
 	if( m_fps > 100 || m_fps < 5 )
 	{
-		ofLog(OF_LOG_VERBOSE, "OpenDecoder: Invalid framerate %d, using forced 25fps and just trust timestamps\n", (int)m_fps);
+		ofLogVerbose(__func__) << "Invalid framerate " << m_fps  << " using forced 25fps and just trust timestamps";
 		m_fps = 25;
 	}
 
