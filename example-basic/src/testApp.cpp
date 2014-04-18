@@ -4,7 +4,6 @@
 void testApp::setup()
 {
 	//ofSetLogLevel(OF_LOG_VERBOSE);
-	ofSetVerticalSync(false);
 	
 	string videoPath = ofToDataPath("../../../video/Timecoded_Big_bunny_1.mov", true);
 	

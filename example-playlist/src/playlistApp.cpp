@@ -37,7 +37,6 @@ void playlistApp::setup()
 	ofBackground(ofColor::black);
 	//ofSetLogLevel(OF_LOG_VERBOSE);
 	ofSetLogLevel("ofThread", OF_LOG_ERROR);
-	ofSetVerticalSync(false);
 	consoleListener.setup(this);	
 	
 	//this will let us just grab a video without recompiling

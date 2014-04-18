@@ -518,7 +518,10 @@ void ofxOMXPlayerEngine::Process()
 			{
 				omxReader.FreePacket(packet);
 				packet = NULL;
+			}else {
+				OMXClock::OMXSleep(10);
 			}
+
 		}
 	}
 }
