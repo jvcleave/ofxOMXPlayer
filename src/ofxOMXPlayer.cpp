@@ -30,32 +30,10 @@ ofxOMXPlayer::ofxOMXPlayer()
 
 void ofxOMXPlayer::updatePixels()
 {
-	//old way - may not need anymore?
-#if 0
-	if (!fbo.isAllocated())
+	if (!isTextureEnabled) 
 	{
-		ofFbo::Settings fboSettings;
-		fboSettings.width = videoWidth;
-		fboSettings.height = videoHeight;
-		fboSettings.wrapModeVertical = GL_REPEAT;	// GL_REPEAT, GL_MIRRORED_REPEAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER etc.
-		fboSettings.wrapModeHorizontal = GL_REPEAT; // GL_REPEAT, GL_MIRRORED_REPEAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER etc.
-		//int		wrapModeHorizontal;		// GL_REPEAT, GL_MIRRORED_REPEAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER etc.
-		//int		wrapModeVertical;		// GL_REPEAT, GL_MIRRORED_REPEAT, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER etc.
-		
-		fbo.allocate(fboSettings);
+		return;
 	}
-#endif
-	if (!fbo.isAllocated())
-	{
-		fbo.allocate(videoWidth, videoHeight);
-	}else
-	{
-		if (fbo.getWidth() != videoWidth && fbo.getHeight() != videoHeight)
-		{
-			fbo.allocate(videoWidth, videoHeight);
-		}
-	}
-
 	fbo.begin(false);
 		ofClear(0, 0, 0, 0);
 		texture.draw(0, 0);
@@ -94,7 +72,19 @@ void ofxOMXPlayer::generateEGLImage(int videoWidth_, int videoHeight_)
 			needsRegeneration = true;
 		}
 	}
-
+	
+	if (!fbo.isAllocated())
+	{
+		needsRegeneration = true;
+	}
+	else
+	{
+		if (fbo.getWidth() != videoWidth && fbo.getHeight() != videoHeight)
+		{
+			needsRegeneration = true;
+		}
+	}
+	
 	if(!needsRegeneration)
 	{
 		ofLogVerbose(__func__) << "NO CHANGES NEEDED - RETURNING EARLY";
@@ -124,6 +114,8 @@ void ofxOMXPlayer::generateEGLImage(int videoWidth_, int videoHeight_)
 
 	if (needsRegeneration)
 	{
+		
+		fbo.allocate(videoWidth, videoHeight, GL_RGBA);
 		texture.allocate(videoWidth, videoHeight, GL_RGBA);
 		//Video renders upside down and backwards when Broadcom proprietary tunnels are enabled
 		//may be resolved in future firmare
@@ -323,6 +315,16 @@ void ofxOMXPlayer::isFrameNewCheck(ofEventArgs& args)
 		{
 			hasNewFrame = true;
 			prevFrame = currentFrame;
+			if (isTextureEnabled)
+			{
+				//engine->Lock();
+					fbo.begin();
+						ofClear(0, 0, 0, 0);
+						texture.draw(0, 0, texture.getWidth(), texture.getHeight());
+					fbo.end();
+				//engine->UnLock();
+			}
+			
 		}else 
 		{
 			hasNewFrame = false;
@@ -419,7 +421,8 @@ GLuint ofxOMXPlayer::getTextureID()
 ofTexture& ofxOMXPlayer::getTextureReference()
 {
 
-	return texture;
+	return fbo.getTextureReference();
+	//return texture;
 }
 
 void ofxOMXPlayer::saveImage(string imagePath)//default imagePath=""
@@ -492,9 +495,9 @@ COMXStreamInfo ofxOMXPlayer::getAudioStreamInfo()
 
 void ofxOMXPlayer::draw(float x, float y, float width, float height)
 {
-	if (texture.isAllocated())
+	if (fbo.isAllocated())
 	{
-		texture.draw(x, y, width, height);
+		fbo.draw(x, y, width, height);
 	}else
 	{
 		engine->setDisplayRect(x, y, width, height);

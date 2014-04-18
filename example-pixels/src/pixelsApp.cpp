@@ -5,7 +5,6 @@ void pixelsApp::setup()
 {
 	ofSetLogLevel(OF_LOG_VERBOSE);
 	ofSetLogLevel("ofThread", OF_LOG_ERROR);
-	ofSetVerticalSync(false);
 	doSaveImage = false;
 	doUpdatePixels = true;
 	string videoPath = ofToDataPath("../../../video/Timecoded_Big_bunny_1.mov", true);

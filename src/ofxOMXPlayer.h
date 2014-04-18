@@ -62,6 +62,7 @@ class ofxOMXPlayer
 		unsigned char * getPixels();
 		ofxOMXPlayerSettings settings;
 		string getInfo();
+	
 	private:
 
 		bool openEngine();

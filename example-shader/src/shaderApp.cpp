@@ -21,11 +21,9 @@ void shaderApp::onVideoLoop(ofxOMXPlayerListenerEventData& e)
 //--------------------------------------------------------------
 void shaderApp::setup()
 {
-	ofSetVerticalSync(false);
 	consoleListener.setup(this);
 	ofHideCursor();
-	
-	
+		
 	string videoPath = ofToDataPath("../../../video/Timecoded_Big_bunny_1.mov", true);
 	
 	ofxOMXPlayerSettings settings;
