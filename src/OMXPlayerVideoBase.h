@@ -25,10 +25,6 @@ class OMXPlayerVideoBase: public OMXThread
 		int							m_stream_id;
 		std::deque<OMXPacket *>		m_packets;
 
-		DllAvUtil					m_dllAvUtil;
-		DllAvCodec					m_dllAvCodec;
-		DllAvFormat					m_dllAvFormat;
-
 		bool						m_open;
 		COMXStreamInfo				m_hints;
 		double						m_iCurrentPts;

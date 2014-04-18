@@ -38,7 +38,6 @@ class OMXClock
 		pthread_mutex_t   m_lock;
 	private:
 		COMXCoreComponent m_omx_clock;
-		DllAvFormat       m_dllAvFormat;
 	public:
 		OMXClock();
 		~OMXClock();

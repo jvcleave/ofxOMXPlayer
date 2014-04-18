@@ -1626,7 +1626,7 @@ unsigned int COMXAudio::SyncAC3(BYTE* pData, unsigned int iSize)
 		}
 
 		if (crc_size <= iSize - skip)
-			if(m_dllAvUtil.av_crc(m_dllAvUtil.av_crc_get_table(AV_CRC_16_ANSI), 0, &pData[2], crc_size * 2))
+			if(av_crc(av_crc_get_table(AV_CRC_16_ANSI), 0, &pData[2], crc_size * 2))
 			{
 				continue;
 			}

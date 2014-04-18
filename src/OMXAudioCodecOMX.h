@@ -76,9 +76,6 @@ class COMXAudioCodecOMX
 		int     m_channels;
 		uint64_t m_layout;
 
-		DllAvCodec m_dllAvCodec;
-		DllAvUtil m_dllAvUtil;
-		DllSwResample m_dllSwResample;
 
 		void BuildChannelMap();
 };

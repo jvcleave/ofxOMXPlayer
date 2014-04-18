@@ -38,7 +38,7 @@ bool OMXPlayerEGLImage::Open(COMXStreamInfo& hints, OMXClock *av_clock, EGLImage
 		Close();
 	}
 
-	m_dllAvFormat.av_register_all();
+	av_register_all();
 
 	m_hints       = hints;
 	m_av_clock    = av_clock;

@@ -32,45 +32,5 @@ extern "C" {
 	#endif
 
 #include <libswresample/swresample.h>
-	/*#include <libavresample/avresample.h>
-	#include <libavutil/opt.h>
-	#include <libavutil/samplefmt.h>
-	#define SwrContext AVAudioResampleContext*/
 
 }
-
-class DllSwResampleInterface
-{
-	public:
-		virtual ~DllSwResampleInterface() {}
-		virtual struct SwrContext *swr_alloc_set_opts(struct SwrContext *s, int64_t out_ch_layout, enum AVSampleFormat out_sample_fmt, int out_sample_rate, int64_t in_ch_layout, enum AVSampleFormat in_sample_fmt, int in_sample_rate, int log_offset, void *log_ctx)=0;
-		virtual int swr_init(struct SwrContext *s)=0;
-		virtual void swr_free(struct SwrContext **s)=0;
-		virtual int swr_convert(struct SwrContext *s, uint8_t **out, int out_count, const uint8_t **in , int in_count)=0;
-};
-
-
-// Use direct mapping
-class DllSwResample : public DllSwResampleInterface
-{
-	public:
-		virtual ~DllSwResample() {}
-
-		virtual struct SwrContext *swr_alloc_set_opts(struct SwrContext *s, int64_t out_ch_layout, enum AVSampleFormat out_sample_fmt, int out_sample_rate, int64_t in_ch_layout, enum AVSampleFormat in_sample_fmt, int in_sample_rate, int log_offset, void *log_ctx)
-		{
-			return ::swr_alloc_set_opts(s, out_ch_layout, out_sample_fmt, out_sample_rate, in_ch_layout, in_sample_fmt, in_sample_rate, log_offset, log_ctx);
-		}
-		virtual int swr_init(struct SwrContext *s)
-		{
-			return ::swr_init(s);
-		}
-		virtual void swr_free(struct SwrContext **s)
-		{
-			return ::swr_free(s);
-		}
-		virtual int swr_convert(struct SwrContext *s, uint8_t **out, int out_count, const uint8_t **in , int in_count)
-		{
-			return ::swr_convert(s, out, out_count, in, in_count);
-		}
-};
-

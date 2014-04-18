@@ -109,5 +109,4 @@ class COMXAudio : public IAudioRenderer
 		COMXCoreTunel     m_omx_tunnel_clock;
 		COMXCoreTunel     m_omx_tunnel_mixer;
 		COMXCoreTunel     m_omx_tunnel_decoder;
-		DllAvUtil         m_dllAvUtil;
 };

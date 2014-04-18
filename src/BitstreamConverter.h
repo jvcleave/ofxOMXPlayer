@@ -168,8 +168,6 @@ class CBitstreamConverter
 		int               m_extrasize;
 		bool              m_convert_3byteTo4byteNALSize;
 		bool              m_convert_bytestream;
-		DllAvUtil         *m_dllAvUtil;
-		DllAvFormat       *m_dllAvFormat;
 		AVCodecID           m_codec;
 };
 
