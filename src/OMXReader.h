@@ -2,9 +2,8 @@
 
 #include "ofMain.h"
 
-#include "DllAvUtil.h"
-#include "DllAvFormat.h"
-#include "DllAvCodec.h"
+#include "LIBAV_INCLUDES.h"
+
 #include "OMXStreamInfo.h"
 #include "OMXThread.h"
 #include <queue>

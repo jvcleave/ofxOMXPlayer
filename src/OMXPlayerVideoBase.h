@@ -2,9 +2,8 @@
 #include "ofMain.h"
 #include "ofxOMXPlayerSettings.h"
 
-#include "DllAvUtil.h"
-#include "DllAvFormat.h"
-#include "DllAvCodec.h"
+#include "LIBAV_INCLUDES.h"
+
 
 #include "OMXReader.h"
 #include "OMXClock.h"

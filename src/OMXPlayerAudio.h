@@ -2,10 +2,8 @@
 #include "ofMain.h"
 
 
-#include "DllAvUtil.h"
-#include "DllAvFormat.h"
-#include "DllAvFilter.h"
-#include "DllAvCodec.h"
+#include "LIBAV_INCLUDES.h"
+
 
 #include "PCMRemap.h"
 

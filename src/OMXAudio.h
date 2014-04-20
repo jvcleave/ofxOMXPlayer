@@ -9,8 +9,8 @@
 #include "IAudioRenderer.h"
 
 
-#include "DllAvCodec.h"
-#include "DllAvUtil.h"
+#include "LIBAV_INCLUDES.h"
+
 #include "OMXCore.h"
 #include "OMXClock.h"
 #include "OMXStreamInfo.h"

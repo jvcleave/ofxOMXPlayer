@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DllAvFormat.h"
+#include "LIBAV_INCLUDES.h"
 
 #include "OMXCore.h"
 
