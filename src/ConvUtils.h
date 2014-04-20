@@ -21,7 +21,6 @@
  *  http://www.gnu.org/copyleft/gpl.html
  *
  */
-//#include "PlatformDefs.h" // UINT DWORD LPCSTR LPSTR LPBOOL ...
 #include "ADDON_DEFINES.h"
 
 int WideCharToMultiByte(

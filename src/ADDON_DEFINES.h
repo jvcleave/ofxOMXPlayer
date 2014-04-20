@@ -495,6 +495,18 @@ typedef struct tWAVEFORMATEXTENSIBLE
 	GUID SubFormat;
 } __attribute__((__packed__)) WAVEFORMATEXTENSIBLE;
 
+#ifndef HAVE_MMX
+#define HAVE_MMX
+#endif
+#ifndef __STDC_CONSTANT_MACROS
+#define __STDC_CONSTANT_MACROS
+#endif
+
+#ifndef __GNUC__
+#pragma warning(disable:4244)
+#endif
+
+
 #define STRINGIZE(x) STRINGIZE2(x)
 #define STRINGIZE2(x) #x
 #define LINE_STRING STRINGIZE(__LINE__)
