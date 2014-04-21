@@ -42,7 +42,7 @@ class OMXPlayerAudio : public OMXThread
 		std::string               m_device;
 		bool                      m_use_passthrough;
 		bool                      m_use_hw_decode;
-		IAudioRenderer::EEncoded  m_passthrough;
+		COMXAudio::EEncoded  m_passthrough;
 		bool                      m_hw_decode;
 		bool                      m_boost_on_downmix;
 		bool                      m_bAbort;
@@ -77,7 +77,7 @@ class OMXPlayerAudio : public OMXThread
 		bool AddPacket(OMXPacket *pkt);
 		bool OpenAudioCodec();
 		void CloseAudioCodec();
-		IAudioRenderer::EEncoded IsPassthrough(COMXStreamInfo hints);
+		COMXAudio::EEncoded IsPassthrough(COMXStreamInfo hints);
 		bool OpenDecoder();
 		bool CloseDecoder();
 		double GetDelay();

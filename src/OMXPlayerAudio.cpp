@@ -119,7 +119,7 @@ bool OMXPlayerAudio::Open(COMXStreamInfo& hints, OMXClock *av_clock, OMXReader *
 	m_av_clock    = av_clock;
 	m_omx_reader  = omx_reader;
 	m_device      = device;
-	m_passthrough = IAudioRenderer::ENCODED_NONE;
+	m_passthrough = COMXAudio::ENCODED_NONE;
 	m_hw_decode   = false;
 	m_use_passthrough = passthrough;
 	m_use_hw_decode   = hw_decode;
@@ -471,19 +471,19 @@ void OMXPlayerAudio::CloseAudioCodec()
 	m_pAudioCodec = NULL;
 }
 
-IAudioRenderer::EEncoded OMXPlayerAudio::IsPassthrough(COMXStreamInfo hints)
+COMXAudio::EEncoded OMXPlayerAudio::IsPassthrough(COMXStreamInfo hints)
 {
 	#ifndef STANDALONE
 	int  m_outputmode = 0;
 	bool bitstream = false;
-	IAudioRenderer::EEncoded passthrough = IAudioRenderer::ENCODED_NONE;
+	COMXAudio::EEncoded passthrough = COMXAudio::ENCODED_NONE;
 
 	m_outputmode = g_guiSettings.GetInt("audiooutput.mode");
 
 	switch(m_outputmode)
 	{
 		case 0:
-			passthrough = IAudioRenderer::ENCODED_NONE;
+			passthrough = COMXAudio::ENCODED_NONE;
 			break;
 		case 1:
 			bitstream = true;
@@ -497,11 +497,11 @@ IAudioRenderer::EEncoded OMXPlayerAudio::IsPassthrough(COMXStreamInfo hints)
 	{
 		if(hints.codec == CODEC_ID_AC3 && g_guiSettings.GetBool("audiooutput.ac3passthrough"))
 		{
-			passthrough = IAudioRenderer::ENCODED_IEC61937_AC3;
+			passthrough = COMXAudio::ENCODED_IEC61937_AC3;
 		}
 		if(hints.codec == CODEC_ID_DTS && g_guiSettings.GetBool("audiooutput.dtspassthrough"))
 		{
-			passthrough = IAudioRenderer::ENCODED_IEC61937_DTS;
+			passthrough = COMXAudio::ENCODED_IEC61937_DTS;
 		}
 	}
 
@@ -509,22 +509,22 @@ IAudioRenderer::EEncoded OMXPlayerAudio::IsPassthrough(COMXStreamInfo hints)
 	#else
 	if(m_device == "omx:local")
 	{
-		return IAudioRenderer::ENCODED_NONE;
+		return COMXAudio::ENCODED_NONE;
 	}
 
-	IAudioRenderer::EEncoded passthrough = IAudioRenderer::ENCODED_NONE;
+	COMXAudio::EEncoded passthrough = COMXAudio::ENCODED_NONE;
 
 	if(hints.codec == CODEC_ID_AC3)
 	{
-		passthrough = IAudioRenderer::ENCODED_IEC61937_AC3;
+		passthrough = COMXAudio::ENCODED_IEC61937_AC3;
 	}
 	if(hints.codec == CODEC_ID_EAC3)
 	{
-		passthrough = IAudioRenderer::ENCODED_IEC61937_EAC3;
+		passthrough = COMXAudio::ENCODED_IEC61937_EAC3;
 	}
 	if(hints.codec == CODEC_ID_DTS)
 	{
-		passthrough = IAudioRenderer::ENCODED_IEC61937_DTS;
+		passthrough = COMXAudio::ENCODED_IEC61937_DTS;
 	}
 
 	return passthrough;

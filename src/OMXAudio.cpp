@@ -146,7 +146,7 @@ bool COMXAudio::Initialize(const std::string& device, enum PCMChannels *channelM
 	m_HWDecode = false;
 	m_Passthrough = false;
 
-	if(bPassthrough != IAudioRenderer::ENCODED_NONE)
+	if(bPassthrough != COMXAudio::ENCODED_NONE)
 	{
 		m_Passthrough = true;
 		SetCodingType(hints.codec);
@@ -186,7 +186,7 @@ bool COMXAudio::Initialize(const std::string& device, int iChannels, enum PCMCha
 
 	m_Passthrough = false;
 
-	if(bPassthrough != IAudioRenderer::ENCODED_NONE)
+	if(bPassthrough != COMXAudio::ENCODED_NONE)
 	{
 		m_Passthrough =true;
 	}

@@ -539,7 +539,15 @@ string ofxOMXPlayer::getInfo()
 	info <<"\n" <<	"DURATION: "			<< getDuration();
 	info <<"\n" <<	"TOTAL FRAMES: "		<< getTotalNumFrames();
 	info <<"\n" <<	"CURRENT FRAME: "		<< getCurrentFrame();
-	info <<"\n" <<	"REMAINING FRAMES: "	<< getTotalNumFrames() - getCurrentFrame();
+	if (getTotalNumFrames() > 0) 
+	{
+		info <<"\n" <<	"REMAINING FRAMES: "	<< getTotalNumFrames() - getCurrentFrame();
+	}else 
+	{
+		info <<"\n" <<	"REMAINING FRAMES: N/A, NO TOTAL FRAMES";
+	}
+
+	
 	info <<"\n" <<	"CURRENT VOLUME: "		<< getVolume();
 	return info.str();
 }

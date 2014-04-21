@@ -8,7 +8,6 @@ class OMXEGLImage : public OMXDecoderBase
 {
 	public:
 		OMXEGLImage();
-		~OMXEGLImage();
 
 		bool Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglImage);
 		

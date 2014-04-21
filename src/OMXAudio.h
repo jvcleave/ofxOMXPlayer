@@ -6,8 +6,7 @@
 
 
 #include "ADDON_DEFINES.h"
-#include "IAudioRenderer.h"
-
+#include "PCMRemap.h"
 
 #include "LIBAV_INCLUDES.h"
 
@@ -19,18 +18,43 @@
 
 #define AUDIO_BUFFER_SECONDS 2
 
-class COMXAudio : public IAudioRenderer
+class COMXAudio
 {
 	public:
+	
+		enum EEncoded
+		{
+			ENCODED_NONE = 0,
+			ENCODED_IEC61937_AC3,
+			ENCODED_IEC61937_EAC3,
+			ENCODED_IEC61937_DTS,
+			ENCODED_IEC61937_MPEG,
+			ENCODED_IEC61937_UNKNOWN,
+		};
+		
 		unsigned int GetChunkLen();
 		float GetDelay();
 		float GetCacheTime();
 		float GetCacheTotal();
 		unsigned int GetAudioRenderingLatency();
 		COMXAudio();
-		bool Initialize(const std::string& device, enum PCMChannels *channelMap,
-		                COMXStreamInfo& hints, OMXClock *clock, EEncoded bPassthrough, bool bUseHWDecode, bool boostOnDownmix);
-		bool Initialize(const std::string& device, int iChannels, enum PCMChannels *channelMap, unsigned int downmixChannels, unsigned int uiSamplesPerSec, unsigned int uiBitsPerSample, bool bResample, bool boostOnDownmix, bool bIsMusic=false, EEncoded bPassthrough = IAudioRenderer::ENCODED_NONE);
+		bool Initialize(const std::string& device,
+						enum PCMChannels *channelMap,
+		                COMXStreamInfo& hints, OMXClock *clock,
+						EEncoded bPassthrough,
+						bool bUseHWDecode,
+						bool boostOnDownmix);
+	
+		bool Initialize(const std::string& device,
+						int iChannels,
+						enum PCMChannels *channelMap,
+						unsigned int downmixChannels,
+						unsigned int uiSamplesPerSec,
+						unsigned int uiBitsPerSample,
+						bool bResample,
+						bool boostOnDownmix,
+						bool bIsMusic=false,
+						EEncoded bPassthrough = COMXAudio::ENCODED_NONE);
 		~COMXAudio();
 
 		unsigned int AddPackets(const void* data, unsigned int len);
@@ -47,6 +71,10 @@ class COMXAudio : public IAudioRenderer
 		void SetDynamicRangeCompression(long drc)
 		{
 			m_drc = drc;
+		}
+		float GetCurrentAttenuation()
+		{
+			return m_remap.GetCurrentAttenuation();
 		}
 		int SetPlaySpeed(int iSpeed);
 		void SubmitEOS();
@@ -109,4 +137,5 @@ class COMXAudio : public IAudioRenderer
 		COMXCoreTunel     m_omx_tunnel_clock;
 		COMXCoreTunel     m_omx_tunnel_mixer;
 		COMXCoreTunel     m_omx_tunnel_decoder;
+		CPCMRemap m_remap;
 };

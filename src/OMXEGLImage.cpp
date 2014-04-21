@@ -1,16 +1,13 @@
 #include "OMXEGLImage.h"
 
-OMXEGLImage* someBullshit = NULL;
+OMXEGLImage* thisInstance = NULL;
 
 OMXEGLImage::OMXEGLImage()
 {
-	someBullshit = this;
+	thisInstance = this;
 }
 
-OMXEGLImage::~OMXEGLImage()
-{
-	someBullshit = NULL;
-}
+
 OMX_ERRORTYPE onFillBufferDone(OMX_HANDLETYPE hComponent,
                                OMX_PTR pAppData,
                                OMX_BUFFERHEADERTYPE* pBuffer)
@@ -21,15 +18,14 @@ OMX_ERRORTYPE onFillBufferDone(OMX_HANDLETYPE hComponent,
 	ofLogVerbose(__func__) << "timestamp: " << timestamp;
 	*/
 	OMX_ERRORTYPE didFillBuffer = OMX_FillThisBuffer(hComponent, pBuffer);
+		
 	if (didFillBuffer == OMX_ErrorNone)
 	{
 	
-		if (someBullshit) 
+		if (thisInstance) 
 		{
-			someBullshit->frameCounter++;
+			thisInstance->frameCounter++;
 		}
-		
-
 	}
 
 	return didFillBuffer;
@@ -316,10 +312,6 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	{
 		ofLogVerbose(__func__) << "m_omx_render GET OMX_IndexParamPortDefinition PASS";
 
-		ofLogVerbose(__func__) << "portParamRenderInput.nBufferCountActual GET VAR --------------------------:" << portParamRenderInput.nBufferCountActual;
-		//ofLogVerbose(__func__) << "portParamRenderInput.format.video.nFrameWidth GET VAR --------------------------:" << portParamRenderInput.format.video.nFrameWidth;
-		//ofLogVerbose(__func__) << "portParamRenderInput.format.video.nFrameHeight GET VAR --------------------------:" << portParamRenderInput.format.video.nFrameHeight;
-
 	}
 	else
 	{
@@ -335,10 +327,6 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	if(error == OMX_ErrorNone)
 	{
 		ofLogVerbose(__func__) << "m_omx_render GET OMX_IndexParamPortDefinition PASS";
-
-		ofLogVerbose(__func__) << "portParamRenderOutput.nBufferCountActual GET VAR --------------------------:" << portParamRenderOutput.nBufferCountActual;
-		ofLogVerbose(__func__) << "portParamRenderOutput.format.video.nFrameWidth GET VAR --------------------------:" << portParamRenderOutput.format.video.nFrameWidth;
-		ofLogVerbose(__func__) << "portParamRenderOutput.format.video.nFrameHeight GET VAR --------------------------:" << portParamRenderOutput.format.video.nFrameHeight;
 
 	}
 	else
