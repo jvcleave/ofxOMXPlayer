@@ -104,7 +104,7 @@ class OMXDecoderBase
 			return m_video_codec_name;
 		};
 		
-		int frameCounter;
-		int frameOffset;
+		virtual int getCurrentFrame() = 0;
+		virtual void resetFrameCounter() = 0;
 		CCriticalSection  m_critSection;
 };

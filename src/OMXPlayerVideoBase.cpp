@@ -39,7 +39,7 @@ int OMXPlayerVideoBase::getCurrentFrame()
 {
 	if (m_decoder) 
 	{
-		return m_decoder->frameCounter;
+		return m_decoder->getCurrentFrame();
 	}
 	return 0;
 }
@@ -48,8 +48,8 @@ void OMXPlayerVideoBase::resetFrameCounter()
 {
 	if (m_decoder) 
 	{
-		m_decoder->frameOffset = m_decoder->frameCounter;
-		m_decoder->frameCounter = 0;
+		ofLogVerbose(__func__) << "";
+		m_decoder->resetFrameCounter();
 	}
 }
 

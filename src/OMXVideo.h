@@ -28,4 +28,12 @@ class COMXVideo : public OMXDecoderBase
 		void configureDisplay();
 		void updateFrameCount();
 		void onUpdate(ofEventArgs& args);
+	
+	int getCurrentFrame();
+	void resetFrameCounter();
+private:
+	int frameCounter;
+	int frameOffset;
+	
+	
 };

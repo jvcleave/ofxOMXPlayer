@@ -160,7 +160,12 @@ class COMXCoreComponent
 		{
 			CustomDecoderEmptyBufferDoneHandler = p;
 		};
-
+		
+	
+		int getCurrentFrame();
+		void resetFrameCounter();
+		void incrementFrameCounter();
+	
 	private:
 		OMX_HANDLETYPE m_handle;
 		unsigned int   m_input_port;
@@ -206,6 +211,10 @@ class COMXCoreComponent
 		bool          m_flush_output;
 		void              Lock();
 		void              UnLock();
+	
+	int frameCounter;
+	int frameOffset;
+	
 };
 
 class COMXCore

@@ -15,10 +15,7 @@ OMXPlayerEGLImage::OMXPlayerEGLImage()
 
 OMXPlayerEGLImage::~OMXPlayerEGLImage()
 {
-	ofLogVerbose(__func__) << "START";
 	Close();
-
-	ofLogVerbose(__func__) << "END";
 }
 
 

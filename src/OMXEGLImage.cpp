@@ -1,36 +1,41 @@
 #include "OMXEGLImage.h"
 
-OMXEGLImage* thisInstance = NULL;
 
 OMXEGLImage::OMXEGLImage()
 {
-	thisInstance = this;
+	frameCounter = 0;
+	frameOffset = 0;
 }
 
 
-OMX_ERRORTYPE onFillBufferDone(OMX_HANDLETYPE hComponent,
+OMX_ERRORTYPE OMXEGLImage::onFillBufferDone(OMX_HANDLETYPE hComponent,
                                OMX_PTR pAppData,
                                OMX_BUFFERHEADERTYPE* pBuffer)
 {
 
-	/*
-	int64_t timestamp = pBuffer->nTimeStamp.nLowPart | ((uint64_t)(pBuffer->nTimeStamp.nHighPart) << 32);
-	ofLogVerbose(__func__) << "timestamp: " << timestamp;
-	*/
+	COMXCoreComponent *ctx = static_cast<COMXCoreComponent*>(pAppData);
+	
 	OMX_ERRORTYPE didFillBuffer = OMX_FillThisBuffer(hComponent, pBuffer);
 		
 	if (didFillBuffer == OMX_ErrorNone)
 	{
 	
-		if (thisInstance) 
-		{
-			thisInstance->frameCounter++;
-		}
+		ctx->incrementFrameCounter();
 	}
 
 	return didFillBuffer;
 }
 
+int OMXEGLImage::getCurrentFrame()
+{
+	
+	return m_omx_render.getCurrentFrame();
+}
+void OMXEGLImage::resetFrameCounter()
+{
+	//frameOffset = m_omx_render.getCurrentFrame();
+	m_omx_render.resetFrameCounter();
+}
 
 bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglImage)
 {
@@ -397,7 +402,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	}
 
 
-	m_omx_render.SetCustomDecoderFillBufferDoneHandler(onFillBufferDone);
+	m_omx_render.SetCustomDecoderFillBufferDoneHandler(&OMXEGLImage::onFillBufferDone);
 	error = m_omx_render.SetStateForComponent(OMX_StateExecuting);
 	if(error == OMX_ErrorNone)
 	{

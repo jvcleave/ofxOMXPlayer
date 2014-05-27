@@ -279,6 +279,14 @@ bool ofxOMXPlayer::openEngine()
 
 }
 
+void ofxOMXPlayer::togglePause()
+{
+	if (engine)
+	{
+		engine->setPaused(!engine->isPaused());
+	}
+}
+
 void ofxOMXPlayer::setPaused(bool doPause)
 {
 	if (engine)

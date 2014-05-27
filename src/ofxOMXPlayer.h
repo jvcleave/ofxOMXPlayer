@@ -44,7 +44,7 @@ class ofxOMXPlayer
 
 		int			getCurrentFrame();
 		int			getTotalNumFrames();
-
+		void		togglePause();
 		void		setPaused(bool doPause);
 		void saveImage(string imagePath="");
 		void updatePixels();

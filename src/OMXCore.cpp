@@ -336,6 +336,9 @@ OMX_ERRORTYPE COMXCoreTunel::Establish(bool portSettingsChanged)
 
 COMXCoreComponent::COMXCoreComponent()
 {
+	
+	frameCounter = 0;
+	frameOffset = 0;
 	m_input_port  = 0;
 	m_output_port = 0;
 	m_handle      = NULL;
@@ -388,6 +391,25 @@ COMXCoreComponent::~COMXCoreComponent()
 	pthread_mutex_destroy(&m_lock);
 	sem_destroy(&m_omx_fill_buffer_done);
 
+}
+
+
+int COMXCoreComponent::getCurrentFrame()
+{
+	return frameCounter;
+	
+	//return frameCounter-frameOffset;
+}
+
+void COMXCoreComponent::resetFrameCounter()
+{
+	frameOffset = frameCounter;
+	frameCounter = 0;
+}
+
+void COMXCoreComponent::incrementFrameCounter()
+{
+	frameCounter++;
 }
 
 void COMXCoreComponent::ResetEos()

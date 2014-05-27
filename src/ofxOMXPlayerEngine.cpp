@@ -441,7 +441,9 @@ void ofxOMXPlayerEngine::Process()
 					previousLoopOffset = loop_offset;
 					loopCounter++;
 					ofLogVerbose(__func__) << "loopCounter: " << loopCounter;
+					
 					ofLog(OF_LOG_VERBOSE, "Loop offset : %8.02f\n", loop_offset / DVD_TIME_BASE);
+					
 					onVideoLoop();
 
 				}

@@ -7,8 +7,10 @@ COMXVideo::COMXVideo()
 
 	m_deinterlace       = false;
 	m_hdmi_clock_sync   = false;
-
+	frameCounter = 0;
+	frameOffset = 0;
 }
+
 
 COMXVideo::~COMXVideo()
 {
@@ -422,6 +424,18 @@ void COMXVideo::updateFrameCount()
 		ofLogError(__func__) << "m_omx_render OMX_CONFIG_BRCMPORTSTATSTYPE fail: " << COMXCore::getOMXError(error);
 	}
 }
+
+int COMXVideo::getCurrentFrame()
+{
+	return frameCounter;
+}
+
+void COMXVideo::resetFrameCounter()
+{
+	frameCounter = 0;
+}
+
+
 bool COMXVideo::Decode(uint8_t *pData, int iSize, double pts)
 {
 	CSingleLock lock (m_critSection);

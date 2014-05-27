@@ -13,5 +13,12 @@ class OMXEGLImage : public OMXDecoderBase
 		
 		bool  Decode(uint8_t *pData, int iSize, double pts);
 
-	
+		int getCurrentFrame();
+		void resetFrameCounter();
+	static OMX_ERRORTYPE onFillBufferDone(OMX_HANDLETYPE hComponent,
+										  OMX_PTR pAppData,
+										  OMX_BUFFERHEADERTYPE* pBuffer);
+private:
+	int frameCounter;
+	int frameOffset;
 };
