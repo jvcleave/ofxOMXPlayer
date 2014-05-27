@@ -634,7 +634,7 @@ bool OMXClock::HDMIClockSync(bool lock /* = true */)
 	return true;
 }
 
-void OMXClock::OMXSleep(unsigned int dwMilliSeconds)
+void  OMXClock::sleep(unsigned int dwMilliSeconds)
 {
 	struct timespec req;
 	req.tv_sec = dwMilliSeconds / 1000;

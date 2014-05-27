@@ -282,7 +282,7 @@ bool OMXPlayerAudio::Decode(OMXPacket *pkt)
 
 	if(!((int)m_decoder->GetSpace() > pkt->size))
 	{
-		OMXClock::OMXSleep(10);
+		m_av_clock->sleep(10);
 	}
 
 	if((int)m_decoder->GetSpace() > pkt->size)
@@ -669,7 +669,7 @@ void OMXPlayerAudio::WaitCompletion()
 			ofLog(OF_LOG_ERROR, "%s::%s - wait for eos timed out\n", "OMXPlayerAudio", __func__);
 			break;
 		}
-		OMXClock::OMXSleep(50);
+		m_av_clock->sleep(50);
 		nTimeOut -= 50;
 	}
 }

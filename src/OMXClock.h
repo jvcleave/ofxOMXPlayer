@@ -69,5 +69,5 @@ class OMXClock
 		bool HDMIClockSync(bool lock = true);
 		int64_t GetAbsoluteClock();
 		double GetClock(bool interpolated = true);
-		static void OMXSleep(unsigned int dwMilliSeconds);
+		void sleep(unsigned int dwMilliSeconds);
 };

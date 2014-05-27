@@ -422,6 +422,7 @@ void ofxOMXPlayerEngine::Process()
 			if (isCacheEmpty)
 			{
 				omxReader.SeekTime(0 * 1000.0f, AVSEEK_FLAG_BACKWARD, &startpts);
+				
 				packet = omxReader.Read();
 
 				if(hasAudio)
@@ -456,7 +457,7 @@ void ofxOMXPlayerEngine::Process()
 			}
 			else
 			{
-				OMXClock::OMXSleep(10);
+				clock.sleep(10);
 				continue;
 			}
 
@@ -500,7 +501,7 @@ void ofxOMXPlayerEngine::Process()
 			}
 			else
 			{
-				OMXClock::OMXSleep(10);
+				clock.sleep(10);
 			}
 			
 		}
@@ -512,7 +513,7 @@ void ofxOMXPlayerEngine::Process()
 			}
 			else
 			{
-				OMXClock::OMXSleep(10);
+				clock.sleep(10);
 			}
 		}
 		else
@@ -522,7 +523,7 @@ void ofxOMXPlayerEngine::Process()
 				omxReader.FreePacket(packet);
 				packet = NULL;
 			}else {
-				OMXClock::OMXSleep(10);
+				clock.sleep(10);
 			}
 
 		}
