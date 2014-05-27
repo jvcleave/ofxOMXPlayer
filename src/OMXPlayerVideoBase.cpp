@@ -48,7 +48,6 @@ void OMXPlayerVideoBase::resetFrameCounter()
 {
 	if (m_decoder) 
 	{
-		ofLogVerbose(__func__) << "";
 		m_decoder->resetFrameCounter();
 	}
 }

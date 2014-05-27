@@ -418,7 +418,7 @@ void COMXVideo::updateFrameCount()
 		 OMX_TICKS nMaxTimeDelta;
 		 OMX_U32 nCorruptMBs;*/
 		//ofLogVerbose(__func__) << "nFrameCount: " << stats.nFrameCount;
-		frameCounter = stats.nFrameCount-frameOffset;
+		frameCounter = stats.nFrameCount;
 	}else
 	{
 		ofLogError(__func__) << "m_omx_render OMX_CONFIG_BRCMPORTSTATSTYPE fail: " << COMXCore::getOMXError(error);
@@ -427,12 +427,12 @@ void COMXVideo::updateFrameCount()
 
 int COMXVideo::getCurrentFrame()
 {
-	return frameCounter;
+	return frameCounter - frameOffset;
 }
 
 void COMXVideo::resetFrameCounter()
 {
-	frameCounter = 0;
+	frameOffset = frameCounter;
 }
 
 
