@@ -24,7 +24,8 @@ ofxOMXPlayer::ofxOMXPlayer()
 	
 	hasNewFrame = false;
 	prevFrame = 0;
-	ofAddListener(ofEvents().update, this, &ofxOMXPlayer::isFrameNewCheck);
+	doRestart = false;
+	ofAddListener(ofEvents().update, this, &ofxOMXPlayer::onUpdate);
 	
 }
 
@@ -232,6 +233,10 @@ void ofxOMXPlayer::loadMovie(string videoPath)
 	setup(settings);
 }
 
+void ofxOMXPlayer::restartMovie()
+{
+	doRestart = true;
+}
 
 bool ofxOMXPlayer::setup(ofxOMXPlayerSettings settings)
 {
@@ -313,9 +318,15 @@ bool ofxOMXPlayer::isPlaying()
 	return false;
 }
 
-void ofxOMXPlayer::isFrameNewCheck(ofEventArgs& args)
+void ofxOMXPlayer::onUpdate(ofEventArgs& args)
 {
-	
+	if (doRestart) 
+	{
+		ofxOMXPlayerSettings sameSettings = settings;
+		setup(sameSettings);
+		doRestart = false;
+		return;
+	}
 	if (engine)
 	{
 		int currentFrame = engine->getCurrentFrame();
@@ -350,6 +361,7 @@ bool ofxOMXPlayer::isFrameNew()
 {
 	return hasNewFrame;
 }
+
 int ofxOMXPlayer::getHeight()
 {
 	return videoHeight;
@@ -428,7 +440,10 @@ GLuint ofxOMXPlayer::getTextureID()
 
 ofTexture& ofxOMXPlayer::getTextureReference()
 {
-
+	if (!fbo.isAllocated())
+	{
+		ofLogError() << "NO FBO!";
+	}
 	return fbo.getTextureReference();
 	//return texture;
 }
@@ -503,12 +518,14 @@ COMXStreamInfo ofxOMXPlayer::getAudioStreamInfo()
 
 void ofxOMXPlayer::draw(float x, float y, float width, float height)
 {
+	if (!engine) return;
+	
 	if (fbo.isAllocated())
 	{
 		fbo.draw(x, y, width, height);
 	}else
 	{
-		engine->setDisplayRect(x, y, width, height);
+		engine->setDisplayRect(x, y, width, height);		
 	}
 	
 }
@@ -526,7 +543,7 @@ void ofxOMXPlayer::close()
 	{
 		return;
 	}
-	ofRemoveListener(ofEvents().update, this, &ofxOMXPlayer::onUpdate);
+	ofRemoveListener(ofEvents().update, this, &ofxOMXPlayer::onUpdateDuringExit);
 
 	if(engine)
 	{
@@ -572,7 +589,7 @@ void termination_handler(int signum)
 	doExit = true;
 }
 
-void ofxOMXPlayer::onUpdate(ofEventArgs& args)
+void ofxOMXPlayer::onUpdateDuringExit(ofEventArgs& args)
 {
 	if (doExit)
 	{
@@ -626,6 +643,6 @@ void ofxOMXPlayer::addExitHandler()
 		//Replace the signal handler of SIGINT with the one described by new_action
 		sigaction(SIGINT,&new_action,NULL);
 	}
-	ofAddListener(ofEvents().update, this, &ofxOMXPlayer::onUpdate);
+	ofAddListener(ofEvents().update, this, &ofxOMXPlayer::onUpdateDuringExit);
 }
 

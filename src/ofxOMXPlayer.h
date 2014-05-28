@@ -48,7 +48,7 @@ class ofxOMXPlayer
 		void		setPaused(bool doPause);
 		void saveImage(string imagePath="");
 		void updatePixels();
-
+	
 		void close();
 		bool isOpen;
 
@@ -58,7 +58,8 @@ class ofxOMXPlayer
 		void setNormalSpeed();
 		void fastForward();
 		void rewind();
-
+		void restartMovie();
+	
 		unsigned char * getPixels();
 		ofxOMXPlayerSettings settings;
 		string getInfo();
@@ -67,7 +68,7 @@ class ofxOMXPlayer
 
 		bool openEngine();
 		void addExitHandler();
-		void onUpdate(ofEventArgs& args);
+		void onUpdateDuringExit(ofEventArgs& args);
 		ofxOMXPlayerEngine* engine;
 		
 
@@ -88,6 +89,7 @@ class ofxOMXPlayer
 	
 		bool hasNewFrame;
 		int prevFrame;
-		void isFrameNewCheck(ofEventArgs& args);
+		void onUpdate(ofEventArgs& args);
+		bool doRestart;
 
 };
