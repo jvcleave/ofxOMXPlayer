@@ -13,7 +13,6 @@ class testApp : public ofBaseApp, public SSHKeyListener{
 		void draw();
 		void keyPressed(int key);	
 		ofxOMXPlayer omxPlayer;
-		ofFbo fbo;
 	
 	void onCharacterReceived(SSHKeyListenerEventData& e);
 	ConsoleListener consoleListener;

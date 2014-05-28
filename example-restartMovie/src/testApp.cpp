@@ -1,19 +1,14 @@
 #include "testApp.h"
 
-bool doRestart = false;
 //--------------------------------------------------------------
 void testApp::setup()
 {
 	ofSetLogLevel(OF_LOG_VERBOSE);
 	ofSetLogLevel("ofThread", OF_LOG_ERROR);
-	//ofSetVerticalSync(false);
-	fbo.allocate(ofGetWidth(), ofGetHeight());
-	fbo.begin();
-		ofClear(0, 0, 0, 0);
-	fbo.end();
+		
 	
-	
-	string videoPath = ofToDataPath("vsync_loop_problem_re-render.mov", true);
+	string videoPath = ofToDataPath("../../../video/Timecoded_Big_bunny_1.mov", true);
+
 	
 	ofDirectory currentVideoDirectory(ofToDataPath("/home/pi/videos/current", true));
 	if (currentVideoDirectory.exists()) 
@@ -30,10 +25,10 @@ void testApp::setup()
 	//Somewhat like ofFboSettings we may have a lot of options so this is the current model
 	ofxOMXPlayerSettings settings;
 	settings.videoPath = videoPath;
-	settings.useHDMIForAudio = true;	//default true
-	settings.enableTexture = true;		//default true
-	settings.enableLooping = true;		//default true
-	settings.enableAudio = true;		//default true, save resources by disabling
+	settings.useHDMIForAudio	= true;		//default true
+	settings.enableTexture		= true;		//default true
+	settings.enableLooping		= true;		//default true
+	settings.enableAudio		= true;		//default true, save resources by disabling
 	//settings.doFlipTexture = true;		//default false
 	
 	if (!settings.enableTexture) 
@@ -52,10 +47,7 @@ void testApp::setup()
 	//so either pass in the settings
 	omxPlayer.setup(settings);
 	
-	//or live with the defaults
-	//omxPlayer.loadMovie(videoPath);
 	consoleListener.setup(this);
-	//ofSetFrameRate(25);
 }
 
 
@@ -63,30 +55,20 @@ void testApp::setup()
 //--------------------------------------------------------------
 void testApp::update()
 {
-	//ofLogVerbose() << "omxPlayer.isFrameNew(): " << omxPlayer.isFrameNew();
 	
-	/*if (doRestart) {
-		omxPlayer.restartMovie();
-		doRestart = false;
-	}*/
-
 	
 }
 
 
 //--------------------------------------------------------------
-void testApp::draw(){
+void testApp::draw()
+{
 	
-	
-
 	omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
 	
-	int scaledHeight	= omxPlayer.getHeight()/4;
-	int scaledWidth		= omxPlayer.getWidth()/4;
-	omxPlayer.draw(ofGetWidth()-scaledWidth, ofGetHeight()-scaledHeight, scaledWidth, scaledHeight);
-
 	ofDrawBitmapStringHighlight(omxPlayer.getInfo(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
 }
+
 void testApp::keyPressed(int key)
 {
 	if (key == 'p') 
@@ -96,7 +78,6 @@ void testApp::keyPressed(int key)
 	if (key == 'r') 
 	{
 		omxPlayer.restartMovie();
-		
 	}
 }
 
