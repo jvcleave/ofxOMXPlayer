@@ -39,7 +39,6 @@ class OMXPlayerVideoBase: public OMXThread
 		bool						m_bAbort;
 		bool						m_flush;
 		int							m_speed;
-		double						m_pts;
 		double						m_FlipTimeStamp; // time stamp of last flippage. used to play at a forced framerate
 		double						m_iVideoDelay;
 		unsigned int				m_cached_size;
@@ -62,7 +61,7 @@ class OMXPlayerVideoBase: public OMXThread
 		int							GetDecoderFreeSpace();
 		double						GetCurrentPTS()
 		{
-			return m_pts;
+			return m_iCurrentPts;
 		};
 		double						GetFPS()
 		{

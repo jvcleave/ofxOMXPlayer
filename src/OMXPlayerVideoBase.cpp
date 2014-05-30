@@ -22,7 +22,7 @@ OMXPlayerVideoBase::OMXPlayerVideoBase()
 	m_flush         = false;
 	m_cached_size   = 0;
 	m_iVideoDelay   = 0;
-	m_pts           = DVD_NOPTS_VALUE;
+	m_iCurrentPts	= DVD_NOPTS_VALUE;
 	m_speed         = DVD_PLAYSPEED_NORMAL;
 
 	m_decoder = NULL;
@@ -113,11 +113,6 @@ bool OMXPlayerVideoBase::Decode(OMXPacket *pkt)
 	if(pkt->pts == DVD_NOPTS_VALUE && (m_iCurrentPts == DVD_NOPTS_VALUE || count_bits(m_history_valid_pts & 0xffff) < 4))
 	{
 		pts = pkt->dts;
-	}
-	
-	if(pkt->pts != DVD_NOPTS_VALUE)
-	{
-		m_pts = pkt->pts; 
 	}
 	
 	if (pts != DVD_NOPTS_VALUE)
@@ -214,8 +209,8 @@ void OMXPlayerVideoBase::Process()
 {
 	OMXPacket *omx_pkt = NULL;
 
-	m_pts = 0;
-
+	//m_pts = 0;
+	//m_iCurrentPts = 0?
 	while(!m_bStop && !m_bAbort)
 	{
 		Lock();

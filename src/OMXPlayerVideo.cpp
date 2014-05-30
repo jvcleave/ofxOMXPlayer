@@ -78,7 +78,6 @@ bool OMXPlayerVideo::Open(COMXStreamInfo& hints, OMXClock *av_clock, bool deinte
 	m_cached_size = 0;
 	m_iVideoDelay = 0;
 	m_hdmi_clock_sync = hdmi_clock_sync;
-	m_pts         = 0;
 	m_speed       = DVD_PLAYSPEED_NORMAL;
 	
 
@@ -177,7 +176,6 @@ bool OMXPlayerVideo::Close()
 	m_stream_id     = -1;
 	m_iCurrentPts   = DVD_NOPTS_VALUE;
 	m_pStream       = NULL;
-	m_pts           = 0;
 	m_speed         = DVD_PLAYSPEED_NORMAL;
 
 	ofLogVerbose(__func__) << " END";

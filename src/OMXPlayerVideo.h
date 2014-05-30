@@ -24,5 +24,5 @@ class OMXPlayerVideo : public OMXPlayerVideoBase
 		bool Close();
 		ofRectangle displayRect;
 		void setDisplayRect(ofRectangle& rectangle);
-	bool validateDisplayRect(ofRectangle& rectangle);
+		bool validateDisplayRect(ofRectangle& rectangle);
 };
