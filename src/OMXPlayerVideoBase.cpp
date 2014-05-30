@@ -107,13 +107,19 @@ bool OMXPlayerVideoBase::Decode(OMXPacket *pkt)
 	{
 		return false;
 	}
+	
 	m_history_valid_pts = (m_history_valid_pts << 1) | (pkt->pts != DVD_NOPTS_VALUE);
 	double pts = pkt->pts;
 	if(pkt->pts == DVD_NOPTS_VALUE && (m_iCurrentPts == DVD_NOPTS_VALUE || count_bits(m_history_valid_pts & 0xffff) < 4))
 	{
 		pts = pkt->dts;
 	}
-
+	
+	if(pkt->pts != DVD_NOPTS_VALUE)
+	{
+		m_pts = pkt->pts; 
+	}
+	
 	if (pts != DVD_NOPTS_VALUE)
 	{
 		pts += m_iVideoDelay;
@@ -123,7 +129,8 @@ bool OMXPlayerVideoBase::Decode(OMXPacket *pkt)
 	{
 		m_iCurrentPts = pts;
 	}
-
+	
+	
 	while((int) m_decoder->GetFreeSpace() < pkt->size)
 	{
 		m_av_clock->sleep(10);
