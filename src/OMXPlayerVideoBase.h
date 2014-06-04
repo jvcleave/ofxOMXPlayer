@@ -59,18 +59,11 @@ class OMXPlayerVideoBase: public OMXThread
 		bool						CloseDecoder();
 		int							GetDecoderBufferSize();
 		int							GetDecoderFreeSpace();
-		double						GetCurrentPTS()
-		{
-			return m_iCurrentPts;
-		};
-		double						GetFPS()
-		{
-			return m_fps;
-		};
-		unsigned int				GetCached()
-		{
-			return m_cached_size;
-		};
+		double						GetCurrentPTS();
+		double						GetFPS();
+
+		unsigned int				GetCached();
+	
 		void						SubmitEOS();
 		bool						IsEOS();
 

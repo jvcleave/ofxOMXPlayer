@@ -35,6 +35,23 @@ OMXPlayerVideoBase::OMXPlayerVideoBase()
 	isExiting = false;
 }
 
+
+double OMXPlayerVideoBase::GetCurrentPTS()
+{
+	return m_iCurrentPts;
+}
+
+double OMXPlayerVideoBase::GetFPS()
+{
+	return m_fps;
+}
+
+unsigned int OMXPlayerVideoBase::GetCached()
+{
+	return m_cached_size;
+}
+
+
 int OMXPlayerVideoBase::getCurrentFrame()
 {
 	if (m_decoder) 
@@ -205,12 +222,15 @@ bool OMXPlayerVideoBase::AddPacket(OMXPacket *pkt)
 }
 
 
+
+
 void OMXPlayerVideoBase::Process()
 {
 	OMXPacket *omx_pkt = NULL;
 
-	//m_pts = 0;
-	//m_iCurrentPts = 0?
+	//m_pts was previously set to 0 - might need later...
+	//m_iCurrentPts = 0;
+	
 	while(!m_bStop && !m_bAbort)
 	{
 		Lock();
