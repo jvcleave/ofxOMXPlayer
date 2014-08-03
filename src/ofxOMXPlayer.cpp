@@ -35,7 +35,7 @@ void ofxOMXPlayer::updatePixels()
 	{
 		return;
 	}
-	fbo.begin(false);
+	fbo.begin();
 		ofClear(0, 0, 0, 0);
 		texture.draw(0, 0);
 		//ofLogVerbose() << "updatePixels";
