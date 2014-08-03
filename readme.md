@@ -27,8 +27,10 @@ Allows the use of
 720p video works best here
 
 Audio:   
-Audio can be played back through HDMI or headphone jack
-May be disabled to save resources
+ - Audio can be played back through HDMI or headphone jack
+ - May be disabled to save resources
+ - intialVolume can be passed
+
 
 Headphone jack may require this tweak:   
 https://gist.github.com/jvcleave/4972661
@@ -41,11 +43,17 @@ EXAMPLES:
 example-basic:   
 Playback of video in texture mode (default)
 
+example-multiple-players:
+Simultaneous playback 2 videos in non-texture mode
+
 example-playlist:   
 Playback of a folder of videos in texture mode
 
 example-pixels:   
 Example of pixel access that is needed for OpenCv operations/Saving images, etc
+
+example-restartMovie:
+restart a movie by pressing "r" + ENTER in ssh session (or "r" on attached keyboard)
 
 example-shader:   
 Use of shaders, fbos and video
@@ -62,7 +70,6 @@ COMPRESSION RECOMMENDATIONS:
  - PCM Audio (more compatible with HDMI)
 
 TODO:   
- - Multiple video support for textured Player
  - Implement better Seeking
  - General cleanup (many properties are public)
  - Possibly have it extend ofBaseVideoPlayer
