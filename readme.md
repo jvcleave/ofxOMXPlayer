@@ -43,7 +43,7 @@ EXAMPLES:
 example-basic:   
 Playback of video in texture mode (default)
 
-example-multiple-players:
+example-multiple-players:   
 Simultaneous playback 2 videos in non-texture mode
 
 example-playlist:   
@@ -52,7 +52,7 @@ Playback of a folder of videos in texture mode
 example-pixels:   
 Example of pixel access that is needed for OpenCv operations/Saving images, etc
 
-example-restartMovie:
+example-restartMovie:   
 restart a movie by pressing "r" + ENTER in ssh session (or "r" on attached keyboard)
 
 example-shader:   
