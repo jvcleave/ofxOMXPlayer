@@ -24,7 +24,7 @@ Allows the use of
  - shaders
  - pixel access
  - drawing overlays
-720p video works best here
+ - 720p video works best here
 
 Audio:   
  - Audio can be played back through HDMI or headphone jack
