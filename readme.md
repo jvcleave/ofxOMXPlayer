@@ -29,7 +29,7 @@ Allows the use of
 Audio:   
  - Audio can be played back through HDMI or headphone jack
  - May be disabled to save resources
- - intialVolume can be passed
+ - initialVolume can be passed
 
 
 Headphone jack may require this tweak:   
