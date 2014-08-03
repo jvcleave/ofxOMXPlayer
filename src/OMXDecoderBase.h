@@ -36,7 +36,7 @@ class OMXDecoderBase
 {
 	public:
 		OMXDecoderBase();
-		~OMXDecoderBase();
+		virtual ~OMXDecoderBase();
 		OMX_VIDEO_CODINGTYPE m_codingType;
 
 		COMXCoreTunel			m_omx_tunnel_clock;

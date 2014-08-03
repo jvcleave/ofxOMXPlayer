@@ -18,6 +18,7 @@ class OMXEGLImage : public OMXDecoderBase
 	static OMX_ERRORTYPE onFillBufferDone(OMX_HANDLETYPE hComponent,
 										  OMX_PTR pAppData,
 										  OMX_BUFFERHEADERTYPE* pBuffer);
+	~OMXEGLImage(){};
 private:
 	int frameCounter;
 	int frameOffset;
