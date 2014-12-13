@@ -584,7 +584,7 @@ ofxOMXPlayer::~ofxOMXPlayer()
 }
 
 bool doExit = false;
-void termination_handler(int signum)
+void signal_handler(int signum)
 {
 	doExit = true;
 }
@@ -614,35 +614,40 @@ void ofxOMXPlayer::onUpdateDuringExit(ofEventArgs& args)
 void ofxOMXPlayer::addExitHandler()
 {
 
-
-
-	//http://stackoverflow.com/questions/11465148/using-sigaction-c-cpp
-	//Structs that will describe the old action and the new action
-	//associated to the SIGINT signal (Ctrl+c from keyboard).
-	struct sigaction new_action, old_action;
-
-	//Set the handler in the new_action struct
-	new_action.sa_handler = termination_handler;
-
-	//Set to empty the sa_mask. It means that no signal is blocked while the handler run.
-	sigemptyset(&new_action.sa_mask);
-
-	//Block the SEGTERM signal.
-	// It means that while the handler run, the SIGTERM signal is ignored
-	sigaddset(&new_action.sa_mask, SIGTERM);
-
-	//Remove any flag from sa_flag. See documentation for flags allowed
-	new_action.sa_flags = 0;
-
-	//Read the old signal associated to SIGINT (keyboard, see signal(7))
-	sigaction(SIGINT, NULL, &old_action);
-
-	//If the old handler wasn't SIG_IGN (it's a handler that just "ignore" the signal)
-	if (old_action.sa_handler != SIG_IGN)
-	{
-		//Replace the signal handler of SIGINT with the one described by new_action
-		sigaction(SIGINT,&new_action,NULL);
-	}
+    vector<int> signals;
+    signals.push_back(SIGINT);
+    signals.push_back(SIGQUIT);
+    
+    for (size_t i=0; i<signals.size(); i++)
+    {
+        int SIGNAL_TO_BLOCK = signals[i];
+        //http://stackoverflow.com/questions/11465148/using-sigaction-c-cpp
+        
+        //Struct for the new action associated to the SIGNAL_TO_BLOCK
+        struct sigaction new_action;
+        new_action.sa_handler = signal_handler;
+        
+        //Empty the sa_mask. This means that no signal is blocked while the signal_handler runs.
+        sigemptyset(&new_action.sa_mask);
+        
+        //Block the SEGTERM signal so while the signal_handler runs, the SIGTERM signal is ignored
+        sigaddset(&new_action.sa_mask, SIGTERM);
+        
+        //Remove any flag from sa_flag. See documentation for flags allowed
+        new_action.sa_flags = 0;
+        
+        struct sigaction old_action;
+        //Read the old signal associated to SIGNAL_TO_BLOCK
+        sigaction(SIGNAL_TO_BLOCK, NULL, &old_action);
+        
+        //If the old handler wasn't SIG_IGN it is a handler that just "ignores" the signal
+        if (old_action.sa_handler != SIG_IGN)
+        {
+            //Replace the signal handler of SIGNAL_TO_BLOCK with the one described by new_action
+            sigaction(SIGNAL_TO_BLOCK, &new_action, NULL);
+        }
+        
+    }
 	ofAddListener(ofEvents().update, this, &ofxOMXPlayer::onUpdateDuringExit);
 }
 
