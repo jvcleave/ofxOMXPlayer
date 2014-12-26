@@ -198,18 +198,19 @@ bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspec
 	// broadcom omx entension:
 	// When enabled, the timestamp fifo mode will change the way incoming timestamps are associated with output images.
 	// In this mode the incoming timestamps get used without re-ordering on output images.
-	if(hints.ptsinvalid)
-	{
-		OMX_CONFIG_BOOLEANTYPE timeStampMode;
-		OMX_INIT_STRUCTURE(timeStampMode);
-		timeStampMode.bEnabled = OMX_TRUE;
-		error = m_omx_decoder.SetParameter((OMX_INDEXTYPE)OMX_IndexParamBrcmVideoTimestampFifo, &timeStampMode);
-		if (error != OMX_ErrorNone)
-		{
-			ofLogError(__func__) << "m_omx_decoder OMX_IndexParamBrcmVideoTimestampFifo FAIL: " << COMXCore::getOMXError(error);
-			return false;
-		}
-	}
+	
+    // recent firmware will actually automatically choose the timestamp stream with the least variance, so always enable
+
+    OMX_CONFIG_BOOLEANTYPE timeStampMode;
+    OMX_INIT_STRUCTURE(timeStampMode);
+    timeStampMode.bEnabled = OMX_TRUE;
+    error = m_omx_decoder.SetParameter((OMX_INDEXTYPE)OMX_IndexParamBrcmVideoTimestampFifo, &timeStampMode);
+    if (error != OMX_ErrorNone)
+    {
+        ofLogError(__func__) << "m_omx_decoder OMX_IndexParamBrcmVideoTimestampFifo FAIL: " << COMXCore::getOMXError(error);
+        return false;
+    }
+
 
 	if(NaluFormatStartCodes(hints.codec, m_extradata, m_extrasize))
 	{

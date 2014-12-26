@@ -92,10 +92,6 @@ class COMXAudio
 
 		void PrintChannels(OMX_AUDIO_CHANNELTYPE eChannelMapping[]);
 		void PrintPCM(OMX_AUDIO_PARAM_PCMMODETYPE *pcm);
-		void PrintDDP(OMX_AUDIO_PARAM_DDPTYPE *ddparm);
-		void PrintDTS(OMX_AUDIO_PARAM_DTSTYPE *dtsparam);
-		unsigned int SyncDTS(BYTE* pData, unsigned int iSize);
-		unsigned int SyncAC3(BYTE* pData, unsigned int iSize);
 
 	private:
 		bool          m_Initialized;
@@ -119,7 +115,6 @@ class COMXAudio
 		bool          m_setStartTime;
 		int           m_SampleSize;
 		bool          m_first_frame;
-		bool          m_LostSync;
 		int           m_SampleRate;
 		OMX_AUDIO_CODINGTYPE m_eEncoding;
 		uint8_t       *m_extradata;

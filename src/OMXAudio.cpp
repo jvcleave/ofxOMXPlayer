@@ -63,10 +63,6 @@ static unsigned int WAVEChannels[OMX_MAX_CHANNELS] =
 	SPEAKER_BACK_CENTER
 };
 
-static const uint16_t AC3Bitrates[] = {32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384, 448, 512, 576, 640};
-static const uint16_t AC3FSCod   [] = {48000, 44100, 32000, 0};
-
-static const uint16_t DTSFSCod   [] = {0, 8000, 16000, 32000, 0, 0, 11025, 22050, 44100, 0, 0, 12000, 24000, 48000, 0, 0};
 
 // Dolby 5.1 downmixing coefficients
 const float downmixing_coefficients_6[16] =
@@ -122,7 +118,6 @@ COMXAudio::COMXAudio() :
 	m_setStartTime    (false  ),
 	m_SampleSize      (0      ),
 	m_first_frame     (true   ),
-	m_LostSync        (true   ),
 	m_SampleRate      (0      ),
 	m_eEncoding       (OMX_AUDIO_CodingPCM),
 	m_extradata       (NULL   ),
@@ -660,7 +655,6 @@ bool COMXAudio::Deinitialize()
 	m_av_clock  = NULL;
 
 	m_Initialized = false;
-	m_LostSync    = true;
 	m_HWDecode    = false;
 
 	if(m_extradata)
@@ -692,7 +686,6 @@ void COMXAudio::Flush()
 	}
 
 	//m_setStartTime  = true;
-	m_LostSync      = true;
 	//m_first_frame   = true;
 }
 
@@ -899,24 +892,6 @@ unsigned int COMXAudio::AddPackets(const void* data, unsigned int len, double dt
 		return len;
 	}
 
-	if(m_eEncoding == OMX_AUDIO_CodingDTS && m_LostSync && (m_Passthrough || m_HWDecode))
-	{
-		int skip = SyncDTS((uint8_t *)data, len);
-		if(skip > 0)
-		{
-			return len;
-		}
-	}
-
-	if(m_eEncoding == OMX_AUDIO_CodingDDP && m_LostSync && (m_Passthrough || m_HWDecode))
-	{
-		int skip = SyncAC3((uint8_t *)data, len);
-		if(skip > 0)
-		{
-			return len;
-		}
-	}
-
 	unsigned int demuxer_bytes = (unsigned int)len;
 	uint8_t *demuxer_content = (uint8_t *)data;
 
@@ -1112,7 +1087,6 @@ unsigned int COMXAudio::AddPackets(const void* data, unsigned int len, double dt
 
 					m_omx_render.SetParameter(OMX_IndexParamAudioDdp, &m_ddParam);
 					m_omx_render.GetParameter(OMX_IndexParamAudioDdp, &m_ddParam);
-					PrintDDP(&m_ddParam);
 				}
 				else if(m_eEncoding == OMX_AUDIO_CodingDTS)
 				{
@@ -1133,7 +1107,6 @@ unsigned int COMXAudio::AddPackets(const void* data, unsigned int len, double dt
 
 					m_omx_render.SetParameter(OMX_IndexParamAudioDts, &m_dtsParam);
 					m_omx_render.GetParameter(OMX_IndexParamAudioDts, &m_dtsParam);
-					PrintDTS(&m_dtsParam);
 				}
 			}
 
@@ -1423,221 +1396,4 @@ void COMXAudio::PrintPCM(OMX_AUDIO_PARAM_PCMMODETYPE *pcm)
 	//PrintChannels(pcm->eChannelMapping);
 }
 
-void COMXAudio::PrintDDP(OMX_AUDIO_PARAM_DDPTYPE *ddparm)
-{
-	stringstream info;
-	info << "DDP PROPERTIES"	<< "\n";
-	info << "nPortIndex         : " <<  (int)ddparm->nPortIndex			<< "\n";
-	info << "nChannels          : " <<  (int)ddparm->nChannels			<< "\n";
-	info << "nBitRate           : " <<  (int)ddparm->nBitRate			<< "\n";
-	info << "nSampleRate        : " <<  (int)ddparm->nSampleRate		<< "\n";
-	info << "eBitStreamId       : " <<  (int)ddparm->eBitStreamId		<< "\n";
-	info << "eBitStreamMode     : " <<  (int)ddparm->eBitStreamMode		<< "\n";
-	info << "eDolbySurroundMode : " <<  (int)ddparm->eDolbySurroundMode << "\n";
-
-	//ofLogVerbose(__func__) << "\n" <<  info.str();
-
-	//PrintChannels(ddparm->eChannelMapping);
-}
-void COMXAudio::PrintDTS(OMX_AUDIO_PARAM_DTSTYPE *dtsparam)
-{
-	stringstream info;
-	info << "DTS PROPERTIES"	<< "\n";
-	info << "nPortIndex         : " <<  (int)dtsparam->nPortIndex 				<< "\n";
-	info << "nChannels          : " <<  (int)dtsparam->nChannels 				<< "\n";
-	info << "nBitRate           : " <<  (int)dtsparam->nBitRate 				<< "\n";
-	info << "nSampleRate        : " <<  (int)dtsparam->nSampleRate				<< "\n";
-	info << "nFormat            : " <<  (int)dtsparam->nFormat					<< "\n";
-	info << "nDtsType           : " <<  (int)dtsparam->nDtsType 				<< "\n";
-	info << "nDtsFrameSizeBytes : " <<  (int)dtsparam->nDtsFrameSizeBytes 		<< "\n";
-
-	//ofLogVerbose(__func__) << "\n" <<  info.str();
-
-	//PrintChannels(dtsparam->eChannelMapping);
-}
-
-/* ========================== SYNC FUNCTIONS ========================== */
-unsigned int COMXAudio::SyncDTS(BYTE* pData, unsigned int iSize)
-{
-	OMX_INIT_STRUCTURE(m_dtsParam);
-
-	unsigned int skip;
-	unsigned int srCode;
-	unsigned int dtsBlocks;
-	bool littleEndian;
-
-	for(skip = 0; iSize - skip > 8; ++skip, ++pData)
-	{
-		if (pData[0] == 0x7F && pData[1] == 0xFE && pData[2] == 0x80 && pData[3] == 0x01)
-		{
-			/* 16bit le */
-			littleEndian = true;
-			dtsBlocks    = ((pData[4] >> 2) & 0x7f) + 1;
-			m_dtsParam.nFormat = 0x1 | 0x2;
-		}
-		else if (pData[0] == 0x1F && pData[1] == 0xFF && pData[2] == 0xE8 && pData[3] == 0x00 && pData[4] == 0x07 && (pData[5] & 0xF0) == 0xF0)
-		{
-			/* 14bit le */
-			littleEndian = true;
-			dtsBlocks    = (((pData[4] & 0x7) << 4) | (pData[7] & 0x3C) >> 2) + 1;
-			m_dtsParam.nFormat = 0x1 | 0x0;
-		}
-		else if (pData[1] == 0x7F && pData[0] == 0xFE && pData[3] == 0x80 && pData[2] == 0x01)
-		{
-			/* 16bit be */
-			littleEndian = false;
-			dtsBlocks    = ((pData[5] >> 2) & 0x7f) + 1;
-			m_dtsParam.nFormat = 0x0 | 0x2;
-		}
-		else if (pData[1] == 0x1F && pData[0] == 0xFF && pData[3] == 0xE8 && pData[2] == 0x00 && pData[5] == 0x07 && (pData[4] & 0xF0) == 0xF0)
-		{
-			/* 14bit be */
-			littleEndian = false;
-			dtsBlocks    = (((pData[5] & 0x7) << 4) | (pData[6] & 0x3C) >> 2) + 1;
-			m_dtsParam.nFormat = 0x0 | 0x0;
-		}
-		else
-		{
-			continue;
-		}
-
-		if (littleEndian)
-		{
-			/* if it is not a termination frame, check the next 6 bits are set */
-			if ((pData[4] & 0x80) == 0x80 && (pData[4] & 0x7C) != 0x7C)
-			{
-				continue;
-			}
-
-			/* get the frame size */
-			m_dtsParam.nDtsFrameSizeBytes = ((((pData[5] & 0x3) << 8 | pData[6]) << 4) | ((pData[7] & 0xF0) >> 4)) + 1;
-			srCode = (pData[8] & 0x3C) >> 2;
-		}
-		else
-		{
-			/* if it is not a termination frame, check the next 6 bits are set */
-			if ((pData[5] & 0x80) == 0x80 && (pData[5] & 0x7C) != 0x7C)
-			{
-				continue;
-			}
-
-			/* get the frame size */
-			m_dtsParam.nDtsFrameSizeBytes = ((((pData[4] & 0x3) << 8 | pData[7]) << 4) | ((pData[6] & 0xF0) >> 4)) + 1;
-			srCode = (pData[9] & 0x3C) >> 2;
-		}
-
-		/* make sure the framesize is sane */
-		if (m_dtsParam.nDtsFrameSizeBytes < 96 || m_dtsParam.nDtsFrameSizeBytes > 16384)
-		{
-			continue;
-		}
-
-		m_dtsParam.nSampleRate = DTSFSCod[srCode];
-
-		switch(dtsBlocks << 5)
-		{
-			case 512 :
-				m_dtsParam.nDtsType = 1;
-				break;
-			case 1024:
-				m_dtsParam.nDtsType = 2;
-				break;
-			case 2048:
-				m_dtsParam.nDtsType = 3;
-				break;
-			default:
-				m_dtsParam.nDtsType = 0;
-				break;
-		}
-
-		//m_dtsParam.nFormat = 1;
-		m_dtsParam.nDtsType = 1;
-
-		m_LostSync = false;
-
-		return skip;
-	}
-
-	m_LostSync = true;
-	return iSize;
-}
-
-unsigned int COMXAudio::SyncAC3(BYTE* pData, unsigned int iSize)
-{
-	unsigned int skip = 0;
-	//unsigned int fSize = 0;
-
-	for(skip = 0; iSize - skip > 6; ++skip, ++pData)
-	{
-		/* search for an ac3 sync word */
-		if(pData[0] != 0x0b || pData[1] != 0x77)
-		{
-			continue;
-		}
-
-		uint8_t fscod      = pData[4] >> 6;
-		uint8_t frmsizecod = pData[4] & 0x3F;
-		uint8_t bsid       = pData[5] >> 3;
-
-		/* sanity checks on the header */
-		if (
-		    fscod      ==   3 ||
-		    frmsizecod >   37 ||
-		    bsid       > 0x11
-		)
-		{
-			continue;
-		}
-
-		/* get the details we need to check crc1 and framesize */
-		uint16_t     bitrate   = AC3Bitrates[frmsizecod >> 1];
-		unsigned int framesize = 0;
-		switch(fscod)
-		{
-			case 0:
-				framesize = bitrate * 2;
-				break;
-			case 1:
-				framesize = (320 * bitrate / 147 + (frmsizecod & 1 ? 1 : 0));
-				break;
-			case 2:
-				framesize = bitrate * 4;
-				break;
-		}
-
-		//fSize = framesize * 2;
-		m_SampleRate = AC3FSCod[fscod];
-
-		/* dont do extensive testing if we have not lost sync */
-		if (!m_LostSync && skip == 0)
-		{
-			return 0;
-		}
-
-		unsigned int crc_size;
-		/* if we have enough data, validate the entire packet, else try to validate crc2 (5/8 of the packet) */
-		if (framesize <= iSize - skip)
-		{
-			crc_size = framesize - 1;
-		}
-		else
-		{
-			crc_size = (framesize >> 1) + (framesize >> 3) - 1;
-		}
-
-		if (crc_size <= iSize - skip)
-			if(av_crc(av_crc_get_table(AV_CRC_16_ANSI), 0, &pData[2], crc_size * 2))
-			{
-				continue;
-			}
-
-		/* if we get here, we can sync */
-		m_LostSync = false;
-		return skip;
-	}
-
-	/* if we get here, the entire packet is invalid and we have lost sync */
-	m_LostSync = true;
-	return iSize;
-}
 
