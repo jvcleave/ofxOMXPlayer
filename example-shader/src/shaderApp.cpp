@@ -66,7 +66,7 @@ void shaderApp::draw(){
 //--------------------------------------------------------------
 void shaderApp::keyPressed  (int key){
 	 
-	ofLogVerbose() << "key received: " << key;
+	ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
 	switch (key) 
 	{
 		case 'p':

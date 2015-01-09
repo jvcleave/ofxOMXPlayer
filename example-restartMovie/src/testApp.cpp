@@ -71,6 +71,7 @@ void testApp::draw()
 
 void testApp::keyPressed(int key)
 {
+    ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
 	if (key == 'p') 
 	{
 		omxPlayer.setPaused(!omxPlayer.isPaused());

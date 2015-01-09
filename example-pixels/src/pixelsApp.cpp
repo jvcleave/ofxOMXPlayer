@@ -58,6 +58,8 @@ void pixelsApp::draw(){
 //--------------------------------------------------------------
 void pixelsApp::keyPressed  (int key)
 {
+    ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
+    
 	if(key == 's')
 	{
 		doSaveImage = true;	
