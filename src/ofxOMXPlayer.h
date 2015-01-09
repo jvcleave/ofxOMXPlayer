@@ -27,7 +27,8 @@ class ofxOMXPlayer
 		int			getWidth();
 
 		void		draw(float x, float y, float w, float h);
-		void		draw(float x, float y);
+        void        setDisplayRectForNonTexture(float x, float y, float width, float height);
+		void		draw(float x=0, float y=0);
 
 
 		double		getMediaTime();

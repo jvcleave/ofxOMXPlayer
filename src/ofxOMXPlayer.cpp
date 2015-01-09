@@ -515,6 +515,18 @@ COMXStreamInfo ofxOMXPlayer::getAudioStreamInfo()
 	return audioInfo;
 }
 
+void ofxOMXPlayer::setDisplayRectForNonTexture(float x, float y, float width, float height)
+{
+    if (!engine) return;
+    if(!isTextureEnabled)
+    {
+       engine->setDisplayRect(x, y, width, height);
+    }else
+    {
+        ofLogWarning(__func__) << " does not work for texture mode";
+    }
+    
+}
 
 void ofxOMXPlayer::draw(float x, float y, float width, float height)
 {
@@ -525,7 +537,7 @@ void ofxOMXPlayer::draw(float x, float y, float width, float height)
 		fbo.draw(x, y, width, height);
 	}else
 	{
-		engine->setDisplayRect(x, y, width, height);		
+		setDisplayRectForNonTexture(x, y, width, height);
 	}
 	
 }
