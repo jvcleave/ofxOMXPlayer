@@ -81,7 +81,7 @@ void testApp::keyPressed(int key)
 	}
 }
 
-void testApp::onCharacterReceived(SSHKeyListenerEventData& e)
+void testApp::onCharacterReceived(KeyListenerEventData& e)
 {
 	keyPressed((int)e.character);
 }

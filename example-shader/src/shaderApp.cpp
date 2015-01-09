@@ -1,9 +1,8 @@
 #include "shaderApp.h"
 
 
-void shaderApp::onCharacterReceived(SSHKeyListenerEventData& e)
+void shaderApp::onCharacterReceived(KeyListenerEventData& e)
 {
-	//ConsoleListener* thread = (ConsoleListener*) e.listener;
 	keyPressed((int)e.character);
 }
 

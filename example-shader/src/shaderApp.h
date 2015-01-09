@@ -3,9 +3,9 @@
 #include "ofMain.h"
 #include "ofxOMXPlayer.h"
 
-#include "ConsoleListener.h"
+#include "TerminalListener.h"
 
-class shaderApp : public ofBaseApp, public SSHKeyListener, public ofxOMXPlayerListener{
+class shaderApp : public ofBaseApp, public KeyListener, public ofxOMXPlayerListener{
 	
 public:
 	
@@ -25,8 +25,8 @@ public:
 	
 	
 	//allows key commands via Shell
-	void onCharacterReceived(SSHKeyListenerEventData& e);
-	ConsoleListener consoleListener;
+	void onCharacterReceived(KeyListenerEventData& e);
+	TerminalListener consoleListener;
 	
 	void onVideoEnd(ofxOMXPlayerListenerEventData& e);
 	void onVideoLoop(ofxOMXPlayerListenerEventData& e);

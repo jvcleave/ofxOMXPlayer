@@ -2,10 +2,10 @@
 
 #include "ofMain.h"
 #include "ofxOMXPlayer.h"
-#include "ConsoleListener.h"
+#include "TerminalListener.h"
 
 
-class playlistApp : public ofBaseApp, public ofxOMXPlayerListener, public SSHKeyListener{
+class playlistApp : public ofBaseApp, public ofxOMXPlayerListener, public KeyListener{
 
 	public:
 
@@ -24,8 +24,8 @@ class playlistApp : public ofBaseApp, public ofxOMXPlayerListener, public SSHKey
 		vector<ofFile> files;
 		int videoCounter;
 	
-		void onCharacterReceived(SSHKeyListenerEventData& e);
-		ConsoleListener consoleListener;
+		void onCharacterReceived(KeyListenerEventData& e);
+		TerminalListener consoleListener;
 		ofxOMXPlayerSettings settings;
 	
 		void loadNextMovie();

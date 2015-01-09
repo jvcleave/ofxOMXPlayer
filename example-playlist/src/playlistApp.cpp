@@ -20,7 +20,7 @@ void playlistApp::onVideoEnd(ofxOMXPlayerListenerEventData& e)
 }
 
 
-void playlistApp::onCharacterReceived(SSHKeyListenerEventData& e)
+void playlistApp::onCharacterReceived(KeyListenerEventData& e)
 {
 	keyPressed((int)e.character);
 }

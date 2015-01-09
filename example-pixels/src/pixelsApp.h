@@ -3,8 +3,8 @@
 #include "ofMain.h"
 #include "ofxOMXPlayer.h"
 
-#include "ConsoleListener.h"
-class pixelsApp : public ofBaseApp, public SSHKeyListener{
+#include "TerminalListener.h"
+class pixelsApp : public ofBaseApp, public KeyListener{
 	
 public:
 	
@@ -17,8 +17,8 @@ public:
 	ofxOMXPlayer omxPlayer;
 	bool doSaveImage;
 	
-	ConsoleListener consoleListener;
-	void onCharacterReceived(SSHKeyListenerEventData& e);
+	TerminalListener consoleListener;
+	void onCharacterReceived(KeyListenerEventData& e);
 
 	ofTexture pixelOutput;
 	bool doUpdatePixels;

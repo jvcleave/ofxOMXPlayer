@@ -69,7 +69,7 @@ void pixelsApp::keyPressed  (int key)
 	}
 }
 
-void pixelsApp::onCharacterReceived(SSHKeyListenerEventData& e)
+void pixelsApp::onCharacterReceived(KeyListenerEventData& e)
 {
 	keyPressed((int)e.character);
 }

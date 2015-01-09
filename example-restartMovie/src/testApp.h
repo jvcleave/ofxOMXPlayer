@@ -2,9 +2,9 @@
 
 #include "ofMain.h"
 #include "ofxOMXPlayer.h"
-#include "ConsoleListener.h"
+#include "TerminalListener.h"
 
-class testApp : public ofBaseApp, public SSHKeyListener{
+class testApp : public ofBaseApp, public KeyListener{
 
 	public:
 
@@ -14,7 +14,7 @@ class testApp : public ofBaseApp, public SSHKeyListener{
 		void keyPressed(int key);	
 		ofxOMXPlayer omxPlayer;
 	
-	void onCharacterReceived(SSHKeyListenerEventData& e);
-	ConsoleListener consoleListener;
+	void onCharacterReceived(KeyListenerEventData& e);
+	TerminalListener consoleListener;
 };
 
