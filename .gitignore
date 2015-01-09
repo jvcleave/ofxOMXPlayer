@@ -6,5 +6,6 @@ example-multiple-players/bin
 example-pixels/bin
 example-playlist/bin
 example-shader/bin/example-shader
+example-displayrect/bin
 example-*/bin/libs
 *._*
