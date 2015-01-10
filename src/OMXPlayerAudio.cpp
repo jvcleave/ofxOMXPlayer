@@ -113,7 +113,6 @@ bool OMXPlayerAudio::Open(COMXStreamInfo& hints, OMXClock *av_clock, OMXReader *
 		return false;
 	}
 
-	av_register_all();
 
 	m_hints       = hints;
 	m_av_clock    = av_clock;

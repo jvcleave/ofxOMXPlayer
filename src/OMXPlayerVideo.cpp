@@ -64,7 +64,6 @@ bool OMXPlayerVideo::Open(COMXStreamInfo& hints, OMXClock *av_clock, bool deinte
 		Close();
 	}
 
-	av_register_all();
 
 	m_hints       = hints;
 	m_av_clock    = av_clock;
