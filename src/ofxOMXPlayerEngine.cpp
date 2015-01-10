@@ -172,7 +172,28 @@ void ofxOMXPlayerEngine::rewind()
 	ofLogVerbose(__func__) << "newSpeed: " << newSpeed;
 
 }
-
+bool ofxOMXPlayerEngine::didReadFile(bool doSkipAvProbe)
+{
+    bool passed = false;
+    
+    unsigned long long startTime = ofGetElapsedTimeMillis();
+    
+    bool didOpenMovie = omxReader.Open(moviePath.c_str(), doSkipAvProbe);
+    
+    unsigned long long endTime = ofGetElapsedTimeMillis();
+    ofLogNotice(__func__) << "didOpenMovie TOOK " << endTime-startTime <<  " MS";
+    
+    
+    if(didOpenMovie)
+    {
+        omxReader.GetHints(OMXSTREAM_VIDEO, videoStreamInfo);
+        if(videoStreamInfo.width > 0 || videoStreamInfo.height > 0)
+        {
+            passed = true;
+        }
+    }
+    return passed;
+}
 
 bool ofxOMXPlayerEngine::setup(ofxOMXPlayerSettings& settings)
 {
@@ -185,15 +206,15 @@ bool ofxOMXPlayerEngine::setup(ofxOMXPlayerSettings& settings)
 	ofLogVerbose(__func__) << "moviePath is " << moviePath;
 	isTextureEnabled		= omxPlayerSettings.enableTexture;
 
-
-
-	bool doDumpFormat = false;
+	bool doSkipAvProbe = true;
+    bool didOpenMovie = didReadFile(doSkipAvProbe);
     
-    unsigned long long startTime = ofGetElapsedTimeMillis();
-    bool didOpenMovie = omxReader.Open(moviePath.c_str(), doDumpFormat);
-    unsigned long long endTime = ofGetElapsedTimeMillis();
-    ofLogNotice(__func__) << "didOpenMovie TOOK " << endTime-startTime <<  " MS";
-    
+    if(!didOpenMovie)
+    {
+        ofLogWarning(__func__) << "FAST PATH MOVE OPEN FAILED - LIKELY A STREAM, TRYING SLOW PATH";
+        doSkipAvProbe = false;
+        didOpenMovie = didReadFile(doSkipAvProbe);
+    }
     
 	if(didOpenMovie)
 	{
@@ -206,37 +227,37 @@ bool ofxOMXPlayerEngine::setup(ofxOMXPlayerSettings& settings)
 		if (audioStreamCount>0)
 		{
 			hasAudio = true;
+             omxReader.GetHints(OMXSTREAM_AUDIO, audioStreamInfo);
 			ofLogVerbose(__func__) << "HAS AUDIO";
 		}
 		else
 		{
 			ofLogVerbose(__func__) << "NO AUDIO";
 		}
+ 
 		if (!omxPlayerSettings.enableAudio)
 		{
 			hasAudio = false;
 		}
+        
 		if (hasVideo)
 		{
 			ofLogVerbose(__func__)	<< "Video streams detection PASS";
-
+            
+            omxReader.GetHints(OMXSTREAM_VIDEO, videoStreamInfo);
+            videoWidth	= videoStreamInfo.width;
+            videoHeight = videoStreamInfo.height;
+            omxPlayerSettings.videoWidth	= videoStreamInfo.width;
+            omxPlayerSettings.videoHeight	= videoStreamInfo.height;
+            
+            ofLogVerbose(__func__) << "SET videoWidth: "	<< videoWidth;
+            ofLogVerbose(__func__) << "SET videoHeight: "	<< videoHeight;
+            ofLogVerbose(__func__) << "videoStreamInfo.nb_frames " <<videoStreamInfo.nb_frames;
+            
 			if(clock.OMXInitialize(hasVideo, hasAudio))
 			{
 				ofLogVerbose(__func__) << "clock Init PASS";
-				omxReader.GetHints(OMXSTREAM_VIDEO, videoStreamInfo);
-				omxReader.GetHints(OMXSTREAM_AUDIO, audioStreamInfo);
-
-				videoWidth	= videoStreamInfo.width;
-				videoHeight = videoStreamInfo.height;
-				omxPlayerSettings.videoWidth	= videoStreamInfo.width;
-				omxPlayerSettings.videoHeight	= videoStreamInfo.height;
-
-				ofLogVerbose(__func__) << "SET videoWidth: "	<< videoWidth;
-				ofLogVerbose(__func__) << "SET videoHeight: "	<< videoHeight;
-				ofLogVerbose(__func__) << "videoStreamInfo.nb_frames " <<videoStreamInfo.nb_frames;
-
 				return true;
-
 			}
 			else
 			{

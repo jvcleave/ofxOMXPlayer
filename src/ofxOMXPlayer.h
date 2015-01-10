@@ -6,16 +6,6 @@
 #include "ofxOMXPlayerListener.h"
 #include "ofxOMXPlayerEngine.h"
 
-
-/*
- avformat_find_stream_info in OMXReader is slow and skipping it
- reduced movie loading times by up to 3 seconds
- 
- comment out below line if is causing issues
-*/
-
-#define OPTIMIZATION_SKIP_PROBE_ENABLED 1
-
 class ofxOMXPlayer
 {
 	public:

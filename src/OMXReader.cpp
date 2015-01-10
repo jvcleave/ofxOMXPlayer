@@ -73,7 +73,7 @@ static offset_t dvd_file_seek(void *h, offset_t pos, int whence)
 		return pFile->Seek(pos, whence & ~AVSEEK_FORCE);
 }
 
-bool OMXReader::Open(std::string filename, bool dump_format)
+bool OMXReader::Open(std::string filename, bool doSkipAvProbe)
 {
 	
 	m_iCurrentPts = DVD_NOPTS_VALUE;
@@ -188,21 +188,21 @@ bool OMXReader::Open(std::string filename, bool dump_format)
 		m_pFormatContext->max_analyze_duration = 0;
 	
     
-#ifdef OPTIMIZATION_SKIP_PROBE_ENABLED
-    
-    unsigned long long startTime = ofGetElapsedTimeMillis();
+    if(!doSkipAvProbe)
+    {
+        unsigned long long startTime = ofGetElapsedTimeMillis();
         result = avformat_find_stream_info(m_pFormatContext, NULL);
-    unsigned long long endTime = ofGetElapsedTimeMillis();
-    ofLogNotice(__func__) << "avformat_find_stream_info TOOK " << endTime-startTime <<  " MS";
-    
-
-	
-	if(result < 0)
-	{
-		Close();
-		return false;
-	}
-#endif
+        unsigned long long endTime = ofGetElapsedTimeMillis();
+        ofLogNotice(__func__) << "avformat_find_stream_info TOOK " << endTime-startTime <<  " MS";
+        
+        
+        
+        if(result < 0)
+        {
+            Close();
+            return false;
+        }
+    }
     
 	if(!GetStreams())
 	{
@@ -225,9 +225,9 @@ bool OMXReader::Open(std::string filename, bool dump_format)
 	}
 	
 	m_speed       = DVD_PLAYSPEED_NORMAL;
-	
+	/*
 	if(dump_format)
-		av_dump_format(m_pFormatContext, 0, m_filename.c_str(), 0);
+		av_dump_format(m_pFormatContext, 0, m_filename.c_str(), 0);*/
 	
 	UpdateCurrentPTS();
 	

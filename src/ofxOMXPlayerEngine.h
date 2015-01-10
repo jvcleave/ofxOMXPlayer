@@ -131,6 +131,7 @@ class ofxOMXPlayerEngine: public OMXThread
 	ofRectangle displayRect;
 	
 	void setDisplayRect(ofRectangle& rectangle);
+    bool didReadFile(bool doSkipAvProbe);
 
 };
 
