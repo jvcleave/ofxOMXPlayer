@@ -19,15 +19,15 @@
 using namespace XFILE;
 using namespace std;
 
-#define MAX_OMX_CHAPTERS 64
+#define MAX_OMX_CHAPTERS 2
 
-#define MAX_OMX_STREAMS        100
+#define MAX_OMX_STREAMS        10
 
 #ifndef FFMPEG_FILE_BUFFER_SIZE
 #define FFMPEG_FILE_BUFFER_SIZE   32768 // default reading size for ffmpeg
 #endif
 #ifndef MAX_STREAMS
-#define MAX_STREAMS 100
+#define MAX_STREAMS 10
 #endif
 
 typedef struct OMXChapter

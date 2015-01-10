@@ -9,6 +9,7 @@
 
 ofxOMXPlayer::ofxOMXPlayer()
 {
+    OMXInitializer::getInstance().init();
 	engine = NULL;
 	isOpen = false;
 	isTextureEnabled = false;
@@ -248,15 +249,24 @@ bool ofxOMXPlayer::setup(ofxOMXPlayerSettings settings)
 
 bool ofxOMXPlayer::openEngine()
 {
+    unsigned long long startTime = ofGetElapsedTimeMillis();
 	if (engine)
 	{
 		delete engine;
 		engine = NULL;
 	}
-
-	//
+    unsigned long long endTime = ofGetElapsedTimeMillis();
+    ofLogNotice(__func__) << "DELETE TOOK " << endTime-startTime <<  " MS";
+	
+    
+    startTime = ofGetElapsedTimeMillis();
+    
 	engine = new ofxOMXPlayerEngine();
 	bool setupPassed = engine->setup(settings);
+    
+    endTime = ofGetElapsedTimeMillis();
+    ofLogNotice(__func__) << "setup TOOK " << endTime-startTime <<  " MS";
+    
 	if (setupPassed)
 	{
 		settings = engine->omxPlayerSettings;
@@ -264,7 +274,7 @@ bool ofxOMXPlayer::openEngine()
 		if (settings.enableTexture)
 		{
 			isTextureEnabled = settings.enableTexture;
-			generateEGLImage(settings.videoWidth, settings.videoHeight);
+            generateEGLImage(settings.videoWidth, settings.videoHeight);
 			engine->eglImage = eglImage;
 		}
 		else
@@ -592,7 +602,7 @@ string ofxOMXPlayer::getInfo()
 ofxOMXPlayer::~ofxOMXPlayer()
 {
 	close();
-
+   // OMX_Deinit();
 }
 
 bool doExit = false;
@@ -619,6 +629,7 @@ void ofxOMXPlayer::onUpdateDuringExit(ofEventArgs& args)
 			delete[] pixels;
 			pixels = NULL;
 		}
+        OMXInitializer::getInstance().deinit();
 		ofExit();
 	}
 }

@@ -91,7 +91,7 @@ class ofxOMXPlayerEngine: public OMXThread
 		void setDisplayRect(float x, float y, float w, float h);
 	private:
 
-		COMXCore				omxCore;
+		
 		OMXClock				clock;
 
 		OMXPacket*				packet;

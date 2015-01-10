@@ -82,11 +82,8 @@ bool OMXReader::Open(std::string filename, bool dump_format)
 	m_program     = UINT_MAX;
 	const AVIOInterruptCB int_cb = { interrupt_cb, NULL };
 	
-	ClearStreams();
-	
-	av_register_all();
-	avformat_network_init();
-	av_log_set_level(dump_format ? AV_LOG_INFO:AV_LOG_QUIET);
+    ClearStreams();
+
 	
 	int           result    = -1;
 	AVInputFormat *iformat  = NULL;
@@ -139,8 +136,9 @@ bool OMXReader::Open(std::string filename, bool dump_format)
 			Close();
 			return false;
 		}
-		
-		buffer = (unsigned char*)av_malloc(FFMPEG_FILE_BUFFER_SIZE);
+        
+        buffer = (unsigned char*)av_malloc(FFMPEG_FILE_BUFFER_SIZE);
+  
 		m_ioContext = avio_alloc_context(buffer, FFMPEG_FILE_BUFFER_SIZE, 0, m_pFile, dvd_file_read, NULL, dvd_file_seek);
 		m_ioContext->max_packet_size = 6144;
 		if(m_ioContext->max_packet_size)
@@ -149,6 +147,7 @@ bool OMXReader::Open(std::string filename, bool dump_format)
 		if(m_pFile->IoControl(IOCTRL_SEEK_POSSIBLE, NULL) == 0)
 			m_ioContext->seekable = 0;
 		
+        
 		av_probe_input_buffer(m_ioContext, &iformat, m_filename.c_str(), NULL, 0, 0);
 		
 		if(!iformat)
@@ -160,6 +159,10 @@ bool OMXReader::Open(std::string filename, bool dump_format)
 		
 		m_pFormatContext     = avformat_alloc_context();
 		m_pFormatContext->pb = m_ioContext;
+        
+        
+        
+        
 		result = avformat_open_input(&m_pFormatContext, m_filename.c_str(), iformat, NULL);
 		if(result < 0)
 		{
@@ -184,13 +187,23 @@ bool OMXReader::Open(std::string filename, bool dump_format)
 	if(/*m_bAVI || */m_bMatroska)
 		m_pFormatContext->max_analyze_duration = 0;
 	
-	result = avformat_find_stream_info(m_pFormatContext, NULL);
+    
+#ifdef OPTIMIZATION_SKIP_PROBE_ENABLED
+    
+    unsigned long long startTime = ofGetElapsedTimeMillis();
+        result = avformat_find_stream_info(m_pFormatContext, NULL);
+    unsigned long long endTime = ofGetElapsedTimeMillis();
+    ofLogNotice(__func__) << "avformat_find_stream_info TOOK " << endTime-startTime <<  " MS";
+    
+
+	
 	if(result < 0)
 	{
 		Close();
 		return false;
 	}
-	
+#endif
+    
 	if(!GetStreams())
 	{
 		Close();

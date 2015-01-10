@@ -221,12 +221,6 @@ class COMXCore
 {
 	public:
 		COMXCore();
-
-		// initialize OMXCore and get decoder component
-		bool Initialize();
-		void Deinitialize();
 		static string getOMXError(OMX_ERRORTYPE error);
-	protected:
-		bool              m_is_open;
-		bool              m_Initialized;
+
 };

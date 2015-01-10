@@ -35,7 +35,6 @@ ofxOMXPlayerEngine::ofxOMXPlayerEngine()
 	//clock				= NULL;
 	loopCounter			= 0;
 	previousLoopOffset = 0;
-	omxCore.Initialize();
 	//FrameCounter::getInstance().reset();
 	normalPlaySpeed = 1000;
 	speedMultiplier = 1;
@@ -97,13 +96,7 @@ ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
 	omxReader.Close();
 
 	clock.OMXDeinitialize();
-
-
-	if (isExiting)
-	{
-		omxCore.Deinitialize();
-	}
-
+    
 	ofLogVerbose(__func__) << "~ofxOMXPlayerEngine END";
 
 
@@ -195,8 +188,14 @@ bool ofxOMXPlayerEngine::setup(ofxOMXPlayerSettings& settings)
 
 
 	bool doDumpFormat = false;
-
-	if(omxReader.Open(moviePath.c_str(), doDumpFormat))
+    
+    unsigned long long startTime = ofGetElapsedTimeMillis();
+    bool didOpenMovie = omxReader.Open(moviePath.c_str(), doDumpFormat);
+    unsigned long long endTime = ofGetElapsedTimeMillis();
+    ofLogNotice(__func__) << "didOpenMovie TOOK " << endTime-startTime <<  " MS";
+    
+    
+	if(didOpenMovie)
 	{
 
 		ofLogVerbose(__func__) << "omxReader open moviePath PASS: " << moviePath;
