@@ -98,6 +98,7 @@ bool OMXReader::Open(std::string filename, bool doSkipAvProbe)
 	   m_filename.substr(0,7) == "rtmp://" || m_filename.substr(0,6) == "udp://" ||
 	   m_filename.substr(0,7) == "rtsp://" )
 	{
+        doSkipAvProbe = false;
 		// ffmpeg dislikes the useragent from AirPlay urls
 		//int idx = m_filename.Find("|User-Agent=AppleCoreMedia");
 		size_t idx = m_filename.find("|");
