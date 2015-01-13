@@ -301,7 +301,7 @@ void ofxOMXPlayerEngine::setDisplayRect(ofRectangle& rectangle)
 	}
 }
 
-bool ofxOMXPlayerEngine::openPlayer()
+bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
 {
 
 	if (isTextureEnabled)
@@ -378,8 +378,20 @@ bool ofxOMXPlayerEngine::openPlayer()
 
 			//file is weird (like test.h264) and has no reported frames
 		}
+        if (startTimeInSeconds !=0 && omxReader.CanSeek())
+        {
+            
+            bool didSeek = omxReader.SeekTime(startTimeInSeconds * 1000.0f, 0, &startpts);
+            if(didSeek)
+            {
+               ofLog(OF_LOG_VERBOSE, "Seeking start of video to %i seconds and frame # %i\n", startTimeInSeconds, (int)videoPlayer->GetFPS()*(int)startTimeInSeconds);
+            }else
+            {
+                ofLogError(__func__) << "COULD NOT SEEK TO " << startTimeInSeconds;
+            }
+        }
 		clock.OMXStateExecute();
-		clock.OMXStart(0.0);
+		clock.OMXStart(startpts);
 
 		ofLogVerbose(__func__) << "Opened video PASS";
 		Create();
@@ -391,7 +403,6 @@ bool ofxOMXPlayerEngine::openPlayer()
 		return false;
 	}
 }
-
 
 void ofxOMXPlayerEngine::Process()
 {

@@ -239,6 +239,13 @@ void ofxOMXPlayer::restartMovie()
 	doRestart = true;
 }
 
+
+void ofxOMXPlayer::seekToPosition(int timeInSeconds)
+{
+
+    openEngine(timeInSeconds);
+}
+
 bool ofxOMXPlayer::setup(ofxOMXPlayerSettings settings)
 {
 	this->settings = settings;
@@ -247,7 +254,7 @@ bool ofxOMXPlayer::setup(ofxOMXPlayerSettings settings)
 }
 
 
-bool ofxOMXPlayer::openEngine()
+bool ofxOMXPlayer::openEngine(int startTimeInSeconds)//default 0
 {
     unsigned long long startTime = ofGetElapsedTimeMillis();
 	if (engine)
@@ -283,7 +290,7 @@ bool ofxOMXPlayer::openEngine()
 			videoHeight = settings.videoHeight;
 		}
 
-		engine->openPlayer();
+		engine->openPlayer(startTimeInSeconds);
 	}
 	else
 	{

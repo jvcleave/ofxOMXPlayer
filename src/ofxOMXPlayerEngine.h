@@ -84,11 +84,12 @@ class ofxOMXPlayerEngine: public OMXThread
 		bool isExiting;
 		void startExit();
 
-		bool openPlayer();
+		bool openPlayer(int startTimeInSeconds=0);
 
 		EGLImageKHR eglImage;
 		ofxOMXPlayerSettings omxPlayerSettings;
 		void setDisplayRect(float x, float y, float w, float h);
+    
 	private:
 
 		

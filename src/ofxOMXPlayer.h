@@ -58,14 +58,14 @@ class ofxOMXPlayer
 		void fastForward();
 		void rewind();
 		void restartMovie();
-	
+        void seekToPosition(int timeInSeconds);
 		unsigned char * getPixels();
 		ofxOMXPlayerSettings settings;
 		string getInfo();
 	
 	private:
 
-		bool openEngine();
+		bool openEngine(int startTimeInSeconds = 0);
 		void addExitHandler();
 		void onUpdateDuringExit(ofEventArgs& args);
 		ofxOMXPlayerEngine* engine;

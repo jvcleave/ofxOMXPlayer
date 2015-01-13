@@ -346,11 +346,15 @@ bool OMXReader::SeekTime(int time, bool backwords, double *startpts, bool doLoop
 	//FlushRead();
 	
 	if(m_ioContext)
-		m_ioContext->buf_ptr = m_ioContext->buf_end;
+    {
+        m_ioContext->buf_ptr = m_ioContext->buf_end;
+    }
 	
 	int64_t seek_pts = (int64_t)time * (AV_TIME_BASE / 1000);
 	if (m_pFormatContext->start_time != (int64_t)AV_NOPTS_VALUE)
-		seek_pts += m_pFormatContext->start_time;
+    {
+        seek_pts += m_pFormatContext->start_time;
+    };
 	
 	
 	int ret = av_seek_frame(m_pFormatContext, -1, seek_pts, backwords ? AVSEEK_FLAG_BACKWARD : 0);
@@ -1045,8 +1049,11 @@ void OMXReader::UpdateCurrentPTS()
 		{
 			double ts = ConvertTimestamp(stream->cur_dts, stream->time_base.den, stream->time_base.num);
 			if(m_iCurrentPts == DVD_NOPTS_VALUE || m_iCurrentPts > ts )
-				m_iCurrentPts = ts;
+            {
+                m_iCurrentPts = ts;
+            }
 		}
+        //ofLogVerbose(__func__) << "m_iCurrentPts: " << m_iCurrentPts;
 	}
 }
 
