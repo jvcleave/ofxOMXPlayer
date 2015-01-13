@@ -89,7 +89,6 @@ class ofxOMXPlayerEngine: public OMXThread
 		EGLImageKHR eglImage;
 		ofxOMXPlayerSettings omxPlayerSettings;
 		void setDisplayRect(float x, float y, float w, float h);
-    
 	private:
 
 		
@@ -133,6 +132,7 @@ class ofxOMXPlayerEngine: public OMXThread
 	
 	void setDisplayRect(ofRectangle& rectangle);
     bool didReadFile(bool doSkipAvProbe);
+    int startFrame;
 
 };
 

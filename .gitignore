@@ -7,5 +7,6 @@ example-pixels/bin
 example-playlist/bin
 example-shader/bin/example-shader
 example-displayrect/bin
+example-seeking/bin
 example-*/bin/libs
 *._*

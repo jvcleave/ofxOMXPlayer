@@ -32,10 +32,11 @@ ofxOMXPlayerEngine::ofxOMXPlayerEngine()
 
 	listener			= NULL;
 
-	//clock				= NULL;
 	loopCounter			= 0;
-	previousLoopOffset = 0;
-	//FrameCounter::getInstance().reset();
+	previousLoopOffset  = 0;
+	
+    startFrame        = 0;
+    
 	normalPlaySpeed = 1000;
 	speedMultiplier = 1;
 	doSeek = false;
@@ -357,7 +358,7 @@ bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
 		}
 		else
 		{
-			ofLogVerbose(__func__) << " AUDIO PLAYER OPEN FAIL";
+			ofLogError(__func__) << " AUDIO PLAYER OPEN FAIL";
 		}
 	}
 
@@ -371,7 +372,7 @@ bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
 		{
 			nFrames =videoStreamInfo.nb_frames;
 			duration =videoStreamInfo.nb_frames / videoPlayer->GetFPS();
-			ofLogVerbose(__func__) << "duration SET: " << duration;
+			ofLogNotice(__func__) << "duration SET: " << duration;
 		}
 		else
 		{
@@ -384,7 +385,8 @@ bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
             bool didSeek = omxReader.SeekTime(startTimeInSeconds * 1000.0f, 0, &startpts);
             if(didSeek)
             {
-               ofLog(OF_LOG_VERBOSE, "Seeking start of video to %i seconds and frame # %i\n", startTimeInSeconds, (int)videoPlayer->GetFPS()*(int)startTimeInSeconds);
+                startFrame = (int)videoPlayer->GetFPS()*(int)startTimeInSeconds;
+               ofLogNotice(__func__) <<  "Seeking start of video to " << startTimeInSeconds << " seconds, frame: " << startFrame;
             }else
             {
                 ofLogError(__func__) << "COULD NOT SEEK TO " << startTimeInSeconds;
@@ -393,13 +395,13 @@ bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
 		clock.OMXStateExecute();
 		clock.OMXStart(startpts);
 
-		ofLogVerbose(__func__) << "Opened video PASS";
+		ofLogNotice(__func__) << "Opened video PASS";
 		Create();
 		return true;
 	}
 	else
 	{
-		ofLogError() << "Opened video FAIL";
+		ofLogError(__func__) << "Opened video FAIL";
 		return false;
 	}
 }
@@ -512,6 +514,7 @@ void ofxOMXPlayerEngine::Process()
 			if (videoPlayer) 
 			{
 				videoPlayer->resetFrameCounter();
+                startFrame = 0;
 			}
 		}
 		if (hasAudio)
@@ -600,7 +603,8 @@ int ofxOMXPlayerEngine::getCurrentFrame()
 {
 	if (videoPlayer) 
 	{
-		return videoPlayer->getCurrentFrame();
+        
+        return videoPlayer->getCurrentFrame()+startFrame;
 	}
 	
 	return 0;
