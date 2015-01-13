@@ -52,20 +52,15 @@ void testApp::setup()
 }
 
 bool doSeek = false;
-bool didSeek = false;
 //--------------------------------------------------------------
 void testApp::update()
 {
 	if(doSeek)
     {
-        omxPlayer.seekToPosition(ofRandom(2, 220));
+        int timeInSecondsToSeekTo = ofRandom(2, 20);
+        omxPlayer.seekToPosition(timeInSecondsToSeekTo);
         doSeek = false;
-        didSeek = true;
        
-    }
-    if(didSeek && omxPlayer.isFrameNew())
-    {
-        //omxPlayer.setPaused(true);
     }
 	
 }
