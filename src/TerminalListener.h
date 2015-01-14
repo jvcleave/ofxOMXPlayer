@@ -83,6 +83,7 @@ public:
                     KeyListenerEventData eventData(ch[0], (void *)this);
                     listener->onCharacterReceived(eventData);
                 }
+                thread.sleep(100);
             }
         }
     }

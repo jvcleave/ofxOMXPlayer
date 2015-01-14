@@ -157,7 +157,9 @@ bool OMXReader::Open(std::string filename, bool doSkipAvProbe)
 			Close();
 			return false;
 		}
-		
+        
+        //#warning experimental
+        //iformat->flags |= AVFMT_SEEK_TO_PTS;
 		m_pFormatContext     = avformat_alloc_context();
 		m_pFormatContext->pb = m_ioContext;
         
