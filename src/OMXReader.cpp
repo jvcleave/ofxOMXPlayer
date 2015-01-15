@@ -799,6 +799,8 @@ bool OMXReader::GetHints(AVStream *stream, COMXStreamInfo *hints)
 	hints->blockalign    = stream->codec->block_align;
 	hints->bitrate       = stream->codec->bit_rate;
 	hints->bitspersample = stream->codec->bits_per_coded_sample;
+    hints->gop_size      = stream->codec->gop_size;
+    
 	if(hints->bitspersample == 0)
 		hints->bitspersample = 16;
 	
@@ -812,6 +814,7 @@ bool OMXReader::GetHints(AVStream *stream, COMXStreamInfo *hints)
 		hints->duration		= stream->duration;
 		hints->nb_frames	= stream->nb_frames;
 		
+        
 		hints->fpsrate       = stream->r_frame_rate.num;
 		hints->fpsscale      = stream->r_frame_rate.den;
 		

@@ -34,7 +34,7 @@ class COMXStreamInfo
 		int profile; // encoder profile of the stream reported by the decoder. used to qualify hw decoders.
 		bool ptsinvalid;  // pts cannot be trusted (avi's).
 		int nb_frames;
-
+        int gop_size;
 		int64_t duration;
 
 		// AUDIO

@@ -30,17 +30,23 @@ private:
 public:
     KeyListener* listener;
     Poco::Thread thread;
+    int sleepTime;
     TerminalListener()
     {
         
+        sleepTime = 100;
         listener = NULL;
         
     }
     
     
-    void setup(KeyListener* listener_)
+    void setup(KeyListener* listener_, int sleepTime_ = 0)
     {
         listener = listener_;
+        if(sleepTime_ > 0)
+        {
+            sleepTime = sleepTime_;
+        }
         struct termios new_termios;
         
         tcgetattr(STDIN_FILENO, &orig_termios);
@@ -83,7 +89,7 @@ public:
                     KeyListenerEventData eventData(ch[0], (void *)this);
                     listener->onCharacterReceived(eventData);
                 }
-                thread.sleep(100);
+                thread.sleep(sleepTime);
             }
         }
     }
