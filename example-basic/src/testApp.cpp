@@ -36,7 +36,7 @@ void testApp::update()
 
 //--------------------------------------------------------------
 void testApp::draw(){
-	if(!omxPlayer.isTextureEnabled)
+	if(!omxPlayer.isTextureEnabled())
 	{
 		return;
 	}

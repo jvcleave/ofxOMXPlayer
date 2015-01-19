@@ -372,20 +372,20 @@ bool OMXReader::SeekTime(int time, bool backwords, double *startpts, bool doLoop
 	
 	// in this case the start time is requested time
 	if(startpts)
-		*startpts = DVD_MSEC_TO_TIME(time);
+    {
+        *startpts = DVD_MSEC_TO_TIME(time);
+    }
 	
-	// demuxer will return failure, if you seek to eof
 	m_eof = false;
 	if (m_pFile && m_pFile->IsEOF() && ret <= 0)
 	{
 		m_eof = true;
 		ret = 0;
 	}
-	//int landedTime = (int)(m_iCurrentPts / DVD_TIME_BASE * 1000);
-	//ofLogVerbose(__func__) << "Seek ended up on time: " << landedTime;
-	
+
+   
 	UnLock();
-	
+
 	return (ret >= 0);
 }
 
@@ -397,7 +397,7 @@ AVMediaType OMXReader::PacketType(OMXPacket *pkt)
 	return m_pFormatContext->streams[pkt->stream_index]->codec->codec_type;
 }
 
-OMXPacket *OMXReader::Read()
+OMXPacket* OMXReader::Read()
 {
 	AVPacket  pkt;
 	OMXPacket *m_omx_pkt = NULL;
@@ -421,8 +421,6 @@ OMXPacket *OMXReader::Read()
 	if (result < 0)
 	{
 		m_eof = true;
-		//FlushRead();
-		//av_free_packet(&pkt);
 		UnLock();
 		return NULL;
 	}
@@ -510,7 +508,7 @@ OMXPacket *OMXReader::Read()
 	m_omx_pkt->dts = ConvertTimestamp(pkt.dts, pStream->time_base.den, pStream->time_base.num);
 	m_omx_pkt->pts = ConvertTimestamp(pkt.pts, pStream->time_base.den, pStream->time_base.num);
 	m_omx_pkt->duration = DVD_SEC_TO_TIME((double)pkt.duration * pStream->time_base.num / pStream->time_base.den);
-	
+
 	// used to guess streamlength
 	if (m_omx_pkt->dts != DVD_NOPTS_VALUE && (m_omx_pkt->dts > m_iCurrentPts || m_iCurrentPts == DVD_NOPTS_VALUE))
 		m_iCurrentPts = m_omx_pkt->dts;
@@ -926,29 +924,6 @@ OMXPacket *OMXReader::AllocPacket(int size)
 	pkt->duration = DVD_NOPTS_VALUE;
 	
 	return pkt;
-	/*
-	OMXPacket *pkt = (OMXPacket *)malloc(sizeof(OMXPacket));
-	if(pkt)
-	{
-		memset(pkt, 0, sizeof(OMXPacket));
-		
-		pkt->data = (uint8_t*) malloc(size + FF_INPUT_BUFFER_PADDING_SIZE);
-		if(!pkt->data)
-		{
-			free(pkt);
-			pkt = NULL;
-		}
-		else
-		{
-			memset(pkt->data + size, 0, FF_INPUT_BUFFER_PADDING_SIZE);
-			pkt->size = size;
-			pkt->dts  = DVD_NOPTS_VALUE;
-			pkt->pts  = DVD_NOPTS_VALUE;
-			pkt->now  = DVD_NOPTS_VALUE;
-			pkt->duration = DVD_NOPTS_VALUE;
-		}
-	}
-	return pkt;*/
 }
 
 bool OMXReader::SetActiveStream(OMXStreamType type, unsigned int index)

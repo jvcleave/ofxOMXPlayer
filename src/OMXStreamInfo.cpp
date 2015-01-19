@@ -49,6 +49,7 @@ void COMXStreamInfo::Clear()
 	framesize  = 0;
 	syncword   = 0;
     gop_size = 0;
+    int fps;
 }
 
 string COMXStreamInfo::toString()
@@ -73,7 +74,7 @@ string COMXStreamInfo::toString()
 	info << "identifier: "			<<	identifier				<< "\n";
 	info << "extrasize: "			<<	extrasize				<< "\n";
     info << "gop_size: "			<<	gop_size				<< "\n";
-    
+    info << "fps: "                 <<	fps                     << "\n";
 
 	return info.str();
 }

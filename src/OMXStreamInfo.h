@@ -36,7 +36,7 @@ class COMXStreamInfo
 		int nb_frames;
         int gop_size;
 		int64_t duration;
-
+        int fps;
 		// AUDIO
 		int channels;
 		int samplerate;

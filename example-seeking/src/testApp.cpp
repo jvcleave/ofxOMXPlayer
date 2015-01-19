@@ -49,6 +49,14 @@ void testApp::setup()
 	omxPlayer.setup(settings);
 	
 	consoleListener.setup(this);
+    stringstream ss;
+    ss << "\n";
+    ss << "PRESS p TO TOGGLE PAUSE";
+    ss << "\n";
+    ss << "PRESS s TO SEEK TO RANDOM TIME";
+    
+    keyCommandInfo  = ss.str();
+    
 }
 
 bool doSeek = false;
@@ -57,8 +65,8 @@ void testApp::update()
 {
 	if(doSeek)
     {
-        int timeInSecondsToSeekTo = ofRandom(2, 20);
-        omxPlayer.seekToPosition(timeInSecondsToSeekTo);
+        int timeInSecondsToSeekTo = ofRandom(2, omxPlayer.getDurationInSeconds()-5);
+        omxPlayer.seekToTimeInSeconds(timeInSecondsToSeekTo);
         doSeek = false;
        
     }
@@ -69,10 +77,13 @@ void testApp::update()
 //--------------------------------------------------------------
 void testApp::draw()
 {
+	if (omxPlayer.isTextureEnabled())
+    {
+        omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
+    }
 	
-	omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
 	
-	ofDrawBitmapStringHighlight(omxPlayer.getInfo(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
+	ofDrawBitmapStringHighlight(omxPlayer.getInfo() + keyCommandInfo, 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
   
     
 }
@@ -84,7 +95,7 @@ void testApp::keyPressed(int key)
 	{
 		omxPlayer.setPaused(!omxPlayer.isPaused());
 	}
-	if (key == 'r') 
+	if (key == 's')
 	{
         doSeek = true;
         

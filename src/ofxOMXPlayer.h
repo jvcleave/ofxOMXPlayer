@@ -12,83 +12,83 @@ class ofxOMXPlayer
 		ofxOMXPlayer();
 		~ofxOMXPlayer();
 		bool setup(ofxOMXPlayerSettings settings);
-
-		void loadMovie(string videoPath);
+        ofxOMXPlayerSettings    settings;
+    
+		void        loadMovie(string videoPath);
 		bool		isPaused();
 		bool		isPlaying();
 		bool		isFrameNew();
-		bool isTextureEnabled;
+		bool        isTextureEnabled();
 
 		ofTexture&	getTextureReference();
 		GLuint		getTextureID();
 		int			getHeight();
 		int			getWidth();
-
+        float       getFPS();
+        double		getMediaTime();
+        float		getDurationInSeconds();
+        int			getCurrentFrame();
+        int			getTotalNumFrames();
+    
 		void		draw(float x, float y, float w, float h);
         void        setDisplayRectForNonTexture(float x, float y, float width, float height);
 		void		draw(float x=0, float y=0);
-
-
-		double		getMediaTime();
-		void		stepFrameForward();
+    
 		void		increaseVolume();
 		void		decreaseVolume();
-
-		float		getDuration();
-
-
 		void		setVolume(float volume); // 0..1
 		float		getVolume();
 
-
-		int			getCurrentFrame();
-		int			getTotalNumFrames();
-		void		togglePause();
 		void		setPaused(bool doPause);
-		void saveImage(string imagePath="");
-		void updatePixels();
-	
-		void close();
-		bool isOpen;
-
-		COMXStreamInfo getVideoStreamInfo();
-		COMXStreamInfo getAudioStreamInfo();
-
-		void setNormalSpeed();
-		void fastForward();
-		void rewind();
-		void restartMovie();
-        void seekToPosition(int timeInSeconds);
-		unsigned char * getPixels();
-		ofxOMXPlayerSettings settings;
-		string getInfo();
-	
+        void		togglePause();
+        void		stepFrameForward();
+        void        setNormalSpeed();
+        void        rewind();
+        void        restartMovie();
+        void        seekToTimeInSeconds(int timeInSeconds);
+    
+		void        saveImage(string imagePath="");
+		void        updatePixels();
+        unsigned char*   getPixels();
+		
+		COMXStreamInfo  getVideoStreamInfo();
+		COMXStreamInfo  getAudioStreamInfo();
+    
+        string      getInfo();
+        void        close();
+    
 	private:
 
 		bool openEngine(int startTimeInSeconds = 0);
 		void addExitHandler();
 		void onUpdateDuringExit(ofEventArgs& args);
+        void generateEGLImage(int videoWidth_, int videoHeight_);
+        void destroyEGLImage();
+        void onUpdate(ofEventArgs& args);
+    
 		ofxOMXPlayerEngine* engine;
-		
-
-		ofFbo fbo;
-		ofTexture texture;
-		EGLImageKHR eglImage;
-		GLuint textureID;
+    
+		ofFbo               fbo;
+		ofTexture           texture;
+		EGLImageKHR         eglImage;
+		GLuint              textureID;
 		ofAppEGLWindow*		appEGLWindow;
 		EGLDisplay			display;
 		EGLContext			context;
 
-		int videoWidth;
-		int videoHeight;
-		unsigned char * pixels;
+		int                 videoWidth;
+		int                 videoHeight;
+		unsigned char*      pixels;
 
-		void generateEGLImage(int videoWidth_, int videoHeight_);
-		void destroyEGLImage();
-	
-		bool hasNewFrame;
-		int prevFrame;
-		void onUpdate(ofEventArgs& args);
-		bool doRestart;
+		bool                hasNewFrame;
+		int                 prevFrame;
+		
+		bool                doRestart;
+
+        bool                textureEnabled;
+    
+        bool                didSeek;
+        bool                didWarnAboutInaccurateCurrentFrame;
+        bool                isOpen;
 
 };

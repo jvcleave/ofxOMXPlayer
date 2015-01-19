@@ -67,9 +67,15 @@ class OMXPlayerAudio : public OMXThread
 	public:
 		OMXPlayerAudio();
 		~OMXPlayerAudio();
-		bool Open(COMXStreamInfo& hints, OMXClock *av_clock, OMXReader *omx_reader,
-		          std::string device, bool passthrough, bool hw_decode,
-		          bool boost_on_downmix, bool use_thread);
+		bool Open(COMXStreamInfo& hints,
+                  OMXClock *av_clock,
+                  OMXReader *omx_reader,
+		          std::string device,
+                  bool passthrough,
+                  bool hw_decode,
+		          bool boost_on_downmix,
+                  bool use_thread);
+    
 		bool Close();
 		bool Decode(OMXPacket *pkt);
 		void Process();

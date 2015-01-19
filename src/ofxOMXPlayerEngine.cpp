@@ -592,9 +592,18 @@ void ofxOMXPlayerEngine::setPaused(bool doPause)
 
 }
 
+float ofxOMXPlayerEngine::getFPS()
+{
+    if (videoPlayer)
+    {
+        
+        return videoPlayer->GetFPS();
+    }
+    return 0;
+}
 
 
-float ofxOMXPlayerEngine::getDuration()
+float ofxOMXPlayerEngine::getDurationInSeconds()
 {
 	return duration;
 }

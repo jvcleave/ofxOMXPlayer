@@ -34,7 +34,7 @@ class ofxOMXPlayerEngine: public OMXThread
 		void		stop();
 
 
-		float		getDuration();
+		float		getDurationInSeconds();
 
 
 		void		setVolume(float volume); // 0..1
@@ -89,6 +89,8 @@ class ofxOMXPlayerEngine: public OMXThread
 		EGLImageKHR eglImage;
 		ofxOMXPlayerSettings omxPlayerSettings;
 		void setDisplayRect(float x, float y, float w, float h);
+    
+        float getFPS();
 	private:
 
 		

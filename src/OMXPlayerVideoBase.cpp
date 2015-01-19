@@ -258,6 +258,7 @@ void OMXPlayerVideoBase::Process()
 			{
 				omx_pkt = m_packets.front();
 				m_cached_size -= omx_pkt->size;
+                //ofLogNotice() << "omx_pkt->pts: " << omx_pkt->pts;
 				m_packets.pop_front();
 			}
 		}

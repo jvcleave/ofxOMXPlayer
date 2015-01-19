@@ -16,5 +16,7 @@ class testApp : public ofBaseApp, public KeyListener{
 	
 	void onCharacterReceived(KeyListenerEventData& e);
 	TerminalListener consoleListener;
+    
+    string keyCommandInfo;
 };
 

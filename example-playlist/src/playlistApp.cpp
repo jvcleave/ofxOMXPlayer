@@ -84,7 +84,7 @@ void playlistApp::update()
 	{
 		ofLogVerbose(__func__) << "doing reload";
 		
-		if(omxPlayer.isTextureEnabled)
+		if(omxPlayer.isTextureEnabled())
 		{
 			//clear the texture if you want
 			//omxPlayer.getTextureReference().clear();
@@ -102,7 +102,7 @@ void playlistApp::draw(){
 	
 	//ofBackgroundGradient(ofColor::red, ofColor::black, OF_GRADIENT_CIRCULAR);
 	
-	if(!omxPlayer.isTextureEnabled) return;
+	if(!omxPlayer.isTextureEnabled()) return;
 	
 	omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
 	
