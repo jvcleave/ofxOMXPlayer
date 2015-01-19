@@ -226,7 +226,7 @@ bool OMXClock::OMXStart(double pts, bool lock /* = true */)
 		Lock();
 	}
 
-	ofLogVerbose(__func__) << "at pts: " << pts;
+	ofLogNotice(__func__) << "at pts: " << pts;
 
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	OMX_TIME_CONFIG_CLOCKSTATETYPE clock;

@@ -32,10 +32,11 @@ ofxOMXPlayerEngine::ofxOMXPlayerEngine()
 
 	listener			= NULL;
 
-	//clock				= NULL;
 	loopCounter			= 0;
-	previousLoopOffset = 0;
-	//FrameCounter::getInstance().reset();
+	previousLoopOffset  = 0;
+	
+    startFrame        = 0;
+    
 	normalPlaySpeed = 1000;
 	speedMultiplier = 1;
 	doSeek = false;
@@ -301,7 +302,7 @@ void ofxOMXPlayerEngine::setDisplayRect(ofRectangle& rectangle)
 	}
 }
 
-bool ofxOMXPlayerEngine::openPlayer()
+bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
 {
 
 	if (isTextureEnabled)
@@ -357,7 +358,7 @@ bool ofxOMXPlayerEngine::openPlayer()
 		}
 		else
 		{
-			ofLogVerbose(__func__) << " AUDIO PLAYER OPEN FAIL";
+			ofLogError(__func__) << " AUDIO PLAYER OPEN FAIL";
 		}
 	}
 
@@ -371,27 +372,39 @@ bool ofxOMXPlayerEngine::openPlayer()
 		{
 			nFrames =videoStreamInfo.nb_frames;
 			duration =videoStreamInfo.nb_frames / videoPlayer->GetFPS();
-			ofLogVerbose(__func__) << "duration SET: " << duration;
+			ofLogNotice(__func__) << "duration SET: " << duration;
 		}
 		else
 		{
 
 			//file is weird (like test.h264) and has no reported frames
 		}
+        if (startTimeInSeconds !=0 && omxReader.CanSeek())
+        {
+            
+            bool didSeek = omxReader.SeekTime(startTimeInSeconds * 1000.0f, 0, &startpts);
+            if(didSeek)
+            {
+                startFrame = (int)videoPlayer->GetFPS()*(int)startTimeInSeconds;
+               ofLogNotice(__func__) <<  "Seeking start of video to " << startTimeInSeconds << " seconds, frame: " << startFrame;
+            }else
+            {
+                ofLogError(__func__) << "COULD NOT SEEK TO " << startTimeInSeconds;
+            }
+        }
 		clock.OMXStateExecute();
-		clock.OMXStart(0.0);
+		clock.OMXStart(startpts);
 
-		ofLogVerbose(__func__) << "Opened video PASS";
+		ofLogNotice(__func__) << "Opened video PASS";
 		Create();
 		return true;
 	}
 	else
 	{
-		ofLogError() << "Opened video FAIL";
+		ofLogError(__func__) << "Opened video FAIL";
 		return false;
 	}
 }
-
 
 void ofxOMXPlayerEngine::Process()
 {
@@ -501,6 +514,7 @@ void ofxOMXPlayerEngine::Process()
 			if (videoPlayer) 
 			{
 				videoPlayer->resetFrameCounter();
+                startFrame = 0;
 			}
 		}
 		if (hasAudio)
@@ -578,9 +592,18 @@ void ofxOMXPlayerEngine::setPaused(bool doPause)
 
 }
 
+float ofxOMXPlayerEngine::getFPS()
+{
+    if (videoPlayer)
+    {
+        
+        return videoPlayer->GetFPS();
+    }
+    return 0;
+}
 
 
-float ofxOMXPlayerEngine::getDuration()
+float ofxOMXPlayerEngine::getDurationInSeconds()
 {
 	return duration;
 }
@@ -589,7 +612,8 @@ int ofxOMXPlayerEngine::getCurrentFrame()
 {
 	if (videoPlayer) 
 	{
-		return videoPlayer->getCurrentFrame();
+        
+        return videoPlayer->getCurrentFrame()+startFrame;
 	}
 	
 	return 0;

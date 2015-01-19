@@ -12,7 +12,7 @@ ofxOMXPlayer::ofxOMXPlayer()
     OMXInitializer::getInstance().init();
 	engine = NULL;
 	isOpen = false;
-	isTextureEnabled = false;
+	textureEnabled = false;
 
 	textureID = 0;
 	videoWidth =0;
@@ -26,13 +26,17 @@ ofxOMXPlayer::ofxOMXPlayer()
 	hasNewFrame = false;
 	prevFrame = 0;
 	doRestart = false;
+    
+    didSeek = false;
+    didWarnAboutInaccurateCurrentFrame =false;
+    
 	ofAddListener(ofEvents().update, this, &ofxOMXPlayer::onUpdate);
 	
 }
 
 void ofxOMXPlayer::updatePixels()
 {
-	if (!isTextureEnabled) 
+	if (!isTextureEnabled())
 	{
 		return;
 	}
@@ -200,9 +204,6 @@ void ofxOMXPlayer::destroyEGLImage()
 
 }
 
-
-
-
 void ofxOMXPlayer::setNormalSpeed()
 {
 	engine->setNormalSpeed();
@@ -213,21 +214,7 @@ void ofxOMXPlayer::rewind()
 {
 	engine->rewind();
 }
-void ofxOMXPlayer::fastForward()
-{
-	/*if(!m_av_clock)
-		return;
 
-	m_omx_reader.SetSpeed(iSpeed);
-
-	// flush when in trickplay mode
-	if (TRICKPLAY(iSpeed) || TRICKPLAY(m_av_clock->OMXPlaySpeed()))
-		FlushStreams(DVD_NOPTS_VALUE);
-
-	m_av_clock->OMXSetSpeed(iSpeed);*/
-	engine->fastForward();
-
-}
 void ofxOMXPlayer::loadMovie(string videoPath)
 {
 	settings.videoPath = videoPath;
@@ -239,6 +226,13 @@ void ofxOMXPlayer::restartMovie()
 	doRestart = true;
 }
 
+
+void ofxOMXPlayer::seekToTimeInSeconds(int timeInSeconds)
+{
+    didSeek = true;
+    openEngine(timeInSeconds);
+}
+
 bool ofxOMXPlayer::setup(ofxOMXPlayerSettings settings)
 {
 	this->settings = settings;
@@ -247,7 +241,7 @@ bool ofxOMXPlayer::setup(ofxOMXPlayerSettings settings)
 }
 
 
-bool ofxOMXPlayer::openEngine()
+bool ofxOMXPlayer::openEngine(int startTimeInSeconds) //default 0
 {
     unsigned long long startTime = ofGetElapsedTimeMillis();
 	if (engine)
@@ -273,7 +267,7 @@ bool ofxOMXPlayer::openEngine()
 
 		if (settings.enableTexture)
 		{
-			isTextureEnabled = settings.enableTexture;
+			textureEnabled = settings.enableTexture;
             generateEGLImage(settings.videoWidth, settings.videoHeight);
 			engine->eglImage = eglImage;
 		}
@@ -283,7 +277,7 @@ bool ofxOMXPlayer::openEngine()
 			videoHeight = settings.videoHeight;
 		}
 
-		engine->openPlayer();
+		engine->openPlayer(startTimeInSeconds);
 	}
 	else
 	{
@@ -344,14 +338,12 @@ void ofxOMXPlayer::onUpdate(ofEventArgs& args)
 		{
 			hasNewFrame = true;
 			prevFrame = currentFrame;
-			if (isTextureEnabled)
+			if (isTextureEnabled())
 			{
-				//engine->Lock();
-					fbo.begin();
-						ofClear(0, 0, 0, 0);
-						texture.draw(0, 0, texture.getWidth(), texture.getHeight());
-					fbo.end();
-				//engine->UnLock();
+                fbo.begin();
+                    ofClear(0, 0, 0, 0);
+                    texture.draw(0, 0, texture.getWidth(), texture.getHeight());
+                fbo.end();
 			}
 			
 		}else 
@@ -370,6 +362,11 @@ void ofxOMXPlayer::onUpdate(ofEventArgs& args)
 bool ofxOMXPlayer::isFrameNew()
 {
 	return hasNewFrame;
+}
+
+bool ofxOMXPlayer::isTextureEnabled()
+{
+    return textureEnabled;
 }
 
 int ofxOMXPlayer::getHeight()
@@ -414,11 +411,11 @@ void ofxOMXPlayer::decreaseVolume()
 	}
 }
 
-float ofxOMXPlayer::getDuration()
+float ofxOMXPlayer::getDurationInSeconds()
 {
 	if (engine)
 	{
-		return engine->getDuration();
+		return engine->getDurationInSeconds();
 	}
 	return 0;
 }
@@ -460,7 +457,7 @@ ofTexture& ofxOMXPlayer::getTextureReference()
 
 void ofxOMXPlayer::saveImage(string imagePath)//default imagePath=""
 {
-	if(!isTextureEnabled) return;
+	if(!isTextureEnabled()) return;
 	if(imagePath == "")
 	{
 		imagePath = ofToDataPath(ofGetTimestampString()+".png", true);
@@ -471,7 +468,6 @@ void ofxOMXPlayer::saveImage(string imagePath)//default imagePath=""
 	image.setFromPixels(getPixels(), getWidth(), getHeight(), OF_IMAGE_COLOR_ALPHA);
 	image.saveImage(imagePath);
 	
-	//ofSaveImage(getPixels(), imagePath);
 	ofLogVerbose() << "SAVED IMAGE TO: " << imagePath;
 }
 
@@ -479,6 +475,12 @@ int ofxOMXPlayer::getCurrentFrame()
 {
 	if (engine)
 	{
+        if(didSeek && !didWarnAboutInaccurateCurrentFrame)
+        {
+            ofLogWarning(__func__) << "UNLESS YOU HAVE A 1:1 KEYFRAME:FRAME RATIO CURRENT FRAME NUMBER WILL LIKELY BE INACCURATE AFTER SEEKING";
+            
+            didWarnAboutInaccurateCurrentFrame = true;
+        }
 		return engine->getCurrentFrame();
 	}
 	return 0;
@@ -528,7 +530,7 @@ COMXStreamInfo ofxOMXPlayer::getAudioStreamInfo()
 void ofxOMXPlayer::setDisplayRectForNonTexture(float x, float y, float width, float height)
 {
     if (!engine) return;
-    if(!isTextureEnabled)
+    if(!isTextureEnabled())
     {
        engine->setDisplayRect(x, y, width, height);
     }else
@@ -577,13 +579,23 @@ void ofxOMXPlayer::close()
 
 }
 
+
+float ofxOMXPlayer::getFPS()
+{
+    if(engine)
+    {
+        return engine->getFPS();
+        
+    }
+    return 0;
+}
 string ofxOMXPlayer::getInfo()
 {
 	stringstream info;
 	info <<"\n" <<  "APP FPS: "+ ofToString(ofGetFrameRate());
 	info <<"\n" <<	"MEDIA TIME: "			<< getMediaTime();
 	info <<"\n" <<	"DIMENSIONS: "			<< getWidth()<<"x"<<getHeight();
-	info <<"\n" <<	"DURATION: "			<< getDuration();
+	info <<"\n" <<	"DURATION IN SECS: "			<< getDurationInSeconds();
 	info <<"\n" <<	"TOTAL FRAMES: "		<< getTotalNumFrames();
 	info <<"\n" <<	"CURRENT FRAME: "		<< getCurrentFrame();
 	if (getTotalNumFrames() > 0) 

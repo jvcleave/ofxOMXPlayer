@@ -40,7 +40,7 @@ void pixelsApp::update()
 
 //--------------------------------------------------------------
 void pixelsApp::draw(){
-	if(!omxPlayer.isTextureEnabled)
+	if(!omxPlayer.isTextureEnabled())
 	{
 		return;
 	}

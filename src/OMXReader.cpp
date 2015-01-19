@@ -157,7 +157,9 @@ bool OMXReader::Open(std::string filename, bool doSkipAvProbe)
 			Close();
 			return false;
 		}
-		
+        
+        //#warning experimental
+        //iformat->flags |= AVFMT_SEEK_TO_PTS;
 		m_pFormatContext     = avformat_alloc_context();
 		m_pFormatContext->pb = m_ioContext;
         
@@ -346,11 +348,15 @@ bool OMXReader::SeekTime(int time, bool backwords, double *startpts, bool doLoop
 	//FlushRead();
 	
 	if(m_ioContext)
-		m_ioContext->buf_ptr = m_ioContext->buf_end;
+    {
+        m_ioContext->buf_ptr = m_ioContext->buf_end;
+    }
 	
 	int64_t seek_pts = (int64_t)time * (AV_TIME_BASE / 1000);
 	if (m_pFormatContext->start_time != (int64_t)AV_NOPTS_VALUE)
-		seek_pts += m_pFormatContext->start_time;
+    {
+        seek_pts += m_pFormatContext->start_time;
+    };
 	
 	
 	int ret = av_seek_frame(m_pFormatContext, -1, seek_pts, backwords ? AVSEEK_FLAG_BACKWARD : 0);
@@ -366,20 +372,20 @@ bool OMXReader::SeekTime(int time, bool backwords, double *startpts, bool doLoop
 	
 	// in this case the start time is requested time
 	if(startpts)
-		*startpts = DVD_MSEC_TO_TIME(time);
+    {
+        *startpts = DVD_MSEC_TO_TIME(time);
+    }
 	
-	// demuxer will return failure, if you seek to eof
 	m_eof = false;
 	if (m_pFile && m_pFile->IsEOF() && ret <= 0)
 	{
 		m_eof = true;
 		ret = 0;
 	}
-	//int landedTime = (int)(m_iCurrentPts / DVD_TIME_BASE * 1000);
-	//ofLogVerbose(__func__) << "Seek ended up on time: " << landedTime;
-	
+
+   
 	UnLock();
-	
+
 	return (ret >= 0);
 }
 
@@ -391,7 +397,7 @@ AVMediaType OMXReader::PacketType(OMXPacket *pkt)
 	return m_pFormatContext->streams[pkt->stream_index]->codec->codec_type;
 }
 
-OMXPacket *OMXReader::Read()
+OMXPacket* OMXReader::Read()
 {
 	AVPacket  pkt;
 	OMXPacket *m_omx_pkt = NULL;
@@ -415,8 +421,6 @@ OMXPacket *OMXReader::Read()
 	if (result < 0)
 	{
 		m_eof = true;
-		//FlushRead();
-		//av_free_packet(&pkt);
 		UnLock();
 		return NULL;
 	}
@@ -504,7 +508,7 @@ OMXPacket *OMXReader::Read()
 	m_omx_pkt->dts = ConvertTimestamp(pkt.dts, pStream->time_base.den, pStream->time_base.num);
 	m_omx_pkt->pts = ConvertTimestamp(pkt.pts, pStream->time_base.den, pStream->time_base.num);
 	m_omx_pkt->duration = DVD_SEC_TO_TIME((double)pkt.duration * pStream->time_base.num / pStream->time_base.den);
-	
+
 	// used to guess streamlength
 	if (m_omx_pkt->dts != DVD_NOPTS_VALUE && (m_omx_pkt->dts > m_iCurrentPts || m_iCurrentPts == DVD_NOPTS_VALUE))
 		m_iCurrentPts = m_omx_pkt->dts;
@@ -793,6 +797,8 @@ bool OMXReader::GetHints(AVStream *stream, COMXStreamInfo *hints)
 	hints->blockalign    = stream->codec->block_align;
 	hints->bitrate       = stream->codec->bit_rate;
 	hints->bitspersample = stream->codec->bits_per_coded_sample;
+    hints->gop_size      = stream->codec->gop_size;
+    
 	if(hints->bitspersample == 0)
 		hints->bitspersample = 16;
 	
@@ -806,6 +812,7 @@ bool OMXReader::GetHints(AVStream *stream, COMXStreamInfo *hints)
 		hints->duration		= stream->duration;
 		hints->nb_frames	= stream->nb_frames;
 		
+        
 		hints->fpsrate       = stream->r_frame_rate.num;
 		hints->fpsscale      = stream->r_frame_rate.den;
 		
@@ -917,29 +924,6 @@ OMXPacket *OMXReader::AllocPacket(int size)
 	pkt->duration = DVD_NOPTS_VALUE;
 	
 	return pkt;
-	/*
-	OMXPacket *pkt = (OMXPacket *)malloc(sizeof(OMXPacket));
-	if(pkt)
-	{
-		memset(pkt, 0, sizeof(OMXPacket));
-		
-		pkt->data = (uint8_t*) malloc(size + FF_INPUT_BUFFER_PADDING_SIZE);
-		if(!pkt->data)
-		{
-			free(pkt);
-			pkt = NULL;
-		}
-		else
-		{
-			memset(pkt->data + size, 0, FF_INPUT_BUFFER_PADDING_SIZE);
-			pkt->size = size;
-			pkt->dts  = DVD_NOPTS_VALUE;
-			pkt->pts  = DVD_NOPTS_VALUE;
-			pkt->now  = DVD_NOPTS_VALUE;
-			pkt->duration = DVD_NOPTS_VALUE;
-		}
-	}
-	return pkt;*/
 }
 
 bool OMXReader::SetActiveStream(OMXStreamType type, unsigned int index)
@@ -1045,8 +1029,11 @@ void OMXReader::UpdateCurrentPTS()
 		{
 			double ts = ConvertTimestamp(stream->cur_dts, stream->time_base.den, stream->time_base.num);
 			if(m_iCurrentPts == DVD_NOPTS_VALUE || m_iCurrentPts > ts )
-				m_iCurrentPts = ts;
+            {
+                m_iCurrentPts = ts;
+            }
 		}
+        //ofLogVerbose(__func__) << "m_iCurrentPts: " << m_iCurrentPts;
 	}
 }
 

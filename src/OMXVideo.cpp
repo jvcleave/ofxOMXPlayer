@@ -137,7 +137,7 @@ bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspec
 	{
 		formatType.xFramerate = 25 * (1<<16);
 	}
-
+    
 	error = m_omx_decoder.SetParameter(OMX_IndexParamVideoPortFormat, &formatType);
 	if(error != OMX_ErrorNone)
 	{
