@@ -117,35 +117,35 @@ void ofxOMXPlayerEngine::startExit()
 
 void ofxOMXPlayerEngine::setNormalSpeed()
 {
-
+    Lock();
 	speedMultiplier = 1;
 	clock.OMXSetSpeed(normalPlaySpeed);
 	omxReader.SetSpeed(normalPlaySpeed);
 	ofLogVerbose(__func__) << "clock speed: " << clock.OMXPlaySpeed();
 	ofLogVerbose(__func__) << "reader speed: " << omxReader.GetSpeed();
+    UnLock();
 }
 
-void ofxOMXPlayerEngine::fastForward()
+int ofxOMXPlayerEngine::increaseSpeed()
 {
 
 	Lock();
 	ofLogVerbose(__func__) << " START";
 	doSeek = true;
-	UnLock();
-	return;
+	
 	ofLogVerbose(__func__) << "clock speed: " << clock.OMXPlaySpeed();
 	ofLogVerbose(__func__) << "reader speed: " << omxReader.GetSpeed();
-	speedMultiplier++;
-	if(speedMultiplier>8)
-	{
-		speedMultiplier = 1;
-	}
-	int newSpeed = normalPlaySpeed*speedMultiplier;
-
-	clock.OMXSetSpeed(newSpeed);
-	omxReader.SetSpeed(newSpeed);
-	ofLogVerbose(__func__) << "newSpeed: " << newSpeed;
-
+    if(speedMultiplier+1 <=4)
+    {
+        speedMultiplier++;
+        int newSpeed = normalPlaySpeed*speedMultiplier;
+        
+        clock.OMXSetSpeed(newSpeed);
+        omxReader.SetSpeed(newSpeed);
+        ofLogVerbose(__func__) << "newSpeed: " << newSpeed;
+    }
+    UnLock();
+    return speedMultiplier;
 }
 
 void ofxOMXPlayerEngine::rewind()

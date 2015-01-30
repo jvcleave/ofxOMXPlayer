@@ -74,7 +74,7 @@ class ofxOMXPlayerEngine: public OMXThread
 		COMXStreamInfo			audioStreamInfo;
 
 
-		void fastForward();
+		int increaseSpeed();
 		void rewind();
 		void setNormalSpeed();
 		int normalPlaySpeed;

@@ -42,6 +42,9 @@ class ofxOMXPlayer
 		void		setPaused(bool doPause);
         void		togglePause();
         void		stepFrameForward();
+    
+        void        increaseSpeed();
+        int         getSpeedMultiplier();
         void        setNormalSpeed();
         void        rewind();
         void        restartMovie();
@@ -90,5 +93,6 @@ class ofxOMXPlayer
         bool                didSeek;
         bool                didWarnAboutInaccurateCurrentFrame;
         bool                isOpen;
+        int                 speedMultiplier;
 
 };

@@ -28,6 +28,7 @@ ofxOMXPlayer::ofxOMXPlayer()
 	doRestart = false;
     
     didSeek = false;
+    speedMultiplier = 1;
     didWarnAboutInaccurateCurrentFrame =false;
     
 	ofAddListener(ofEvents().update, this, &ofxOMXPlayer::onUpdate);
@@ -204,9 +205,29 @@ void ofxOMXPlayer::destroyEGLImage()
 
 }
 
+int ofxOMXPlayer::getSpeedMultiplier()
+{
+    if(engine)
+    {
+        speedMultiplier = engine->speedMultiplier;
+    }
+    return speedMultiplier;
+}
+
+void ofxOMXPlayer::increaseSpeed()
+{
+    if(engine)
+    {
+        speedMultiplier = engine->increaseSpeed();
+    }
+}
+
 void ofxOMXPlayer::setNormalSpeed()
 {
-	engine->setNormalSpeed();
+    if(engine)
+    {
+        engine->setNormalSpeed();
+    }
 }
 
 
