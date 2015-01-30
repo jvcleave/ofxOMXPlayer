@@ -595,7 +595,8 @@ string ofxOMXPlayer::getInfo()
 	info <<"\n" <<  "APP FPS: "+ ofToString(ofGetFrameRate());
 	info <<"\n" <<	"MEDIA TIME: "			<< getMediaTime();
 	info <<"\n" <<	"DIMENSIONS: "			<< getWidth()<<"x"<<getHeight();
-	info <<"\n" <<	"DURATION IN SECS: "			<< getDurationInSeconds();
+    info <<"\n" <<	"FPS: "                 << getFPS();
+	info <<"\n" <<	"DURATION IN SECS: "    << getDurationInSeconds();
 	info <<"\n" <<	"TOTAL FRAMES: "		<< getTotalNumFrames();
 	info <<"\n" <<	"CURRENT FRAME: "		<< getCurrentFrame();
 	if (getTotalNumFrames() > 0) 
