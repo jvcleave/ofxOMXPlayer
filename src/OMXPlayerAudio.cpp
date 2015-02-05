@@ -234,13 +234,14 @@ bool OMXPlayerAudio::Decode(OMXPacket *pkt)
 	        old_bitrate           != new_bitrate ||
 	        m_hints.bitspersample != pkt->hints.bitspersample)
 	{
+        /*
 		stringstream info;
 		info << "m_hints.codec : "			<< m_hints.codec			<<	"\n";
 		info << "m_hints.channels : "		<< m_hints.channels			<<	"\n";
 		info << "m_hints.samplerate : "		<< m_hints.samplerate		<<	"\n";
 		info << "bitrate.bitrate : "		<< m_hints.bitrate			<<	"\n";
 		info << "bitrate.bitspersample : "	<< m_hints.bitspersample	<<	"\n";
-		//ofLogVerbose(__func__) << info;
+		ofLogVerbose(__func__) << info;
 		
 		info.str("");
 		
@@ -250,8 +251,8 @@ bool OMXPlayerAudio::Decode(OMXPacket *pkt)
 		info << "pkt->hints.bitrate : "			<< pkt->hints.bitrate		<< "\n";
 		info << "pkt->hints.bitspersample : "	<< pkt->hints.bitspersample	<< "\n";
 		
-		//ofLogVerbose(__func__) << info;
-		
+		ofLogVerbose(__func__) << info;
+		*/
 		/*ofLog(OF_LOG_VERBOSE, "C : %d %d %d %d %d\n", m_hints.codec, m_hints.channels, m_hints.samplerate, m_hints.bitrate, m_hints.bitspersample);
 		ofLog(OF_LOG_VERBOSE, "N : %d %d %d %d %d\n", pkt->hints.codec, channels, pkt->hints.samplerate, pkt->hints.bitrate, pkt->hints.bitspersample);*/
 
