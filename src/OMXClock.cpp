@@ -116,7 +116,7 @@ bool OMXClock::OMXStateExecute(bool lock /* = true */)
 
 void OMXClock::OMXStateIdle(bool lock /* = true */)
 {
-	ofLogVerbose(__func__) << "OMXClock::OMXStateIdle START";
+	//ofLogVerbose(__func__) << "OMXClock::OMXStateIdle START";
 	if(m_omx_clock.GetComponent() == NULL)
 	{
 		ofLogError(__func__) << "NO CLOCK YET";
@@ -138,7 +138,7 @@ void OMXClock::OMXStateIdle(bool lock /* = true */)
 		}
 		else
 		{
-			ofLogVerbose(__func__) << "SetStateForComponent OMX_StatePause PASS";
+			//ofLogVerbose(__func__) << "SetStateForComponent OMX_StatePause PASS";
 		}
 	}
 
@@ -151,7 +151,7 @@ void OMXClock::OMXStateIdle(bool lock /* = true */)
 		}
 		else
 		{
-			ofLogVerbose(__func__) << "m_omx_clock SetStateForComponent OMX_StateIdle PASS";
+			//ofLogVerbose(__func__) << "m_omx_clock SetStateForComponent OMX_StateIdle PASS";
 		}
 	}
 
@@ -159,7 +159,7 @@ void OMXClock::OMXStateIdle(bool lock /* = true */)
 	{
 		UnLock();
 	}
-	ofLogVerbose(__func__) << "OMXClock::OMXStateIdle END";
+	//ofLogVerbose(__func__) << "OMXClock::OMXStateIdle END";
 }
 
 COMXCoreComponent *OMXClock::GetOMXClock()
@@ -176,7 +176,7 @@ bool  OMXClock::OMXStop(bool lock /* = true */)
 {
 	if(m_omx_clock.GetComponent() == NULL)
 	{
-		ofLogVerbose(__func__) << "NO CLOCK - RETURNING EARLY";
+		//ofLogVerbose(__func__) << "NO CLOCK - RETURNING EARLY";
 		return false;
 	}
 
@@ -186,7 +186,7 @@ bool  OMXClock::OMXStop(bool lock /* = true */)
 		Lock();
 	}
 
-	ofLogVerbose(__func__) << "START";
+	//ofLogVerbose(__func__) << "START";
 
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	OMX_TIME_CONFIG_CLOCKSTATETYPE clock;
@@ -210,7 +210,7 @@ bool  OMXClock::OMXStop(bool lock /* = true */)
 		UnLock();
 	}
 
-	ofLogVerbose(__func__) << "END";
+	//ofLogVerbose(__func__) << "END";
 	return true;
 }
 
@@ -454,7 +454,7 @@ bool OMXClock::OMXMediaTime(double pts, bool lock /* = true*/)
 
 bool OMXClock::OMXPause(bool lock /* = true */)
 {
-	ofLogVerbose(__func__) << "START";
+	//ofLogVerbose(__func__) << "START";
 	if(m_omx_clock.GetComponent() == NULL)
 	{
 		return false;
@@ -477,13 +477,13 @@ bool OMXClock::OMXPause(bool lock /* = true */)
 			UnLock();
 		}
 	}
-	ofLogVerbose(__func__) << "END";
+	//ofLogVerbose(__func__) << "END";
 	return m_pause == true;
 }
 
 bool OMXClock::OMXResume(bool lock /* = true */)
 {
-	ofLogVerbose(__func__) << "START";
+	//ofLogVerbose(__func__) << "START";
 	if(m_omx_clock.GetComponent() == NULL)
 	{
 		return false;
@@ -506,7 +506,7 @@ bool OMXClock::OMXResume(bool lock /* = true */)
 			UnLock();
 		}
 	}
-	ofLogVerbose(__func__) << "END";
+	//ofLogVerbose(__func__) << "END";
 	return m_pause == false;
 }
 

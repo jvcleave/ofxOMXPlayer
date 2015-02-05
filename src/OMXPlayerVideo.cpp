@@ -40,19 +40,19 @@ OMXPlayerVideo::OMXPlayerVideo()
 }
 OMXPlayerVideo::~OMXPlayerVideo()
 {
-	ofLogVerbose(__func__) << "START";
+	//ofLogVerbose(__func__) << "START";
 
 	Close();
 
 	pthread_cond_destroy(&m_packet_cond);
 	pthread_mutex_destroy(&m_lock);
 	pthread_mutex_destroy(&m_lock_decoder);
-	ofLogVerbose(__func__) << "END";
+	//ofLogVerbose(__func__) << "END";
 }
 
 bool OMXPlayerVideo::Open(COMXStreamInfo& hints, OMXClock *av_clock, bool deinterlace, bool hdmi_clock_sync, float display_aspect)
 {
-	ofLogVerbose(__func__) << "OMXPlayerVideo Open";
+	//ofLogVerbose(__func__) << "OMXPlayerVideo Open";
 
 	if (!av_clock)
 	{
@@ -134,7 +134,7 @@ bool OMXPlayerVideo::OpenDecoder()
 	info << "Video height: "	<<	m_hints.height					<< "\n";
 	info << "Video profile: "	<<	m_hints.profile					<< "\n";
 	info << "Video fps: "		<<	m_fps							<< "\n";
-	ofLogVerbose(__func__) << "\n" << info;
+	//ofLogVerbose(__func__) << "\n" << info;
 
 	/*ofLog(OF_LOG_VERBOSE, "Video codec %s width %d height %d profile %d fps %f\n",
 		m_decoder->GetDecoderName().c_str() , m_hints.width, m_hints.height, m_hints.profile, m_fps);*/
@@ -147,7 +147,7 @@ bool OMXPlayerVideo::OpenDecoder()
 
 bool OMXPlayerVideo::Close()
 {
-	ofLogVerbose(__func__) << " START, isExiting:" << isExiting;
+	//ofLogVerbose(__func__) << " START, isExiting:" << isExiting;
 	m_bAbort  = true;
 	m_flush   = true;
 
@@ -156,7 +156,7 @@ bool OMXPlayerVideo::Close()
 	if(ThreadHandle())
 	{
 		Lock();
-		ofLogVerbose(__func__) << "WE ARE STILL THREADED";
+		//ofLogVerbose(__func__) << "WE ARE STILL THREADED";
 		pthread_cond_broadcast(&m_packet_cond);
 		UnLock();
 
@@ -165,10 +165,10 @@ bool OMXPlayerVideo::Close()
 	
 	if (nonTextureDecoder && !isExiting)
 	{
-		ofLogVerbose(__func__) << "PRE DELETE nonTextureDecoder";
+		//ofLogVerbose(__func__) << "PRE DELETE nonTextureDecoder";
 		delete nonTextureDecoder;
 		nonTextureDecoder = NULL;
-		ofLogVerbose(__func__) << "POST DELETE nonTextureDecoder";
+		//ofLogVerbose(__func__) << "POST DELETE nonTextureDecoder";
 	}
 
 	m_open          = false;
@@ -177,7 +177,7 @@ bool OMXPlayerVideo::Close()
 	m_pStream       = NULL;
 	m_speed         = DVD_PLAYSPEED_NORMAL;
 
-	ofLogVerbose(__func__) << " END";
+	//ofLogVerbose(__func__) << " END";
 	return true;
 }
 

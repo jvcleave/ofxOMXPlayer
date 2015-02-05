@@ -94,7 +94,7 @@ void ofxOMXPlayer::generateEGLImage(int videoWidth_, int videoHeight_)
 	
 	if(!needsRegeneration)
 	{
-		ofLogVerbose(__func__) << "NO CHANGES NEEDED - RETURNING EARLY";
+		//ofLogVerbose(__func__) << "NO CHANGES NEEDED - RETURNING EARLY";
 		return;
 	}
 
@@ -137,8 +137,8 @@ void ofxOMXPlayer::generateEGLImage(int videoWidth_, int videoHeight_)
 	}
 
 
-	ofLogVerbose(__func__) << "textureID: " << textureID;
-	ofLogVerbose(__func__) << "tex.isAllocated(): " << texture.isAllocated();
+	//ofLogVerbose(__func__) << "textureID: " << textureID;
+	//ofLogVerbose(__func__) << "tex.isAllocated(): " << texture.isAllocated();
 
 	glEnable(GL_TEXTURE_2D);
 
@@ -194,7 +194,7 @@ void ofxOMXPlayer::destroyEGLImage()
 	{
 		if (eglDestroyImageKHR(display, eglImage))
 		{
-			ofLogVerbose(__func__) << "eglDestroyImageKHR PASS <---------------- :)";
+			//ofLogVerbose(__func__) << "eglDestroyImageKHR PASS <---------------- :)";
 		}
 		else
 		{
@@ -264,25 +264,16 @@ bool ofxOMXPlayer::setup(ofxOMXPlayerSettings settings)
 
 bool ofxOMXPlayer::openEngine(int startTimeInSeconds) //default 0
 {
-    unsigned long long startTime = ofGetElapsedTimeMillis();
 	if (engine)
 	{
 		delete engine;
 		engine = NULL;
 	}
-    unsigned long long endTime = ofGetElapsedTimeMillis();
-    ofLogNotice(__func__) << "DELETE TOOK " << endTime-startTime <<  " MS";
 	
-    
-    startTime = ofGetElapsedTimeMillis();
-    
 	engine = new ofxOMXPlayerEngine();
 	bool setupPassed = engine->setup(settings);
     
-    endTime = ofGetElapsedTimeMillis();
-    ofLogNotice(__func__) << "setup TOOK " << endTime-startTime <<  " MS";
-    
-	if (setupPassed)
+    if (setupPassed)
 	{
 		settings = engine->omxPlayerSettings;
 
@@ -583,7 +574,7 @@ void ofxOMXPlayer::draw(float x, float y)
 
 void ofxOMXPlayer::close()
 {
-	ofLogVerbose(__func__) << " isOpen: " << isOpen;
+	//ofLogVerbose(__func__) << " isOpen: " << isOpen;
 	if (!isOpen)
 	{
 		return;
@@ -649,7 +640,7 @@ void ofxOMXPlayer::onUpdateDuringExit(ofEventArgs& args)
 {
 	if (doExit)
 	{
-		ofLogVerbose(__func__) << " EXITING VIA SIGNAL";
+		//ofLogVerbose(__func__) << " EXITING VIA SIGNAL";
 		if(engine)
 		{
 			engine->startExit();

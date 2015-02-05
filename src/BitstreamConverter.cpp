@@ -491,7 +491,7 @@ bool CBitstreamConverter::Open(enum AVCodecID codec, uint8_t *in_extradata, int 
 		case CODEC_ID_H264:
 			if (in_extrasize < 7 || in_extradata == NULL)
 			{
-				ofLogVerbose(__func__) << "avcC data too small or missing";
+				//ofLogVerbose(__func__) << "avcC data too small or missing";
 				return false;
 			}
 			// valid avcC data (bitstream) always starts with the value 1 (version)
@@ -499,7 +499,7 @@ bool CBitstreamConverter::Open(enum AVCodecID codec, uint8_t *in_extradata, int 
 			{
 				if ( *(char*)in_extradata == 1 )
 				{
-					ofLogVerbose(__func__) << "bitstream to annexb init";
+					//ofLogVerbose(__func__) << "bitstream to annexb init";
 					m_convert_bitstream = BitstreamConvertInit(in_extradata, in_extrasize);
 					return true;
 				}
@@ -511,7 +511,7 @@ bool CBitstreamConverter::Open(enum AVCodecID codec, uint8_t *in_extradata, int 
 				{
 					if (in_extradata[0] == 0 && in_extradata[1] == 0 && in_extradata[2] == 0 && in_extradata[3] == 1)
 					{
-						ofLogVerbose(__func__) << "annexb to bitstream init";
+						//ofLogVerbose(__func__) << "annexb to bitstream init";
 						// video content is from x264 or from bytestream h264 (AnnexB format)
 						// NAL reformating to bitstream format needed
 
@@ -546,7 +546,7 @@ bool CBitstreamConverter::Open(enum AVCodecID codec, uint8_t *in_extradata, int 
 				{
 					if (in_extradata[4] == 0xFE)
 					{
-						ofLogVerbose(__func__) << "annexb to bitstream init 3 byte to 4 byte nal";
+						//ofLogVerbose(__func__) << "annexb to bitstream init 3 byte to 4 byte nal";
 						// video content is from so silly encoder that think 3 byte NAL sizes
 						// are valid, setup to convert 3 byte NAL sizes to 4 byte.
 

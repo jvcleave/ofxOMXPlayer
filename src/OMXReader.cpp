@@ -365,7 +365,7 @@ bool OMXReader::SeekTime(int time, bool backwords, double *startpts, bool doLoop
 	{
 		UpdateCurrentPTS();
 	}else {
-		ofLogVerbose(__func__) << "av_seek_frame returned >= 0, no UpdateCurrentPTS" << ret;
+		//ofLogVerbose(__func__) << "av_seek_frame returned >= 0, no UpdateCurrentPTS" << ret;
 		m_pFile->rewindFile();
 	}
 

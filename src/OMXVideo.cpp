@@ -15,7 +15,7 @@ COMXVideo::COMXVideo()
 COMXVideo::~COMXVideo()
 {
 	ofRemoveListener(ofEvents().update, this, &COMXVideo::onUpdate);
-	ofLogVerbose(__func__) << "removed update listener";
+	//ofLogVerbose(__func__) << "removed update listener";
 }
 
 bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspect, bool deinterlace, bool hdmi_clock_sync)

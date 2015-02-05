@@ -22,7 +22,7 @@ OMXPlayerEGLImage::~OMXPlayerEGLImage()
 bool OMXPlayerEGLImage::Open(COMXStreamInfo& hints, OMXClock *av_clock, EGLImageKHR eglImage)
 {
 
-	ofLogVerbose(__func__) << " OMXPlayerEGLImage Open";
+	//ofLogVerbose(__func__) << " OMXPlayerEGLImage Open";
 	this->eglImage = eglImage;
 
 	if (!av_clock)
@@ -76,7 +76,7 @@ bool OMXPlayerEGLImage::OpenDecoder()
 
 	if( m_fps > 100 || m_fps < 5 )
 	{
-		ofLogVerbose(__func__) << "Invalid framerate " << m_fps  << " using forced 25fps and just trust timestamps";
+		//ofLogVerbose(__func__) << "Invalid framerate " << m_fps  << " using forced 25fps and just trust timestamps";
 		m_fps = 25;
 	}
 
@@ -102,7 +102,7 @@ bool OMXPlayerEGLImage::OpenDecoder()
 	info << "Video height: "	<<	m_hints.height					<< "\n";
 	info << "Video profile: "	<<	m_hints.profile					<< "\n";
 	info << "Video fps: "		<<	m_fps							<< "\n";
-	ofLogVerbose(__func__) << "\n" << info.str();
+	//ofLogVerbose(__func__) << "\n" << info.str();
 
 
 	/*ofLog(OF_LOG_VERBOSE, "Video codec %s width %d height %d profile %d fps %f\n",
@@ -114,7 +114,7 @@ bool OMXPlayerEGLImage::OpenDecoder()
 
 bool OMXPlayerEGLImage::Close()
 {
-	ofLogVerbose(__func__) << " START, isExiting:" << isExiting;
+	//ofLogVerbose(__func__) << " START, isExiting:" << isExiting;
 	m_bAbort  = true;
 	m_flush   = true;
 	
@@ -124,7 +124,7 @@ bool OMXPlayerEGLImage::Close()
 	if(ThreadHandle())
 	{
 		Lock();
-		ofLogVerbose(__func__) << "WE ARE STILL THREADED";
+		//ofLogVerbose(__func__) << "WE ARE STILL THREADED";
 		pthread_cond_broadcast(&m_packet_cond);
 		UnLock();
 
@@ -133,10 +133,10 @@ bool OMXPlayerEGLImage::Close()
 
 	if (eglImageDecoder)
 	{
-		ofLogVerbose(__func__) << "PRE DELETE eglImageDecoder";
+		//ofLogVerbose(__func__) << "PRE DELETE eglImageDecoder";
 		delete eglImageDecoder;
 		eglImageDecoder = NULL;
-		ofLogVerbose(__func__) << "POST DELETE eglImageDecoder";
+		//ofLogVerbose(__func__) << "POST DELETE eglImageDecoder";
 	};
 
 
@@ -146,6 +146,6 @@ bool OMXPlayerEGLImage::Close()
 	m_pStream       = NULL;
 	m_speed         = DVD_PLAYSPEED_NORMAL;
 
-	ofLogVerbose(__func__) << " END";
+	//ofLogVerbose(__func__) << " END";
 	return true;
 }

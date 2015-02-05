@@ -161,7 +161,7 @@ bool OMXPlayerVideoBase::Decode(OMXPacket *pkt)
 
 void OMXPlayerVideoBase::Flush()
 {
-	ofLogVerbose(__func__) << "OMXPlayerVideoBase::Flush start";
+	//ofLogVerbose(__func__) << "OMXPlayerVideoBase::Flush start";
 
 
 	m_flush_requested = true;
@@ -183,13 +183,13 @@ void OMXPlayerVideoBase::Flush()
 
 	if(m_decoder)
 	{
-		ofLogVerbose(__func__) << "OMXPlayerVideoBase::m_decoder->Reset";
+		//ofLogVerbose(__func__) << "OMXPlayerVideoBase::m_decoder->Reset";
 		m_decoder->Reset();
 	}
 
 	UnLockDecoder();
 	UnLock();
-	ofLogVerbose(__func__) << "OMXPlayerVideoBase::Flush end";
+	//ofLogVerbose(__func__) << "OMXPlayerVideoBase::Flush end";
 }
 
 
@@ -320,7 +320,7 @@ bool OMXPlayerVideoBase::IsEOS()
 		{
 
 			atEndofStream = true;
-			ofLogVerbose(__func__) << "m_packets.empty() && m_decoder->IsEOS(): " << atEndofStream;
+			//ofLogVerbose(__func__) << "m_packets.empty() && m_decoder->IsEOS(): " << atEndofStream;
 		}
 	}
 	return atEndofStream;

@@ -240,7 +240,7 @@ bool OMXPlayerAudio::Decode(OMXPacket *pkt)
 		info << "m_hints.samplerate : "		<< m_hints.samplerate		<<	"\n";
 		info << "bitrate.bitrate : "		<< m_hints.bitrate			<<	"\n";
 		info << "bitrate.bitspersample : "	<< m_hints.bitspersample	<<	"\n";
-		ofLogVerbose(__func__) << info;
+		//ofLogVerbose(__func__) << info;
 		
 		info.str("");
 		
@@ -250,7 +250,7 @@ bool OMXPlayerAudio::Decode(OMXPacket *pkt)
 		info << "pkt->hints.bitrate : "			<< pkt->hints.bitrate		<< "\n";
 		info << "pkt->hints.bitspersample : "	<< pkt->hints.bitspersample	<< "\n";
 		
-		ofLogVerbose(__func__) << info;
+		//ofLogVerbose(__func__) << info;
 		
 		/*ofLog(OF_LOG_VERBOSE, "C : %d %d %d %d %d\n", m_hints.codec, m_hints.channels, m_hints.samplerate, m_hints.bitrate, m_hints.bitspersample);
 		ofLog(OF_LOG_VERBOSE, "N : %d %d %d %d %d\n", pkt->hints.codec, channels, pkt->hints.samplerate, pkt->hints.bitrate, pkt->hints.bitspersample);*/
@@ -398,7 +398,7 @@ void OMXPlayerAudio::Process()
 
 void OMXPlayerAudio::Flush()
 {
-	ofLogVerbose(__func__) << "OMXPlayerAudio::Flush start";
+	//ofLogVerbose(__func__) << "OMXPlayerAudio::Flush start";
 	Lock();
 	LockDecoder();
 	m_flush = true;
@@ -416,7 +416,7 @@ void OMXPlayerAudio::Flush()
 	}
 	UnLockDecoder();
 	UnLock();
-	ofLogVerbose(__func__) << "OMXPlayerAudio::Flush end";
+	//ofLogVerbose(__func__) << "OMXPlayerAudio::Flush end";
 }
 
 bool OMXPlayerAudio::AddPacket(OMXPacket *pkt)
@@ -532,8 +532,8 @@ COMXAudio::EEncoded OMXPlayerAudio::IsPassthrough(COMXStreamInfo hints)
 
 bool OMXPlayerAudio::OpenDecoder()
 {
-	ofLogVerbose(__func__) << "m_use_hw_decode: " << m_use_hw_decode;
-	ofLogVerbose(__func__) << "m_use_passthrough: " << m_use_passthrough;
+	//ofLogVerbose(__func__) << "m_use_hw_decode: " << m_use_hw_decode;
+	//ofLogVerbose(__func__) << "m_use_passthrough: " << m_use_passthrough;
 	bool bAudioRenderOpen = false;
 
 	m_decoder = new COMXAudio();
@@ -595,7 +595,7 @@ bool OMXPlayerAudio::OpenDecoder()
 			      m_codec_name.c_str(), m_hints.channels, m_hints.samplerate, m_hints.bitspersample);
 		}
 	}
-	ofLogVerbose(__func__) << "m_hw_decode: " << m_hw_decode;
+	//ofLogVerbose(__func__) << "m_hw_decode: " << m_hw_decode;
 	return true;
 }
 
@@ -648,7 +648,7 @@ bool OMXPlayerAudio::IsEOS()
 
 void OMXPlayerAudio::WaitCompletion()
 {
-	ofLogVerbose(__func__) << "OMXPlayerAudio::WaitCompletion";
+	//ofLogVerbose(__func__) << "OMXPlayerAudio::WaitCompletion";
 	if(!m_decoder)
 	{
 		return;
@@ -675,7 +675,7 @@ void OMXPlayerAudio::WaitCompletion()
 
 void OMXPlayerAudio::SetCurrentVolume(long nVolume)
 {
-	ofLogVerbose(__func__) << "nVolume: " << nVolume;
+	//ofLogVerbose(__func__) << "nVolume: " << nVolume;
 	if(m_decoder)
 	{
 		m_decoder->SetCurrentVolume(nVolume);

@@ -29,8 +29,7 @@ bool OMXThread::StopThread(std::string className)
 	}
 
 	m_bStop = true;
-	int result = pthread_join(m_thread, NULL);
-	//ofLogVerbose(__func__) << "join result: " << result;
+	pthread_join(m_thread, NULL);
 	m_running = false;
 
 	m_thread = 0;

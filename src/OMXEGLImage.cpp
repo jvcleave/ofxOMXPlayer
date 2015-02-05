@@ -129,7 +129,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	error = m_omx_decoder.SetParameter(OMX_IndexParamVideoPortFormat, &formatType);
 	if(error == OMX_ErrorNone)
 	{
-		ofLogVerbose(__func__) << "m_omx_decoder SET OMX_IndexParamVideoPortFormat PASS";
+		//ofLogVerbose(__func__) << "m_omx_decoder SET OMX_IndexParamVideoPortFormat PASS";
 	}
 	else
 	{
@@ -144,7 +144,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	error = m_omx_decoder.GetParameter(OMX_IndexParamPortDefinition, &portParam);
 	if(error == OMX_ErrorNone)
 	{
-		ofLogVerbose(__func__) << "m_omx_decoder GET OMX_IndexParamPortDefinition PASS";
+		//ofLogVerbose(__func__) << "m_omx_decoder GET OMX_IndexParamPortDefinition PASS";
 	}
 	else
 	{
@@ -162,7 +162,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	error = m_omx_decoder.SetParameter(OMX_IndexParamPortDefinition, &portParam);
 	if(error == OMX_ErrorNone)
 	{
-		ofLogVerbose(__func__) << "m_omx_decoder SET OMX_IndexParamPortDefinition PASS";
+		//ofLogVerbose(__func__) << "m_omx_decoder SET OMX_IndexParamPortDefinition PASS";
 	}
 	else
 	{
@@ -186,7 +186,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	error = m_omx_decoder.SetParameter(OMX_IndexParamBrcmVideoDecodeErrorConcealment, &concanParam);
 	if(error == OMX_ErrorNone)
 	{
-		ofLogVerbose(__func__)	<< "m_omx_decoder OMX_IndexParamBrcmVideoDecodeErrorConcealment PASS";
+		//ofLogVerbose(__func__)	<< "m_omx_decoder OMX_IndexParamBrcmVideoDecodeErrorConcealment PASS";
 	}
 	else
 	{
@@ -204,7 +204,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 		error = m_omx_decoder.SetParameter((OMX_INDEXTYPE)OMX_IndexParamNalStreamFormatSelect, &nalStreamFormat);
 		if (error == OMX_ErrorNone)
 		{
-			ofLogVerbose(__func__)	<< "Open OMX_IndexParamNalStreamFormatSelect PASS";
+			//ofLogVerbose(__func__)	<< "Open OMX_IndexParamNalStreamFormatSelect PASS";
 		}
 		else
 		{
@@ -227,7 +227,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
     
     if (error == OMX_ErrorNone)
     {
-        ofLogVerbose(__func__)	<< "Open OMX_IndexParamBrcmVideoTimestampFifo PASS";
+        //ofLogVerbose(__func__)	<< "Open OMX_IndexParamBrcmVideoTimestampFifo PASS";
     }
     else
     {
@@ -240,7 +240,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	error = m_omx_decoder.AllocInputBuffers();
 	if(error == OMX_ErrorNone)
 	{
-		ofLogVerbose(__func__) << "m_omx_decoder AllocInputBuffers PASS";
+		//ofLogVerbose(__func__) << "m_omx_decoder AllocInputBuffers PASS";
 	}
 	else
 	{
@@ -253,7 +253,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	error = m_omx_tunnel_decoder.Establish(false);
 	if(error == OMX_ErrorNone)
 	{
-		ofLogVerbose(__func__) << "m_omx_tunnel_decoder Establish PASS";
+		//ofLogVerbose(__func__) << "m_omx_tunnel_decoder Establish PASS";
 	}
 	else
 	{
@@ -264,7 +264,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	error = m_omx_decoder.SetStateForComponent(OMX_StateExecuting);
 	if(error == OMX_ErrorNone)
 	{
-		ofLogVerbose(__func__) << "m_omx_decoder OMX_StateExecuting PASS";
+		//ofLogVerbose(__func__) << "m_omx_decoder OMX_StateExecuting PASS";
 	}
 	else
 	{
@@ -276,7 +276,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	error = m_omx_tunnel_sched.Establish(false);
 	if(error == OMX_ErrorNone)
 	{
-		ofLogVerbose(__func__) << "m_omx_tunnel_sched Establish PASS";
+		//ofLogVerbose(__func__) << "m_omx_tunnel_sched Establish PASS";
 	}
 	else
 	{
@@ -287,7 +287,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	error = m_omx_sched.SetStateForComponent(OMX_StateExecuting);
 	if(error == OMX_ErrorNone)
 	{
-		ofLogVerbose(__func__) << "m_omx_sched OMX_StateExecuting PASS";
+		//ofLogVerbose(__func__) << "m_omx_sched OMX_StateExecuting PASS";
 	}
 	else
 	{
@@ -313,7 +313,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	error = m_omx_render.GetParameter(OMX_IndexParamPortDefinition, &portParamRenderInput);
 	if(error == OMX_ErrorNone)
 	{
-		ofLogVerbose(__func__) << "m_omx_render GET OMX_IndexParamPortDefinition PASS";
+		//ofLogVerbose(__func__) << "m_omx_render GET OMX_IndexParamPortDefinition PASS";
 
 	}
 	else
@@ -329,7 +329,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	error = m_omx_render.GetParameter(OMX_IndexParamPortDefinition, &portParamRenderOutput);
 	if(error == OMX_ErrorNone)
 	{
-		ofLogVerbose(__func__) << "m_omx_render GET OMX_IndexParamPortDefinition PASS";
+		//ofLogVerbose(__func__) << "m_omx_render GET OMX_IndexParamPortDefinition PASS";
 
 	}
 	else
@@ -342,7 +342,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	error = m_omx_render.AllocInputBuffers();
 	if(error == OMX_ErrorNone)
 	{
-		ofLogVerbose(__func__) << "m_omx_render AllocInputBuffers PASS";
+		//ofLogVerbose(__func__) << "m_omx_render AllocInputBuffers PASS";
 	}
 	else
 	{
@@ -354,7 +354,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	error = m_omx_render.SetStateForComponent(OMX_StateIdle);
 	if(error == OMX_ErrorNone)
 	{
-		ofLogVerbose(__func__) << "m_omx_render OMX_StateIdle PASS";
+		//ofLogVerbose(__func__) << "m_omx_render OMX_StateIdle PASS";
 	}
 	else
 	{
@@ -363,11 +363,11 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	}
 	
 
-	ofLogVerbose(__func__) << "m_omx_render.GetOutputPort(): " << m_omx_render.GetOutputPort();
+	//ofLogVerbose(__func__) << "m_omx_render.GetOutputPort(): " << m_omx_render.GetOutputPort();
 	m_omx_render.EnablePort(m_omx_render.GetOutputPort(), false);
 	if(error == OMX_ErrorNone)
 	{
-		ofLogVerbose(__func__) << "m_omx_render Enable OUTPUT Port PASS";
+		//ofLogVerbose(__func__) << "m_omx_render Enable OUTPUT Port PASS";
 	}
 	else
 	{
@@ -380,7 +380,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	error = m_omx_render.UseEGLImage(&eglBuffer, m_omx_render.GetOutputPort(), NULL, eglImage);
 	if(error == OMX_ErrorNone)
 	{
-		ofLogVerbose(__func__) << "m_omx_render UseEGLImage PASS";
+		//ofLogVerbose(__func__) << "m_omx_render UseEGLImage PASS";
 	}
 	else
 	{
@@ -391,7 +391,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 
 	if(SendDecoderConfig())
 	{
-		ofLogVerbose(__func__) << "SendDecoderConfig PASS";
+		//ofLogVerbose(__func__) << "SendDecoderConfig PASS";
 	}
 	else
 	{
@@ -404,7 +404,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	error = m_omx_render.SetStateForComponent(OMX_StateExecuting);
 	if(error == OMX_ErrorNone)
 	{
-		ofLogVerbose(__func__) << "m_omx_render OMX_StateExecuting PASS";
+		//ofLogVerbose(__func__) << "m_omx_render OMX_StateExecuting PASS";
 	}
 	else
 	{
@@ -414,7 +414,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	error = m_omx_render.FillThisBuffer(eglBuffer);
 	if(error == OMX_ErrorNone)
 	{
-		ofLogVerbose(__func__) << "m_omx_render FillThisBuffer PASS";
+		//ofLogVerbose(__func__) << "m_omx_render FillThisBuffer PASS";
 	}
 	else
 	{
@@ -496,7 +496,6 @@ bool OMXEGLImage::Decode(uint8_t *pData, int iSize, double pts)
 			int nRetry = 0;
 			while(true)
 			{
-				//ofLogVerbose(__func__) << "nRetry: " << nRetry;
 				error = m_omx_decoder.EmptyThisBuffer(omx_buffer);
 				if (error == OMX_ErrorNone)
 				{

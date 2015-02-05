@@ -60,7 +60,7 @@ bool COMXAudioCodecOMX::Open(COMXStreamInfo& hints)
 	pCodec = avcodec_find_decoder(hints.codec);
 	if (!pCodec)
 	{
-		ofLog(OF_LOG_VERBOSE,"COMXAudioCodecOMX::Open() Unable to find codec %d", hints.codec);
+		ofLog(OF_LOG_ERROR, "COMXAudioCodecOMX::Open() Unable to find codec %d", hints.codec);
 		return false;
 	}
 
@@ -95,7 +95,7 @@ bool COMXAudioCodecOMX::Open(COMXStreamInfo& hints)
 
 	if (avcodec_open2(m_pCodecContext, pCodec, NULL) < 0)
 	{
-		ofLog(OF_LOG_VERBOSE,"COMXAudioCodecOMX::Open() Unable to open codec");
+		ofLog(OF_LOG_ERROR, "COMXAudioCodecOMX::Open() Unable to open codec");
 		Dispose();
 		return false;
 	}
@@ -166,7 +166,7 @@ int COMXAudioCodecOMX::Decode(BYTE* pData, int iSize)
 	/* some codecs will attempt to consume more data than what we gave */
 	if (iBytesUsed > iSize)
 	{
-		ofLog(OF_LOG_VERBOSE, "COMXAudioCodecOMX::Decode - decoder attempted to consume more data than given");
+		ofLog(OF_LOG_ERROR, "COMXAudioCodecOMX::Decode - decoder attempted to consume more data than given");
 		iBytesUsed = iSize;
 	}
 
@@ -199,7 +199,7 @@ int COMXAudioCodecOMX::Decode(BYTE* pData, int iSize)
 
 		if(!m_pConvert || swr_init(m_pConvert) < 0)
 		{
-			ofLog(OF_LOG_VERBOSE, "COMXAudioCodecOMX::Decode - Unable to convert %d to AV_SAMPLE_FMT_S16", m_pCodecContext->sample_fmt);
+			ofLog(OF_LOG_ERROR, "COMXAudioCodecOMX::Decode - Unable to convert %d to AV_SAMPLE_FMT_S16", m_pCodecContext->sample_fmt);
 			m_iBufferSize1 = 0;
 			m_iBufferSize2 = 0;
 			return iBytesUsed;
@@ -208,7 +208,7 @@ int COMXAudioCodecOMX::Decode(BYTE* pData, int iSize)
 		int len = m_iBufferSize1 / av_get_bytes_per_sample(m_pCodecContext->sample_fmt);
 		if(swr_convert(m_pConvert, &m_pBuffer2, len, (const uint8_t**)m_pFrame1->data, m_pFrame1->nb_samples) < 0)
 		{
-			ofLog(OF_LOG_VERBOSE, "COMXAudioCodecOMX::Decode - Unable to convert %d to AV_SAMPLE_FMT_S16", (int)m_pCodecContext->sample_fmt);
+			ofLog(OF_LOG_ERROR, "COMXAudioCodecOMX::Decode - Unable to convert %d to AV_SAMPLE_FMT_S16", (int)m_pCodecContext->sample_fmt);
 			m_iBufferSize1 = 0;
 			m_iBufferSize2 = 0;
 			return iBytesUsed;
@@ -389,7 +389,7 @@ void COMXAudioCodecOMX::BuildChannelMap()
 		}
 		else
 		{
-			ofLog(OF_LOG_VERBOSE, "COMXAudioCodecOMX::GetChannelMap - FFmpeg reported %d channels, but the layout contains %d ignoring", m_pCodecContext->channels, bits);
+			ofLog(OF_LOG_ERROR, "COMXAudioCodecOMX::GetChannelMap - FFmpeg reported %d channels, but the layout contains %d ignoring", m_pCodecContext->channels, bits);
 			layout = av_get_default_channel_layout(m_pCodecContext->channels);
 		}
 

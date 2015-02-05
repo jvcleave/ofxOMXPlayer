@@ -861,8 +861,8 @@ bool COMXAudio::SetCurrentVolume(long nVolume)
 		}
 		else
 		{
-			ofLogVerbose(__func__) << "Set Volume to " << nVolume;
-			ofLogVerbose(__func__) << "volume.bLinear: " << volume.bLinear;
+			//ofLogVerbose(__func__) << "Set Volume to " << nVolume;
+			//ofLogVerbose(__func__) << "volume.bLinear: " << volume.bLinear;
 		}
 
 	}
@@ -1179,7 +1179,7 @@ unsigned int COMXAudio::GetAudioRenderingLatency()
 
 void COMXAudio::SubmitEOS()
 {
-	ofLogVerbose(__func__) << "START";
+	//ofLogVerbose(__func__) << "START";
 	if(!m_Initialized || m_Pause)
 	{
 		return;
@@ -1239,16 +1239,16 @@ void COMXAudio::SetCodingType(AVCodecID codec)
 	switch(codec)
 	{
 		case CODEC_ID_DTS:
-			ofLogVerbose(__func__) << "OMX_AUDIO_CodingDTS";
+			//ofLogVerbose(__func__) << "OMX_AUDIO_CodingDTS";
 			m_eEncoding = OMX_AUDIO_CodingDTS;
 			break;
 		case CODEC_ID_AC3:
 		case CODEC_ID_EAC3:
-			ofLogVerbose(__func__) << "OMX_AUDIO_CodingDDP";
+			//ofLogVerbose(__func__) << "OMX_AUDIO_CodingDDP";
 			m_eEncoding = OMX_AUDIO_CodingDDP;
 			break;
 		default:
-			ofLogVerbose(__func__) << "OMX_AUDIO_CodingPCM";
+			//ofLogVerbose(__func__) << "OMX_AUDIO_CodingPCM";
 			m_eEncoding = OMX_AUDIO_CodingPCM;
 			break;
 	}
@@ -1260,35 +1260,35 @@ bool COMXAudio::CanHWDecode(AVCodecID codec)
 	{
 		/*
 		 case CODEC_ID_VORBIS:
-		 ofLogVerbose(__func__) << "OMX_AUDIO_CodingVORBIS";
+		 //ofLogVerbose(__func__) << "OMX_AUDIO_CodingVORBIS";
 		 m_eEncoding = OMX_AUDIO_CodingVORBIS;
 		 m_HWDecode = true;
 		 break;
 		 case CODEC_ID_AAC:
-		 ofLogVerbose(__func__) << "OMX_AUDIO_CodingAAC";
+		 //ofLogVerbose(__func__) << "OMX_AUDIO_CodingAAC";
 		 m_eEncoding = OMX_AUDIO_CodingAAC;
 		 m_HWDecode = true;
 		 break;
 		 */
 		case CODEC_ID_MP2:
 		case CODEC_ID_MP3:
-			ofLogVerbose(__func__) << "OMX_AUDIO_CodingMP3";
+			//ofLogVerbose(__func__) << "OMX_AUDIO_CodingMP3";
 			m_eEncoding = OMX_AUDIO_CodingMP3;
 			m_HWDecode = true;
 			break;
 		case CODEC_ID_DTS:
-			ofLogVerbose(__func__) << "OMX_AUDIO_CodingDTS";
+			//ofLogVerbose(__func__) << "OMX_AUDIO_CodingDTS";
 			m_eEncoding = OMX_AUDIO_CodingDTS;
 			m_HWDecode = true;
 			break;
 		case CODEC_ID_AC3:
 		case CODEC_ID_EAC3:
-			ofLogVerbose(__func__) << "OMX_AUDIO_CodingDDP";
+			//ofLogVerbose(__func__) << "OMX_AUDIO_CodingDDP";
 			m_eEncoding = OMX_AUDIO_CodingDDP;
 			m_HWDecode = true;
 			break;
 		default:
-			ofLogVerbose(__func__) << "OMX_AUDIO_CodingPCM";
+			//ofLogVerbose(__func__) << "OMX_AUDIO_CodingPCM";
 			m_eEncoding = OMX_AUDIO_CodingPCM;
 			m_HWDecode = false;
 			break;
@@ -1305,26 +1305,26 @@ bool COMXAudio::HWDecode(AVCodecID codec)
 	{
 		/*
 		 case CODEC_ID_VORBIS:
-		 ofLogVerbose(__func__) << "CODEC_ID_VORBIS";
+		 //ofLogVerbose(__func__) << "CODEC_ID_VORBIS";
 		 ret = true;
 		 break;
 		 case CODEC_ID_AAC:
-		 ofLogVerbose(__func__) << "CODEC_ID_AAC";
+		 //ofLogVerbose(__func__) << "CODEC_ID_AAC";
 		 ret = true;
 		 break;
 		 */
 		case CODEC_ID_MP2:
 		case CODEC_ID_MP3:
-			ofLogVerbose(__func__) << "CODEC_ID_MP2 / CODEC_ID_MP3";
+			//ofLogVerbose(__func__) << "CODEC_ID_MP2 / CODEC_ID_MP3";
 			ret = true;
 			break;
 		case CODEC_ID_DTS:
-			ofLogVerbose(__func__) << "CODEC_ID_DTS";
+			//ofLogVerbose(__func__) << "CODEC_ID_DTS";
 			ret = true;
 			break;
 		case CODEC_ID_AC3:
 		case CODEC_ID_EAC3:
-			ofLogVerbose(__func__) << "CODEC_ID_AC3 / CODEC_ID_EAC3";
+			//ofLogVerbose(__func__) << "CODEC_ID_AC3 / CODEC_ID_EAC3";
 			ret = true;
 			break;
 		default:
@@ -1342,31 +1342,31 @@ void COMXAudio::PrintChannels(OMX_AUDIO_CHANNELTYPE eChannelMapping[])
 		switch(eChannelMapping[i])
 		{
 			case OMX_AUDIO_ChannelLF:
-				ofLogVerbose(__func__) << "OMX_AUDIO_ChannelLF";
+				//ofLogVerbose(__func__) << "OMX_AUDIO_ChannelLF";
 				break;
 			case OMX_AUDIO_ChannelRF:
-				ofLogVerbose(__func__) << "OMX_AUDIO_ChannelRF";
+				//ofLogVerbose(__func__) << "OMX_AUDIO_ChannelRF";
 				break;
 			case OMX_AUDIO_ChannelCF:
-				ofLogVerbose(__func__) << "OMX_AUDIO_ChannelCF";
+				//ofLogVerbose(__func__) << "OMX_AUDIO_ChannelCF";
 				break;
 			case OMX_AUDIO_ChannelLS:
-				ofLogVerbose(__func__) << "OMX_AUDIO_ChannelLS";
+				//ofLogVerbose(__func__) << "OMX_AUDIO_ChannelLS";
 				break;
 			case OMX_AUDIO_ChannelRS:
-				ofLogVerbose(__func__) << "OMX_AUDIO_ChannelRS";
+				//ofLogVerbose(__func__) << "OMX_AUDIO_ChannelRS";
 				break;
 			case OMX_AUDIO_ChannelLFE:
-				ofLogVerbose(__func__) << "OMX_AUDIO_ChannelLFE";
+				//ofLogVerbose(__func__) << "OMX_AUDIO_ChannelLFE";
 				break;
 			case OMX_AUDIO_ChannelCS:
-				ofLogVerbose(__func__) << "OMX_AUDIO_ChannelCS";
+				//ofLogVerbose(__func__) << "OMX_AUDIO_ChannelCS";
 				break;
 			case OMX_AUDIO_ChannelLR:
-				ofLogVerbose(__func__) << "OMX_AUDIO_ChannelLR";
+				//ofLogVerbose(__func__) << "OMX_AUDIO_ChannelLR";
 				break;
 			case OMX_AUDIO_ChannelRR:
-				ofLogVerbose(__func__) << "OMX_AUDIO_ChannelRR";
+				//ofLogVerbose(__func__) << "OMX_AUDIO_ChannelRR";
 				break;
 			case OMX_AUDIO_ChannelNone:
 			case OMX_AUDIO_ChannelKhronosExtensions:

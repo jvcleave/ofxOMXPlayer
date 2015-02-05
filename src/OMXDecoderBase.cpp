@@ -23,14 +23,14 @@ OMXDecoderBase::OMXDecoderBase()
 	m_av_clock			= NULL;
 	m_omx_clock			= NULL;
 	decoder_name = OMX_VIDEO_DECODER;
-	ofLogVerbose(__func__) << "OMXDecoderBase::CONSTRUCT";
+	//ofLogVerbose(__func__) << "OMXDecoderBase::CONSTRUCT";
 
 }
 
 OMXDecoderBase::~OMXDecoderBase()
 {
 
-	ofLogVerbose(__func__) << " START ---------";
+	//ofLogVerbose(__func__) << " START ---------";
 	//return;
 	//TODO fix this?
 	try
@@ -79,7 +79,7 @@ OMXDecoderBase::~OMXDecoderBase()
 	//m_av_clock->OMXStop();
 	//m_av_clock->OMXStateIdle();
 
-	ofLogVerbose(__func__) << "END ---------";
+	//ofLogVerbose(__func__) << "END ---------";
 }
 
 bool OMXDecoderBase::NaluFormatStartCodes(enum AVCodecID codec, uint8_t *in_extradata, int in_extrasize)
@@ -142,7 +142,7 @@ bool OMXDecoderBase::SendDecoderConfig()
 		}
 		else
 		{
-			ofLogVerbose(__func__) << "EmptyThisBuffer PASS";
+			//ofLogVerbose(__func__) << "EmptyThisBuffer PASS";
 		}
 
 	}
@@ -264,12 +264,12 @@ bool OMXDecoderBase::Resume()
 
 void OMXDecoderBase::Reset()
 {
-	ofLogVerbose(__func__) << " START";
+	//ofLogVerbose(__func__) << " START";
 
 	m_omx_decoder.FlushInput();
 	m_omx_tunnel_decoder.Flush();
 
-	ofLogVerbose(__func__) << " END";
+	//ofLogVerbose(__func__) << " END";
 }
 
 
@@ -380,5 +380,5 @@ void OMXDecoderBase::ProcessCodec(COMXStreamInfo& hints)
 			ofLog(OF_LOG_VERBOSE, "Video codec id unknown: %x\n", hints.codec);
 			break;
 	}
-	ofLogVerbose(__func__) << " m_video_codec_name: " << m_video_codec_name;
+	//ofLogVerbose(__func__) << " m_video_codec_name: " << m_video_codec_name;
 }
