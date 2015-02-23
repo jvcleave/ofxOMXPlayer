@@ -1,4 +1,19 @@
 #!/bin/bash
 
-make -C example-basic && make -C example-displayrect && make -C example-multiple-players && make -C example-pixels && make -C example-playlist && make -C example-restartMovie && make -C example-shader
-
+for exampleFolder in $(ls -1d *)
+do
+    if [[ $exampleFolder != *"example"* ]]
+    then
+        continue;
+    fi
+    echo "COMPILING PROJECT: " $exampleFolder
+    cd $exampleFolder
+    make
+    ret=$?
+    if [ $ret -ne 0 ]; then
+        echo $exampleFolder "COMPILE FAIL" 
+    else
+        echo $exampleFolder "COMPILE SUCCESS" 
+    fi
+    cd ../
+done
