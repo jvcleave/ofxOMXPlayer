@@ -97,3 +97,4 @@ private:
     int             speedMultiplier;
     
 };
+
