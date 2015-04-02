@@ -630,38 +630,38 @@ ofxOMXPlayer::~ofxOMXPlayer()
    // OMX_Deinit();
 }
 
-bool doExit = false;
-void signal_handler(int signum)
+bool ofxOMXPlayer::doExit = false;
+void ofxOMXPlayer::signal_handler(int signum)
 {
-	doExit = true;
+    ofxOMXPlayer::doExit = true;
 }
 
 void ofxOMXPlayer::onUpdateDuringExit(ofEventArgs& args)
 {
-	if (doExit)
-	{
-		//ofLogVerbose(__func__) << " EXITING VIA SIGNAL";
-		if(engine)
-		{
-			engine->startExit();
-		}
-
-		doExit = false;
-		close();
-		destroyEGLImage();
-		if (pixels)
-		{
-			delete[] pixels;
-			pixels = NULL;
-		}
+    if (ofxOMXPlayer::doExit)
+    {
+        //ofLogVerbose(__func__) << " EXITING VIA SIGNAL";
+        if(engine)
+        {
+            engine->startExit();
+        }
+        
+        ofxOMXPlayer::doExit = false;
+        close();
+        destroyEGLImage();
+        if (pixels)
+        {
+            delete[] pixels;
+            pixels = NULL;
+        }
         OMXInitializer::getInstance().deinit();
-		ofExit();
-	}
+        ofExit();
+    }
 }
 
 void ofxOMXPlayer::addExitHandler()
 {
-
+    
     vector<int> signals;
     signals.push_back(SIGINT);
     signals.push_back(SIGQUIT);
@@ -673,7 +673,7 @@ void ofxOMXPlayer::addExitHandler()
         
         //Struct for the new action associated to the SIGNAL_TO_BLOCK
         struct sigaction new_action;
-        new_action.sa_handler = signal_handler;
+        new_action.sa_handler = ofxOMXPlayer::signal_handler;
         
         //Empty the sa_mask. This means that no signal is blocked while the signal_handler runs.
         sigemptyset(&new_action.sa_mask);
@@ -696,6 +696,6 @@ void ofxOMXPlayer::addExitHandler()
         }
         
     }
-	ofAddListener(ofEvents().update, this, &ofxOMXPlayer::onUpdateDuringExit);
+    ofAddListener(ofEvents().update, this, &ofxOMXPlayer::onUpdateDuringExit);
 }
 
