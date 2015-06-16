@@ -61,7 +61,7 @@ public:
     void        close();
     
 private:
-    
+    vector<int> signals;
     bool openEngine(int startTimeInSeconds = 0);
     void addExitHandler();
     void onUpdateDuringExit(ofEventArgs& args);

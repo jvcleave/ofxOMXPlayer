@@ -3,8 +3,10 @@
 //--------------------------------------------------------------
 void testApp::setup()
 {
-	//ofSetLogLevel(OF_LOG_VERBOSE);
+    //ofSetLogLevel("ofThread", OF_LOG_SILENT);
+    ofSetLogLevel(OF_LOG_VERBOSE);
 	
+    
 	string videoPath = ofToDataPath("../../../video/Timecoded_Big_bunny_1.mov", true);
 	
 	//Somewhat like ofFboSettings we may have a lot of options so this is the current model
@@ -25,12 +27,23 @@ void testApp::setup()
 	
 }
 
-
+bool forceClosed = false;
 
 //--------------------------------------------------------------
 void testApp::update()
 {
-		
+		if(ofGetElapsedTimeMillis()>10000)
+        {
+            if(!forceClosed)
+            {
+                omxPlayer.close();
+                ofLogVerbose(__func__)  << "";
+
+                forceClosed = true;
+
+            }
+            
+        }
 }
 
 

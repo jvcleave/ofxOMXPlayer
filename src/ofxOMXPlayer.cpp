@@ -10,6 +10,9 @@
 ofxOMXPlayer::ofxOMXPlayer()
 {
     OMXInitializer::getInstance().init();
+    signals.push_back(SIGINT);
+    signals.push_back(SIGQUIT);
+    
 	engine = NULL;
 	isOpen = false;
 	textureEnabled = false;
@@ -572,24 +575,6 @@ void ofxOMXPlayer::draw(float x, float y)
 	
 }
 
-void ofxOMXPlayer::close()
-{
-	//ofLogVerbose(__func__) << " isOpen: " << isOpen;
-	if (!isOpen)
-	{
-		return;
-	}
-	ofRemoveListener(ofEvents().update, this, &ofxOMXPlayer::onUpdateDuringExit);
-
-	if(engine)
-	{
-		delete engine;
-		engine = NULL;
-	}
-
-	isOpen = false;
-
-}
 
 
 float ofxOMXPlayer::getFPS()
@@ -624,13 +609,53 @@ string ofxOMXPlayer::getInfo()
 	return info.str();
 }
 
+struct sigaction old_action;
+bool ofxOMXPlayer::doExit = false;
+
+void ofxOMXPlayer::close()
+{
+    ofLogVerbose(__func__)  << "";
+    //ofLogVerbose(__func__) << " isOpen: " << isOpen;
+    if (!isOpen)
+    {
+        return;
+    }
+    
+    
+    
+    
+    ofRemoveListener(ofEvents().update, this, &ofxOMXPlayer::onUpdateDuringExit);
+    
+    
+    if (!ofxOMXPlayer::doExit)
+    {
+        ofLogVerbose(__func__) << "signals.size() " << signals.size();
+        for (size_t i=0; i<signals.size(); i++)
+        {
+            int SIGNAL_TO_BLOCK = signals[i];
+            sigaction(SIGNAL_TO_BLOCK, &old_action, NULL);
+            ofLogVerbose(__func__) << " RESTORED SIGNAL";
+        }
+    }
+    
+    if(engine)
+    {
+        delete engine;
+        engine = NULL;
+    }
+    
+    isOpen = false;
+    
+}
+
+
 ofxOMXPlayer::~ofxOMXPlayer()
 {
 	close();
-   // OMX_Deinit();
+    // OMX_Deinit();
 }
 
-bool ofxOMXPlayer::doExit = false;
+
 void ofxOMXPlayer::signal_handler(int signum)
 {
     ofxOMXPlayer::doExit = true;
@@ -645,9 +670,9 @@ void ofxOMXPlayer::onUpdateDuringExit(ofEventArgs& args)
         {
             engine->startExit();
         }
-        
-        ofxOMXPlayer::doExit = false;
         close();
+        ofxOMXPlayer::doExit = false;
+        
         destroyEGLImage();
         if (pixels)
         {
@@ -662,9 +687,8 @@ void ofxOMXPlayer::onUpdateDuringExit(ofEventArgs& args)
 void ofxOMXPlayer::addExitHandler()
 {
     
-    vector<int> signals;
-    signals.push_back(SIGINT);
-    signals.push_back(SIGQUIT);
+    
+ 
     
     for (size_t i=0; i<signals.size(); i++)
     {
@@ -684,7 +708,7 @@ void ofxOMXPlayer::addExitHandler()
         //Remove any flag from sa_flag. See documentation for flags allowed
         new_action.sa_flags = 0;
         
-        struct sigaction old_action;
+        
         //Read the old signal associated to SIGNAL_TO_BLOCK
         sigaction(SIGNAL_TO_BLOCK, NULL, &old_action);
         
