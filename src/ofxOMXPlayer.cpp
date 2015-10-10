@@ -303,6 +303,12 @@ bool ofxOMXPlayer::openEngine(int startTimeInSeconds) //default 0
 
 }
 
+bool ofxOMXPlayer::getIsOpen()
+{
+	return isOpen;
+}
+
+
 void ofxOMXPlayer::togglePause()
 {
 	if (engine)
