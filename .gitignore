@@ -3,3 +3,4 @@ readMe.txt
 example-*/bin/
 example-*/bin/libs
 *._*
+!example-*/bin/data/.gitkeep
