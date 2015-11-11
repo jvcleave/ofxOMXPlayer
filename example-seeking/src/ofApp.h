@@ -4,7 +4,7 @@
 #include "ofxOMXPlayer.h"
 #include "TerminalListener.h"
 
-class testApp : public ofBaseApp, public KeyListener{
+class ofApp : public ofBaseApp, public KeyListener{
 
 	public:
 
@@ -16,7 +16,6 @@ class testApp : public ofBaseApp, public KeyListener{
 	
 	void onCharacterReceived(KeyListenerEventData& e);
 	TerminalListener consoleListener;
-    
-    string keyCommandInfo;
+    bool doSeek;
 };
 

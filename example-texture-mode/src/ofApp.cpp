@@ -1,7 +1,7 @@
-#include "testApp.h"
+#include "ofApp.h"
 
 //--------------------------------------------------------------
-void testApp::setup()
+void ofApp::setup()
 {
 	//ofSetLogLevel(OF_LOG_VERBOSE);
 	
@@ -28,14 +28,14 @@ void testApp::setup()
 
 
 //--------------------------------------------------------------
-void testApp::update()
+void ofApp::update()
 {
 		
 }
 
 
 //--------------------------------------------------------------
-void testApp::draw(){
+void ofApp::draw(){
 	if(!omxPlayer.isTextureEnabled())
 	{
 		return;

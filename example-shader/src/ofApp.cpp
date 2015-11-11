@@ -1,24 +1,24 @@
-#include "shaderApp.h"
+#include "ofApp.h"
 
 
-void shaderApp::onCharacterReceived(KeyListenerEventData& e)
+void ofApp::onCharacterReceived(KeyListenerEventData& e)
 {
 	keyPressed((int)e.character);
 }
 
 
-void shaderApp::onVideoEnd(ofxOMXPlayerListenerEventData& e)
+void ofApp::onVideoEnd(ofxOMXPlayerListenerEventData& e)
 {
 	ofLogVerbose(__func__) << "at: " << ofGetElapsedTimeMillis();
 }
-void shaderApp::onVideoLoop(ofxOMXPlayerListenerEventData& e)
+void ofApp::onVideoLoop(ofxOMXPlayerListenerEventData& e)
 {
 	ofLogVerbose(__func__) << "at: " << ofGetElapsedTimeMillis();
 }
 
 
 //--------------------------------------------------------------
-void shaderApp::setup()
+void ofApp::setup()
 {
 	consoleListener.setup(this);
 	ofHideCursor();
@@ -42,7 +42,7 @@ void shaderApp::setup()
 
 
 //--------------------------------------------------------------
-void shaderApp::update()
+void ofApp::update()
 {
 	fbo.begin();
 		ofClear(0, 0, 0, 0);
@@ -56,15 +56,29 @@ void shaderApp::update()
 }
 
 //--------------------------------------------------------------
-void shaderApp::draw(){
+void ofApp::draw(){
 	
 	fbo.draw(0, 0);
-	ofDrawBitmapStringHighlight(omxPlayer.getInfo(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
+    
+    stringstream info;
+    info << omxPlayer.getInfo();
+    info << "\n";
+    info << "\n";
+    info << "PRESS p TO TOGGLE PAUSE";
+    info << "\n";
+    info << "PRESS b TO SEEK TO FRAME STEP FORWARD";
+    info << "\n";
+    info << "PRESS 1 TO SEEK TO DECREASE VOLUME";
+    info << "\n";
+    info << "PRESS 2 TO SEEK TO INCREASE VOLUME";
+    ofDrawBitmapStringHighlight(info.str() , 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
+    
+	ofDrawBitmapStringHighlight(info.str(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
 	
 }
 
 //--------------------------------------------------------------
-void shaderApp::keyPressed  (int key){
+void ofApp::keyPressed  (int key){
 	 
 	ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
 	switch (key) 

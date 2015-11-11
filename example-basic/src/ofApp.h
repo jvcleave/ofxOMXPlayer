@@ -3,18 +3,15 @@
 #include "ofMain.h"
 #include "ofxOMXPlayer.h"
 
-class multiPlayer : public ofBaseApp{
+class ofApp : public ofBaseApp{
 
 	public:
 
 		void setup();
 		void update();
 		void draw();
-		void keyPressed(int key);
+			
+		ofxOMXPlayer omxPlayer;
 	
-	
-	vector<ofxOMXPlayer*> omxPlayers; 
-
-
 };
 

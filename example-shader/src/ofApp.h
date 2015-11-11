@@ -5,7 +5,7 @@
 
 #include "TerminalListener.h"
 
-class shaderApp : public ofBaseApp, public KeyListener, public ofxOMXPlayerListener{
+class ofApp : public ofBaseApp, public KeyListener, public ofxOMXPlayerListener{
 	
 public:
 	

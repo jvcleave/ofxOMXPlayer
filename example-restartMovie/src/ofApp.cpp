@@ -1,13 +1,9 @@
-#include "testApp.h"
-
+#include "ofApp.h"
 
 //--------------------------------------------------------------
-void testApp::setup()
+void ofApp::setup()
 {
 	ofSetLogLevel(OF_LOG_VERBOSE);
-	ofSetLogLevel("ofThread", OF_LOG_ERROR);
-		
-	
 	string videoPath = ofToDataPath("../../../video/Timecoded_Big_bunny_1.mov", true);
 
 	
@@ -49,60 +45,46 @@ void testApp::setup()
 	omxPlayer.setup(settings);
 	
 	consoleListener.setup(this);
-    stringstream ss;
-    ss << "\n";
-    ss << "PRESS p TO TOGGLE PAUSE";
-    ss << "\n";
-    ss << "PRESS s TO SEEK TO RANDOM TIME";
-    
-    keyCommandInfo  = ss.str();
-    
 }
 
-bool doSeek = false;
+
+
 //--------------------------------------------------------------
-void testApp::update()
+void ofApp::update()
 {
-	if(doSeek)
-    {
-        int timeInSecondsToSeekTo = ofRandom(2, omxPlayer.getDurationInSeconds()-5);
-        omxPlayer.seekToTimeInSeconds(timeInSecondsToSeekTo);
-        doSeek = false;
-       
-    }
+	
 	
 }
 
 
 //--------------------------------------------------------------
-void testApp::draw()
+void ofApp::draw()
 {
-	if (omxPlayer.isTextureEnabled())
-    {
-        omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
-    }
 	
-	
-	ofDrawBitmapStringHighlight(omxPlayer.getInfo() + keyCommandInfo, 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
-  
-    
+	omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
+    stringstream info;
+    info << omxPlayer.getInfo();
+    info << "\n";
+    info << "\n";
+    info << "PRESS r TO RESTART MOVIE";
+    info << "\n";
+	ofDrawBitmapStringHighlight(info.str(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
 }
 
-void testApp::keyPressed(int key)
+void ofApp::keyPressed(int key)
 {
     ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
 	if (key == 'p') 
 	{
 		omxPlayer.setPaused(!omxPlayer.isPaused());
 	}
-	if (key == 's')
+	if (key == 'r') 
 	{
-        doSeek = true;
-        
+		omxPlayer.restartMovie();
 	}
 }
 
-void testApp::onCharacterReceived(KeyListenerEventData& e)
+void ofApp::onCharacterReceived(KeyListenerEventData& e)
 {
 	keyPressed((int)e.character);
 }

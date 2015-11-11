@@ -1,12 +1,10 @@
-#include "testApp.h"
+#include "ofApp.h"
+
 
 //--------------------------------------------------------------
-void testApp::setup()
+void ofApp::setup()
 {
-	ofSetLogLevel(OF_LOG_NOTICE);
-	ofSetLogLevel("ofThread", OF_LOG_ERROR);
-		
-	
+    doSeek = false;
 	string videoPath = ofToDataPath("../../../video/Timecoded_Big_bunny_1.mov", true);
 
 	
@@ -46,52 +44,62 @@ void testApp::setup()
 	
 	//so either pass in the settings
 	omxPlayer.setup(settings);
- 
-    
+	
 	consoleListener.setup(this);
-}
 
-//--------------------------------------------------------------
-void testApp::update()
-{
+    
     
 }
 
 
 //--------------------------------------------------------------
-void testApp::draw()
+void ofApp::update()
 {
-	if(omxPlayer.isTextureEnabled())
+	if(doSeek)
+    {
+        int timeInSecondsToSeekTo = ofRandom(2, omxPlayer.getDurationInSeconds()-5);
+        omxPlayer.seekToTimeInSeconds(timeInSecondsToSeekTo);
+        doSeek = false;
+       
+    }
+	
+}
+
+
+//--------------------------------------------------------------
+void ofApp::draw()
+{
+	if (omxPlayer.isTextureEnabled())
     {
         omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
     }
 	
-	
-	ofDrawBitmapStringHighlight(omxPlayer.getInfo() + "\n " + "speedMultiplier: " + ofToString(omxPlayer.getSpeedMultiplier()), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
+    stringstream info;
+    info << omxPlayer.getInfo();
+    info << "\n";
+    info << "\n";
+    info << "PRESS p TO TOGGLE PAUSE";
+    info << "\n";
+    info << "PRESS s TO SEEK TO RANDOM TIME";
+	ofDrawBitmapStringHighlight(info.str() , 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
   
     
 }
 
-void testApp::keyPressed(int key)
+void ofApp::keyPressed(int key)
 {
     ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
-	if (key == 'i')
+	if (key == 'p') 
 	{
-        /*
-            BETA FEATURE:
-            If the movie loops it will take a while for the video to recover to normal speed
-         
-         */
-        omxPlayer.increaseSpeed();
+		omxPlayer.setPaused(!omxPlayer.isPaused());
 	}
-	if (key == 'n')
+	if (key == 's')
 	{
-        omxPlayer.setNormalSpeed();
-        
+        doSeek = true;
 	}
 }
 
-void testApp::onCharacterReceived(KeyListenerEventData& e)
+void ofApp::onCharacterReceived(KeyListenerEventData& e)
 {
 	keyPressed((int)e.character);
 }

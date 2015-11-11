@@ -5,7 +5,7 @@
 #include "TerminalListener.h"
 
 
-class playlistApp : public ofBaseApp, public ofxOMXPlayerListener, public KeyListener{
+class ofApp : public ofBaseApp, public ofxOMXPlayerListener, public KeyListener{
 
 	public:
 

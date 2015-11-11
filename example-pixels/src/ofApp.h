@@ -4,7 +4,7 @@
 #include "ofxOMXPlayer.h"
 
 #include "TerminalListener.h"
-class pixelsApp : public ofBaseApp, public KeyListener{
+class ofApp : public ofBaseApp, public KeyListener{
 	
 public:
 	

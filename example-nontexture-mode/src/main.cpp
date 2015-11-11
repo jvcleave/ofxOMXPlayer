@@ -1,8 +1,9 @@
 #include "ofMain.h"
-#include "testApp.h"
+#include "ofApp.h"
 
 int main()
 {
+    ofSetLogLevel(OF_LOG_VERBOSE);
 	ofSetupOpenGL(1280, 720, OF_WINDOW);
-	ofRunApp( new testApp());
+	ofRunApp( new ofApp());
 }

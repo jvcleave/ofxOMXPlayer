@@ -1,12 +1,8 @@
-#include "multiPlayer.h"
+#include "ofApp.h"
 
 //--------------------------------------------------------------
-void multiPlayer::setup()
-{
-	ofSetLogLevel(OF_LOG_VERBOSE);
-	ofSetLogLevel("ofThread", OF_LOG_ERROR);
-	ofSetVerticalSync(false);
-	
+void ofApp::setup()
+{	
 	ofDirectory currentVideoDirectory(ofToDataPath("../../../video", true));
 	if (currentVideoDirectory.exists()) 
 	{
@@ -38,12 +34,16 @@ void multiPlayer::setup()
 			player->setup(settings);
 			omxPlayers.push_back(player);
 		}
-	}
+    }else{
+        ofLogError() << "currentVideoDirectory: " << currentVideoDirectory.path() << " MISSING";
+        
+        
+    }
 
 }
 
 //--------------------------------------------------------------
-void multiPlayer::update()
+void ofApp::update()
 {
 	
 	
@@ -52,7 +52,7 @@ void multiPlayer::update()
 
 
 //--------------------------------------------------------------
-void multiPlayer::draw(){
+void ofApp::draw(){
 	ofBackgroundGradient(ofColor::red, ofColor::black, OF_GRADIENT_BAR);
 	for (int i=0; i<omxPlayers.size(); i++) 
 	{
@@ -71,7 +71,7 @@ void multiPlayer::draw(){
 }
 
 //--------------------------------------------------------------
-void multiPlayer::keyPressed  (int key){
+void ofApp::keyPressed  (int key){
 	switch (key) 
 	{
 		case 'c':

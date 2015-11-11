@@ -1,23 +1,13 @@
 #include "ofMain.h"
-#include "testApp.h"
-#if (OF_VERSION_MINOR != 9)
-#include "ofGLProgrammableRenderer.h"
-#endif
-
+#include "ofApp.h"
 
 int main()
 {
     ofSetLogLevel(OF_LOG_VERBOSE);
-#if (OF_VERSION_MINOR == 9)
     ofGLESWindowSettings settings;
     settings.width = 1280;
     settings.height = 720;
     settings.setGLESVersion(2);
     ofCreateWindow(settings);
-#else
-    ofSetLogLevel("ofThread", OF_LOG_ERROR);
-    ofSetCurrentRenderer(ofGLProgrammableRenderer::TYPE);
-    ofSetupOpenGL(1280, 720, OF_WINDOW);
-#endif
-    ofRunApp( new testApp());
+    ofRunApp( new ofApp());
 }

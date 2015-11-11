@@ -1,10 +1,8 @@
-#include "pixelsApp.h"
+#include "ofApp.h"
 
 //--------------------------------------------------------------
-void pixelsApp::setup()
+void ofApp::setup()
 {
-	ofSetLogLevel(OF_LOG_VERBOSE);
-	ofSetLogLevel("ofThread", OF_LOG_ERROR);
 	doSaveImage = false;
 	doUpdatePixels = true;
 	string videoPath = ofToDataPath("../../../video/Timecoded_Big_bunny_1.mov", true);
@@ -15,7 +13,7 @@ void pixelsApp::setup()
 }
 
 //--------------------------------------------------------------
-void pixelsApp::update()
+void ofApp::update()
 {
 	if (doSaveImage ) 
 	{
@@ -39,7 +37,7 @@ void pixelsApp::update()
 
 
 //--------------------------------------------------------------
-void pixelsApp::draw(){
+void ofApp::draw(){
 	if(!omxPlayer.isTextureEnabled())
 	{
 		return;
@@ -56,7 +54,7 @@ void pixelsApp::draw(){
 }
 
 //--------------------------------------------------------------
-void pixelsApp::keyPressed  (int key)
+void ofApp::keyPressed  (int key)
 {
     ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
     
@@ -71,7 +69,7 @@ void pixelsApp::keyPressed  (int key)
 	}
 }
 
-void pixelsApp::onCharacterReceived(KeyListenerEventData& e)
+void ofApp::onCharacterReceived(KeyListenerEventData& e)
 {
 	keyPressed((int)e.character);
 }

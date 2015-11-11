@@ -1,4 +1,4 @@
-#include "playlistApp.h"
+#include "ofApp.h"
 
 //This app is a demo of the ability to play multiple files with the Non-Texture Player
 //It requires multiple video files to be in /home/pi/videos/current
@@ -13,14 +13,14 @@
 
 
 bool doLoadNextMovie = false;
-void playlistApp::onVideoEnd(ofxOMXPlayerListenerEventData& e)
+void ofApp::onVideoEnd(ofxOMXPlayerListenerEventData& e)
 {
 	ofLogVerbose(__func__) << " RECEIVED";
 	doLoadNextMovie = true;
 }
 
 
-void playlistApp::onCharacterReceived(KeyListenerEventData& e)
+void ofApp::onCharacterReceived(KeyListenerEventData& e)
 {
 	keyPressed((int)e.character);
 }
@@ -32,11 +32,9 @@ unsigned long long skipTimeEnd=0;
 unsigned long long amountSkipped =0;
 unsigned long long totalAmountSkipped =0;
 //--------------------------------------------------------------
-void playlistApp::setup()
+void ofApp::setup()
 {
 	ofBackground(ofColor::black);
-	//ofSetLogLevel(OF_LOG_VERBOSE);
-	ofSetLogLevel("ofThread", OF_LOG_ERROR);
 	consoleListener.setup(this);	
 	
 	//this will let us just grab a video without recompiling
@@ -60,7 +58,7 @@ void playlistApp::setup()
 }
 
 
-void playlistApp::loadNextMovie()
+void ofApp::loadNextMovie()
 {
 	if(videoCounter+1<files.size())
 	{
@@ -78,7 +76,7 @@ void playlistApp::loadNextMovie()
 }
 
 //--------------------------------------------------------------
-void playlistApp::update()
+void ofApp::update()
 {
 	if (doLoadNextMovie) 
 	{
@@ -98,7 +96,7 @@ void playlistApp::update()
 
 
 //--------------------------------------------------------------
-void playlistApp::draw(){
+void ofApp::draw(){
 	
 	//ofBackgroundGradient(ofColor::red, ofColor::black, OF_GRADIENT_CIRCULAR);
 	
@@ -112,14 +110,21 @@ void playlistApp::draw(){
 	omxPlayer.draw(ofGetWidth()-scaledWidth, ofGetHeight()-scaledHeight, scaledWidth, scaledHeight);
 
 	stringstream info;
-	info <<"\n" <<	"MILLIS SKIPPED: "		<< amountSkipped;
-	info <<"\n" <<	"TOTAL MILLIS SKIPPED: " << totalAmountSkipped;
-	info <<"\n" <<	"CURRENT MOVIE: "		<< files[videoCounter].path();
-	ofDrawBitmapStringHighlight(omxPlayer.getInfo() + info.str(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
+    info << omxPlayer.getInfo();
+    info << "\n";
+	info << "MILLIS SKIPPED: " << amountSkipped;
+    info << "\n";
+	info << "TOTAL MILLIS SKIPPED: " << totalAmountSkipped;
+    info << "\n";
+	info << "CURRENT MOVIE: " << files[videoCounter].path();
+    info << "\n";
+    info << "PRESS n TO LOAD NEXT MOVIE";
+    info << "\n";
+	ofDrawBitmapStringHighlight(info.str(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
 }
 
 //--------------------------------------------------------------
-void playlistApp::keyPressed  (int key){
+void ofApp::keyPressed  (int key){
 
 	ofLogVerbose(__func__) << "key: " << key;
 	switch (key) 
@@ -127,25 +132,6 @@ void playlistApp::keyPressed  (int key){
 		case 'n':
 		{
 			doLoadNextMovie = true;
-			break;
-		}
-		case 'e':
-		{
-			break;
-		}
-		case 'x':
-		{
-			break;
-		}
-		case 'p':
-		{
-			ofLogVerbose() << "pause: " << !omxPlayer.isPaused();
-			omxPlayer.setPaused(!omxPlayer.isPaused());
-			break;
-		}
-		case 's':
-		{
-			
 			break;
 		}
 	}

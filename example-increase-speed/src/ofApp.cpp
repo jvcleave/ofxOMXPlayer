@@ -1,9 +1,9 @@
-#include "testApp.h"
+#include "ofApp.h"
 
 //--------------------------------------------------------------
-void testApp::setup()
+void ofApp::setup()
 {
-	ofSetLogLevel(OF_LOG_VERBOSE);
+	ofSetLogLevel(OF_LOG_NOTICE);
 	ofSetLogLevel("ofThread", OF_LOG_ERROR);
 		
 	
@@ -46,43 +46,61 @@ void testApp::setup()
 	
 	//so either pass in the settings
 	omxPlayer.setup(settings);
-	
+ 
+    
 	consoleListener.setup(this);
 }
 
-
-
 //--------------------------------------------------------------
-void testApp::update()
+void ofApp::update()
 {
-	
-	
+    
 }
 
 
 //--------------------------------------------------------------
-void testApp::draw()
+void ofApp::draw()
 {
+	if(omxPlayer.isTextureEnabled())
+    {
+        omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
+    }
 	
-	omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
-	
-	ofDrawBitmapStringHighlight(omxPlayer.getInfo(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
+    stringstream info;
+    info << omxPlayer.getInfo();
+    info << "\n";
+    info << "\n";
+    info << "speedMultiplier " << omxPlayer.getSpeedMultiplier();
+    info << "\n";
+    info << "PRESS n to reset Speed";
+    info << "\n";
+    info << "PRESS i to increase Speed";
+    info << "\n";
+	ofDrawBitmapStringHighlight(info.str(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
+  
+    
 }
 
-void testApp::keyPressed(int key)
+void ofApp::keyPressed(int key)
 {
     ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
-	if (key == 'p') 
+	if (key == 'i')
 	{
-		omxPlayer.setPaused(!omxPlayer.isPaused());
+        /*
+            BETA FEATURE:
+            If the movie loops it will take a while for the video to recover to normal speed
+         
+         */
+        omxPlayer.increaseSpeed();
 	}
-	if (key == 'r') 
+	if (key == 'n')
 	{
-		omxPlayer.restartMovie();
+        omxPlayer.setNormalSpeed();
+        
 	}
 }
 
-void testApp::onCharacterReceived(KeyListenerEventData& e)
+void ofApp::onCharacterReceived(KeyListenerEventData& e)
 {
 	keyPressed((int)e.character);
 }

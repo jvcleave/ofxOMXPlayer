@@ -671,7 +671,7 @@ void ofxOMXPlayer::onUpdateDuringExit(ofEventArgs& args)
 {
     if (ofxOMXPlayer::doExit)
     {
-        //ofLogVerbose(__func__) << " EXITING VIA SIGNAL";
+        ofLogVerbose(__func__) << " EXITING VIA SIGNAL";
         if(engine)
         {
             engine->startExit();

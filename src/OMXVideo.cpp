@@ -390,7 +390,9 @@ bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspec
 
 void COMXVideo::onUpdate(ofEventArgs& args)
 {
-	updateFrameCount();
+    //TODO: seems to cause hang on exit
+    
+	//updateFrameCount();
 }
 void COMXVideo::updateFrameCount()
 {
