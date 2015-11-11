@@ -973,7 +973,7 @@ unsigned int COMXAudio::AddPackets(const void* data, unsigned int len, double dt
 		if(m_first_frame)
 		{
 			m_first_frame = false;
-			//m_omx_render.WaitForEvent(OMX_EventPortSettingsChanged);
+			m_omx_render.WaitForEvent(OMX_EventPortSettingsChanged);
 
 			m_omx_render.DisablePort(m_omx_render.GetInputPort(), false);
 			if(!m_Passthrough)
@@ -1002,11 +1002,14 @@ unsigned int COMXAudio::AddPackets(const void* data, unsigned int len, double dt
 				if(omx_err != OMX_ErrorNone)
 				{
 					ofLog(OF_LOG_ERROR, "COMXAudio::AddPackets error SetParameter 1 omx_err(0x%08x)\n", omx_err);
+                    ofLogError() << __LINE__;
+                    
 				}
 				omx_err = m_omx_mixer.GetParameter(OMX_IndexParamAudioPcm, &m_pcm_input);
 				if(omx_err != OMX_ErrorNone)
 				{
 					ofLog(OF_LOG_ERROR, "COMXAudio::AddPackets error GetParameter 2  omx_err(0x%08x)\n", omx_err);
+                    ofLogError() << __LINE__;
 				}
 
 				/* setup mixer output */
@@ -1015,11 +1018,13 @@ unsigned int COMXAudio::AddPackets(const void* data, unsigned int len, double dt
 				if(omx_err != OMX_ErrorNone)
 				{
 					ofLog(OF_LOG_ERROR, "COMXAudio::AddPackets error SetParameter 1 omx_err(0x%08x)\n", omx_err);
+                    ofLogError() << __LINE__;
 				}
 				omx_err = m_omx_mixer.GetParameter(OMX_IndexParamAudioPcm, &m_pcm_output);
 				if(omx_err != OMX_ErrorNone)
 				{
 					ofLog(OF_LOG_ERROR, "COMXAudio::AddPackets error GetParameter 2  omx_err(0x%08x)\n", omx_err);
+                    ofLogError() << __LINE__;
 				}
 
 				m_pcm_output.nPortIndex      = m_omx_render.GetInputPort();
@@ -1027,11 +1032,13 @@ unsigned int COMXAudio::AddPackets(const void* data, unsigned int len, double dt
 				if(omx_err != OMX_ErrorNone)
 				{
 					ofLog(OF_LOG_ERROR, "COMXAudio::AddPackets error SetParameter 1 omx_err(0x%08x)\n", omx_err);
+                    ofLogError() << __LINE__;
 				}
 				omx_err = m_omx_render.GetParameter(OMX_IndexParamAudioPcm, &m_pcm_output);
 				if(omx_err != OMX_ErrorNone)
 				{
 					ofLog(OF_LOG_ERROR, "COMXAudio::AddPackets error GetParameter 2  omx_err(0x%08x)\n", omx_err);
+                    ofLogError() << __LINE__;
 				}
 
 				PrintPCM(&m_pcm_input);
