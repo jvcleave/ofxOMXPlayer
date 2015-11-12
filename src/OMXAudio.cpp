@@ -188,23 +188,7 @@ bool COMXAudio::Initialize(const std::string& device, int iChannels, enum PCMCha
 
 	memset(&m_wave_header, 0x0, sizeof(m_wave_header));
 
-	#ifndef STANDALONE
-	bool bAudioOnAllSpeakers(false);
-	g_audioContext.SetupSpeakerConfig(iChannels, bAudioOnAllSpeakers, bIsMusic);
-
-	if(bPassthrough)
-	{
-		g_audioContext.SetActiveDevice(CAudioContext::DIRECTSOUND_DEVICE_DIGITAL);
-	}
-	else
-	{
-		g_audioContext.SetActiveDevice(CAudioContext::DIRECTSOUND_DEVICE);
-	}
-
-	m_CurrentVolume = g_settings.m_nVolumeLevel;
-	#else
 	m_CurrentVolume = 0;
-	#endif
 
 	m_downmix_channels = downmixChannels;
 	m_normalize_downmix = !boostOnDownmix;
