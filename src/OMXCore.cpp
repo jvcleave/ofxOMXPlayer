@@ -49,9 +49,9 @@ string COMXCore::getOMXError(OMX_ERRORTYPE error)
 	return printOMXError(error);
 }
 
-#pragma mark COMXCoreTunel
+#pragma mark COMXCoreTunnel
 
-COMXCoreTunel::COMXCoreTunel()
+COMXCoreTunnel::COMXCoreTunnel()
 {
 	srcName = "UNDEFINED_srcName";
 	dstName = "UNDEFINED_dstName";
@@ -65,7 +65,7 @@ COMXCoreTunel::COMXCoreTunel()
 	pthread_mutex_init(&m_lock, NULL);
 }
 
-COMXCoreTunel::~COMXCoreTunel()
+COMXCoreTunnel::~COMXCoreTunnel()
 {
 	if(isEstablished)
 	{
@@ -76,17 +76,17 @@ COMXCoreTunel::~COMXCoreTunel()
 	pthread_mutex_destroy(&m_lock);
 }
 
-void COMXCoreTunel::Lock()
+void COMXCoreTunnel::Lock()
 {
 	pthread_mutex_lock(&m_lock);
 }
 
-void COMXCoreTunel::UnLock()
+void COMXCoreTunnel::UnLock()
 {
 	pthread_mutex_unlock(&m_lock);
 }
 
-void COMXCoreTunel::Initialize(COMXCoreComponent *src_component, unsigned int src_port, COMXCoreComponent *dst_component, unsigned int dst_port)
+void COMXCoreTunnel::Initialize(COMXCoreComponent *src_component, unsigned int src_port, COMXCoreComponent *dst_component, unsigned int dst_port)
 {
 
 	m_src_component  = src_component;
@@ -98,7 +98,7 @@ void COMXCoreTunel::Initialize(COMXCoreComponent *src_component, unsigned int sr
 	dstName = m_dst_component->GetName();
 }
 
-OMX_ERRORTYPE COMXCoreTunel::Flush()
+OMX_ERRORTYPE COMXCoreTunnel::Flush()
 {
 	if(!m_src_component || !m_dst_component || !isEstablished)
 	{
@@ -120,7 +120,7 @@ OMX_ERRORTYPE COMXCoreTunel::Flush()
 	return OMX_ErrorNone;
 }
 
-OMX_ERRORTYPE COMXCoreTunel::Deestablish(bool doWait)
+OMX_ERRORTYPE COMXCoreTunnel::Deestablish(bool doWait)
 {
 
 	if (!isEstablished)
@@ -182,7 +182,7 @@ OMX_ERRORTYPE COMXCoreTunel::Deestablish(bool doWait)
 	return OMX_ErrorNone;
 }
 
-OMX_ERRORTYPE COMXCoreTunel::Establish(bool portSettingsChanged)
+OMX_ERRORTYPE COMXCoreTunnel::Establish(bool portSettingsChanged)
 {
 	Lock();
 

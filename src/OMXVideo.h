@@ -16,7 +16,7 @@ class COMXVideo : public OMXDecoderBase
 		bool  Decode(uint8_t *pData, int iSize, double pts);
 
 		COMXCoreComponent m_omx_image_fx;
-		COMXCoreTunel     m_omx_tunnel_image_fx;
+		COMXCoreTunnel     m_omx_tunnel_image_fx;
 
 
 

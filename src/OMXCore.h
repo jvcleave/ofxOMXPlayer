@@ -36,35 +36,7 @@ typedef struct omx_event
 	OMX_U32 nData2;
 } omx_event;
 
-class DllLibOMXCore;
 class COMXCore;
-class COMXCoreComponent;
-class COMXCoreTunel;
-class COMXCoreClock;
-
-class COMXCoreTunel
-{
-	public:
-		COMXCoreTunel();
-		~COMXCoreTunel();
-
-		void Initialize(COMXCoreComponent *src_component, unsigned int src_port, COMXCoreComponent *dst_component, unsigned int dst_port);
-		OMX_ERRORTYPE Flush();
-		OMX_ERRORTYPE Deestablish(bool doWait = true);
-		OMX_ERRORTYPE Establish(bool portSettingsChanged);
-		string srcName;
-		string dstName;
-	private:
-		bool isEstablished;
-		pthread_mutex_t   m_lock;
-		bool              m_portSettingsChanged;
-		COMXCoreComponent *m_src_component;
-		COMXCoreComponent *m_dst_component;
-		unsigned int      m_src_port;
-		unsigned int      m_dst_port;
-		void              Lock();
-		void              UnLock();
-};
 
 class COMXCoreComponent
 {
@@ -215,6 +187,30 @@ class COMXCoreComponent
 	int frameCounter;
 	int frameOffset;
 	
+};
+
+class COMXCoreTunnel
+{
+public:
+    COMXCoreTunnel();
+    ~COMXCoreTunnel();
+    
+    void Initialize(COMXCoreComponent *src_component, unsigned int src_port, COMXCoreComponent *dst_component, unsigned int dst_port);
+    OMX_ERRORTYPE Flush();
+    OMX_ERRORTYPE Deestablish(bool doWait = true);
+    OMX_ERRORTYPE Establish(bool portSettingsChanged);
+    string srcName;
+    string dstName;
+private:
+    bool isEstablished;
+    pthread_mutex_t   m_lock;
+    bool              m_portSettingsChanged;
+    COMXCoreComponent *m_src_component;
+    COMXCoreComponent *m_dst_component;
+    unsigned int      m_src_port;
+    unsigned int      m_dst_port;
+    void              Lock();
+    void              UnLock();
 };
 
 class COMXCore

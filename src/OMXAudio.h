@@ -203,8 +203,8 @@ class COMXAudio
 		COMXCoreComponent m_omx_render;
 		COMXCoreComponent m_omx_mixer;
 		COMXCoreComponent m_omx_decoder;
-		COMXCoreTunel     m_omx_tunnel_clock;
-		COMXCoreTunel     m_omx_tunnel_mixer;
-		COMXCoreTunel     m_omx_tunnel_decoder;
+		COMXCoreTunnel     m_omx_tunnel_clock;
+		COMXCoreTunnel     m_omx_tunnel_mixer;
+		COMXCoreTunnel     m_omx_tunnel_decoder;
 		CPCMRemap m_remap;
 };

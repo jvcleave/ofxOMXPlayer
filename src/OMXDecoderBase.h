@@ -30,8 +30,6 @@
 #define OMX_MJPEG_DECODER       OMX_VIDEO_DECODER
 
 
-class DllAvUtil;
-class DllAvFormat;
 class OMXDecoderBase
 {
 	public:
@@ -39,9 +37,9 @@ class OMXDecoderBase
 		virtual ~OMXDecoderBase();
 		OMX_VIDEO_CODINGTYPE m_codingType;
 
-		COMXCoreTunel			m_omx_tunnel_clock;
-		COMXCoreTunel			m_omx_tunnel_sched;
-		COMXCoreTunel			m_omx_tunnel_decoder;
+		COMXCoreTunnel			m_omx_tunnel_clock;
+		COMXCoreTunnel			m_omx_tunnel_sched;
+		COMXCoreTunnel			m_omx_tunnel_decoder;
 
 		COMXCoreComponent		m_omx_decoder;
 		COMXCoreComponent		m_omx_render;
