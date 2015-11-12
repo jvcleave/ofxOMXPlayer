@@ -13,7 +13,6 @@
 #include "OMXCore.h"
 #include "OMXClock.h"
 #include "OMXStreamInfo.h"
-#include "BitstreamConverter.h"
 #include <assert.h>
 
 #define AUDIO_BUFFER_SECONDS 2
