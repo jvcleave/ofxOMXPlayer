@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ADDON_DEFINES.h"
+#include <sys/stat.h>
 
 #define FFMPEG_FILE_BUFFER_SIZE   32768
 

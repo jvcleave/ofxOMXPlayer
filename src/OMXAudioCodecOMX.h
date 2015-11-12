@@ -27,7 +27,10 @@
 
 #include "OMXStreamInfo.h"
 #include "PCMRemap.h"
-#include "ADDON_DEFINES.h"
+
+typedef unsigned char   BYTE;
+
+
 
 #define AVCODEC_MAX_AUDIO_FRAME_SIZE 192000
 
