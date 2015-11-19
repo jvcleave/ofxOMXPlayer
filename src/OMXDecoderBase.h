@@ -22,15 +22,15 @@ class OMXDecoderBase
 		virtual ~OMXDecoderBase();
 		OMX_VIDEO_CODINGTYPE m_codingType;
 
-		COMXCoreTunnel			m_omx_tunnel_clock;
-		COMXCoreTunnel			m_omx_tunnel_sched;
-		COMXCoreTunnel			m_omx_tunnel_decoder;
+		Tunnel			clockTunnel;
+		Tunnel			schedulerTunnel;
+		Tunnel			decoderTunnel;
 
-		COMXCoreComponent		m_omx_decoder;
-		COMXCoreComponent		m_omx_render;
-		COMXCoreComponent		m_omx_sched;
+		Component		m_omx_decoder;
+		Component		renderComponent;
+		Component		m_omx_sched;
 
-		COMXCoreComponent*		m_omx_clock;
+		Component*		m_omx_clock;
 		OMXClock*				m_av_clock;
 
 		bool					m_is_open;

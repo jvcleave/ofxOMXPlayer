@@ -33,25 +33,25 @@ OMXDecoderBase::~OMXDecoderBase()
 	//TODO fix this?
 	try
 	{
-		m_omx_tunnel_decoder.Flush();
+		decoderTunnel.Flush();
 		/*if(m_deinterlace)
 		 m_omx_tunnel_image_fx.Flush();*/
-		m_omx_tunnel_clock.Flush();
-		m_omx_tunnel_sched.Flush();
+		clockTunnel.Flush();
+		schedulerTunnel.Flush();
 
-		m_omx_tunnel_clock.Deestablish();
-		m_omx_tunnel_decoder.Deestablish();
+		clockTunnel.Deestablish();
+		decoderTunnel.Deestablish();
 		/*if(m_deinterlace)
 		 m_omx_tunnel_image_fx.Deestablish();*/
-		m_omx_tunnel_sched.Deestablish();
+		schedulerTunnel.Deestablish();
 
-		m_omx_decoder.FlushInput();
+		m_omx_decoder.flushInput();
 
 		m_omx_sched.Deinitialize(true);
 		/*if(m_deinterlace)
 		 m_omx_image_fx.Deinitialize();*/
 		m_omx_decoder.Deinitialize(true);
-		m_omx_render.Deinitialize(true);
+		renderComponent.Deinitialize(true);
 
 		m_is_open       = false;
 
@@ -111,27 +111,27 @@ bool OMXDecoderBase::SendDecoderConfig()
 	if(m_extrasize > 0 && m_extradata != NULL)
 	{
 
-		OMX_BUFFERHEADERTYPE *omx_buffer = m_omx_decoder.GetInputBuffer();
+		OMX_BUFFERHEADERTYPE *omxBuffer = m_omx_decoder.GetInputBuffer();
 
-		if(omx_buffer == NULL)
+		if(omxBuffer == NULL)
 		{
 			ofLogError(__func__) << "buffer error";
 			return false;
 		}
 
-		omx_buffer->nOffset = 0;
-		omx_buffer->nFilledLen = m_extrasize;
-		if(omx_buffer->nFilledLen > omx_buffer->nAllocLen)
+		omxBuffer->nOffset = 0;
+		omxBuffer->nFilledLen = m_extrasize;
+		if(omxBuffer->nFilledLen > omxBuffer->nAllocLen)
 		{
-			ofLogError(__func__) << "omx_buffer->nFilledLen > omx_buffer->nAllocLen";
+			ofLogError(__func__) << "omxBuffer->nFilledLen > omxBuffer->nAllocLen";
 			return false;
 		}
 
-		memset((unsigned char *)omx_buffer->pBuffer, 0x0, omx_buffer->nAllocLen);
-		memcpy((unsigned char *)omx_buffer->pBuffer, m_extradata, omx_buffer->nFilledLen);
-		omx_buffer->nFlags = OMX_BUFFERFLAG_CODECCONFIG | OMX_BUFFERFLAG_ENDOFFRAME;
+		memset((unsigned char *)omxBuffer->pBuffer, 0x0, omxBuffer->nAllocLen);
+		memcpy((unsigned char *)omxBuffer->pBuffer, m_extradata, omxBuffer->nFilledLen);
+		omxBuffer->nFlags = OMX_BUFFERFLAG_CODECCONFIG | OMX_BUFFERFLAG_ENDOFFRAME;
 
-		error = m_omx_decoder.EmptyThisBuffer(omx_buffer);
+		error = m_omx_decoder.EmptyThisBuffer(omxBuffer);
         OMX_TRACE(error);
 		if (error != OMX_ErrorNone)
 		{
@@ -171,21 +171,21 @@ void OMXDecoderBase::SubmitEOS()
 	}
 
 	OMX_ERRORTYPE error = OMX_ErrorNone;
-	OMX_BUFFERHEADERTYPE *omx_buffer = m_omx_decoder.GetInputBuffer();
+	OMX_BUFFERHEADERTYPE *omxBuffer = m_omx_decoder.GetInputBuffer();
 
-	if(omx_buffer == NULL)
+	if(omxBuffer == NULL)
 	{
 		ofLogError(__func__) << "buffer NULL";
 		return;
 	}
 
-	omx_buffer->nOffset     = 0;
-	omx_buffer->nFilledLen  = 0;
-	omx_buffer->nTimeStamp  = ToOMXTime(0LL);
+	omxBuffer->nOffset     = 0;
+	omxBuffer->nFilledLen  = 0;
+	omxBuffer->nTimeStamp  = ToOMXTime(0LL);
 
-	omx_buffer->nFlags = OMX_BUFFERFLAG_ENDOFFRAME | OMX_BUFFERFLAG_EOS | OMX_BUFFERFLAG_TIME_UNKNOWN;
+	omxBuffer->nFlags = OMX_BUFFERFLAG_ENDOFFRAME | OMX_BUFFERFLAG_EOS | OMX_BUFFERFLAG_TIME_UNKNOWN;
 
-	error = m_omx_decoder.EmptyThisBuffer(omx_buffer);
+	error = m_omx_decoder.EmptyThisBuffer(omxBuffer);
     OMX_TRACE(error);
 
 }
@@ -205,7 +205,7 @@ bool OMXDecoderBase::IsEOS()
 			isEndOfStream =  true;
 
 		}
-		//return m_omx_render.IsEOS();
+		//return renderComponent.IsEOS();
 	}
 	if (isEndOfStream)
 	{
@@ -216,7 +216,7 @@ bool OMXDecoderBase::IsEOS()
 
 bool OMXDecoderBase::Pause()
 {
-	if(m_omx_render.GetComponent() == NULL)
+	if(renderComponent.GetComponent() == NULL)
 	{
 		return false;
 	}
@@ -228,15 +228,15 @@ bool OMXDecoderBase::Pause()
 
 	m_Pause = true;
 
-	m_omx_sched.SetStateForComponent(OMX_StatePause);
-	m_omx_render.SetStateForComponent(OMX_StatePause);
+	m_omx_sched.setState(OMX_StatePause);
+	renderComponent.setState(OMX_StatePause);
 
 	return true;
 }
 
 bool OMXDecoderBase::Resume()
 {
-	if(m_omx_render.GetComponent() == NULL)
+	if(renderComponent.GetComponent() == NULL)
 	{
 		return false;
 	}
@@ -247,8 +247,8 @@ bool OMXDecoderBase::Resume()
 	}
 	m_Pause = false;
 
-	m_omx_sched.SetStateForComponent(OMX_StateExecuting);
-	m_omx_render.SetStateForComponent(OMX_StateExecuting);
+	m_omx_sched.setState(OMX_StateExecuting);
+	renderComponent.setState(OMX_StateExecuting);
 
 	return true;
 }
@@ -257,8 +257,8 @@ void OMXDecoderBase::Reset()
 {
 	//ofLogVerbose(__func__) << " START";
 
-	m_omx_decoder.FlushInput();
-	m_omx_tunnel_decoder.Flush();
+	m_omx_decoder.flushInput();
+	decoderTunnel.Flush();
 
 	//ofLogVerbose(__func__) << " END";
 }

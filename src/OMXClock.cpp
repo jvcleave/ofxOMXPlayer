@@ -35,14 +35,14 @@ void OMXClock::UnLock()
 bool OMXClock::OMXInitialize(bool has_video, bool has_audio)
 {
 	OMX_ERRORTYPE error = OMX_ErrorNone;
-	const std::string componentName = "OMX.broadcom.clock";
+	std::string componentName = "OMX.broadcom.clock";
 
 	m_has_video = has_video;
 	m_has_audio = has_audio;
 
 	m_pause       = false;
 
-	if(!m_omx_clock.Initialize(componentName, OMX_IndexParamOtherInit))
+	if(!m_omx_clock.init(componentName, OMX_IndexParamOtherInit))
 	{
 		return false;
 	}
@@ -59,7 +59,7 @@ bool OMXClock::OMXInitialize(bool has_video, bool has_audio)
 		refClock.eClock = OMX_TIME_RefClockVideo;
 	}
 
-	error = m_omx_clock.SetConfig(OMX_IndexConfigTimeActiveRefClock, &refClock);
+	error = m_omx_clock.setConfig(OMX_IndexConfigTimeActiveRefClock, &refClock);
 	if(error != OMX_ErrorNone)
 	{
 		ofLogError(__func__) << " setting OMX_IndexConfigTimeCurrentAudioReference";
@@ -91,10 +91,10 @@ bool OMXClock::OMXStateExecute(bool lock /* = true */)
 		Lock();
 	}
 
-	if(m_omx_clock.GetState() != OMX_StateExecuting)
+	if(m_omx_clock.getState() != OMX_StateExecuting)
 	{
 		OMX_ERRORTYPE error = OMX_ErrorNone;
-		error = m_omx_clock.SetStateForComponent(OMX_StateExecuting);
+		error = m_omx_clock.setState(OMX_StateExecuting);
         OMX_TRACE(error);
 		if (error != OMX_ErrorNone)
 		{
@@ -128,16 +128,16 @@ void OMXClock::OMXStateIdle(bool lock /* = true */)
 	}
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 
-	if(m_omx_clock.GetState() == OMX_StateExecuting)
+	if(m_omx_clock.getState() == OMX_StateExecuting)
 	{
-		error = m_omx_clock.SetStateForComponent(OMX_StatePause);
+		error = m_omx_clock.setState(OMX_StatePause);
         OMX_TRACE(error);
 
 	}
 
-	if(m_omx_clock.GetState() != OMX_StateIdle)
+	if(m_omx_clock.getState() != OMX_StateIdle)
 	{
-		error = m_omx_clock.SetStateForComponent(OMX_StateIdle);
+		error = m_omx_clock.setState(OMX_StateIdle);
         OMX_TRACE(error);
 
 	}
@@ -148,7 +148,7 @@ void OMXClock::OMXStateIdle(bool lock /* = true */)
 	}
 }
 
-COMXCoreComponent *OMXClock::GetOMXClock()
+Component *OMXClock::GetOMXClock()
 {
 	if(!m_omx_clock.GetComponent())
 	{
@@ -179,7 +179,7 @@ bool  OMXClock::OMXStop(bool lock /* = true */)
 
 	clock.eState = OMX_TIME_ClockStateStopped;
 
-	error = m_omx_clock.SetConfig(OMX_IndexConfigTimeClockState, &clock);
+	error = m_omx_clock.setConfig(OMX_IndexConfigTimeClockState, &clock);
     OMX_TRACE(error);
 	if(error != OMX_ErrorNone)
 	{
@@ -217,7 +217,7 @@ bool OMXClock::OMXStart(double pts, bool lock /* = true */)
 	clock.eState = OMX_TIME_ClockStateRunning;
 	clock.nStartTime = ToOMXTime((uint64_t)pts);
 
-	error = m_omx_clock.SetConfig(OMX_IndexConfigTimeClockState, &clock);
+	error = m_omx_clock.setConfig(OMX_IndexConfigTimeClockState, &clock);
     OMX_TRACE(error);
 	if(error != OMX_ErrorNone)
 	{
@@ -255,7 +255,7 @@ bool OMXClock::OMXStep(int steps /* = 1 */, bool lock /* = true */)
 	param.nPortIndex = OMX_ALL;
 	param.nU32 = steps;
 
-	error = m_omx_clock.SetConfig(OMX_IndexConfigSingleStep, &param);
+	error = m_omx_clock.setConfig(OMX_IndexConfigSingleStep, &param);
     OMX_TRACE(error);
 	if(error != OMX_ErrorNone)
 	{
@@ -316,7 +316,7 @@ double OMXClock::OMXMediaTime(bool lock /* = true */)
 	OMX_INIT_STRUCTURE(timeStamp);
 	timeStamp.nPortIndex = m_omx_clock.GetInputPort();
 
-	error = m_omx_clock.GetConfig(OMX_IndexConfigTimeCurrentMediaTime, &timeStamp);
+	error = m_omx_clock.getConfig(OMX_IndexConfigTimeCurrentMediaTime, &timeStamp);
     OMX_TRACE(error);
 
 	if(error != OMX_ErrorNone)
@@ -356,7 +356,7 @@ double OMXClock::OMXClockAdjustment(bool lock /* = true */)
 	OMX_INIT_STRUCTURE(timeStamp);
 	timeStamp.nPortIndex = m_omx_clock.GetInputPort();
 
-	error = m_omx_clock.GetConfig(OMX_IndexConfigClockAdjustment, &timeStamp);
+	error = m_omx_clock.getConfig(OMX_IndexConfigClockAdjustment, &timeStamp);
     OMX_TRACE(error);
 
 	if(error != OMX_ErrorNone)
@@ -410,7 +410,7 @@ bool OMXClock::OMXMediaTime(double pts, bool lock /* = true*/)
 
 	timeStamp.nTimestamp = ToOMXTime(pts);
 
-	error = m_omx_clock.SetConfig(index, &timeStamp);
+	error = m_omx_clock.setConfig(index, &timeStamp);
     OMX_TRACE(error);
 
 	if(error != OMX_ErrorNone)
@@ -516,7 +516,7 @@ bool OMXClock::OMXSetSpeed(int speed, bool lock /* = true */, bool pause_resume 
 		refClock.eClock = OMX_TIME_RefClockVideo;
 	}
 
-	error = m_omx_clock.SetConfig(OMX_IndexConfigTimeActiveRefClock, &refClock);
+	error = m_omx_clock.setConfig(OMX_IndexConfigTimeActiveRefClock, &refClock);
     OMX_TRACE(error);
 
 	if(error != OMX_ErrorNone)
@@ -540,7 +540,7 @@ bool OMXClock::OMXSetSpeed(int speed, bool lock /* = true */, bool pause_resume 
 	{
 		scaleType.xScale = (speed << 16) / DVD_PLAYSPEED_NORMAL;
 	}
-	error = m_omx_clock.SetConfig(OMX_IndexConfigTimeScale, &scaleType);
+	error = m_omx_clock.setConfig(OMX_IndexConfigTimeScale, &scaleType);
     OMX_TRACE(error);
 
 	if(error != OMX_ErrorNone)
@@ -590,7 +590,7 @@ bool OMXClock::HDMIClockSync(bool lock /* = true */)
 	latencyTarget.nInterFactor = 100;
 	latencyTarget.nAdjCap = 100;
 
-	error = m_omx_clock.SetConfig(OMX_IndexConfigLatencyTarget, &latencyTarget);
+	error = m_omx_clock.setConfig(OMX_IndexConfigLatencyTarget, &latencyTarget);
     OMX_TRACE(error);
 
 	if(error != OMX_ErrorNone)

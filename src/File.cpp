@@ -34,7 +34,7 @@ void CFile::rewindFile()
 	rewind(m_pFile);
 }
 //*********************************************************************************************
-bool CFile::Open(const std::string& strFileName, unsigned int flags)
+bool CFile::Open(std::string& strFileName, unsigned int flags)
 {
 	m_flags = flags;
 
@@ -58,12 +58,12 @@ bool CFile::Open(const std::string& strFileName, unsigned int flags)
 	return true;
 }
 
-bool CFile::OpenForWrite(const std::string& strFileName, bool bOverWrite)
+bool CFile::OpenForWrite(std::string& strFileName, bool bOverWrite)
 {
 	return false;
 }
 
-bool CFile::Exists(const std::string& strFileName, bool bUseCache /* = true */)
+bool CFile::Exists(std::string& strFileName, bool bUseCache /* = true */)
 {
 	FILE *fp;
 
@@ -137,7 +137,7 @@ int64_t CFile::GetPosition()
 }
 
 //*********************************************************************************************
-int CFile::Write(const void* lpBuf, int64_t uiBufSize)
+int CFile::Write(void* lpBuf, int64_t uiBufSize)
 {
 	return -1;
 }

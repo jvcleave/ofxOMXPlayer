@@ -270,7 +270,7 @@ bool OMXPlayerAudio::Decode(OMXPacket *pkt)
 			m_iCurrentPts = pkt->dts;
 		}
 
-		const uint8_t *data_dec = pkt->data;
+		uint8_t *data_dec = pkt->data;
 		int            data_len = pkt->size;
 
 		if(!m_passthrough && !m_hw_decode)
@@ -497,7 +497,10 @@ bool OMXPlayerAudio::OpenDecoder()
 		{
 			m_hw_decode = false;
 		}
-		bAudioRenderOpen = m_decoder->Initialize(m_device.substr(4), m_pChannelMap,
+        stringstream ss;
+        ss << m_device.substr(4);
+        string name = ss.str();
+		bAudioRenderOpen = m_decoder->init(name, m_pChannelMap,
 		                   m_hints, m_av_clock, m_passthrough,
 		                   m_hw_decode, m_boost_on_downmix);
 	}
@@ -510,8 +513,10 @@ bool OMXPlayerAudio::OpenDecoder()
 		{
 			m_hints.channels = 8;
 		}
-
-		bAudioRenderOpen = m_decoder->Initialize(m_device.substr(4), m_hints.channels, m_pChannelMap,
+        stringstream ss;
+        ss << m_device.substr(4);
+        string name = ss.str();
+		bAudioRenderOpen = m_decoder->init(name, m_hints.channels, m_pChannelMap,
 		                   downmix_channels, m_hints.samplerate, m_hints.bitspersample,
 		                   false, m_boost_on_downmix, false, m_passthrough);
 	}
@@ -550,31 +555,7 @@ bool OMXPlayerAudio::CloseDecoder()
 	m_decoder   = NULL;
 	return true;
 }
-#if 0
-double OMXPlayerAudio::GetDelay()
-{
-	if(m_decoder)
-	{
-		return m_decoder->GetDelay();
-	}
-	else
-	{
-		return 0;
-	}
-}
 
-double OMXPlayerAudio::GetCacheTime()
-{
-	if(m_decoder)
-	{
-		return m_decoder->GetCacheTime();
-	}
-	else
-	{
-		return 0;
-	}
-}
-#endif
 void OMXPlayerAudio::SubmitEOS()
 {
 	if(m_decoder)

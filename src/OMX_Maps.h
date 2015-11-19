@@ -822,7 +822,7 @@ OMX_ERRORTYPE disableAllPortsForComponent(OMX_HANDLETYPE handle)
                      ofLog(OF_LOG_VERBOSE, 
                      "disableAllPortsForComponent - Error disable port %d on component %s error: 0x%08x", 
                      (int)(ports.nStartPortNumber) + j,
-                     "m_componentName", 
+                     "componentName", 
                      (int)error);
                      */
                 }

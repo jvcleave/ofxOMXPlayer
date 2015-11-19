@@ -80,7 +80,7 @@ bool OMXReader::Open(std::string filename, bool doSkipAvProbe)
 	m_filename    = filename; 
 	m_speed       = DVD_PLAYSPEED_NORMAL;
 	m_program     = UINT_MAX;
-	const AVIOInterruptCB int_cb = { interrupt_cb, NULL };
+	AVIOInterruptCB int_cb = { interrupt_cb, NULL };
 	
     ClearStreams();
 
@@ -1081,7 +1081,7 @@ int OMXReader::GetStreamLength()
 double OMXReader::NormalizeFrameduration(double frameduration)
 {
 	//if the duration is within 20 microseconds of a common duration, use that
-	const double durations[] = {DVD_TIME_BASE * 1.001 / 24.0, DVD_TIME_BASE / 24.0, DVD_TIME_BASE / 25.0,
+	double durations[] = {DVD_TIME_BASE * 1.001 / 24.0, DVD_TIME_BASE / 24.0, DVD_TIME_BASE / 25.0,
 		DVD_TIME_BASE * 1.001 / 30.0, DVD_TIME_BASE / 30.0, DVD_TIME_BASE / 50.0,
 		DVD_TIME_BASE * 1.001 / 60.0, DVD_TIME_BASE / 60.0};
 	

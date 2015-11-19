@@ -29,54 +29,54 @@
 #include "LIBAV_INCLUDES.h"
 
 
-typedef struct omx_event
+struct OMXEvent
 {
 	OMX_EVENTTYPE eEvent;
 	OMX_U32 nData1;
 	OMX_U32 nData2;
-} omx_event;
+};
 
 
-class COMXCoreComponent
+class Component
 {
 	public:
-		COMXCoreComponent();
-		~COMXCoreComponent();
+		Component();
+		~Component();
 
 		OMX_HANDLETYPE    GetComponent()
 		{
-			return m_handle;
+			return handle;
 		};
 		unsigned int      GetInputPort()
 		{
-			return m_input_port;
+			return inputPort;
 		};
 		unsigned int      GetOutputPort()
 		{
-			return m_output_port;
+			return outputPort;
 		};
 		std::string       GetName()
 		{
-			return m_componentName;
+			return componentName;
 		};
 
 		OMX_ERRORTYPE DisableAllPorts();
 		void          Remove(OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2);
-		OMX_ERRORTYPE AddEvent(OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2);
-		OMX_ERRORTYPE WaitForEvent(OMX_EVENTTYPE event, long timeout = 300);
-		OMX_ERRORTYPE WaitForCommand(OMX_COMMANDTYPE command, OMX_U32 nData2, long timeout=300);
-		OMX_ERRORTYPE SetStateForComponent(OMX_STATETYPE state);
-		OMX_STATETYPE GetState();
-		OMX_ERRORTYPE SetParameter(OMX_INDEXTYPE paramIndex, OMX_PTR paramStruct);
-		OMX_ERRORTYPE GetParameter(OMX_INDEXTYPE paramIndex, OMX_PTR paramStruct);
-		OMX_ERRORTYPE SetConfig(OMX_INDEXTYPE configIndex, OMX_PTR configStruct);
-		OMX_ERRORTYPE GetConfig(OMX_INDEXTYPE configIndex, OMX_PTR configStruct);
-		OMX_ERRORTYPE SendCommand(OMX_COMMANDTYPE cmd, OMX_U32 cmdParam, OMX_PTR cmdParamData);
-		OMX_ERRORTYPE EnablePort(unsigned int port, bool wait = false);
-		OMX_ERRORTYPE DisablePort(unsigned int port, bool wait = false);
-		OMX_ERRORTYPE UseEGLImage(OMX_BUFFERHEADERTYPE** ppBufferHdr, OMX_U32 nPortIndex, OMX_PTR pAppPrivate, void* eglImage);
+		OMX_ERRORTYPE addEvent(OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2);
+		OMX_ERRORTYPE waitForEvent(OMX_EVENTTYPE event, long timeout = 300);
+		OMX_ERRORTYPE waitForCommand(OMX_COMMANDTYPE command, OMX_U32 nData2, long timeout=300);
+		OMX_ERRORTYPE setState(OMX_STATETYPE state);
+		OMX_STATETYPE getState();
+		OMX_ERRORTYPE setParameter(OMX_INDEXTYPE, OMX_PTR);
+		OMX_ERRORTYPE getParameter(OMX_INDEXTYPE, OMX_PTR);
+		OMX_ERRORTYPE setConfig(OMX_INDEXTYPE, OMX_PTR);
+		OMX_ERRORTYPE getConfig(OMX_INDEXTYPE, OMX_PTR);
+		OMX_ERRORTYPE sendCommand(OMX_COMMANDTYPE, OMX_U32, OMX_PTR);
+		OMX_ERRORTYPE enablePort(unsigned int);
+		OMX_ERRORTYPE disablePort(unsigned int);
+		OMX_ERRORTYPE useEGLImage(OMX_BUFFERHEADERTYPE**, OMX_U32, OMX_PTR, void*);
 
-		bool Initialize( const std::string& component_name, OMX_INDEXTYPE index);
+		bool init(string&, OMX_INDEXTYPE);
 		bool Deinitialize(bool doFlush=true);
 
 		// Decoder delegate callback routines.
@@ -89,35 +89,31 @@ class COMXCoreComponent
 		OMX_ERRORTYPE DecoderEmptyBufferDone(OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*);
 		OMX_ERRORTYPE DecoderFillBufferDone(OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*);
 
-		OMX_ERRORTYPE EmptyThisBuffer(OMX_BUFFERHEADERTYPE *omx_buffer);
-		OMX_ERRORTYPE FillThisBuffer(OMX_BUFFERHEADERTYPE *omx_buffer);
-		OMX_ERRORTYPE FreeOutputBuffer(OMX_BUFFERHEADERTYPE *omx_buffer);
+		OMX_ERRORTYPE EmptyThisBuffer(OMX_BUFFERHEADERTYPE*);
+		OMX_ERRORTYPE FillThisBuffer(OMX_BUFFERHEADERTYPE*);
+		OMX_ERRORTYPE FreeOutputBuffer(OMX_BUFFERHEADERTYPE*);
 
 		unsigned int GetInputBufferSize();
         int m_input_buffer_size;
-		//unsigned int GetOutputBufferSize();
 
 		unsigned int GetInputBufferSpace();
-		//unsigned int GetOutputBufferSpace();
         
-		void FlushAll();
-		void FlushInput();
-		void FlushOutput();
+		void flushAll();
+		void flushInput();
+		void flushOutput();
 
-		OMX_BUFFERHEADERTYPE *GetInputBuffer(long timeout=200);
-		OMX_BUFFERHEADERTYPE *GetOutputBuffer();
+		OMX_BUFFERHEADERTYPE* GetInputBuffer(long timeout=200);
+		OMX_BUFFERHEADERTYPE* GetOutputBuffer();
 
 		OMX_ERRORTYPE AllocInputBuffers();
-		OMX_ERRORTYPE AllocOutputBuffers();
+		OMX_ERRORTYPE allocOutputBuffers();
 
-		//OMX_ERRORTYPE FreeInputBuffers(bool wait);
-		//OMX_ERRORTYPE FreeOutputBuffers(bool wait);
-		void ResetEos();
+		void resetEOS();
 		bool IsEOS()
 		{
 			return m_eos;
 		};
-		void SetEOS(bool isEndOfStream);
+		void setEOS(bool isEndOfStream);
 		void SetCustomDecoderFillBufferDoneHandler(OMX_ERRORTYPE (*p)(OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*))
 		{
 			CustomDecoderFillBufferDoneHandler = p;
@@ -133,15 +129,15 @@ class COMXCoreComponent
 		void incrementFrameCounter();
 	
 	private:
-		OMX_HANDLETYPE m_handle;
-		unsigned int   m_input_port;
-		unsigned int   m_output_port;
-		std::string    m_componentName;
-		pthread_mutex_t   m_omx_event_mutex;
-		pthread_mutex_t   m_omx_eos_mutex;
+		OMX_HANDLETYPE handle;
+		unsigned int   inputPort;
+		unsigned int   outputPort;
+		string    componentName;
+		pthread_mutex_t   event_mutex;
+		pthread_mutex_t   eos_mutex;
 
 		pthread_mutex_t   m_lock;
-		std::vector<omx_event> m_omx_events;
+		vector<OMXEvent> omxEvents;
 
 		OMX_CALLBACKTYPE  m_callbacks;
 
@@ -151,13 +147,13 @@ class COMXCoreComponent
 
 		// OMXCore input buffers (demuxer packets)
 		pthread_mutex_t   m_omx_input_mutex;
-		std::queue<OMX_BUFFERHEADERTYPE*> m_omx_input_available;
-		std::vector<OMX_BUFFERHEADERTYPE*> m_omx_input_buffers;
+		queue<OMX_BUFFERHEADERTYPE*> inputBuffersAvailable;
+		vector<OMX_BUFFERHEADERTYPE*> inputBuffers;
 
 		// OMXCore output buffers (video frames)
 		pthread_mutex_t   m_omx_output_mutex;
-		std::queue<OMX_BUFFERHEADERTYPE*> m_omx_output_available;
-		std::vector<OMX_BUFFERHEADERTYPE*> m_omx_output_buffers;
+		std::queue<OMX_BUFFERHEADERTYPE*> outputBuffersAvailable;
+		std::vector<OMX_BUFFERHEADERTYPE*> outputBuffers;
 		sem_t         m_omx_fill_buffer_done;
 
 		bool          m_exit;
@@ -175,13 +171,13 @@ class COMXCoreComponent
 	
 };
 
-class COMXCoreTunnel
+class Tunnel
 {
 public:
-    COMXCoreTunnel();
-    ~COMXCoreTunnel();
+    Tunnel();
+    ~Tunnel();
     
-    void Initialize(COMXCoreComponent *src_component, unsigned int src_port, COMXCoreComponent *dst_component, unsigned int dst_port);
+    void init(Component*, unsigned int, Component*, unsigned int);
     OMX_ERRORTYPE Flush();
     OMX_ERRORTYPE Deestablish(bool doWait = true);
     OMX_ERRORTYPE Establish(bool portSettingsChanged);
@@ -190,11 +186,11 @@ public:
 private:
     bool isEstablished;
     pthread_mutex_t   m_lock;
-    bool              m_portSettingsChanged;
-    COMXCoreComponent *m_src_component;
-    COMXCoreComponent *m_dst_component;
-    unsigned int      m_src_port;
-    unsigned int      m_dst_port;
-    void              Lock();
-    void              UnLock();
+    bool            havePortSettingsChanged;
+    Component*      sourceComponent;
+    Component*      destinationComponent;
+    unsigned int    sourcePort;
+    unsigned int    destinationPort;
+    void            Lock();
+    void            UnLock();
 };

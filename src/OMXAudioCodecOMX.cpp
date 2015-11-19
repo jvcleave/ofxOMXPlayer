@@ -199,7 +199,7 @@ int COMXAudioCodecOMX::Decode(BYTE* pData, int iSize)
 
 		if(!m_pConvert || swr_init(m_pConvert) < 0)
 		{
-			ofLog(OF_LOG_ERROR, "COMXAudioCodecOMX::Decode - Unable to convert %d to AV_SAMPLE_FMT_S16", m_pCodecContext->sample_fmt);
+			//ofLog(OF_LOG_ERROR, "COMXAudioCodecOMX::Decode - Unable to convert %d to AV_SAMPLE_FMT_S16", m_pCodecContext->sample_fmt);
 			m_iBufferSize1 = 0;
 			m_iBufferSize2 = 0;
 			return iBytesUsed;
@@ -227,7 +227,7 @@ int COMXAudioCodecOMX::GetData(BYTE** dst)
 	if(m_pCodecContext->channels == 6 && m_iBufferSize1)
 	{
 		int16_t *pDst = (int16_t *)m_pBuffer2;
-		const int16_t *pSrc = (const int16_t *)m_pFrame1->data[0];
+		int16_t *pSrc = (int16_t *)m_pFrame1->data[0];
 
 		//printf("\ncopy_chunk_len %d, omx_chunk_len %d\n", copy_chunk_len, omx_chunk_len);
 		memset(m_pBuffer2, 0, MAX_AUDIO_FRAME_SIZE + FF_INPUT_BUFFER_PADDING_SIZE);

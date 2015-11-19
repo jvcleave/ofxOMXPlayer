@@ -48,19 +48,19 @@ typedef struct tGUID
     unsigned char  Data4[8];
 } __attribute__((__packed__)) GUID;
 
-static const GUID KSDATAFORMAT_SUBTYPE_UNKNOWN = {
+static GUID KSDATAFORMAT_SUBTYPE_UNKNOWN = {
     WAVE_FORMAT_UNKNOWN,
     0x0000, 0x0000,
     {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
 };
 
-static const GUID KSDATAFORMAT_SUBTYPE_PCM = {
+static GUID KSDATAFORMAT_SUBTYPE_PCM = {
     WAVE_FORMAT_PCM,
     0x0000, 0x0010,
     {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}
 };
 
-static const GUID KSDATAFORMAT_SUBTYPE_IEEE_FLOAT = {
+static GUID KSDATAFORMAT_SUBTYPE_IEEE_FLOAT = {
     WAVE_FORMAT_IEEE_FLOAT,
     0x0000, 0x0010,
     {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}
@@ -112,14 +112,14 @@ class COMXAudio
 		float GetCacheTotal();
 		unsigned int GetAudioRenderingLatency();
 		COMXAudio();
-		bool Initialize(const std::string& device,
+		bool init(string device,
 						enum PCMChannels *channelMap,
 		                COMXStreamInfo& hints, OMXClock *clock,
 						EEncoded bPassthrough,
 						bool bUseHWDecode,
 						bool boostOnDownmix);
 	
-		bool Initialize(const std::string& device,
+		bool init(string device,
 						int iChannels,
 						enum PCMChannels *channelMap,
 						unsigned int downmixChannels,
@@ -131,8 +131,8 @@ class COMXAudio
 						EEncoded bPassthrough = COMXAudio::ENCODED_NONE);
 		~COMXAudio();
 
-		unsigned int AddPackets(const void* data, unsigned int len);
-		unsigned int AddPackets(const void* data, unsigned int len, double dts, double pts);
+		unsigned int AddPackets(void* data, unsigned int len);
+		unsigned int AddPackets(void* data, unsigned int len, double dts, double pts);
 		unsigned int GetSpace();
 		bool Deinitialize();
 		bool Pause();
@@ -183,8 +183,8 @@ class COMXAudio
 		unsigned int  m_OutputChannels;
 		unsigned int  m_downmix_channels;
 		unsigned int  m_BitsPerSample;
-		COMXCoreComponent *m_omx_clock;
-		OMXClock       *m_av_clock;
+		Component*    m_omx_clock;
+		OMXClock*     m_av_clock;
 		bool          m_external_clock;
 		bool          m_setStartTime;
 		int           m_SampleSize;
@@ -200,11 +200,11 @@ class COMXAudio
 		WAVEFORMATEXTENSIBLE        m_wave_header;
 
 	protected:
-		COMXCoreComponent m_omx_render;
-		COMXCoreComponent m_omx_mixer;
-		COMXCoreComponent m_omx_decoder;
-		COMXCoreTunnel     m_omx_tunnel_clock;
-		COMXCoreTunnel     m_omx_tunnel_mixer;
-		COMXCoreTunnel     m_omx_tunnel_decoder;
+		Component renderComponent;
+		Component m_omx_mixer;
+		Component m_omx_decoder;
+		Tunnel     clockTunnel;
+		Tunnel     mixerTunnel;
+		Tunnel     decoderTunnel;
 		CPCMRemap m_remap;
 };

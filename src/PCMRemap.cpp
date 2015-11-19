@@ -743,7 +743,7 @@ int CPCMRemap::FramesToInBytes(int frames)
 
 std::string CPCMRemap::PCMChannelStr(enum PCMChannels ename)
 {
-  const char* PCMChannelName[] =
+  char* PCMChannelName[] =
   {
     "FL",
     "FR",
@@ -768,7 +768,7 @@ std::string CPCMRemap::PCMChannelStr(enum PCMChannels ename)
   int namepos = (int)ename;
   std::string namestr;
 
-  if (namepos < 0 || namepos >= (int)(sizeof(PCMChannelName) / sizeof(const char*)))
+  if (namepos < 0 || namepos >= (int)(sizeof(PCMChannelName) / sizeof(char*)))
   {
 	  stringstream formatted;
 	  formatted << "UNKNOWN CHANNEL:" << namepos;
@@ -782,7 +782,7 @@ std::string CPCMRemap::PCMChannelStr(enum PCMChannels ename)
 
 std::string CPCMRemap::PCMLayoutStr(enum PCMLayout ename)
 {
-  const char* PCMLayoutName[] =
+  char* PCMLayoutName[] =
   {
     "2.0",
     "2.1",
@@ -799,7 +799,7 @@ std::string CPCMRemap::PCMLayoutStr(enum PCMLayout ename)
   int namepos = (int)ename;
   std::string namestr;
 
-  if (namepos < 0 || namepos >= (int)(sizeof(PCMLayoutName) / sizeof(const char*)))
+  if (namepos < 0 || namepos >= (int)(sizeof(PCMLayoutName) / sizeof(char*)))
   {
 	  stringstream formatted;
 	  formatted << "UNKNOWN LAYOUT:" << namepos;

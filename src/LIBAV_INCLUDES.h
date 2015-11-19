@@ -37,14 +37,14 @@ extern "C"
 											   int out_channels,
 											   enum AVSampleFormat in_fmt, 
 											   int in_channels,
-											   const float *matrix, 
+											   float *matrix, 
 											   int flags);
-		void av_audio_convert_free(AVAudioConvert *ctx);
-		int av_audio_convert(AVAudioConvert *ctx,
-							 void * const out[6], 
-							 const int out_stride[6],
-							 const void * const  in[6], 
-							 const int  in_stride[6], int len);
+		void av_audio_convert_free(AVAudioConvert *component);
+		int av_audio_convert(AVAudioConvert *component,
+							 void * out[6], 
+							 int out_stride[6],
+							 void *  in[6], 
+							 int  in_stride[6], int len);
 	#include <libavutil/opt.h>
 	#include <libavcodec/opt.h>
 	#include <libavutil/mem.h>

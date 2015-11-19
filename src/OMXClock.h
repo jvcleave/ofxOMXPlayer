@@ -37,7 +37,7 @@ class OMXClock
 		int               m_omx_speed;
 		pthread_mutex_t   m_lock;
 	private:
-		COMXCoreComponent m_omx_clock;
+		Component m_omx_clock;
 	public:
 		OMXClock();
 		~OMXClock();
@@ -63,7 +63,7 @@ class OMXClock
 		{
 			return m_omx_speed;
 		};
-		COMXCoreComponent *GetOMXClock();
+		Component *GetOMXClock();
 		bool OMXStateExecute(bool lock = true);
 		void OMXStateIdle(bool lock = true);
 		bool HDMIClockSync(bool lock = true);
