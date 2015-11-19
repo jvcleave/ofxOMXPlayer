@@ -142,27 +142,9 @@ bool OMXDecoderBase::SendDecoderConfig()
 
 	return true;
 }
-/*
-int OMXDecoderBase::getInputBufferSize()
-{
-	return decoderComponent.getInputBufferSize();
-}
-*/
-void OMXDecoderBase::SetDropState(bool bDrop)
-{
-	m_drop_state = bDrop;
-}
-/*
-unsigned int OMXDecoderBase::GetFreeSpace()
-{
-	return decoderComponent.getInputBufferSpace();
-}
 
-unsigned int OMXDecoderBase::GetSize()
-{
-	return decoderComponent.getInputBufferSize();
-}
-*/
+
+
 void OMXDecoderBase::submitEOS()
 {
 	if(!isOpen)

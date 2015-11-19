@@ -280,7 +280,6 @@ bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspec
 	}
 
 	isOpen           = true;
-	m_drop_state        = false;
 	doSetStartTime      = true;
 	OMX_CONFIG_DISPLAYREGIONTYPE configDisplay;
 	OMX_INIT_STRUCTURE(configDisplay);
@@ -386,7 +385,7 @@ bool COMXVideo::Decode(uint8_t *pData, int iSize, double pts)
 	CSingleLock lock (m_critSection);
 	OMX_ERRORTYPE error;
 
-	if( m_drop_state || !isOpen )
+	if(!isOpen )
 	{
 		return true;
 	}

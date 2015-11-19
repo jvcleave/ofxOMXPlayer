@@ -276,7 +276,6 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
     if(error != OMX_ErrorNone) return false;
 
 	isOpen           = true;
-	m_drop_state        = false;
 	doSetStartTime      = true;
 
 
@@ -295,7 +294,7 @@ bool OMXEGLImage::Decode(uint8_t *pData, int iSize, double pts)
 	CSingleLock lock (m_critSection);
 	OMX_ERRORTYPE error;
 
-	if( m_drop_state || !isOpen )
+	if(!isOpen )
 	{
 		return true;
 	}

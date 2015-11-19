@@ -39,7 +39,6 @@ class OMXDecoderBase
 		bool					doPause;
 		bool					doSetStartTime;
 
-		bool					m_drop_state;
 		unsigned int			videoWidth;
 		unsigned int			videoHeight;
 
@@ -64,7 +63,6 @@ class OMXDecoderBase
 		bool					SendDecoderConfig();
 		bool					NaluFormatStartCodes(enum AVCodecID codec, uint8_t *in_extradata, int in_extrasize);
 
-		void					SetDropState(bool bDrop);
 		unsigned int			GetFreeSpace();
 		unsigned int			GetSize();
 		//int						getInputBufferSize();
