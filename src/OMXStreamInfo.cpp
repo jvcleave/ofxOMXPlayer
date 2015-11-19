@@ -1,12 +1,12 @@
 #include "OMXStreamInfo.h"
 
-COMXStreamInfo::COMXStreamInfo()
+OMXStreamInfo::OMXStreamInfo()
 {
 	extradata = NULL;
 	Clear();
 }
 
-COMXStreamInfo::~COMXStreamInfo()
+OMXStreamInfo::~OMXStreamInfo()
 {
 	//if( extradata && extrasize ) free(extradata);
 
@@ -15,7 +15,7 @@ COMXStreamInfo::~COMXStreamInfo()
 }
 
 
-void COMXStreamInfo::Clear()
+void OMXStreamInfo::Clear()
 {
 	codec = CODEC_ID_NONE;
 	software = false;
@@ -52,7 +52,7 @@ void COMXStreamInfo::Clear()
     int fps;
 }
 
-string COMXStreamInfo::toString()
+string OMXStreamInfo::toString()
 {
 	stringstream info;
 	info << "width: "				<<	width					<< "\n";

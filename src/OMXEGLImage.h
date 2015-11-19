@@ -9,7 +9,7 @@ class OMXEGLImage : public OMXDecoderBase
 	public:
 		OMXEGLImage();
 
-		bool Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglImage);
+		bool Open(OMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglImage);
 		
 		bool  Decode(uint8_t *pData, int iSize, double pts);
 

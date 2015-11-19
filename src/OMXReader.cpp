@@ -111,18 +111,18 @@ bool OMXReader::Open(std::string filename, bool doSkipAvProbe)
 		{
 			av_dict_set(&d, "seekable", "1", 0);
 		}
-		ofLog(OF_LOG_VERBOSE, "COMXPlayer::OpenFile - avformat_open_input %s ", m_filename.c_str());
+		ofLog(OF_LOG_VERBOSE, "OMXPlayer::OpenFile - avformat_open_input %s ", m_filename.c_str());
 		result = avformat_open_input(&m_pFormatContext, m_filename.c_str(), iformat, &d);
 		if(av_dict_count(d) == 0)
 		{
-			ofLog(OF_LOG_VERBOSE, "COMXPlayer::OpenFile - avformat_open_input enabled SEEKING ");
+			ofLog(OF_LOG_VERBOSE, "OMXPlayer::OpenFile - avformat_open_input enabled SEEKING ");
 			if(m_filename.substr(0,7) == "http://")
 				m_pFormatContext->pb->seekable = AVIO_SEEKABLE_NORMAL;
 		}
 		av_dict_free(&d);
 		if(result < 0)
 		{
-			ofLog(OF_LOG_ERROR, "COMXPlayer::OpenFile - avformat_open_input %s ", m_filename.c_str());
+			ofLog(OF_LOG_ERROR, "OMXPlayer::OpenFile - avformat_open_input %s ", m_filename.c_str());
 			Close();
 			return false;
 		}
@@ -133,7 +133,7 @@ bool OMXReader::Open(std::string filename, bool doSkipAvProbe)
 		
 		if (!m_pFile->Open(m_filename, flags))
 		{
-			ofLog(OF_LOG_ERROR, "COMXPlayer::OpenFile - %s ", m_filename.c_str());
+			ofLog(OF_LOG_ERROR, "OMXPlayer::OpenFile - %s ", m_filename.c_str());
 			Close();
 			return false;
 		}
@@ -153,7 +153,7 @@ bool OMXReader::Open(std::string filename, bool doSkipAvProbe)
 		
 		if(!iformat)
 		{
-			ofLog(OF_LOG_ERROR, "COMXPlayer::OpenFile - av_probe_input_buffer %s ", m_filename.c_str());
+			ofLog(OF_LOG_ERROR, "OMXPlayer::OpenFile - av_probe_input_buffer %s ", m_filename.c_str());
 			Close();
 			return false;
 		}
@@ -223,7 +223,7 @@ bool OMXReader::Open(std::string filename, bool doSkipAvProbe)
 			unsigned rate = len * 1000 / tim;
 			unsigned maxrate = rate + 1024 * 1024 / 8;
 			if(m_pFile->IoControl(IOCTRL_CACHE_SETRATE, &maxrate) >= 0)
-				ofLog(OF_LOG_VERBOSE, "COMXPlayer::OpenFile - set cache throttle rate to %u bytes per second", maxrate);
+				ofLog(OF_LOG_VERBOSE, "OMXPlayer::OpenFile - set cache throttle rate to %u bytes per second", maxrate);
 		}
 	}
 	
@@ -784,7 +784,7 @@ bool OMXReader::IsActive(OMXStreamType type, int stream_index)
 	return false;
 }
 
-bool OMXReader::GetHints(AVStream *stream, COMXStreamInfo *hints)
+bool OMXReader::GetHints(AVStream *stream, OMXStreamInfo *hints)
 {
 	if(!hints || !stream)
 		return false;
@@ -845,7 +845,7 @@ bool OMXReader::GetHints(AVStream *stream, COMXStreamInfo *hints)
 	return true;
 }
 
-bool OMXReader::GetHints(OMXStreamType type, unsigned int index, COMXStreamInfo &hints)
+bool OMXReader::GetHints(OMXStreamType type, unsigned int index, OMXStreamInfo &hints)
 {
 	for(unsigned int i = 0; i < MAX_STREAMS; i++)
 	{
@@ -859,7 +859,7 @@ bool OMXReader::GetHints(OMXStreamType type, unsigned int index, COMXStreamInfo 
 	return false;
 }
 
-bool OMXReader::GetHints(OMXStreamType type, COMXStreamInfo &hints)
+bool OMXReader::GetHints(OMXStreamType type, OMXStreamInfo &hints)
 {
 	bool ret = false;
 	

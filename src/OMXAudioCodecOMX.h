@@ -34,12 +34,12 @@ typedef unsigned char   BYTE;
 
 #define AVCODEC_MAX_AUDIO_FRAME_SIZE 192000
 
-class COMXAudioCodecOMX
+class OMXAudioCodecOMX
 {
 	public:
-		COMXAudioCodecOMX();
-		~COMXAudioCodecOMX();
-		bool Open(COMXStreamInfo& hints);
+		OMXAudioCodecOMX();
+		~OMXAudioCodecOMX();
+		bool Open(OMXStreamInfo& hints);
 		void Dispose();
 		int Decode(BYTE* pData, int iSize);
 		int GetData(BYTE** dst);

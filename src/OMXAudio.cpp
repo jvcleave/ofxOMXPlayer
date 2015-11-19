@@ -99,7 +99,7 @@ float downmixing_coefficients_8[16] =
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 //***********************************************************************************************
-COMXAudio::COMXAudio() :
+OMXAudio::OMXAudio() :
 	m_Initialized     (false  ),
 	doPause           (false  ),
 	m_CanPause        (false  ),
@@ -127,7 +127,7 @@ COMXAudio::COMXAudio() :
 {
 }
 
-COMXAudio::~COMXAudio()
+OMXAudio::~OMXAudio()
 {
 	if(m_Initialized)
 	{
@@ -136,14 +136,14 @@ COMXAudio::~COMXAudio()
 }
 
 
-bool COMXAudio::init(string device, enum PCMChannels *channelMap,
-                           COMXStreamInfo& hints, OMXClock *clock, EEncoded bPassthrough, bool bUseHWDecode,
+bool OMXAudio::init(string device, enum PCMChannels *channelMap,
+                           OMXStreamInfo& hints, OMXClock *clock, EEncoded bPassthrough, bool bUseHWDecode,
                            bool boostOnDownmix)
 {
 	m_HWDecode = false;
 	m_Passthrough = false;
 
-	if(bPassthrough != COMXAudio::ENCODED_NONE)
+	if(bPassthrough != OMXAudio::ENCODED_NONE)
 	{
 		m_Passthrough = true;
 		SetCodingType(hints.codec);
@@ -167,7 +167,7 @@ bool COMXAudio::init(string device, enum PCMChannels *channelMap,
 	return init(device, hints.channels, channelMap, hints.channels, hints.samplerate, hints.bitspersample, false, boostOnDownmix, false, bPassthrough);
 }
 
-bool COMXAudio::init(string device, int iChannels, enum PCMChannels *channelMap, unsigned int downmixChannels, unsigned int uiSamplesPerSec, unsigned int uiBitsPerSample, bool bResample, bool boostOnDownmix, bool bIsMusic, EEncoded bPassthrough)
+bool OMXAudio::init(string device, int iChannels, enum PCMChannels *channelMap, unsigned int downmixChannels, unsigned int uiSamplesPerSec, unsigned int uiBitsPerSample, bool bResample, bool boostOnDownmix, bool bIsMusic, EEncoded bPassthrough)
 {
 	std::string deviceuse;
 	if(device == "hdmi")
@@ -183,7 +183,7 @@ bool COMXAudio::init(string device, int iChannels, enum PCMChannels *channelMap,
 
 	m_Passthrough = false;
 
-	if(bPassthrough != COMXAudio::ENCODED_NONE)
+	if(bPassthrough != OMXAudio::ENCODED_NONE)
 	{
 		m_Passthrough =true;
 	}
@@ -419,7 +419,7 @@ bool COMXAudio::init(string device, int iChannels, enum PCMChannels *channelMap,
 		{
 			delete omxClock;
 			omxClock = NULL;
-			ofLog(OF_LOG_ERROR, "COMXAudio::init error creating av clock");
+			ofLog(OF_LOG_ERROR, "OMXAudio::init error creating av clock");
 			return false;
 		}
 	}
@@ -515,7 +515,7 @@ bool COMXAudio::init(string device, int iChannels, enum PCMChannels *channelMap,
 		OMX_BUFFERHEADERTYPE *omxBuffer = decoderComponent.getInputBuffer();
 		if(omxBuffer == NULL)
 		{
-			ofLog(OF_LOG_ERROR, "COMXAudio::init - buffer error");
+			ofLog(OF_LOG_ERROR, "OMXAudio::init - buffer error");
 			return false;
 		}
 
@@ -523,7 +523,7 @@ bool COMXAudio::init(string device, int iChannels, enum PCMChannels *channelMap,
 		omxBuffer->nFilledLen = sizeof(m_wave_header);
 		if(omxBuffer->nFilledLen > omxBuffer->nAllocLen)
 		{
-			ofLog(OF_LOG_ERROR, "COMXAudio::init - omxBuffer->nFilledLen > omxBuffer->nAllocLen");
+			ofLog(OF_LOG_ERROR, "OMXAudio::init - omxBuffer->nFilledLen > omxBuffer->nAllocLen");
 			return false;
 		}
 		memset((unsigned char *)omxBuffer->pBuffer, 0x0, omxBuffer->nAllocLen);
@@ -577,14 +577,14 @@ bool COMXAudio::init(string device, int iChannels, enum PCMChannels *channelMap,
 
 	setCurrentVolume(m_CurrentVolume);
 
-	ofLog(OF_LOG_VERBOSE, "COMXAudio::init Ouput bps %d samplerate %d channels %d device %s buffer size %d bytes per second %d passthrough %d hwdecode %d",
+	ofLog(OF_LOG_VERBOSE, "OMXAudio::init Ouput bps %d samplerate %d channels %d device %s buffer size %d bytes per second %d passthrough %d hwdecode %d",
 	      (int)m_pcm_output.nBitPerSample, (int)m_pcm_output.nSamplingRate, (int)m_pcm_output.nChannels, deviceuse.c_str(), m_BufferLen, m_BytesPerSec, m_Passthrough, m_HWDecode);
 
 	return true;
 }
 
 //***********************************************************************************************
-bool COMXAudio::Deinitialize()
+bool OMXAudio::Deinitialize()
 {
 	if(!m_Initialized)
 	{
@@ -650,7 +650,7 @@ bool COMXAudio::Deinitialize()
 	return true;
 }
 
-void COMXAudio::Flush()
+void OMXAudio::Flush()
 {
 	if(!m_Initialized)
 	{
@@ -669,7 +669,7 @@ void COMXAudio::Flush()
 }
 
 //***********************************************************************************************
-bool COMXAudio::pause()
+bool OMXAudio::pause()
 {
 	if (!m_Initialized)
 	{
@@ -688,7 +688,7 @@ bool COMXAudio::pause()
 }
 
 //***********************************************************************************************
-bool COMXAudio::resume()
+bool OMXAudio::resume()
 {
 	if (!m_Initialized)
 	{
@@ -707,7 +707,7 @@ bool COMXAudio::resume()
 }
 
 //***********************************************************************************************
-bool COMXAudio::Stop()
+bool OMXAudio::Stop()
 {
 	if (!m_Initialized)
 	{
@@ -722,13 +722,13 @@ bool COMXAudio::Stop()
 }
 
 //***********************************************************************************************
-long COMXAudio::getCurrentVolume() const
+long OMXAudio::getCurrentVolume() const
 {
 	return m_CurrentVolume;
 }
 
 //***********************************************************************************************
-void COMXAudio::Mute(bool bMute)
+void OMXAudio::Mute(bool bMute)
 {
 	if(!m_Initialized)
 	{
@@ -746,7 +746,7 @@ void COMXAudio::Mute(bool bMute)
 }
 
 //***********************************************************************************************
-bool COMXAudio::setCurrentVolume(long nVolume)
+bool OMXAudio::setCurrentVolume(long nVolume)
 {
 	if(!m_Initialized || m_Passthrough)
 	{
@@ -840,23 +840,23 @@ bool COMXAudio::setCurrentVolume(long nVolume)
 
 //***********************************************************************************************
 #if 1
-unsigned int COMXAudio::GetSpace()
+unsigned int OMXAudio::GetSpace()
 {
 	int free = decoderComponent.getInputBufferSpace();
 	return free;
 }
 #endif
-unsigned int COMXAudio::AddPackets(void* data, unsigned int len)
+unsigned int OMXAudio::AddPackets(void* data, unsigned int len)
 {
 	return AddPackets(data, len, 0, 0);
 }
 
 //***********************************************************************************************
-unsigned int COMXAudio::AddPackets(void* data, unsigned int len, double dts, double pts)
+unsigned int OMXAudio::AddPackets(void* data, unsigned int len, double dts, double pts)
 {
 	if(!m_Initialized)
 	{
-		ofLog(OF_LOG_ERROR,"COMXAudio::AddPackets - sanity failed. no valid play handle!");
+		ofLog(OF_LOG_ERROR,"OMXAudio::AddPackets - sanity failed. no valid play handle!");
 		return len;
 	}
 
@@ -874,7 +874,7 @@ unsigned int COMXAudio::AddPackets(void* data, unsigned int len, double dts, dou
 
 		if(omxBuffer == NULL)
 		{
-			ofLog(OF_LOG_ERROR, "COMXAudio::Decode timeout");
+			ofLog(OF_LOG_ERROR, "OMXAudio::Decode timeout");
 			return len;
 		}
 
@@ -1067,14 +1067,14 @@ unsigned int COMXAudio::AddPackets(void* data, unsigned int len, double dts, dou
 
 //***********************************************************************************************
 #if 0
-float COMXAudio::GetDelay()
+float OMXAudio::GetDelay()
 {
 	unsigned int free = decoderComponent.getInputBufferSize() - decoderComponent.getInputBufferSpace();
 	return (float)free / (float)m_BytesPerSec;
 }
 
 
-float COMXAudio::GetCacheTime()
+float OMXAudio::GetCacheTime()
 {
 	float fBufferLenFull = (float)m_BufferLen - (float)GetSpace();
 	if(fBufferLenFull < 0)
@@ -1085,23 +1085,23 @@ float COMXAudio::GetCacheTime()
 	return ret;
 }
 #endif
-float COMXAudio::GetCacheTotal()
+float OMXAudio::GetCacheTotal()
 {
 	return (float)m_BufferLen / (float)m_BytesPerSec;
 }
 
 //***********************************************************************************************
-unsigned int COMXAudio::GetChunkLen()
+unsigned int OMXAudio::GetChunkLen()
 {
 	return m_ChunkLen;
 }
 //***********************************************************************************************
-int COMXAudio::SetPlaySpeed(int iSpeed)
+int OMXAudio::SetPlaySpeed(int iSpeed)
 {
 	return 0;
 }
 
-unsigned int COMXAudio::GetAudioRenderingLatency()
+unsigned int OMXAudio::GetAudioRenderingLatency()
 {
 	OMX_PARAM_U32TYPE param;
 	OMX_INIT_STRUCTURE(param);
@@ -1116,7 +1116,7 @@ unsigned int COMXAudio::GetAudioRenderingLatency()
 	return param.nU32;
 }
 
-void COMXAudio::submitEOS()
+void OMXAudio::submitEOS()
 {
 	//ofLogVerbose(__func__) << "START";
 	if(!m_Initialized || doPause)
@@ -1148,7 +1148,7 @@ void COMXAudio::submitEOS()
 
 }
 
-bool COMXAudio::EOS()
+bool OMXAudio::EOS()
 {
 	if(!m_Initialized || doPause)
 	{
@@ -1161,7 +1161,7 @@ bool COMXAudio::EOS()
 
 
 
-bool COMXAudio::SetClock(OMXClock *clock)
+bool OMXAudio::SetClock(OMXClock *clock)
 {
 	if(omxClock != NULL)
 	{
@@ -1173,7 +1173,7 @@ bool COMXAudio::SetClock(OMXClock *clock)
 	return true;
 }
 
-void COMXAudio::SetCodingType(AVCodecID codec)
+void OMXAudio::SetCodingType(AVCodecID codec)
 {
 	switch(codec)
 	{
@@ -1193,7 +1193,7 @@ void COMXAudio::SetCodingType(AVCodecID codec)
 	}
 }
 
-bool COMXAudio::CanHWDecode(AVCodecID codec)
+bool OMXAudio::CanHWDecode(AVCodecID codec)
 {
 	switch(codec)
 	{
@@ -1236,7 +1236,7 @@ bool COMXAudio::CanHWDecode(AVCodecID codec)
 	return m_HWDecode;
 }
 
-bool COMXAudio::HWDecode(AVCodecID codec)
+bool OMXAudio::HWDecode(AVCodecID codec)
 {
 	bool ret = false;
 
@@ -1274,7 +1274,7 @@ bool COMXAudio::HWDecode(AVCodecID codec)
 	return ret;
 }
 
-void COMXAudio::PrintChannels(OMX_AUDIO_CHANNELTYPE eChannelMapping[])
+void OMXAudio::PrintChannels(OMX_AUDIO_CHANNELTYPE eChannelMapping[])
 {
 	for(int i = 0; i < OMX_AUDIO_MAXCHANNELS; i++)
 	{
@@ -1317,7 +1317,7 @@ void COMXAudio::PrintChannels(OMX_AUDIO_CHANNELTYPE eChannelMapping[])
 	}
 }
 
-void COMXAudio::PrintPCM(OMX_AUDIO_PARAM_PCMMODETYPE *pcm)
+void OMXAudio::PrintPCM(OMX_AUDIO_PARAM_PCMMODETYPE *pcm)
 {
 
 	stringstream info;

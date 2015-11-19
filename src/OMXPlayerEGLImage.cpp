@@ -19,7 +19,7 @@ OMXPlayerEGLImage::~OMXPlayerEGLImage()
 }
 
 
-bool OMXPlayerEGLImage::Open(COMXStreamInfo& hints, OMXClock *av_clock, EGLImageKHR eglImage)
+bool OMXPlayerEGLImage::Open(OMXStreamInfo& hints, OMXClock *av_clock, EGLImageKHR eglImage)
 {
 
 	//ofLogVerbose(__func__) << " OMXPlayerEGLImage Open";

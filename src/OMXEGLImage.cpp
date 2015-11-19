@@ -37,7 +37,7 @@ void OMXEGLImage::resetFrameCounter()
 	renderComponent.resetFrameCounter();
 }
 
-bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglImage)
+bool OMXEGLImage::Open(OMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglImage)
 {
 
 

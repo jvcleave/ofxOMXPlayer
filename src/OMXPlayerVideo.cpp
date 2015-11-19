@@ -50,7 +50,7 @@ OMXPlayerVideo::~OMXPlayerVideo()
 	//ofLogVerbose(__func__) << "END";
 }
 
-bool OMXPlayerVideo::Open(COMXStreamInfo& hints, OMXClock *av_clock, bool deinterlace, bool hdmi_clock_sync, float display_aspect)
+bool OMXPlayerVideo::Open(OMXStreamInfo& hints, OMXClock *av_clock, bool deinterlace, bool hdmi_clock_sync, float display_aspect)
 {
 	//ofLogVerbose(__func__) << "OMXPlayerVideo Open";
 
@@ -116,7 +116,7 @@ bool OMXPlayerVideo::OpenDecoder()
 
 	m_frametime = (double)DVD_TIME_BASE / m_fps;
 
-	nonTextureDecoder = new COMXVideo();
+	nonTextureDecoder = new OMXVideo();
 	
 	nonTextureDecoder->setDisplayRect(displayRect);
 

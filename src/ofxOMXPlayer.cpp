@@ -517,10 +517,10 @@ int ofxOMXPlayer::getTotalNumFrames()
 }
 
 
-COMXStreamInfo ofxOMXPlayer::getVideoStreamInfo()
+OMXStreamInfo ofxOMXPlayer::getVideoStreamInfo()
 {
 
-	COMXStreamInfo videoInfo;
+	OMXStreamInfo videoInfo;
 	if (engine)
 	{
 		videoInfo = engine->videoStreamInfo;
@@ -533,9 +533,9 @@ COMXStreamInfo ofxOMXPlayer::getVideoStreamInfo()
 	return videoInfo;
 }
 
-COMXStreamInfo ofxOMXPlayer::getAudioStreamInfo()
+OMXStreamInfo ofxOMXPlayer::getAudioStreamInfo()
 {
-	COMXStreamInfo audioInfo;
+	OMXStreamInfo audioInfo;
 	if (engine)
 	{
 		audioInfo = engine->audioStreamInfo;

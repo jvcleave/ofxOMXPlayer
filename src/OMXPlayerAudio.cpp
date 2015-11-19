@@ -98,7 +98,7 @@ void OMXPlayerAudio::UnLockDecoder()
 	}
 }
 
-bool OMXPlayerAudio::Open(COMXStreamInfo& hints, OMXClock *av_clock, OMXReader *omx_reader,
+bool OMXPlayerAudio::Open(OMXStreamInfo& hints, OMXClock *av_clock, OMXReader *omx_reader,
                           std::string device, bool passthrough, bool hw_decode,
                           bool boost_on_downmix, bool use_thread)
 {
@@ -117,7 +117,7 @@ bool OMXPlayerAudio::Open(COMXStreamInfo& hints, OMXClock *av_clock, OMXReader *
 	omxClock    = av_clock;
 	m_omx_reader  = omx_reader;
 	m_device      = device;
-	m_passthrough = COMXAudio::ENCODED_NONE;
+	m_passthrough = OMXAudio::ENCODED_NONE;
 	m_hw_decode   = false;
 	m_use_passthrough = passthrough;
 	m_use_hw_decode   = hw_decode;
@@ -422,7 +422,7 @@ bool OMXPlayerAudio::AddPacket(OMXPacket *pkt)
 
 bool OMXPlayerAudio::OpenAudioCodec()
 {
-	m_pAudioCodec = new COMXAudioCodecOMX();
+	m_pAudioCodec = new OMXAudioCodecOMX();
 
 	if(!m_pAudioCodec->Open(m_hints))
 	{
@@ -444,26 +444,26 @@ void OMXPlayerAudio::CloseAudioCodec()
 	m_pAudioCodec = NULL;
 }
 
-COMXAudio::EEncoded OMXPlayerAudio::IsPassthrough(COMXStreamInfo hints)
+OMXAudio::EEncoded OMXPlayerAudio::IsPassthrough(OMXStreamInfo hints)
 {
     if(m_device == "omx:local")
     {
-        return COMXAudio::ENCODED_NONE;
+        return OMXAudio::ENCODED_NONE;
     }
     
-    COMXAudio::EEncoded passthrough = COMXAudio::ENCODED_NONE;
+    OMXAudio::EEncoded passthrough = OMXAudio::ENCODED_NONE;
     
     if(hints.codec == CODEC_ID_AC3)
     {
-        passthrough = COMXAudio::ENCODED_IEC61937_AC3;
+        passthrough = OMXAudio::ENCODED_IEC61937_AC3;
     }
     if(hints.codec == CODEC_ID_EAC3)
     {
-        passthrough = COMXAudio::ENCODED_IEC61937_EAC3;
+        passthrough = OMXAudio::ENCODED_IEC61937_EAC3;
     }
     if(hints.codec == CODEC_ID_DTS)
     {
-        passthrough = COMXAudio::ENCODED_IEC61937_DTS;
+        passthrough = OMXAudio::ENCODED_IEC61937_DTS;
     }
     
     return passthrough;
@@ -476,7 +476,7 @@ bool OMXPlayerAudio::OpenDecoder()
 	//ofLogVerbose(__func__) << "m_use_passthrough: " << m_use_passthrough;
 	bool bAudioRenderOpen = false;
 
-	m_decoder = new COMXAudio();
+	m_decoder = new OMXAudio();
 	m_decoder->SetClock(omxClock);
 
 	if(m_use_passthrough)
@@ -486,7 +486,7 @@ bool OMXPlayerAudio::OpenDecoder()
 
 	if(!m_passthrough && m_use_hw_decode)
 	{
-		m_hw_decode = COMXAudio::HWDecode(m_hints.codec);
+		m_hw_decode = OMXAudio::HWDecode(m_hints.codec);
 	}
 
 	if(m_passthrough || m_use_hw_decode)

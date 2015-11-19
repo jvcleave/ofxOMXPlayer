@@ -15,11 +15,11 @@ class OMXPlayerVideo : public OMXPlayerVideoBase
 		float                     m_display_aspect;
 
 		bool                      m_hdmi_clock_sync;
-		COMXVideo* nonTextureDecoder;
+		OMXVideo* nonTextureDecoder;
 		OMXPlayerVideo();
 		~OMXPlayerVideo();
 
-		bool Open(COMXStreamInfo& hints, OMXClock *av_clock, bool deinterlace, bool hdmi_clock_sync, float display_aspect);
+		bool Open(OMXStreamInfo& hints, OMXClock *av_clock, bool deinterlace, bool hdmi_clock_sync, float display_aspect);
 		bool OpenDecoder();
 		bool Close();
 		ofRectangle displayRect;

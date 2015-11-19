@@ -68,7 +68,7 @@ class OMXDecoderBase
 		//int						getInputBufferSize();
 		void					Reset();
 
-		void ProcessCodec(COMXStreamInfo& hints);
+		void ProcessCodec(OMXStreamInfo& hints);
 		static unsigned count_bits(int32_t value)
 		{
 			unsigned bits = 0;

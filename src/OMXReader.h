@@ -48,7 +48,7 @@ typedef struct OMXPacket
 	int       size;
 	uint8_t   *data;
 	int       stream_index;
-	COMXStreamInfo hints;
+	OMXStreamInfo hints;
 	enum AVMediaType codec_type;
 } OMXPacket;
 
@@ -71,7 +71,7 @@ typedef struct OMXStream
 	void        *extradata;
 	unsigned int extrasize;
 	unsigned int index;
-	COMXStreamInfo hints;
+	OMXStreamInfo hints;
 } OMXStream;
 
 class OMXReader
@@ -118,9 +118,9 @@ class OMXReader
 		void AddStream(int id);
 		bool IsActive(int stream_index);
 		bool IsActive(OMXStreamType type, int stream_index);
-		bool GetHints(AVStream *stream, COMXStreamInfo *hints);
-		bool GetHints(OMXStreamType type, unsigned int index, COMXStreamInfo& hints);
-		bool GetHints(OMXStreamType type, COMXStreamInfo& hints);
+		bool GetHints(AVStream *stream, OMXStreamInfo *hints);
+		bool GetHints(OMXStreamType type, unsigned int index, OMXStreamInfo& hints);
+		bool GetHints(OMXStreamType type, OMXStreamInfo& hints);
 		bool IsEof();
 		int  AudioStreamCount()
 		{

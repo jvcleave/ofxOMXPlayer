@@ -2,7 +2,7 @@
 
 
 
-COMXVideo::COMXVideo()
+OMXVideo::OMXVideo()
 {
 
 	m_deinterlace       = false;
@@ -12,13 +12,13 @@ COMXVideo::COMXVideo()
 }
 
 
-COMXVideo::~COMXVideo()
+OMXVideo::~OMXVideo()
 {
-	ofRemoveListener(ofEvents().update, this, &COMXVideo::onUpdate);
+	ofRemoveListener(ofEvents().update, this, &OMXVideo::onUpdate);
 	//ofLogVerbose(__func__) << "removed update listener";
 }
 
-bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspect, bool deinterlace, bool hdmi_clock_sync)
+bool OMXVideo::Open(OMXStreamInfo& hints, OMXClock *clock, float display_aspect, bool deinterlace, bool hdmi_clock_sync)
 {
 	OMX_ERRORTYPE error   = OMX_ErrorNone;
 
@@ -273,7 +273,7 @@ bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspec
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
     
-	ofAddListener(ofEvents().update, this, &COMXVideo::onUpdate);
+	ofAddListener(ofEvents().update, this, &OMXVideo::onUpdate);
 	if(!SendDecoderConfig())
 	{
 		return false;
@@ -328,13 +328,13 @@ bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspec
 	return true;
 }
 
-void COMXVideo::onUpdate(ofEventArgs& args)
+void OMXVideo::onUpdate(ofEventArgs& args)
 {
     //TODO: seems to cause hang on exit
     
 	//updateFrameCount();
 }
-void COMXVideo::updateFrameCount()
+void OMXVideo::updateFrameCount()
 {
 	if (!isOpen) {
 		return;
@@ -369,18 +369,18 @@ void COMXVideo::updateFrameCount()
 	}
 }
 
-int COMXVideo::getCurrentFrame()
+int OMXVideo::getCurrentFrame()
 {
 	return frameCounter - frameOffset;
 }
 
-void COMXVideo::resetFrameCounter()
+void OMXVideo::resetFrameCounter()
 {
 	frameOffset = frameCounter;
 }
 
 
-bool COMXVideo::Decode(uint8_t *pData, int iSize, double pts)
+bool OMXVideo::Decode(uint8_t *pData, int iSize, double pts)
 {
 	CSingleLock lock (m_critSection);
 	OMX_ERRORTYPE error;
@@ -464,7 +464,7 @@ bool COMXVideo::Decode(uint8_t *pData, int iSize, double pts)
 	return false;
 }
 
-void COMXVideo::configureDisplay()
+void OMXVideo::configureDisplay()
 {
 	OMX_CONFIG_DISPLAYREGIONTYPE configDisplay;
 	OMX_INIT_STRUCTURE(configDisplay);
@@ -485,7 +485,7 @@ void COMXVideo::configureDisplay()
 	
 	renderComponent.setConfig(OMX_IndexConfigDisplayRegion, &configDisplay);
 }
-void COMXVideo::setDisplayRect(ofRectangle& rectangle)
+void OMXVideo::setDisplayRect(ofRectangle& rectangle)
 {
 	
 	bool hasChanged = (displayRect != rectangle);

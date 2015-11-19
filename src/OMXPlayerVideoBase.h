@@ -24,7 +24,7 @@ class OMXPlayerVideoBase: public OMXThread
 		std::deque<OMXPacket *>		m_packets;
 
 		bool						m_open;
-		COMXStreamInfo				m_hints;
+		OMXStreamInfo				m_hints;
 		double						m_iCurrentPts;
 
 		pthread_cond_t				m_packet_cond;

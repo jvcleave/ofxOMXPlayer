@@ -28,7 +28,7 @@ class OMXPlayerAudio : public OMXThread
 		int                       m_stream_id;
 		std::deque<OMXPacket *>   m_packets;
 		bool                      m_open;
-		COMXStreamInfo            m_hints;
+		OMXStreamInfo            m_hints;
 		double                    m_iCurrentPts;
 		pthread_cond_t            m_packet_cond;
 		pthread_cond_t            m_audio_cond;
@@ -36,12 +36,12 @@ class OMXPlayerAudio : public OMXThread
 		pthread_mutex_t           m_lock_decoder;
 		OMXClock                  *omxClock;
 		OMXReader                 *m_omx_reader;
-		COMXAudio                 *m_decoder;
+		OMXAudio                 *m_decoder;
 		std::string               m_codec_name;
 		std::string               m_device;
 		bool                      m_use_passthrough;
 		bool                      m_use_hw_decode;
-		COMXAudio::EEncoded  m_passthrough;
+		OMXAudio::EEncoded  m_passthrough;
 		bool                      m_hw_decode;
 		bool                      m_boost_on_downmix;
 		bool                      m_bAbort;
@@ -49,7 +49,7 @@ class OMXPlayerAudio : public OMXThread
 		bool                      m_flush;
 		enum PCMChannels          *m_pChannelMap;
 		unsigned int              m_cached_size;
-		COMXAudioCodecOMX         *m_pAudioCodec;
+		OMXAudioCodecOMX         *m_pAudioCodec;
 		int                       m_speed;
 
 		int64_t m_errortime; //timestamp of last time we measured
@@ -66,7 +66,7 @@ class OMXPlayerAudio : public OMXThread
 	public:
 		OMXPlayerAudio();
 		~OMXPlayerAudio();
-		bool Open(COMXStreamInfo& hints,
+		bool Open(OMXStreamInfo& hints,
                   OMXClock *av_clock,
                   OMXReader *omx_reader,
 		          std::string device,
@@ -82,7 +82,7 @@ class OMXPlayerAudio : public OMXThread
 		bool AddPacket(OMXPacket *pkt);
 		bool OpenAudioCodec();
 		void CloseAudioCodec();
-		COMXAudio::EEncoded IsPassthrough(COMXStreamInfo hints);
+		OMXAudio::EEncoded IsPassthrough(OMXStreamInfo hints);
 		bool OpenDecoder();
 		bool CloseDecoder();
 		//double GetDelay();

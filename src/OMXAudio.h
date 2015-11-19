@@ -80,7 +80,7 @@ typedef struct tWAVEFORMATEXTENSIBLE
 } __attribute__((__packed__)) WAVEFORMATEXTENSIBLE;
 
 
-class COMXAudio
+class OMXAudio
 {
 	public:
 	
@@ -99,10 +99,10 @@ class COMXAudio
 		//float GetCacheTime();
 		float GetCacheTotal();
 		unsigned int GetAudioRenderingLatency();
-		COMXAudio();
+		OMXAudio();
 		bool init(string device,
 						enum PCMChannels *channelMap,
-		                COMXStreamInfo& hints, OMXClock *clock,
+		                OMXStreamInfo& hints, OMXClock *clock,
 						EEncoded bPassthrough,
 						bool bUseHWDecode,
 						bool boostOnDownmix);
@@ -116,8 +116,8 @@ class COMXAudio
 						bool bResample,
 						bool boostOnDownmix,
 						bool bIsMusic=false,
-						EEncoded bPassthrough = COMXAudio::ENCODED_NONE);
-		~COMXAudio();
+						EEncoded bPassthrough = OMXAudio::ENCODED_NONE);
+		~OMXAudio();
 
 		unsigned int AddPackets(void* data, unsigned int len);
 		unsigned int AddPackets(void* data, unsigned int len, double dts, double pts);

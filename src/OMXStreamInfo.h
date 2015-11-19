@@ -9,12 +9,12 @@ extern "C" {
 
 class CDemuxStream;
 
-class COMXStreamInfo
+class OMXStreamInfo
 {
 	public:
-		COMXStreamInfo();
+		OMXStreamInfo();
 
-		~COMXStreamInfo();
+		~OMXStreamInfo();
 
 		void Clear(); // clears current information
 

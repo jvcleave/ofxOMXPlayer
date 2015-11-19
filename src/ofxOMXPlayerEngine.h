@@ -70,8 +70,8 @@ class ofxOMXPlayerEngine: public OMXThread
 		//OMXThread inheritance
 		void		Process();
 
-		COMXStreamInfo			videoStreamInfo;
-		COMXStreamInfo			audioStreamInfo;
+		OMXStreamInfo			videoStreamInfo;
+		OMXStreamInfo			audioStreamInfo;
 
 
 		int increaseSpeed();
