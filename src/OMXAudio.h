@@ -9,8 +9,9 @@
 
 #include "LIBAV_INCLUDES.h"
 
-#include "OMXCore.h"
 #include "OMXClock.h"
+#include "Tunnel.h"
+
 #include "OMXStreamInfo.h"
 #include <assert.h>
 
@@ -48,23 +49,10 @@ typedef struct tGUID
     unsigned char  Data4[8];
 } __attribute__((__packed__)) GUID;
 
-static GUID KSDATAFORMAT_SUBTYPE_UNKNOWN = {
-    WAVE_FORMAT_UNKNOWN,
-    0x0000, 0x0000,
-    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
-};
 
-static GUID KSDATAFORMAT_SUBTYPE_PCM = {
-    WAVE_FORMAT_PCM,
-    0x0000, 0x0010,
-    {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}
-};
 
-static GUID KSDATAFORMAT_SUBTYPE_IEEE_FLOAT = {
-    WAVE_FORMAT_IEEE_FLOAT,
-    0x0000, 0x0010,
-    {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}
-};
+
+
 
 // Audio stuff
 typedef struct tWAVEFORMATEX
@@ -139,9 +127,9 @@ class COMXAudio
 		bool Stop();
 		bool Resume();
 
-		long GetCurrentVolume() const;
+		long getCurrentVolume() const;
 		void Mute(bool bMute);
-		bool SetCurrentVolume(long nVolume);
+		bool setCurrentVolume(long nVolume);
 		void SetDynamicRangeCompression(long drc)
 		{
 			m_drc = drc;
@@ -151,8 +139,8 @@ class COMXAudio
 			return m_remap.GetCurrentAttenuation();
 		}
 		int SetPlaySpeed(int iSpeed);
-		void SubmitEOS();
-		bool IsEOS();
+		void submitEOS();
+		bool EOS();
 
 		void Flush();
 		void DoAudioWork();

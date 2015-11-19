@@ -694,6 +694,17 @@ private:
 #define OMX_NULL_SINK (OMX_STRING)"OMX.broadcom.null_sink"
 #define NULL_SINK_INPUT_PORT 240
 
+#define DVD_TIME_BASE 1000000
+#define DVD_NOPTS_VALUE    (-1LL<<52) // should be possible to represent in both double and __int64
+
+#define DVD_TIME_TO_SEC(x)  ((int)((double)(x) / DVD_TIME_BASE))
+#define DVD_TIME_TO_MSEC(x) ((int)((double)(x) * 1000 / DVD_TIME_BASE))
+#define DVD_SEC_TO_TIME(x)  ((double)(x) * DVD_TIME_BASE)
+#define DVD_MSEC_TO_TIME(x) ((double)(x) * DVD_TIME_BASE / 1000)
+
+#define DVD_PLAYSPEED_PAUSE       0       // frame stepping
+#define DVD_PLAYSPEED_NORMAL      1000
+
 extern inline  
 string omxErrorToString(OMX_ERRORTYPE error)
 {

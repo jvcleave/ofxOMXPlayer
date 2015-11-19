@@ -119,10 +119,10 @@ void ofxOMXPlayerEngine::setNormalSpeed()
 {
     Lock();
 	speedMultiplier = 1;
-	clock.OMXSetSpeed(normalPlaySpeed);
-	omxReader.SetSpeed(normalPlaySpeed);
+	clock.OMXsetSpeed(normalPlaySpeed);
+	omxReader.setSpeed(normalPlaySpeed);
 	//ofLogVerbose(__func__) << "clock speed: " << clock.OMXPlaySpeed();
-	//ofLogVerbose(__func__) << "reader speed: " << omxReader.GetSpeed();
+	//ofLogVerbose(__func__) << "reader speed: " << omxReader.getSpeed();
     UnLock();
 }
 
@@ -134,14 +134,14 @@ int ofxOMXPlayerEngine::increaseSpeed()
 	doSeek = true;
 	
 	//ofLogVerbose(__func__) << "clock speed: " << clock.OMXPlaySpeed();
-	//ofLogVerbose(__func__) << "reader speed: " << omxReader.GetSpeed();
+	//ofLogVerbose(__func__) << "reader speed: " << omxReader.getSpeed();
     if(speedMultiplier+1 <=4)
     {
         speedMultiplier++;
         int newSpeed = normalPlaySpeed*speedMultiplier;
         
-        clock.OMXSetSpeed(newSpeed);
-        omxReader.SetSpeed(newSpeed);
+        clock.OMXsetSpeed(newSpeed);
+        omxReader.setSpeed(newSpeed);
         //ofLogVerbose(__func__) << "newSpeed: " << newSpeed;
     }
     UnLock();
@@ -151,7 +151,7 @@ int ofxOMXPlayerEngine::increaseSpeed()
 void ofxOMXPlayerEngine::rewind()
 {
 	//ofLogVerbose(__func__) << "clock speed: " << clock.OMXPlaySpeed();
-	//ofLogVerbose(__func__) << "reader speed: " << omxReader.GetSpeed();
+	//ofLogVerbose(__func__) << "reader speed: " << omxReader.getSpeed();
 	if(speedMultiplier-1 == 0)
 	{
 		speedMultiplier = -1;
@@ -168,8 +168,8 @@ void ofxOMXPlayerEngine::rewind()
 	}
 	int newSpeed = normalPlaySpeed*speedMultiplier;
 
-	clock.OMXSetSpeed(newSpeed);
-	omxReader.SetSpeed(newSpeed);
+	clock.OMXsetSpeed(newSpeed);
+	omxReader.setSpeed(newSpeed);
 	//ofLogVerbose(__func__) << "newSpeed: " << newSpeed;
 
 }
@@ -444,7 +444,7 @@ void ofxOMXPlayerEngine::Process()
 
 		if (omxReader.IsEof() && !packet && isCacheEmpty)
 		{
-			videoPlayer->SubmitEOS();
+			videoPlayer->submitEOS();
 
 		}
 
@@ -499,7 +499,7 @@ void ofxOMXPlayerEngine::Process()
 		{
 			if (!doLooping && omxReader.IsEof() && !packet && isCacheEmpty)
 			{
-				if (videoPlayer->IsEOS())
+				if (videoPlayer->EOS())
 				{
 					onVideoEnd();
 					break;
@@ -698,7 +698,7 @@ void ofxOMXPlayerEngine::setVolume(float volume)
 		return;
 	}
 	float value = ofMap(volume, 0.0, 1.0, -6000.0, 6000.0, true);
-	audioPlayer->SetCurrentVolume(value);
+	audioPlayer->setCurrentVolume(value);
 }
 
 float ofxOMXPlayerEngine::getVolume()
@@ -707,7 +707,7 @@ float ofxOMXPlayerEngine::getVolume()
 	{
 		return 0;
 	}
-	float value = ofMap(audioPlayer->GetCurrentVolume(), -6000.0, 6000.0, 0.0, 1.0, true);
+	float value = ofMap(audioPlayer->getCurrentVolume(), -6000.0, 6000.0, 0.0, 1.0, true);
 	return floorf(value * 100 + 0.5) / 100;
 }
 

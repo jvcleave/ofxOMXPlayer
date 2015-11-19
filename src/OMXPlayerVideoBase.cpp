@@ -70,12 +70,12 @@ void OMXPlayerVideoBase::resetFrameCounter()
 }
 
 
-void OMXPlayerVideoBase::SetSpeed(int speed)
+void OMXPlayerVideoBase::setSpeed(int speed)
 {
 	m_speed = speed;
 }
 
-int OMXPlayerVideoBase::GetSpeed()
+int OMXPlayerVideoBase::getSpeed()
 {
 	return m_speed;
 }
@@ -287,25 +287,25 @@ bool OMXPlayerVideoBase::CloseDecoder()
 	return true;
 }
 
-void OMXPlayerVideoBase::SubmitEOS()
+void OMXPlayerVideoBase::submitEOS()
 {
 	if(m_decoder)
 	{
-		m_decoder->SubmitEOS();
+		m_decoder->submitEOS();
 	}
 }
 
-bool OMXPlayerVideoBase::IsEOS()
+bool OMXPlayerVideoBase::EOS()
 {
 	bool atEndofStream = false;
 
 	if (m_decoder)
 	{
-		if (m_packets.empty() && m_decoder->IsEOS())
+		if (m_packets.empty() && m_decoder->EOS())
 		{
 
 			atEndofStream = true;
-			//ofLogVerbose(__func__) << "m_packets.empty() && m_decoder->IsEOS(): " << atEndofStream;
+			//ofLogVerbose(__func__) << "m_packets.empty() && m_decoder->EOS(): " << atEndofStream;
 		}
 	}
 	return atEndofStream;

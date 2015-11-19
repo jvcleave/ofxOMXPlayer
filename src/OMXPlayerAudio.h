@@ -93,8 +93,8 @@ class OMXPlayerAudio : public OMXThread
 			return m_iCurrentPts;
 		};
 		void WaitCompletion();
-		void SubmitEOS();
-		bool IsEOS();
+		void submitEOS();
+		bool EOS();
 
 		unsigned int GetCached()
 		{
@@ -105,9 +105,9 @@ class OMXPlayerAudio : public OMXThread
 
 		};
 
-		void SetCurrentVolume(long nVolume);
-		long GetCurrentVolume();
-		void SetSpeed(int iSpeed);
+		void setCurrentVolume(long nVolume);
+		long getCurrentVolume();
+		void setSpeed(int iSpeed);
 		bool Error()
 		{
 			return !m_player_error;

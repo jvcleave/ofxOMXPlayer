@@ -89,16 +89,16 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	m_av_clock = clock;
 	m_omx_clock = m_av_clock->GetOMXClock();
 
-	if(m_omx_clock->GetComponent() == NULL)
+	if(m_omx_clock->getComponent() == NULL)
 	{
 		m_av_clock = NULL;
 		m_omx_clock = NULL;
 		return false;
 	}
 
-	decoderTunnel.init(&m_omx_decoder,		m_omx_decoder.GetOutputPort(),		&m_omx_sched,	m_omx_sched.GetInputPort());
-	schedulerTunnel.init(	&m_omx_sched,		m_omx_sched.GetOutputPort(),		&renderComponent,	renderComponent.GetInputPort());
-	clockTunnel.init(	m_omx_clock,		m_omx_clock->GetInputPort() + 1,	&m_omx_sched,	m_omx_sched.GetOutputPort() + 1);
+	decoderTunnel.init(&m_omx_decoder,		m_omx_decoder.getOutputPort(),		&m_omx_sched,	m_omx_sched.getInputPort());
+	schedulerTunnel.init(	&m_omx_sched,		m_omx_sched.getOutputPort(),		&renderComponent,	renderComponent.getInputPort());
+	clockTunnel.init(	m_omx_clock,		m_omx_clock->getInputPort() + 1,	&m_omx_sched,	m_omx_sched.getOutputPort() + 1);
 
 
 	error = m_omx_decoder.setState(OMX_StateIdle);
@@ -110,7 +110,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 
 	OMX_VIDEO_PARAM_PORTFORMATTYPE formatType;
 	OMX_INIT_STRUCTURE(formatType);
-	formatType.nPortIndex = m_omx_decoder.GetInputPort();
+	formatType.nPortIndex = m_omx_decoder.getInputPort();
 	formatType.eCompressionFormat = m_codingType;
 
 	if (hints.fpsscale > 0 && hints.fpsrate > 0)
@@ -133,7 +133,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 
 	OMX_PARAM_PORTDEFINITIONTYPE portParam;
 	OMX_INIT_STRUCTURE(portParam);
-	portParam.nPortIndex = m_omx_decoder.GetInputPort();
+	portParam.nPortIndex = m_omx_decoder.getInputPort();
 
 	error = m_omx_decoder.getParameter(OMX_IndexParamPortDefinition, &portParam);
     OMX_TRACE(error);
@@ -168,7 +168,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	{
 		OMX_NALSTREAMFORMATTYPE nalStreamFormat;
 		OMX_INIT_STRUCTURE(nalStreamFormat);
-		nalStreamFormat.nPortIndex = m_omx_decoder.GetInputPort();
+		nalStreamFormat.nPortIndex = m_omx_decoder.getInputPort();
 		nalStreamFormat.eNaluFormat = OMX_NaluFormatStartCodes;
 
 		error = m_omx_decoder.setParameter((OMX_INDEXTYPE)OMX_IndexParamNalStreamFormatSelect, &nalStreamFormat);
@@ -192,7 +192,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 
 
 	// Alloc buffers for the omx intput port.
-	error = m_omx_decoder.AllocInputBuffers();
+	error = m_omx_decoder.allocInputBuffers();
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
@@ -218,7 +218,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 
 	OMX_PARAM_PORTDEFINITIONTYPE portParamRenderInput;
 	OMX_INIT_STRUCTURE(portParamRenderInput);
-	portParamRenderInput.nPortIndex = renderComponent.GetInputPort();
+	portParamRenderInput.nPortIndex = renderComponent.getInputPort();
 
 	error = renderComponent.getParameter(OMX_IndexParamPortDefinition, &portParamRenderInput);
     OMX_TRACE(error);
@@ -226,14 +226,14 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 
 	OMX_PARAM_PORTDEFINITIONTYPE portParamRenderOutput;
 	OMX_INIT_STRUCTURE(portParamRenderOutput);
-	portParamRenderOutput.nPortIndex = renderComponent.GetOutputPort();
+	portParamRenderOutput.nPortIndex = renderComponent.getOutputPort();
 
 	error = renderComponent.getParameter(OMX_IndexParamPortDefinition, &portParamRenderOutput);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 	
 	// Alloc buffers for the renderComponent input port.
-	error = renderComponent.AllocInputBuffers();
+	error = renderComponent.allocInputBuffers();
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 	
@@ -243,14 +243,14 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
     if(error != OMX_ErrorNone) return false;
 	
 
-	//ofLogVerbose(__func__) << "renderComponent.GetOutputPort(): " << renderComponent.GetOutputPort();
-	renderComponent.enablePort(renderComponent.GetOutputPort());
+	//ofLogVerbose(__func__) << "renderComponent.getOutputPort(): " << renderComponent.getOutputPort();
+	renderComponent.enablePort(renderComponent.getOutputPort());
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
 
 	OMX_BUFFERHEADERTYPE* eglBuffer = NULL;
-	error = renderComponent.useEGLImage(&eglBuffer, renderComponent.GetOutputPort(), NULL, eglImage);
+	error = renderComponent.useEGLImage(&eglBuffer, renderComponent.getOutputPort(), NULL, eglImage);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
@@ -282,7 +282,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 
 	ofLog(OF_LOG_VERBOSE,
 	      "%s::%s - decoder_component: 0x%p, input_port: 0x%x, output_port: 0x%x \n",
-	      "OMXEGLImage", __func__, m_omx_decoder.GetComponent(), m_omx_decoder.GetInputPort(), m_omx_decoder.GetOutputPort());
+	      "OMXEGLImage", __func__, m_omx_decoder.getComponent(), m_omx_decoder.getInputPort(), m_omx_decoder.getOutputPort());
 
 	m_first_frame   = true;
 	// start from assuming all recent frames had valid pts
@@ -308,7 +308,7 @@ bool OMXEGLImage::Decode(uint8_t *pData, int iSize, double pts)
 		while(demuxer_bytes)
 		{
 			// 500ms timeout
-			OMX_BUFFERHEADERTYPE *omxBuffer = m_omx_decoder.GetInputBuffer(500);
+			OMX_BUFFERHEADERTYPE *omxBuffer = m_omx_decoder.getInputBuffer(500);
 			if(omxBuffer == NULL)
 			{
 				ofLog(OF_LOG_ERROR, "OMXVideo::Decode timeout\n");

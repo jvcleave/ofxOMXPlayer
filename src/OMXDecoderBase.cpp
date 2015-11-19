@@ -111,7 +111,7 @@ bool OMXDecoderBase::SendDecoderConfig()
 	if(m_extrasize > 0 && m_extradata != NULL)
 	{
 
-		OMX_BUFFERHEADERTYPE *omxBuffer = m_omx_decoder.GetInputBuffer();
+		OMX_BUFFERHEADERTYPE *omxBuffer = m_omx_decoder.getInputBuffer();
 
 		if(omxBuffer == NULL)
 		{
@@ -143,9 +143,9 @@ bool OMXDecoderBase::SendDecoderConfig()
 	return true;
 }
 /*
-int OMXDecoderBase::GetInputBufferSize()
+int OMXDecoderBase::getInputBufferSize()
 {
-	return m_omx_decoder.GetInputBufferSize();
+	return m_omx_decoder.getInputBufferSize();
 }
 */
 void OMXDecoderBase::SetDropState(bool bDrop)
@@ -155,15 +155,15 @@ void OMXDecoderBase::SetDropState(bool bDrop)
 /*
 unsigned int OMXDecoderBase::GetFreeSpace()
 {
-	return m_omx_decoder.GetInputBufferSpace();
+	return m_omx_decoder.getInputBufferSpace();
 }
 
 unsigned int OMXDecoderBase::GetSize()
 {
-	return m_omx_decoder.GetInputBufferSize();
+	return m_omx_decoder.getInputBufferSize();
 }
 */
-void OMXDecoderBase::SubmitEOS()
+void OMXDecoderBase::submitEOS()
 {
 	if(!m_is_open)
 	{
@@ -171,7 +171,7 @@ void OMXDecoderBase::SubmitEOS()
 	}
 
 	OMX_ERRORTYPE error = OMX_ErrorNone;
-	OMX_BUFFERHEADERTYPE *omxBuffer = m_omx_decoder.GetInputBuffer();
+	OMX_BUFFERHEADERTYPE *omxBuffer = m_omx_decoder.getInputBuffer();
 
 	if(omxBuffer == NULL)
 	{
@@ -190,7 +190,7 @@ void OMXDecoderBase::SubmitEOS()
 
 }
 
-bool OMXDecoderBase::IsEOS()
+bool OMXDecoderBase::EOS()
 {
 	bool isEndOfStream = false;
 	if(!m_is_open)
@@ -199,24 +199,24 @@ bool OMXDecoderBase::IsEOS()
 	}
 	else
 	{
-		if (m_omx_decoder.IsEOS())
+		if (m_omx_decoder.EOS())
 		{
 
 			isEndOfStream =  true;
 
 		}
-		//return renderComponent.IsEOS();
+		//return renderComponent.EOS();
 	}
 	if (isEndOfStream)
 	{
-		ofLogVerbose("OMXDecoderBase::IsEOS") << "isEndOfStream: " << isEndOfStream;
+		ofLogVerbose("OMXDecoderBase::EOS") << "isEndOfStream: " << isEndOfStream;
 	}
 	return isEndOfStream;
 }
 
 bool OMXDecoderBase::Pause()
 {
-	if(renderComponent.GetComponent() == NULL)
+	if(renderComponent.getComponent() == NULL)
 	{
 		return false;
 	}
@@ -236,7 +236,7 @@ bool OMXDecoderBase::Pause()
 
 bool OMXDecoderBase::Resume()
 {
-	if(renderComponent.GetComponent() == NULL)
+	if(renderComponent.getComponent() == NULL)
 	{
 		return false;
 	}

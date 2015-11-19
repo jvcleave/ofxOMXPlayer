@@ -145,8 +145,8 @@ class OMXReader
 		};
 		static void FreePacket(OMXPacket *pkt);
 		static OMXPacket *AllocPacket(int size);
-		void SetSpeed(int iSpeed);
-		int GetSpeed()
+		void setSpeed(int iSpeed);
+		int getSpeed()
 		{
 			return m_speed;
 		};

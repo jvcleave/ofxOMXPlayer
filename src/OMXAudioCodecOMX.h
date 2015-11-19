@@ -48,7 +48,7 @@ class COMXAudioCodecOMX
 		enum PCMChannels *GetChannelMap();
 		int GetSampleRate();
 		int GetBitsPerSample();
-		string GetName()
+		string getName()
 		{
 			return "FFmpeg";
 		}

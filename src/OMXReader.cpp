@@ -1037,7 +1037,7 @@ void OMXReader::UpdateCurrentPTS()
 	}
 }
 
-void OMXReader::SetSpeed(int iSpeed)
+void OMXReader::setSpeed(int iSpeed)
 {
 	if(!m_pFormatContext)
 		return;

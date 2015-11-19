@@ -3,12 +3,13 @@
 #include "ofMain.h"
 #include "ofxOMXPlayerSettings.h"
 
-#include "OMXCore.h"
+#include "OMXClock.h"
+#include "Tunnel.h"
+
 #include "OMXStreamInfo.h"
 
 #include <IL/OMX_Video.h>
 
-#include "OMXClock.h"
 #include "OMXReader.h"
 #include "SingleLock.h"
 
@@ -54,8 +55,8 @@ class OMXDecoderBase
 		virtual bool			Decode(uint8_t *pData, int iSize, double pts)=0;
 
 
-		void SubmitEOS();
-		bool IsEOS();
+		void submitEOS();
+		bool EOS();
 
 		bool					Resume();
 		bool					Pause();
@@ -66,7 +67,7 @@ class OMXDecoderBase
 		void					SetDropState(bool bDrop);
 		unsigned int			GetFreeSpace();
 		unsigned int			GetSize();
-		//int						GetInputBufferSize();
+		//int						getInputBufferSize();
 		void					Reset();
 
 		void ProcessCodec(COMXStreamInfo& hints);

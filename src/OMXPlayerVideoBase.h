@@ -44,8 +44,8 @@ class OMXPlayerVideoBase: public OMXThread
 		unsigned int				m_cached_size;
 
 
-		void						SetSpeed(int speed);
-		int							GetSpeed();
+		void						setSpeed(int speed);
+		int							getSpeed();
 
 		virtual bool				Close() = 0;
 		bool						Decode(OMXPacket *pkt);
@@ -62,8 +62,8 @@ class OMXPlayerVideoBase: public OMXThread
 
 		unsigned int				GetCached();
 	
-		void						SubmitEOS();
-		bool						IsEOS();
+		void						submitEOS();
+		bool						EOS();
 
 		void						Lock();
 		void						UnLock();

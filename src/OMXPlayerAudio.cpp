@@ -556,17 +556,17 @@ bool OMXPlayerAudio::CloseDecoder()
 	return true;
 }
 
-void OMXPlayerAudio::SubmitEOS()
+void OMXPlayerAudio::submitEOS()
 {
 	if(m_decoder)
 	{
-		m_decoder->SubmitEOS();
+		m_decoder->submitEOS();
 	}
 }
 
-bool OMXPlayerAudio::IsEOS()
+bool OMXPlayerAudio::EOS()
 {
-	return m_packets.empty() && (!m_decoder || m_decoder->IsEOS());
+	return m_packets.empty() && (!m_decoder || m_decoder->EOS());
 }
 
 void OMXPlayerAudio::WaitCompletion()
@@ -580,7 +580,7 @@ void OMXPlayerAudio::WaitCompletion()
 	unsigned int nTimeOut = 2.0f * 1000;
 	while(nTimeOut)
 	{
-		if(IsEOS())
+		if(EOS())
 		{
 			ofLog(OF_LOG_VERBOSE, "%s::%s - got eos\n", "OMXPlayerAudio", __func__);
 			break;
@@ -596,20 +596,20 @@ void OMXPlayerAudio::WaitCompletion()
 	}
 }
 
-void OMXPlayerAudio::SetCurrentVolume(long nVolume)
+void OMXPlayerAudio::setCurrentVolume(long nVolume)
 {
 	//ofLogVerbose(__func__) << "nVolume: " << nVolume;
 	if(m_decoder)
 	{
-		m_decoder->SetCurrentVolume(nVolume);
+		m_decoder->setCurrentVolume(nVolume);
 	}
 }
 
-long OMXPlayerAudio::GetCurrentVolume()
+long OMXPlayerAudio::getCurrentVolume()
 {
 	if(m_decoder)
 	{
-		return m_decoder->GetCurrentVolume();
+		return m_decoder->getCurrentVolume();
 	}
 	else
 	{
@@ -617,7 +617,7 @@ long OMXPlayerAudio::GetCurrentVolume()
 	}
 }
 
-void OMXPlayerAudio::SetSpeed(int speed)
+void OMXPlayerAudio::setSpeed(int speed)
 {
 	m_speed = speed;
 }
