@@ -234,29 +234,7 @@ bool OMXPlayerAudio::Decode(OMXPacket *pkt)
 	        old_bitrate           != new_bitrate ||
 	        m_hints.bitspersample != pkt->hints.bitspersample)
 	{
-        /*
-		stringstream info;
-		info << "m_hints.codec : "			<< m_hints.codec			<<	"\n";
-		info << "m_hints.channels : "		<< m_hints.channels			<<	"\n";
-		info << "m_hints.samplerate : "		<< m_hints.samplerate		<<	"\n";
-		info << "bitrate.bitrate : "		<< m_hints.bitrate			<<	"\n";
-		info << "bitrate.bitspersample : "	<< m_hints.bitspersample	<<	"\n";
-		ofLogVerbose(__func__) << info;
-		
-		info.str("");
-		
-		info << "pkt->hints.codec : "			<< pkt->hints.codec			<< "\n";
-		info << "channels : "					<< channels					<< "\n";
-		info << "pkt->hints.samplerate : "		<< pkt->hints.samplerate	<< "\n";
-		info << "pkt->hints.bitrate : "			<< pkt->hints.bitrate		<< "\n";
-		info << "pkt->hints.bitspersample : "	<< pkt->hints.bitspersample	<< "\n";
-		
-		ofLogVerbose(__func__) << info;
-		*/
-		/*ofLog(OF_LOG_VERBOSE, "C : %d %d %d %d %d\n", m_hints.codec, m_hints.channels, m_hints.samplerate, m_hints.bitrate, m_hints.bitspersample);
-		ofLog(OF_LOG_VERBOSE, "N : %d %d %d %d %d\n", pkt->hints.codec, channels, pkt->hints.samplerate, pkt->hints.bitrate, pkt->hints.bitspersample);*/
-
-
+       
 		CloseDecoder();
 		CloseAudioCodec();
 
@@ -273,13 +251,9 @@ bool OMXPlayerAudio::Decode(OMXPacket *pkt)
 		{
 			return false;
 		}
-
-		//m_av_clock->OMXStateExecute();
-		//m_av_clock->OMXReset();
-		//m_av_clock->OMXResume();
-
 	}
-
+    
+#if 1
 	if(!((int)m_decoder->GetSpace() > pkt->size))
 	{
 		m_av_clock->sleep(10);
@@ -341,6 +315,7 @@ bool OMXPlayerAudio::Decode(OMXPacket *pkt)
 	{
 		return false;
 	}
+#endif
 }
 
 void OMXPlayerAudio::Process()
@@ -575,7 +550,7 @@ bool OMXPlayerAudio::CloseDecoder()
 	m_decoder   = NULL;
 	return true;
 }
-
+#if 0
 double OMXPlayerAudio::GetDelay()
 {
 	if(m_decoder)
@@ -599,7 +574,7 @@ double OMXPlayerAudio::GetCacheTime()
 		return 0;
 	}
 }
-
+#endif
 void OMXPlayerAudio::SubmitEOS()
 {
 	if(m_decoder)

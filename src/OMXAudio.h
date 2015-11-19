@@ -107,8 +107,8 @@ class COMXAudio
 		};
 		
 		unsigned int GetChunkLen();
-		float GetDelay();
-		float GetCacheTime();
+		//float GetDelay();
+		//float GetCacheTime();
 		float GetCacheTotal();
 		unsigned int GetAudioRenderingLatency();
 		COMXAudio();

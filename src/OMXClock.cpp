@@ -95,9 +95,9 @@ bool OMXClock::OMXStateExecute(bool lock /* = true */)
 	{
 		OMX_ERRORTYPE error = OMX_ErrorNone;
 		error = m_omx_clock.SetStateForComponent(OMX_StateExecuting);
+        OMX_TRACE(error);
 		if (error != OMX_ErrorNone)
 		{
-			ofLogError(__func__) << "m_omx_clock GET OMX_StateExecuting FAIL error:" << COMXCore::getOMXError(error);
 			if(lock)
 			{
 				UnLock();
@@ -116,7 +116,6 @@ bool OMXClock::OMXStateExecute(bool lock /* = true */)
 
 void OMXClock::OMXStateIdle(bool lock /* = true */)
 {
-	//ofLogVerbose(__func__) << "OMXClock::OMXStateIdle START";
 	if(m_omx_clock.GetComponent() == NULL)
 	{
 		ofLogError(__func__) << "NO CLOCK YET";
@@ -132,34 +131,21 @@ void OMXClock::OMXStateIdle(bool lock /* = true */)
 	if(m_omx_clock.GetState() == OMX_StateExecuting)
 	{
 		error = m_omx_clock.SetStateForComponent(OMX_StatePause);
-		if (error != OMX_ErrorNone)
-		{
-			ofLogError(__func__) << "SetStateForComponent OMX_StatePause FAIL: " << COMXCore::getOMXError(error);
-		}
-		else
-		{
-			//ofLogVerbose(__func__) << "SetStateForComponent OMX_StatePause PASS";
-		}
+        OMX_TRACE(error);
+
 	}
 
 	if(m_omx_clock.GetState() != OMX_StateIdle)
 	{
 		error = m_omx_clock.SetStateForComponent(OMX_StateIdle);
-		if (error != OMX_ErrorNone)
-		{
-			ofLogError(__func__) << "SetStateForComponent OMX_StateIdle FAIL: " << COMXCore::getOMXError(error);
-		}
-		else
-		{
-			//ofLogVerbose(__func__) << "m_omx_clock SetStateForComponent OMX_StateIdle PASS";
-		}
+        OMX_TRACE(error);
+
 	}
 
 	if(lock)
 	{
 		UnLock();
 	}
-	//ofLogVerbose(__func__) << "OMXClock::OMXStateIdle END";
 }
 
 COMXCoreComponent *OMXClock::GetOMXClock()
@@ -176,7 +162,6 @@ bool  OMXClock::OMXStop(bool lock /* = true */)
 {
 	if(m_omx_clock.GetComponent() == NULL)
 	{
-		//ofLogVerbose(__func__) << "NO CLOCK - RETURNING EARLY";
 		return false;
 	}
 
@@ -195,9 +180,9 @@ bool  OMXClock::OMXStop(bool lock /* = true */)
 	clock.eState = OMX_TIME_ClockStateStopped;
 
 	error = m_omx_clock.SetConfig(OMX_IndexConfigTimeClockState, &clock);
+    OMX_TRACE(error);
 	if(error != OMX_ErrorNone)
 	{
-		ofLogError(__func__) << "SetConfig OMX_IndexConfigTimeClockState FAIL: " << COMXCore::getOMXError(error);
 		if(lock)
 		{
 			UnLock();
@@ -210,7 +195,6 @@ bool  OMXClock::OMXStop(bool lock /* = true */)
 		UnLock();
 	}
 
-	//ofLogVerbose(__func__) << "END";
 	return true;
 }
 
@@ -225,9 +209,7 @@ bool OMXClock::OMXStart(double pts, bool lock /* = true */)
 	{
 		Lock();
 	}
-
-	ofLogNotice(__func__) << "at pts: " << pts;
-
+    
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	OMX_TIME_CONFIG_CLOCKSTATETYPE clock;
 	OMX_INIT_STRUCTURE(clock);
@@ -236,9 +218,9 @@ bool OMXClock::OMXStart(double pts, bool lock /* = true */)
 	clock.nStartTime = ToOMXTime((uint64_t)pts);
 
 	error = m_omx_clock.SetConfig(OMX_IndexConfigTimeClockState, &clock);
+    OMX_TRACE(error);
 	if(error != OMX_ErrorNone)
 	{
-		ofLogError(__func__) << "SetConfig OMX_IndexConfigTimeClockState FAIL: " << COMXCore::getOMXError(error);
 		if(lock)
 		{
 			UnLock();
@@ -274,9 +256,9 @@ bool OMXClock::OMXStep(int steps /* = 1 */, bool lock /* = true */)
 	param.nU32 = steps;
 
 	error = m_omx_clock.SetConfig(OMX_IndexConfigSingleStep, &param);
+    OMX_TRACE(error);
 	if(error != OMX_ErrorNone)
 	{
-		ofLogError(__func__) << "SetConfig OMX_IndexConfigSingleStep FAIL: " << COMXCore::getOMXError(error);
 		if(lock)
 		{
 			UnLock();
@@ -335,9 +317,10 @@ double OMXClock::OMXMediaTime(bool lock /* = true */)
 	timeStamp.nPortIndex = m_omx_clock.GetInputPort();
 
 	error = m_omx_clock.GetConfig(OMX_IndexConfigTimeCurrentMediaTime, &timeStamp);
+    OMX_TRACE(error);
+
 	if(error != OMX_ErrorNone)
 	{
-		ofLogError(__func__) << "GetConfig OMX_IndexConfigTimeCurrentMediaTime FAIL: " << COMXCore::getOMXError(error);
 		if(lock)
 		{
 			UnLock();
@@ -346,7 +329,6 @@ double OMXClock::OMXMediaTime(bool lock /* = true */)
 	}
 
 	pts = (double)FromOMXTime(timeStamp.nTimestamp);
-	//ofLogVerbose(__func__) << " nTimestamp: " << (double)FromOMXTime(timeStamp.nTimestamp) << " pts: " << pts;
 	if(lock)
 	{
 		UnLock();
@@ -375,9 +357,10 @@ double OMXClock::OMXClockAdjustment(bool lock /* = true */)
 	timeStamp.nPortIndex = m_omx_clock.GetInputPort();
 
 	error = m_omx_clock.GetConfig(OMX_IndexConfigClockAdjustment, &timeStamp);
+    OMX_TRACE(error);
+
 	if(error != OMX_ErrorNone)
 	{
-		ofLogError(__func__) << "GetConfig OMX_IndexConfigClockAdjustment FAIL: " << COMXCore::getOMXError(error);
 		if(lock)
 		{
 			UnLock();
@@ -387,7 +370,6 @@ double OMXClock::OMXClockAdjustment(bool lock /* = true */)
 
 	pts = (double)FromOMXTime(timeStamp.nTimestamp);
 	
-	//ofLogVerbose(__func__) << "nTimestamp: " << (double)FromOMXTime(timeStamp.nTimestamp) << " pts " << pts;
 	if(lock)
 	{
 		UnLock();
@@ -429,21 +411,16 @@ bool OMXClock::OMXMediaTime(double pts, bool lock /* = true*/)
 	timeStamp.nTimestamp = ToOMXTime(pts);
 
 	error = m_omx_clock.SetConfig(index, &timeStamp);
+    OMX_TRACE(error);
+
 	if(error != OMX_ErrorNone)
 	{
-		ofLog(OF_LOG_ERROR, "OMXClock::OMXMediaTime error setting %s", index == OMX_IndexConfigTimeCurrentAudioReference ?
-		      "OMX_IndexConfigTimeCurrentAudioReference":"OMX_IndexConfigTimeCurrentVideoReference");
-		ofLogError(__func__) << COMXCore::getOMXError(error);
 		if(lock)
 		{
 			UnLock();
 		}
 		return false;
 	}
-
-	ofLog(OF_LOG_VERBOSE, "OMXClock::OMXMediaTime set config %s = %.2f (%.2f)", index == OMX_IndexConfigTimeCurrentAudioReference ?
-	      "OMX_IndexConfigTimeCurrentAudioReference":"OMX_IndexConfigTimeCurrentVideoReference", pts, OMXMediaTime(false));
-
 	if(lock)
 	{
 		UnLock();
@@ -454,7 +431,6 @@ bool OMXClock::OMXMediaTime(double pts, bool lock /* = true*/)
 
 bool OMXClock::OMXPause(bool lock /* = true */)
 {
-	//ofLogVerbose(__func__) << "START";
 	if(m_omx_clock.GetComponent() == NULL)
 	{
 		return false;
@@ -477,13 +453,11 @@ bool OMXClock::OMXPause(bool lock /* = true */)
 			UnLock();
 		}
 	}
-	//ofLogVerbose(__func__) << "END";
 	return m_pause == true;
 }
 
 bool OMXClock::OMXResume(bool lock /* = true */)
 {
-	//ofLogVerbose(__func__) << "START";
 	if(m_omx_clock.GetComponent() == NULL)
 	{
 		return false;
@@ -506,7 +480,6 @@ bool OMXClock::OMXResume(bool lock /* = true */)
 			UnLock();
 		}
 	}
-	//ofLogVerbose(__func__) << "END";
 	return m_pause == false;
 }
 
@@ -544,9 +517,10 @@ bool OMXClock::OMXSetSpeed(int speed, bool lock /* = true */, bool pause_resume 
 	}
 
 	error = m_omx_clock.SetConfig(OMX_IndexConfigTimeActiveRefClock, &refClock);
+    OMX_TRACE(error);
+
 	if(error != OMX_ErrorNone)
 	{
-		ofLogError(__func__) << "SetConfig OMX_IndexConfigTimeActiveRefClock FAIL: " << COMXCore::getOMXError(error);
 		return false;
 	}
 	if (TRICKPLAY(speed))
@@ -567,9 +541,10 @@ bool OMXClock::OMXSetSpeed(int speed, bool lock /* = true */, bool pause_resume 
 		scaleType.xScale = (speed << 16) / DVD_PLAYSPEED_NORMAL;
 	}
 	error = m_omx_clock.SetConfig(OMX_IndexConfigTimeScale, &scaleType);
+    OMX_TRACE(error);
+
 	if(error != OMX_ErrorNone)
 	{
-		ofLogError(__func__) << "SetConfig OMX_IndexConfigTimeScale FAIL: " << COMXCore::getOMXError(error);
 		if(lock)
 		{
 			UnLock();
@@ -616,10 +591,11 @@ bool OMXClock::HDMIClockSync(bool lock /* = true */)
 	latencyTarget.nAdjCap = 100;
 
 	error = m_omx_clock.SetConfig(OMX_IndexConfigLatencyTarget, &latencyTarget);
+    OMX_TRACE(error);
+
 	if(error != OMX_ErrorNone)
 	{
-		ofLogError(__func__) << "SetConfig OMX_IndexConfigLatencyTarget FAIL: " << COMXCore::getOMXError(error);
-		if(lock)
+        if(lock)
 		{
 			UnLock();
 		}

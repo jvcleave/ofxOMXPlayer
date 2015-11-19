@@ -80,23 +80,8 @@ int OMXPlayerVideoBase::GetSpeed()
 	return m_speed;
 }
 
-int  OMXPlayerVideoBase::GetDecoderFreeSpace()
-{
-	if(m_decoder)
-	{
-		return m_decoder->GetFreeSpace();
-	}
-	return 0;
-}
 
-int  OMXPlayerVideoBase::GetDecoderBufferSize()
-{
-	if(m_decoder)
-	{
-		return m_decoder->GetInputBufferSize();
-	}
-	return 0;
-}
+
 
 void OMXPlayerVideoBase::Lock()
 {
@@ -142,7 +127,7 @@ bool OMXPlayerVideoBase::Decode(OMXPacket *pkt)
 		m_iCurrentPts = pts;
 	}
 	
-	
+	/*
 	while((int) m_decoder->GetFreeSpace() < pkt->size)
 	{
 		m_av_clock->sleep(10);
@@ -151,7 +136,7 @@ bool OMXPlayerVideoBase::Decode(OMXPacket *pkt)
 			return true;
 		}
 	}
-	
+	*/
 	// CLog::Log(LOGINFO, "CDVDPlayerVideo::Decode dts:%.0f pts:%.0f cur:%.0f, size:%d", pkt->dts, pkt->pts, m_iCurrentPts, pkt->size);
 	//ofLog(OF_LOG_VERBOSE, "OMXPlayerVideoBase::Decode dts:%.0f pts:%.0f cur:%.0f, size:%d", pkt->dts, pkt->pts, m_iCurrentPts, pkt->size);
 	return m_decoder->Decode(pkt->data, pkt->size, pts);

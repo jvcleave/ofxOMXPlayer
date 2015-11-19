@@ -86,8 +86,8 @@ class OMXPlayerAudio : public OMXThread
 		COMXAudio::EEncoded IsPassthrough(COMXStreamInfo hints);
 		bool OpenDecoder();
 		bool CloseDecoder();
-		double GetDelay();
-		double GetCacheTime();
+		//double GetDelay();
+		//double GetCacheTime();
 		double GetCurrentPTS()
 		{
 			return m_iCurrentPts;

@@ -276,11 +276,25 @@ public:
     map<OMX_STATETYPE, string>omxStateNames;
     map<EGLint, string> eglErrors;
     
+    vector<string> commandNames;
+    map<string, OMX_COMMANDTYPE> commands;
+    map<OMX_COMMANDTYPE, string> commandTypes;
+    
 private:	
     OMX_Maps()
     {
         
         
+        commands["OMX_CommandVendorStartUnused"]= OMX_CommandVendorStartUnused;
+        commands["OMX_CommandMax"]= OMX_CommandMax;
+        commands["OMX_CommandStateSet"]= OMX_CommandStateSet;
+        commands["OMX_CommandFlush"]= OMX_CommandFlush;
+        commands["OMX_CommandPortDisable"]= OMX_CommandPortDisable;
+        commands["OMX_CommandPortEnable"]= OMX_CommandPortEnable;
+        commands["OMX_CommandMarkBuffer"]= OMX_CommandMarkBuffer;
+        commands["OMX_CommandKhronosExtensions"]= OMX_CommandKhronosExtensions;
+        
+        collectNames<OMX_COMMANDTYPE>(commands, commandNames, commandTypes);
         
         focusControls["On"] = OMX_IMAGE_FocusControlOn;
         focusControls["Off"] = OMX_IMAGE_FocusControlOff;
@@ -694,7 +708,7 @@ string omxErrorToString(OMX_ERRORTYPE error)
 #define OMX_LOG_LEVEL_SILENT 9
 
 #ifndef OMX_LOG_LEVEL
-#define OMX_LOG_LEVEL OMX_LOG_LEVEL_DEV
+#define OMX_LOG_LEVEL OMX_LOG_LEVEL_SILENT
 #endif
 
 extern inline  

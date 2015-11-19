@@ -57,8 +57,6 @@ class OMXPlayerVideoBase: public OMXThread
 		virtual bool				OpenDecoder() =0;
 
 		bool						CloseDecoder();
-		int							GetDecoderBufferSize();
-		int							GetDecoderFreeSpace();
 		double						GetCurrentPTS();
 		double						GetFPS();
 

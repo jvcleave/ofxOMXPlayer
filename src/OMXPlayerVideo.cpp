@@ -129,7 +129,6 @@ bool OMXPlayerVideo::OpenDecoder()
 	}
 	
 	stringstream info;
-	info << "Video codec: "	<<	m_decoder->GetDecoderName()		<< "\n";
 	info << "Video width: "	<<	m_hints.width					<< "\n";
 	info << "Video height: "	<<	m_hints.height					<< "\n";
 	info << "Video profile: "	<<	m_hints.profile					<< "\n";

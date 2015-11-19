@@ -11,7 +11,7 @@
 #include <IL/OMX_Video.h>
 #include <IL/OMX_Broadcom.h>
 
-#include "OMXMaps.h"
+#include "OMX_Maps.h"
 
 #include <semaphore.h>
 
@@ -36,7 +36,6 @@ typedef struct omx_event
 	OMX_U32 nData2;
 } omx_event;
 
-class COMXCore;
 
 class COMXCoreComponent
 {
@@ -77,35 +76,30 @@ class COMXCoreComponent
 		OMX_ERRORTYPE DisablePort(unsigned int port, bool wait = false);
 		OMX_ERRORTYPE UseEGLImage(OMX_BUFFERHEADERTYPE** ppBufferHdr, OMX_U32 nPortIndex, OMX_PTR pAppPrivate, void* eglImage);
 
-		bool          Initialize( const std::string& component_name, OMX_INDEXTYPE index);
-		bool          Deinitialize(bool doFlush=true);
+		bool Initialize( const std::string& component_name, OMX_INDEXTYPE index);
+		bool Deinitialize(bool doFlush=true);
 
-		// OMXCore Decoder delegate callback routines.
-		static OMX_ERRORTYPE DecoderEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData,
-		        OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData);
-		static OMX_ERRORTYPE DecoderEmptyBufferDoneCallback(
-		    OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_BUFFERHEADERTYPE* pBuffer);
-		static OMX_ERRORTYPE DecoderFillBufferDoneCallback(
-		    OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_BUFFERHEADERTYPE* pBufferHeader);
+		// Decoder delegate callback routines.
+		static OMX_ERRORTYPE DecoderEventHandlerCallback(OMX_HANDLETYPE, OMX_PTR, OMX_EVENTTYPE, OMX_U32, OMX_U32, OMX_PTR);
+		static OMX_ERRORTYPE DecoderEmptyBufferDoneCallback(OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*);
+		static OMX_ERRORTYPE DecoderFillBufferDoneCallback(OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*);
 
 		// OMXCore decoder callback routines.
-		OMX_ERRORTYPE DecoderEventHandler(OMX_HANDLETYPE hComponent, OMX_PTR pAppData,
-		                                  OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData);
-		OMX_ERRORTYPE DecoderEmptyBufferDone(
-		    OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_BUFFERHEADERTYPE* pBuffer);
-		OMX_ERRORTYPE DecoderFillBufferDone(
-		    OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_BUFFERHEADERTYPE* pBuffer);
+		OMX_ERRORTYPE DecoderEventHandler(OMX_HANDLETYPE, OMX_PTR, OMX_EVENTTYPE, OMX_U32, OMX_U32, OMX_PTR);
+		OMX_ERRORTYPE DecoderEmptyBufferDone(OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*);
+		OMX_ERRORTYPE DecoderFillBufferDone(OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*);
 
 		OMX_ERRORTYPE EmptyThisBuffer(OMX_BUFFERHEADERTYPE *omx_buffer);
 		OMX_ERRORTYPE FillThisBuffer(OMX_BUFFERHEADERTYPE *omx_buffer);
 		OMX_ERRORTYPE FreeOutputBuffer(OMX_BUFFERHEADERTYPE *omx_buffer);
 
 		unsigned int GetInputBufferSize();
-		unsigned int GetOutputBufferSize();
+        int m_input_buffer_size;
+		//unsigned int GetOutputBufferSize();
 
 		unsigned int GetInputBufferSpace();
-		unsigned int GetOutputBufferSpace();
-
+		//unsigned int GetOutputBufferSpace();
+        
 		void FlushAll();
 		void FlushInput();
 		void FlushOutput();
@@ -113,11 +107,11 @@ class COMXCoreComponent
 		OMX_BUFFERHEADERTYPE *GetInputBuffer(long timeout=200);
 		OMX_BUFFERHEADERTYPE *GetOutputBuffer();
 
-		OMX_ERRORTYPE AllocInputBuffers(bool use_buffers = false);
-		OMX_ERRORTYPE AllocOutputBuffers(bool use_buffers = false);
+		OMX_ERRORTYPE AllocInputBuffers();
+		OMX_ERRORTYPE AllocOutputBuffers();
 
-		OMX_ERRORTYPE FreeInputBuffers(bool wait);
-		OMX_ERRORTYPE FreeOutputBuffers(bool wait);
+		//OMX_ERRORTYPE FreeInputBuffers(bool wait);
+		//OMX_ERRORTYPE FreeOutputBuffers(bool wait);
 		void ResetEos();
 		bool IsEOS()
 		{
@@ -157,21 +151,13 @@ class COMXCoreComponent
 
 		// OMXCore input buffers (demuxer packets)
 		pthread_mutex_t   m_omx_input_mutex;
-		std::queue<OMX_BUFFERHEADERTYPE*> m_omx_input_avaliable;
+		std::queue<OMX_BUFFERHEADERTYPE*> m_omx_input_available;
 		std::vector<OMX_BUFFERHEADERTYPE*> m_omx_input_buffers;
-		unsigned int  m_input_alignment;
-		unsigned int  m_input_buffer_size;
-		unsigned int  m_input_buffer_count;
-		bool          m_omx_input_use_buffers;
 
 		// OMXCore output buffers (video frames)
 		pthread_mutex_t   m_omx_output_mutex;
 		std::queue<OMX_BUFFERHEADERTYPE*> m_omx_output_available;
 		std::vector<OMX_BUFFERHEADERTYPE*> m_omx_output_buffers;
-		unsigned int  m_output_alignment;
-		unsigned int  m_output_buffer_size;
-		unsigned int  m_output_buffer_count;
-		bool          m_omx_output_use_buffers;
 		sem_t         m_omx_fill_buffer_done;
 
 		bool          m_exit;
@@ -211,12 +197,4 @@ private:
     unsigned int      m_dst_port;
     void              Lock();
     void              UnLock();
-};
-
-class COMXCore
-{
-	public:
-		COMXCore();
-		static string getOMXError(OMX_ERRORTYPE error);
-
 };

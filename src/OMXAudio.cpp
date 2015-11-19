@@ -856,12 +856,13 @@ bool COMXAudio::SetCurrentVolume(long nVolume)
 
 
 //***********************************************************************************************
+#if 1
 unsigned int COMXAudio::GetSpace()
 {
 	int free = m_omx_decoder.GetInputBufferSpace();
 	return free;
 }
-
+#endif
 unsigned int COMXAudio::AddPackets(const void* data, unsigned int len)
 {
 	return AddPackets(data, len, 0, 0);
@@ -1116,11 +1117,13 @@ unsigned int COMXAudio::AddPackets(const void* data, unsigned int len, double dt
 }
 
 //***********************************************************************************************
+#if 0
 float COMXAudio::GetDelay()
 {
 	unsigned int free = m_omx_decoder.GetInputBufferSize() - m_omx_decoder.GetInputBufferSpace();
 	return (float)free / (float)m_BytesPerSec;
 }
+
 
 float COMXAudio::GetCacheTime()
 {
@@ -1132,7 +1135,7 @@ float COMXAudio::GetCacheTime()
 	float ret = fBufferLenFull / (float)m_BytesPerSec;
 	return ret;
 }
-
+#endif
 float COMXAudio::GetCacheTotal()
 {
 	return (float)m_BufferLen / (float)m_BytesPerSec;

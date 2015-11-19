@@ -3,7 +3,7 @@
 //--------------------------------------------------------------
 void ofApp::setup()
 {
-	//ofSetLogLevel(OF_LOG_VERBOSE);
+	ofSetLogLevel(OF_LOG_VERBOSE);
 	
 	string videoPath = ofToDataPath("../../../video/Timecoded_Big_bunny_1.mov", true);
 	
