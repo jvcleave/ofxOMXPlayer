@@ -25,7 +25,6 @@
 class OMXPlayerAudio : public OMXThread
 {
 	protected:
-		AVStream                  *m_pStream;
 		int                       m_stream_id;
 		std::deque<OMXPacket *>   m_packets;
 		bool                      m_open;
@@ -35,7 +34,7 @@ class OMXPlayerAudio : public OMXThread
 		pthread_cond_t            m_audio_cond;
 		pthread_mutex_t           m_lock;
 		pthread_mutex_t           m_lock_decoder;
-		OMXClock                  *m_av_clock;
+		OMXClock                  *omxClock;
 		OMXReader                 *m_omx_reader;
 		COMXAudio                 *m_decoder;
 		std::string               m_codec_name;

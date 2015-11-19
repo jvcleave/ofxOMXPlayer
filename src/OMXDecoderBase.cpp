@@ -19,8 +19,8 @@ OMXDecoderBase::OMXDecoderBase()
 	m_extradata         = NULL;
 	m_extrasize         = 0;
 	m_first_frame       = true;
-	m_av_clock			= NULL;
-	m_omx_clock			= NULL;
+	omxClock			= NULL;
+	clockComponent			= NULL;
 	//ofLogVerbose(__func__) << "OMXDecoderBase::CONSTRUCT";
 
 }
@@ -73,8 +73,8 @@ OMXDecoderBase::~OMXDecoderBase()
 	m_is_open       = false;
 	//ofLogVerbose(__func__) << " END ---------";
 
-	//m_av_clock->OMXStop();
-	//m_av_clock->OMXStateIdle();
+	//omxClock->stop();
+	//omxClock->setToIdleState();
 
 	//ofLogVerbose(__func__) << "END ---------";
 }
@@ -216,7 +216,7 @@ bool OMXDecoderBase::EOS()
 
 bool OMXDecoderBase::Pause()
 {
-	if(renderComponent.getComponent() == NULL)
+	if(renderComponent.getHandle() == NULL)
 	{
 		return false;
 	}
@@ -236,7 +236,7 @@ bool OMXDecoderBase::Pause()
 
 bool OMXDecoderBase::Resume()
 {
-	if(renderComponent.getComponent() == NULL)
+	if(renderComponent.getHandle() == NULL)
 	{
 		return false;
 	}

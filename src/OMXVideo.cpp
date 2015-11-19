@@ -85,13 +85,13 @@ bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspec
 		return false;
 	}
 
-	m_av_clock = clock;
-	m_omx_clock = m_av_clock->GetOMXClock();
+	omxClock = clock;
+	clockComponent = omxClock->getComponent();
 
-	if(m_omx_clock->getComponent() == NULL)
+	if(clockComponent->getHandle() == NULL)
 	{
-		m_av_clock = NULL;
-		m_omx_clock = NULL;
+		omxClock = NULL;
+		clockComponent = NULL;
 		return false;
 	}
 
@@ -106,7 +106,7 @@ bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspec
 	}
 
 	schedulerTunnel.init(&m_omx_sched, m_omx_sched.getOutputPort(), &renderComponent, renderComponent.getInputPort());
-	clockTunnel.init(m_omx_clock, m_omx_clock->getInputPort() + 1, &m_omx_sched, m_omx_sched.getOutputPort() + 1);
+	clockTunnel.init(clockComponent, clockComponent->getInputPort() + 1, &m_omx_sched, m_omx_sched.getOutputPort() + 1);
 
 	error = clockTunnel.Establish(false);
     OMX_TRACE(error);
@@ -319,7 +319,7 @@ bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspec
 
 	ofLog(OF_LOG_VERBOSE,
 	      "%s::%s - decoder_component(0x%p), input_port(0x%x), output_port(0x%x) deinterlace %d hdmiclocksync %d\n",
-	      "OMXVideo", __func__, m_omx_decoder.getComponent(), m_omx_decoder.getInputPort(), m_omx_decoder.getOutputPort(),
+	      "OMXVideo", __func__, m_omx_decoder.getHandle(), m_omx_decoder.getInputPort(), m_omx_decoder.getOutputPort(),
 	      m_deinterlace, m_hdmi_clock_sync);
 
 	m_first_frame   = true;

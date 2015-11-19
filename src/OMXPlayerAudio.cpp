@@ -36,8 +36,7 @@ OMXPlayerAudio::OMXPlayerAudio()
 {
 	m_open          = false;
 	m_stream_id     = -1;
-	m_pStream       = NULL;
-	m_av_clock      = NULL;
+	omxClock      = NULL;
 	m_omx_reader    = NULL;
 	m_decoder       = NULL;
 	m_flush         = false;
@@ -115,7 +114,7 @@ bool OMXPlayerAudio::Open(COMXStreamInfo& hints, OMXClock *av_clock, OMXReader *
 
 
 	m_hints       = hints;
-	m_av_clock    = av_clock;
+	omxClock    = av_clock;
 	m_omx_reader  = omx_reader;
 	m_device      = device;
 	m_passthrough = COMXAudio::ENCODED_NONE;
@@ -132,7 +131,7 @@ bool OMXPlayerAudio::Open(COMXStreamInfo& hints, OMXClock *av_clock, OMXReader *
 	m_pChannelMap = NULL;
 	m_speed       = DVD_PLAYSPEED_NORMAL;
 
-// m_av_clock->SetMasterClock(false);
+// omxClock->SetMasterClock(false);
 
 	m_player_error = OpenAudioCodec();
 	if(!m_player_error)
@@ -180,7 +179,6 @@ bool OMXPlayerAudio::Close()
 	m_open          = false;
 	m_stream_id     = -1;
 	m_iCurrentPts   = DVD_NOPTS_VALUE;
-	m_pStream       = NULL;
 	m_speed         = DVD_PLAYSPEED_NORMAL;
 
 
@@ -256,7 +254,7 @@ bool OMXPlayerAudio::Decode(OMXPacket *pkt)
 #if 1
 	if(!((int)m_decoder->GetSpace() > pkt->size))
 	{
-		m_av_clock->sleep(10);
+		omxClock->sleep(10);
 	}
 
 	if((int)m_decoder->GetSpace() > pkt->size)
@@ -479,7 +477,7 @@ bool OMXPlayerAudio::OpenDecoder()
 	bool bAudioRenderOpen = false;
 
 	m_decoder = new COMXAudio();
-	m_decoder->SetClock(m_av_clock);
+	m_decoder->SetClock(omxClock);
 
 	if(m_use_passthrough)
 	{
@@ -501,7 +499,7 @@ bool OMXPlayerAudio::OpenDecoder()
         ss << m_device.substr(4);
         string name = ss.str();
 		bAudioRenderOpen = m_decoder->init(name, m_pChannelMap,
-		                   m_hints, m_av_clock, m_passthrough,
+		                   m_hints, omxClock, m_passthrough,
 		                   m_hw_decode, m_boost_on_downmix);
 	}
 	else
@@ -591,7 +589,7 @@ void OMXPlayerAudio::WaitCompletion()
 			ofLog(OF_LOG_ERROR, "%s::%s - wait for eos timed out\n", "OMXPlayerAudio", __func__);
 			break;
 		}
-		m_av_clock->sleep(50);
+		omxClock->sleep(50);
 		nTimeOut -= 50;
 	}
 }

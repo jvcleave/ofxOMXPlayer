@@ -31,8 +31,8 @@ class OMXDecoderBase
 		Component		renderComponent;
 		Component		m_omx_sched;
 
-		Component*		m_omx_clock;
-		OMXClock*				m_av_clock;
+		Component*		clockComponent;
+		OMXClock*				omxClock;
 
 		bool					m_is_open;
 

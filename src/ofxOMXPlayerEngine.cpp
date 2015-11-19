@@ -119,9 +119,9 @@ void ofxOMXPlayerEngine::setNormalSpeed()
 {
     Lock();
 	speedMultiplier = 1;
-	clock.OMXsetSpeed(normalPlaySpeed);
+	clock.setSpeed(normalPlaySpeed);
 	omxReader.setSpeed(normalPlaySpeed);
-	//ofLogVerbose(__func__) << "clock speed: " << clock.OMXPlaySpeed();
+	//ofLogVerbose(__func__) << "clock speed: " << clock.getSpeed();
 	//ofLogVerbose(__func__) << "reader speed: " << omxReader.getSpeed();
     UnLock();
 }
@@ -133,14 +133,14 @@ int ofxOMXPlayerEngine::increaseSpeed()
 	//ofLogVerbose(__func__) << " START";
 	doSeek = true;
 	
-	//ofLogVerbose(__func__) << "clock speed: " << clock.OMXPlaySpeed();
+	//ofLogVerbose(__func__) << "clock speed: " << clock.getSpeed();
 	//ofLogVerbose(__func__) << "reader speed: " << omxReader.getSpeed();
     if(speedMultiplier+1 <=4)
     {
         speedMultiplier++;
         int newSpeed = normalPlaySpeed*speedMultiplier;
         
-        clock.OMXsetSpeed(newSpeed);
+        clock.setSpeed(newSpeed);
         omxReader.setSpeed(newSpeed);
         //ofLogVerbose(__func__) << "newSpeed: " << newSpeed;
     }
@@ -150,7 +150,7 @@ int ofxOMXPlayerEngine::increaseSpeed()
 
 void ofxOMXPlayerEngine::rewind()
 {
-	//ofLogVerbose(__func__) << "clock speed: " << clock.OMXPlaySpeed();
+	//ofLogVerbose(__func__) << "clock speed: " << clock.getSpeed();
 	//ofLogVerbose(__func__) << "reader speed: " << omxReader.getSpeed();
 	if(speedMultiplier-1 == 0)
 	{
@@ -168,7 +168,7 @@ void ofxOMXPlayerEngine::rewind()
 	}
 	int newSpeed = normalPlaySpeed*speedMultiplier;
 
-	clock.OMXsetSpeed(newSpeed);
+	clock.setSpeed(newSpeed);
 	omxReader.setSpeed(newSpeed);
 	//ofLogVerbose(__func__) << "newSpeed: " << newSpeed;
 
@@ -255,7 +255,7 @@ bool ofxOMXPlayerEngine::setup(ofxOMXPlayerSettings& settings)
             //ofLogVerbose(__func__) << "SET videoHeight: "	<< videoHeight;
             //ofLogVerbose(__func__) << "videoStreamInfo.nb_frames " <<videoStreamInfo.nb_frames;
             
-			if(clock.OMXInitialize(hasVideo, hasAudio))
+			if(clock.init(hasVideo, hasAudio))
 			{
 				//ofLogVerbose(__func__) << "clock Init PASS";
 				return true;
@@ -393,7 +393,7 @@ bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
             }
         }
 		clock.OMXStateExecute();
-		clock.OMXStart(startpts);
+		clock.start(startpts);
 
 		ofLogNotice(__func__) << "Opened video PASS";
 		Create();
@@ -582,12 +582,12 @@ void ofxOMXPlayerEngine::setPaused(bool doPause)
 	if(doPause)
 	{
 
-		clock.OMXPause();
+		clock.pause();
 	}
 	else
 	{
 
-		clock.OMXResume();
+		clock.resume();
 	}
 
 }
@@ -639,7 +639,7 @@ double ofxOMXPlayerEngine::getMediaTime()
 	double mediaTime = 0.0;
 	if(isPlaying())
 	{
-		mediaTime =  clock.OMXMediaTime();
+		mediaTime =  clock.getMediaTime();
 	}
 
 	return mediaTime;
@@ -647,7 +647,7 @@ double ofxOMXPlayerEngine::getMediaTime()
 
 bool ofxOMXPlayerEngine::isPaused()
 {
-	return clock.OMXIsPaused();
+	return clock.isPaused();
 }
 
 
@@ -657,7 +657,7 @@ void ofxOMXPlayerEngine::stepFrameForward()
 	{
 		setPaused(true);
 	}
-	clock.OMXStep(1);
+	clock.step(1);
 }
 
 

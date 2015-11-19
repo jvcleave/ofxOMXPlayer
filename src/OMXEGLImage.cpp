@@ -86,19 +86,19 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 		return false;
 	}
 
-	m_av_clock = clock;
-	m_omx_clock = m_av_clock->GetOMXClock();
+	omxClock = clock;
+	clockComponent = omxClock->getComponent();
 
-	if(m_omx_clock->getComponent() == NULL)
+	if(clockComponent->getHandle() == NULL)
 	{
-		m_av_clock = NULL;
-		m_omx_clock = NULL;
+		omxClock = NULL;
+		clockComponent = NULL;
 		return false;
 	}
 
 	decoderTunnel.init(&m_omx_decoder,		m_omx_decoder.getOutputPort(),		&m_omx_sched,	m_omx_sched.getInputPort());
 	schedulerTunnel.init(	&m_omx_sched,		m_omx_sched.getOutputPort(),		&renderComponent,	renderComponent.getInputPort());
-	clockTunnel.init(	m_omx_clock,		m_omx_clock->getInputPort() + 1,	&m_omx_sched,	m_omx_sched.getOutputPort() + 1);
+	clockTunnel.init(	clockComponent,		clockComponent->getInputPort() + 1,	&m_omx_sched,	m_omx_sched.getOutputPort() + 1);
 
 
 	error = m_omx_decoder.setState(OMX_StateIdle);
@@ -282,7 +282,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 
 	ofLog(OF_LOG_VERBOSE,
 	      "%s::%s - decoder_component: 0x%p, input_port: 0x%x, output_port: 0x%x \n",
-	      "OMXEGLImage", __func__, m_omx_decoder.getComponent(), m_omx_decoder.getInputPort(), m_omx_decoder.getOutputPort());
+	      "OMXEGLImage", __func__, m_omx_decoder.getHandle(), m_omx_decoder.getInputPort(), m_omx_decoder.getOutputPort());
 
 	m_first_frame   = true;
 	// start from assuming all recent frames had valid pts
@@ -311,8 +311,7 @@ bool OMXEGLImage::Decode(uint8_t *pData, int iSize, double pts)
 			OMX_BUFFERHEADERTYPE *omxBuffer = m_omx_decoder.getInputBuffer(500);
 			if(omxBuffer == NULL)
 			{
-				ofLog(OF_LOG_ERROR, "OMXVideo::Decode timeout\n");
-				//printf("COMXVideo::Decode timeout\n");
+                ofLogVerbose(__func__) << "timeout";
 				return false;
 			}
 
@@ -322,7 +321,7 @@ bool OMXEGLImage::Decode(uint8_t *pData, int iSize, double pts)
 			if(m_setStartTime)
 			{
 				omxBuffer->nFlags |= OMX_BUFFERFLAG_STARTTIME;
-				ofLog(OF_LOG_VERBOSE, "OMXVideo::Decode VDec : setStartTime %f\n", (pts == DVD_NOPTS_VALUE ? 0.0 : pts) / DVD_TIME_BASE);
+				ofLog(OF_LOG_VERBOSE, "%s : setStartTime %f\n", __func__, (pts == DVD_NOPTS_VALUE ? 0.0 : pts) / DVD_TIME_BASE);
 				m_setStartTime = false;
 			}
 			else if(pts == DVD_NOPTS_VALUE)

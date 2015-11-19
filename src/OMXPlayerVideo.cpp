@@ -66,7 +66,7 @@ bool OMXPlayerVideo::Open(COMXStreamInfo& hints, OMXClock *av_clock, bool deinte
 
 
 	m_hints       = hints;
-	m_av_clock    = av_clock;
+	omxClock    = av_clock;
 	m_fps         = 25.0f;
 	m_frametime   = 0;
 	m_Deinterlace = deinterlace;
@@ -80,7 +80,7 @@ bool OMXPlayerVideo::Open(COMXStreamInfo& hints, OMXClock *av_clock, bool deinte
 	m_speed       = DVD_PLAYSPEED_NORMAL;
 	
 
-	m_FlipTimeStamp = m_av_clock->GetAbsoluteClock();
+	m_FlipTimeStamp = omxClock->getAbsoluteClock();
 
 	if(!OpenDecoder())
 	{
@@ -121,7 +121,7 @@ bool OMXPlayerVideo::OpenDecoder()
 	nonTextureDecoder->setDisplayRect(displayRect);
 
 	m_decoder = (OMXDecoderBase*)nonTextureDecoder;
-	if(!nonTextureDecoder->Open(m_hints, m_av_clock, m_display_aspect, m_Deinterlace, m_hdmi_clock_sync))
+	if(!nonTextureDecoder->Open(m_hints, omxClock, m_display_aspect, m_Deinterlace, m_hdmi_clock_sync))
 	{
 
 		CloseDecoder();
@@ -173,7 +173,6 @@ bool OMXPlayerVideo::Close()
 	m_open          = false;
 	m_stream_id     = -1;
 	m_iCurrentPts   = DVD_NOPTS_VALUE;
-	m_pStream       = NULL;
 	m_speed         = DVD_PLAYSPEED_NORMAL;
 
 	//ofLogVerbose(__func__) << " END";

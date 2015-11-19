@@ -171,8 +171,8 @@ class COMXAudio
 		unsigned int  m_OutputChannels;
 		unsigned int  m_downmix_channels;
 		unsigned int  m_BitsPerSample;
-		Component*    m_omx_clock;
-		OMXClock*     m_av_clock;
+		Component*    clockComponent;
+		OMXClock*     omxClock;
 		bool          m_external_clock;
 		bool          m_setStartTime;
 		int           m_SampleSize;

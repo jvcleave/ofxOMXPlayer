@@ -25,37 +25,36 @@ class OMXClock
 		int               m_omx_speed;
 		pthread_mutex_t   m_lock;
 	private:
-		Component m_omx_clock;
+		Component clockComponent;
 	public:
 		OMXClock();
 		~OMXClock();
 		void Lock();
 		void UnLock();
-		bool OMXInitialize(bool has_video, bool has_audio);
+		bool init(bool has_video, bool has_audio);
 		void OMXDeinitialize();
-		bool OMXIsPaused()
+		bool isPaused()
 		{
 			return m_pause;
 		};
-		bool OMXStop(bool lock = true);
-		bool OMXStart(double pts, bool lock = true);
-		bool OMXStep(int steps = 1, bool lock = true);
-		bool OMXReset(bool lock = true);
-		double OMXMediaTime(bool lock = true);
+		bool stop(bool lock = true);
+		bool start(double pts, bool lock = true);
+		bool step(int steps = 1, bool lock = true);
+		bool reset(bool lock = true);
+		double getMediaTime(bool lock = true);
 		double OMXClockAdjustment(bool lock = true);
-		bool OMXMediaTime(double pts, bool lock = true);
-		bool OMXPause(bool lock = true);
-		bool OMXResume(bool lock = true);
-		bool OMXsetSpeed(int speed, bool lock = true, bool pause_resume = false);
-		int  OMXPlaySpeed()
+		bool getMediaTime(double pts, bool lock = true);
+		bool pause(bool lock = true);
+		bool resume(bool lock = true);
+		bool setSpeed(int speed, bool lock = true, bool pause_resume = false);
+		int  getSpeed()
 		{
 			return m_omx_speed;
 		};
-		Component *GetOMXClock();
+		Component *getComponent();
 		bool OMXStateExecute(bool lock = true);
-		void OMXStateIdle(bool lock = true);
-		bool HDMIClockSync(bool lock = true);
-		int64_t GetAbsoluteClock();
-		double GetClock(bool interpolated = true);
+		void setToIdleState(bool lock = true);
+		bool doHDMIClockSync(bool lock = true);
+		int64_t getAbsoluteClock();
 		void sleep(unsigned int dwMilliSeconds);
 };

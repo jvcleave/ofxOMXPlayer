@@ -20,7 +20,6 @@ class OMXPlayerVideoBase: public OMXThread
 		OMXPlayerVideoBase();
 		//~OMXPlayerVideoBase();
 		OMXDecoderBase*				m_decoder;
-		AVStream*					m_pStream;
 		int							m_stream_id;
 		std::deque<OMXPacket *>		m_packets;
 
@@ -33,7 +32,7 @@ class OMXPlayerVideoBase: public OMXThread
 		pthread_mutex_t				m_lock;
 		pthread_mutex_t				m_lock_decoder;
 
-		OMXClock*					m_av_clock;
+		OMXClock*					omxClock;
 		float						m_fps;
 		double						m_frametime;
 		bool						m_bAbort;

@@ -21,7 +21,7 @@ public:
     Component();
     ~Component();
     
-    OMX_HANDLETYPE    getComponent()
+    OMX_HANDLETYPE    getHandle()
     {
         return handle;
     };

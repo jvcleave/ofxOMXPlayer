@@ -15,8 +15,7 @@ OMXPlayerVideoBase::OMXPlayerVideoBase()
 {
 	m_open          = false;
 	m_stream_id     = -1;
-	m_pStream       = NULL;
-	m_av_clock      = NULL;
+	omxClock      = NULL;
 	m_decoder       = NULL;
 	m_fps           = 25.0f;
 	m_flush         = false;
@@ -26,7 +25,6 @@ OMXPlayerVideoBase::OMXPlayerVideoBase()
 	m_speed         = DVD_PLAYSPEED_NORMAL;
 
 	m_decoder = NULL;
-	m_pStream = NULL;
 	pthread_cond_init(&m_packet_cond, NULL);
 	pthread_mutex_init(&m_lock, NULL);
 	pthread_mutex_init(&m_lock_decoder, NULL);
@@ -127,16 +125,6 @@ bool OMXPlayerVideoBase::Decode(OMXPacket *pkt)
 		m_iCurrentPts = pts;
 	}
 	
-	/*
-	while((int) m_decoder->GetFreeSpace() < pkt->size)
-	{
-		m_av_clock->sleep(10);
-		if(m_flush_requested)
-		{
-			return true;
-		}
-	}
-	*/
 	// CLog::Log(LOGINFO, "CDVDPlayerVideo::Decode dts:%.0f pts:%.0f cur:%.0f, size:%d", pkt->dts, pkt->pts, m_iCurrentPts, pkt->size);
 	//ofLog(OF_LOG_VERBOSE, "OMXPlayerVideoBase::Decode dts:%.0f pts:%.0f cur:%.0f, size:%d", pkt->dts, pkt->pts, m_iCurrentPts, pkt->size);
 	return m_decoder->Decode(pkt->data, pkt->size, pts);

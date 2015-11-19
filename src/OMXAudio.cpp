@@ -21,9 +21,6 @@
 
 
 #include "OMXAudio.h"
-
-#define CLASSNAME "COMXAudio"
-
 #include "XMemUtils.h"
 
 
@@ -117,8 +114,8 @@ COMXAudio::COMXAudio() :
 	m_OutputChannels  (0      ),
 	m_downmix_channels(0      ),
 	m_BitsPerSample   (0      ),
-	m_omx_clock       (NULL   ),
-	m_av_clock        (NULL   ),
+	clockComponent       (NULL   ),
+	omxClock        (NULL   ),
 	m_external_clock  (false  ),
 	m_setStartTime    (false  ),
 	m_SampleSize      (0      ),
@@ -324,6 +321,7 @@ bool COMXAudio::init(string device, int iChannels, enum PCMChannels *channelMap,
 	configBool.bEnabled = OMX_FALSE;
 
 	error = renderComponent.setConfig(OMX_IndexConfigBrcmClockReferenceSource, &configBool);
+    OMX_TRACE(error);
 	if (error != OMX_ErrorNone)
 	{
 		return false;
@@ -336,6 +334,7 @@ bool COMXAudio::init(string device, int iChannels, enum PCMChannels *channelMap,
 	strncpy((char *)audioDest.sName, device.c_str(), strlen(device.c_str()));
 
 	error = renderComponent.setConfig(OMX_IndexConfigBrcmAudioDestination, &audioDest);
+    OMX_TRACE(error);
 	if (error != OMX_ErrorNone)
 	{
 		return false;
@@ -362,9 +361,9 @@ bool COMXAudio::init(string device, int iChannels, enum PCMChannels *channelMap,
 		OMX_INIT_STRUCTURE(boolType);
 		boolType.bEnabled = OMX_TRUE;
 		error = m_omx_decoder.setParameter(OMX_IndexParamBrcmDecoderPassThrough, &boolType);
+        OMX_TRACE(error);
 		if(error != OMX_ErrorNone)
 		{
-			ofLog(OF_LOG_ERROR, "COMXAudio::init - Error OMX_IndexParamBrcmDecoderPassThrough 0x%08x", error);
 			return false;
 		}
 	}
@@ -375,9 +374,9 @@ bool COMXAudio::init(string device, int iChannels, enum PCMChannels *channelMap,
 	port_param.nPortIndex = m_omx_decoder.getInputPort();
 
 	error = m_omx_decoder.getParameter(OMX_IndexParamPortDefinition, &port_param);
+    OMX_TRACE(error);
 	if(error != OMX_ErrorNone)
 	{
-		ofLog(OF_LOG_ERROR, "COMXAudio::init error get OMX_IndexParamPortDefinition error(0x%08x)\n", error);
 		return false;
 	}
 
@@ -387,9 +386,9 @@ bool COMXAudio::init(string device, int iChannels, enum PCMChannels *channelMap,
 	port_param.nBufferCountActual = m_BufferLen / m_ChunkLen;
 
 	error = m_omx_decoder.setParameter(OMX_IndexParamPortDefinition, &port_param);
+    OMX_TRACE(error);
 	if(error != OMX_ErrorNone)
 	{
-		ofLog(OF_LOG_ERROR, "COMXAudio::init error set OMX_IndexParamPortDefinition error(0x%08x)\n", error);
 		return false;
 	}
 
@@ -402,64 +401,55 @@ bool COMXAudio::init(string device, int iChannels, enum PCMChannels *channelMap,
 		formatType.eEncoding = m_eEncoding;
 
 		error = m_omx_decoder.setParameter(OMX_IndexParamAudioPortFormat, &formatType);
+        OMX_TRACE(error);
 		if(error != OMX_ErrorNone)
 		{
-			ofLog(OF_LOG_ERROR, "COMXAudio::init error OMX_IndexParamAudioPortFormat error(0x%08x)\n", error);
 			return false;
 		}
 	}
 
-	if(m_av_clock == NULL)
+	if(omxClock == NULL)
 	{
 		/* no external clock set. generate one */
 		m_external_clock = false;
 
-		m_av_clock = new OMXClock();
+		omxClock = new OMXClock();
 
-		if(!m_av_clock->OMXInitialize(false, true))
+		if(!omxClock->init(false, true))
 		{
-			delete m_av_clock;
-			m_av_clock = NULL;
+			delete omxClock;
+			omxClock = NULL;
 			ofLog(OF_LOG_ERROR, "COMXAudio::init error creating av clock");
 			return false;
 		}
 	}
 
-	m_omx_clock = m_av_clock->GetOMXClock();
+	clockComponent = omxClock->getComponent();
 
-	clockTunnel.init(m_omx_clock, m_omx_clock->getInputPort(), &renderComponent, renderComponent.getInputPort()+1);
+	clockTunnel.init(clockComponent, clockComponent->getInputPort(), &renderComponent, renderComponent.getInputPort()+1);
 
 	error = clockTunnel.Establish(false);
+    OMX_TRACE(error);
 	if(error != OMX_ErrorNone)
 	{
-		ofLog(OF_LOG_ERROR, "COMXAudio::init clockTunnel.Establish");
 		return false;
 	}
 
 	if(!m_external_clock)
 	{
-		error = m_omx_clock->setState(OMX_StateExecuting);
+		error = clockComponent->setState(OMX_StateExecuting);
+        OMX_TRACE(error);
 		if (error != OMX_ErrorNone)
 		{
-			ofLog(OF_LOG_ERROR, "COMXAudio::init m_omx_clock.setState");
 			return false;
 		}
 	}
 
-	/*
-	m_pcm_output.nPortIndex          = renderComponent.getInputPort();
-	error = renderComponent.setParameter(OMX_IndexParamAudioPcm, &m_pcm_output);
-	if(error != OMX_ErrorNone)
-	{
-	  ofLog(OF_LOG_VERBOSE, "COMXAudio::init OMX_IndexParamAudioPcm error(0x%08x)\n", error);
-	  return false;
-	}
-	*/
 
 	error = m_omx_decoder.allocInputBuffers();
+    OMX_TRACE(error);
 	if(error != OMX_ErrorNone)
 	{
-		ofLog(OF_LOG_ERROR, "COMXAudio::init - Error alloc buffers 0x%08x", error);
 		return false;
 	}
 
@@ -467,31 +457,31 @@ bool COMXAudio::init(string device, int iChannels, enum PCMChannels *channelMap,
 	{
 		decoderTunnel.init(&m_omx_decoder, m_omx_decoder.getOutputPort(), &m_omx_mixer, m_omx_mixer.getInputPort());
 		error = decoderTunnel.Establish(false);
+        OMX_TRACE(error);
 		if(error != OMX_ErrorNone)
 		{
-			ofLog(OF_LOG_ERROR, "COMXAudio::init - Error decoderTunnel.Establish 0x%08x", error);
 			return false;
 		}
 
 		error = m_omx_decoder.setState(OMX_StateExecuting);
+        OMX_TRACE(error);
 		if(error != OMX_ErrorNone)
 		{
-			ofLog(OF_LOG_ERROR, "COMXAudio::init - Error setting OMX_StateExecuting 0x%08x", error);
 			return false;
 		}
 
 		mixerTunnel.init(&m_omx_mixer, m_omx_mixer.getOutputPort(), &renderComponent, renderComponent.getInputPort());
 		error = mixerTunnel.Establish(false);
+        OMX_TRACE(error);
 		if(error != OMX_ErrorNone)
 		{
-			ofLog(OF_LOG_ERROR, "COMXAudio::init - Error decoderTunnel.Establish 0x%08x", error);
 			return false;
 		}
 
 		error = m_omx_mixer.setState(OMX_StateExecuting);
+        OMX_TRACE(error);
 		if(error != OMX_ErrorNone)
 		{
-			ofLog(OF_LOG_ERROR, "COMXAudio::init - Error setting OMX_StateExecuting 0x%08x", error);
 			return false;
 		}
 	}
@@ -499,24 +489,24 @@ bool COMXAudio::init(string device, int iChannels, enum PCMChannels *channelMap,
 	{
 		decoderTunnel.init(&m_omx_decoder, m_omx_decoder.getOutputPort(), &renderComponent, renderComponent.getInputPort());
 		error = decoderTunnel.Establish(false);
+        OMX_TRACE(error);
 		if(error != OMX_ErrorNone)
 		{
-			ofLog(OF_LOG_ERROR, "COMXAudio::init - Error decoderTunnel.Establish 0x%08x", error);
 			return false;
 		}
 
 		error = m_omx_decoder.setState(OMX_StateExecuting);
+        OMX_TRACE(error);
 		if(error != OMX_ErrorNone)
 		{
-			ofLog(OF_LOG_ERROR, "COMXAudio::init - Error setting OMX_StateExecuting 0x%08x", error);
 			return false;
 		}
 	}
 
 	error = renderComponent.setState(OMX_StateExecuting);
+    OMX_TRACE(error);
 	if(error != OMX_ErrorNone)
 	{
-		ofLog(OF_LOG_ERROR, "COMXAudio::init - Error setting OMX_StateExecuting 0x%08x", error);
 		return false;
 	}
 
@@ -525,7 +515,7 @@ bool COMXAudio::init(string device, int iChannels, enum PCMChannels *channelMap,
 		OMX_BUFFERHEADERTYPE *omxBuffer = m_omx_decoder.getInputBuffer();
 		if(omxBuffer == NULL)
 		{
-			ofLog(OF_LOG_ERROR, "COMXAudio::init - buffer error 0x%08x", error);
+			ofLog(OF_LOG_ERROR, "COMXAudio::init - buffer error");
 			return false;
 		}
 
@@ -541,9 +531,9 @@ bool COMXAudio::init(string device, int iChannels, enum PCMChannels *channelMap,
 		omxBuffer->nFlags = OMX_BUFFERFLAG_CODECCONFIG | OMX_BUFFERFLAG_ENDOFFRAME;
 
 		error = m_omx_decoder.EmptyThisBuffer(omxBuffer);
+        OMX_TRACE(error);
 		if (error != OMX_ErrorNone)
 		{
-			ofLog(OF_LOG_ERROR, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, error);
 			return false;
 		}
 	}
@@ -556,7 +546,7 @@ bool COMXAudio::init(string device, int iChannels, enum PCMChannels *channelMap,
 
 			if(omxBuffer == NULL)
 			{
-				ofLog(OF_LOG_ERROR, "%s::%s - buffer error 0x%08x", CLASSNAME, __func__, error);
+				ofLog(OF_LOG_ERROR, "%s - buffer error", __func__);
 				return false;
 			}
 
@@ -564,7 +554,7 @@ bool COMXAudio::init(string device, int iChannels, enum PCMChannels *channelMap,
 			omxBuffer->nFilledLen = m_extrasize;
 			if(omxBuffer->nFilledLen > omxBuffer->nAllocLen)
 			{
-				ofLog(OF_LOG_ERROR, "%s::%s - omxBuffer->nFilledLen > omxBuffer->nAllocLen", CLASSNAME, __func__);
+				ofLog(OF_LOG_ERROR, "%s - omxBuffer->nFilledLen > omxBuffer->nAllocLen", __func__);
 				return false;
 			}
 
@@ -573,9 +563,9 @@ bool COMXAudio::init(string device, int iChannels, enum PCMChannels *channelMap,
 			omxBuffer->nFlags = OMX_BUFFERFLAG_CODECCONFIG | OMX_BUFFERFLAG_ENDOFFRAME;
 
 			error = m_omx_decoder.EmptyThisBuffer(omxBuffer);
+            OMX_TRACE(error);
 			if (error != OMX_ErrorNone)
 			{
-				ofLog(OF_LOG_ERROR, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, error);
 				return false;
 			}
 		}
@@ -601,9 +591,9 @@ bool COMXAudio::Deinitialize()
 		return true;
 	}
 
-	if(!m_external_clock && m_av_clock != NULL)
+	if(!m_external_clock && omxClock != NULL)
 	{
-		m_av_clock->OMXStop();
+		omxClock->stop();
 	}
 
 	decoderTunnel.Flush();
@@ -633,15 +623,15 @@ bool COMXAudio::Deinitialize()
 	m_BytesPerSec = 0;
 	m_BufferLen   = 0;
 
-	if(!m_external_clock && m_av_clock != NULL)
+	if(!m_external_clock && omxClock != NULL)
 	{
-		delete m_av_clock;
-		m_av_clock  = NULL;
+		delete omxClock;
+		omxClock  = NULL;
 		m_external_clock = false;
 	}
 
-	m_omx_clock = NULL;
-	m_av_clock  = NULL;
+	clockComponent = NULL;
+	omxClock  = NULL;
 
 	m_Initialized = false;
 	m_HWDecode    = false;
@@ -820,13 +810,10 @@ bool COMXAudio::setCurrentVolume(long nVolume)
 			mix.coeff[i] = static_cast<unsigned int>(0x10000 * (coeff[i] * r));
 		}
 
-		OMX_ERRORTYPE error =
-		    m_omx_mixer.setConfig(OMX_IndexConfigBrcmAudioDownmixCoefficients, &mix);
-
+		OMX_ERRORTYPE error = m_omx_mixer.setConfig(OMX_IndexConfigBrcmAudioDownmixCoefficients, &mix);
+        OMX_TRACE(error);
 		if(error != OMX_ErrorNone)
 		{
-			ofLog(OF_LOG_ERROR, "%s::%s - error setting OMX_IndexConfigBrcmAudioDownmixCoefficients, error 0x%08x\n",
-			      CLASSNAME, __func__, error);
 			return false;
 		}
 	}
@@ -839,21 +826,12 @@ bool COMXAudio::setCurrentVolume(long nVolume)
 
 		volume.sVolume.nValue = nVolume;
 
-		OMX_ERRORTYPE error =
-		    renderComponent.setConfig(OMX_IndexConfigAudioVolume, &volume);
-
+		OMX_ERRORTYPE error = renderComponent.setConfig(OMX_IndexConfigAudioVolume, &volume);
+        OMX_TRACE(error);
 		if(error != OMX_ErrorNone)
 		{
-			ofLog(OF_LOG_ERROR, "%s::%s - error setting OMX_IndexConfigAudioVolume, error 0x%08x\n",
-			      CLASSNAME, __func__, error);
 			return false;
 		}
-		else
-		{
-			//ofLogVerbose(__func__) << "Set Volume to " << nVolume;
-			//ofLogVerbose(__func__) << "volume.bLinear: " << volume.bLinear;
-		}
-
 	}
 
 	return true;
@@ -943,19 +921,18 @@ unsigned int COMXAudio::AddPackets(void* data, unsigned int len, double dts, dou
 		while(true)
 		{
 			error = m_omx_decoder.EmptyThisBuffer(omxBuffer);
+            OMX_TRACE(error);
 			if (error == OMX_ErrorNone)
 			{
 				break;
 			}
 			else
 			{
-				ofLog(OF_LOG_ERROR, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, error);
 				nRetry++;
 			}
 			if(nRetry == 5)
 			{
-				ofLog(OF_LOG_VERBOSE, "%s::%s - OMX_EmptyThisBuffer() finaly failed\n", CLASSNAME, __func__);
-				printf("%s::%s - OMX_EmptyThisBuffer() finaly failed\n", CLASSNAME, __func__);
+				ofLog(OF_LOG_VERBOSE, "%s - OMX_EmptyThisBuffer() finally failed\n", __func__);
 				return 0;
 			}
 		}
@@ -980,56 +957,31 @@ unsigned int COMXAudio::AddPackets(void* data, unsigned int len, double dts, dou
 					OMX_INIT_STRUCTURE(m_pcm_input);
 					m_pcm_input.nPortIndex      = m_omx_decoder.getOutputPort();
 					error = m_omx_decoder.getParameter(OMX_IndexParamAudioPcm, &m_pcm_input);
-					if(error != OMX_ErrorNone)
-					{
-						ofLog(OF_LOG_ERROR, "COMXAudio::AddPackets error getParameter 1 error(0x%08x)\n", error);
-					}
+					OMX_TRACE(error);
 				}
 
 				/* setup mixer input */
 				m_pcm_input.nPortIndex      = m_omx_mixer.getInputPort();
 				error = m_omx_mixer.setParameter(OMX_IndexParamAudioPcm, &m_pcm_input);
-				if(error != OMX_ErrorNone)
-				{
-					ofLog(OF_LOG_ERROR, "COMXAudio::AddPackets error setParameter 1 error(0x%08x)\n", error);
-                    ofLogError() << __LINE__;
-                    
-				}
+				OMX_TRACE(error);
+                
 				error = m_omx_mixer.getParameter(OMX_IndexParamAudioPcm, &m_pcm_input);
-				if(error != OMX_ErrorNone)
-				{
-					ofLog(OF_LOG_ERROR, "COMXAudio::AddPackets error getParameter 2  error(0x%08x)\n", error);
-                    ofLogError() << __LINE__;
-				}
+				OMX_TRACE(error);
 
 				/* setup mixer output */
 				m_pcm_output.nPortIndex      = m_omx_mixer.getOutputPort();
 				error = m_omx_mixer.setParameter(OMX_IndexParamAudioPcm, &m_pcm_output);
-				if(error != OMX_ErrorNone)
-				{
-					ofLog(OF_LOG_ERROR, "COMXAudio::AddPackets error setParameter 1 error(0x%08x)\n", error);
-                    ofLogError() << __LINE__;
-				}
+				OMX_TRACE(error);
+                
 				error = m_omx_mixer.getParameter(OMX_IndexParamAudioPcm, &m_pcm_output);
-				if(error != OMX_ErrorNone)
-				{
-					ofLog(OF_LOG_ERROR, "COMXAudio::AddPackets error getParameter 2  error(0x%08x)\n", error);
-                    ofLogError() << __LINE__;
-				}
-
+				OMX_TRACE(error);
+                
 				m_pcm_output.nPortIndex      = renderComponent.getInputPort();
 				error = renderComponent.setParameter(OMX_IndexParamAudioPcm, &m_pcm_output);
-				if(error != OMX_ErrorNone)
-				{
-					ofLog(OF_LOG_ERROR, "COMXAudio::AddPackets error setParameter 1 error(0x%08x)\n", error);
-                    ofLogError() << __LINE__;
-				}
+				OMX_TRACE(error);
+                
 				error = renderComponent.getParameter(OMX_IndexParamAudioPcm, &m_pcm_output);
-				if(error != OMX_ErrorNone)
-				{
-					ofLog(OF_LOG_ERROR, "COMXAudio::AddPackets error getParameter 2  error(0x%08x)\n", error);
-                    ofLogError() << __LINE__;
-				}
+				OMX_TRACE(error);
 
 				PrintPCM(&m_pcm_input);
 				PrintPCM(&m_pcm_output);
@@ -1045,20 +997,12 @@ unsigned int COMXAudio::AddPackets(void* data, unsigned int len, double dts, dou
 				formatType.nPortIndex = renderComponent.getInputPort();
 
 				error = renderComponent.getParameter(OMX_IndexParamAudioPortFormat, &formatType);
-				if(error != OMX_ErrorNone)
-				{
-					ofLog(OF_LOG_ERROR, "COMXAudio::AddPackets error OMX_IndexParamAudioPortFormat error(0x%08x)\n", error);
-					assert(0);
-				}
+				OMX_TRACE(error);
 
 				formatType.eEncoding = m_eEncoding;
 
 				error = renderComponent.setParameter(OMX_IndexParamAudioPortFormat, &formatType);
-				if(error != OMX_ErrorNone)
-				{
-					ofLog(OF_LOG_ERROR, "COMXAudio::AddPackets error OMX_IndexParamAudioPortFormat error(0x%08x)\n", error);
-					assert(0);
-				}
+				OMX_TRACE(error);
 
 				if(m_eEncoding == OMX_AUDIO_CodingDDP)
 				{
@@ -1163,16 +1107,12 @@ unsigned int COMXAudio::GetAudioRenderingLatency()
 	OMX_INIT_STRUCTURE(param);
 	param.nPortIndex = renderComponent.getInputPort();
 
-	OMX_ERRORTYPE error =
-	    renderComponent.getConfig(OMX_IndexConfigAudioRenderingLatency, &param);
-
+	OMX_ERRORTYPE error = renderComponent.getConfig(OMX_IndexConfigAudioRenderingLatency, &param);
+    OMX_TRACE(error);
 	if(error != OMX_ErrorNone)
 	{
-		ofLog(OF_LOG_VERBOSE, "COMXAudio::GetAudioRenderingLatency: "
-		      "error getting OMX_IndexConfigAudioRenderingLatency");
 		return 0;
 	}
-
 	return param.nU32;
 }
 
@@ -1189,7 +1129,7 @@ void COMXAudio::submitEOS()
 
 	if(omxBuffer == NULL)
 	{
-		ofLog(OF_LOG_VERBOSE, "%s::%s - buffer error 0x%08x", CLASSNAME, __func__, error);
+		ofLog(OF_LOG_VERBOSE, "%s - buffer error", __func__);
 		return;
 	}
 
@@ -1200,9 +1140,9 @@ void COMXAudio::submitEOS()
 	omxBuffer->nFlags = OMX_BUFFERFLAG_ENDOFFRAME | OMX_BUFFERFLAG_EOS | OMX_BUFFERFLAG_TIME_UNKNOWN;
 
 	error = m_omx_decoder.EmptyThisBuffer(omxBuffer);
+    OMX_TRACE(error);
 	if (error != OMX_ErrorNone)
 	{
-		ofLog(OF_LOG_VERBOSE, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, error);
 		return;
 	}
 
@@ -1223,12 +1163,12 @@ bool COMXAudio::EOS()
 
 bool COMXAudio::SetClock(OMXClock *clock)
 {
-	if(m_av_clock != NULL)
+	if(omxClock != NULL)
 	{
 		return false;
 	}
 
-	m_av_clock = clock;
+	omxClock = clock;
 	m_external_clock = true;
 	return true;
 }
