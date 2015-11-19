@@ -27,28 +27,28 @@ class OMXDecoderBase
 		Tunnel			schedulerTunnel;
 		Tunnel			decoderTunnel;
 
-		Component		m_omx_decoder;
+		Component		decoderComponent;
 		Component		renderComponent;
-		Component		m_omx_sched;
+		Component		schedulerComponent;
 
 		Component*		clockComponent;
 		OMXClock*				omxClock;
 
-		bool					m_is_open;
+		bool					isOpen;
 
-		bool					m_Pause;
-		bool					m_setStartTime;
+		bool					doPause;
+		bool					doSetStartTime;
 
 		bool					m_drop_state;
-		unsigned int			m_decoded_width;
-		unsigned int			m_decoded_height;
+		unsigned int			videoWidth;
+		unsigned int			videoHeight;
 
-		uint8_t*				m_extradata;
-		int						m_extrasize;
+		uint8_t*				extraData;
+		int						extraSize;
 
 
-		bool					m_first_frame;
-		uint32_t				m_history_valid_pts;
+		bool					isFirstFrame;
+		uint32_t				validHistoryPTS;
 
 
 
@@ -58,8 +58,8 @@ class OMXDecoderBase
 		void submitEOS();
 		bool EOS();
 
-		bool					Resume();
-		bool					Pause();
+		bool					resume();
+		bool					pause();
 
 		bool					SendDecoderConfig();
 		bool					NaluFormatStartCodes(enum AVCodecID codec, uint8_t *in_extradata, int in_extrasize);

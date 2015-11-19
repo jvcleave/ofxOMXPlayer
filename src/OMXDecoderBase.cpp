@@ -13,12 +13,12 @@
 OMXDecoderBase::OMXDecoderBase()
 {
 
-	m_is_open           = false;
-	m_Pause             = false;
-	m_setStartTime      = true;
-	m_extradata         = NULL;
-	m_extrasize         = 0;
-	m_first_frame       = true;
+	isOpen           = false;
+	doPause             = false;
+	doSetStartTime      = true;
+	extraData         = NULL;
+	extraSize         = 0;
+	isFirstFrame       = true;
 	omxClock			= NULL;
 	clockComponent			= NULL;
 	//ofLogVerbose(__func__) << "OMXDecoderBase::CONSTRUCT";
@@ -45,32 +45,32 @@ OMXDecoderBase::~OMXDecoderBase()
 		 m_omx_tunnel_image_fx.Deestablish();*/
 		schedulerTunnel.Deestablish();
 
-		m_omx_decoder.flushInput();
+		decoderComponent.flushInput();
 
-		m_omx_sched.Deinitialize(true);
+		schedulerComponent.Deinitialize(true);
 		/*if(m_deinterlace)
 		 m_omx_image_fx.Deinitialize();*/
-		m_omx_decoder.Deinitialize(true);
+		decoderComponent.Deinitialize(true);
 		renderComponent.Deinitialize(true);
 
-		m_is_open       = false;
+		isOpen       = false;
 
-		if(m_extradata)
+		if(extraData)
 		{
-			free(m_extradata);
+			free(extraData);
 		}
-		m_extradata = NULL;
-		m_extrasize = 0;
+		extraData = NULL;
+		extraSize = 0;
 
 		//m_deinterlace       = false;
-		m_first_frame       = true;
-		m_setStartTime      = true;
+		isFirstFrame       = true;
+		doSetStartTime      = true;
 	}
 	catch (int e)
 	{
 		ofLogError(__func__) << "An exception occurred. Exception: " << e << '\n';
 	}
-	m_is_open       = false;
+	isOpen       = false;
 	//ofLogVerbose(__func__) << " END ---------";
 
 	//omxClock->stop();
@@ -108,10 +108,10 @@ bool OMXDecoderBase::SendDecoderConfig()
 	OMX_ERRORTYPE error   = OMX_ErrorNone;
 
 	/* send decoder config */
-	if(m_extrasize > 0 && m_extradata != NULL)
+	if(extraSize > 0 && extraData != NULL)
 	{
 
-		OMX_BUFFERHEADERTYPE *omxBuffer = m_omx_decoder.getInputBuffer();
+		OMX_BUFFERHEADERTYPE *omxBuffer = decoderComponent.getInputBuffer();
 
 		if(omxBuffer == NULL)
 		{
@@ -120,7 +120,7 @@ bool OMXDecoderBase::SendDecoderConfig()
 		}
 
 		omxBuffer->nOffset = 0;
-		omxBuffer->nFilledLen = m_extrasize;
+		omxBuffer->nFilledLen = extraSize;
 		if(omxBuffer->nFilledLen > omxBuffer->nAllocLen)
 		{
 			ofLogError(__func__) << "omxBuffer->nFilledLen > omxBuffer->nAllocLen";
@@ -128,10 +128,10 @@ bool OMXDecoderBase::SendDecoderConfig()
 		}
 
 		memset((unsigned char *)omxBuffer->pBuffer, 0x0, omxBuffer->nAllocLen);
-		memcpy((unsigned char *)omxBuffer->pBuffer, m_extradata, omxBuffer->nFilledLen);
+		memcpy((unsigned char *)omxBuffer->pBuffer, extraData, omxBuffer->nFilledLen);
 		omxBuffer->nFlags = OMX_BUFFERFLAG_CODECCONFIG | OMX_BUFFERFLAG_ENDOFFRAME;
 
-		error = m_omx_decoder.EmptyThisBuffer(omxBuffer);
+		error = decoderComponent.EmptyThisBuffer(omxBuffer);
         OMX_TRACE(error);
 		if (error != OMX_ErrorNone)
 		{
@@ -145,7 +145,7 @@ bool OMXDecoderBase::SendDecoderConfig()
 /*
 int OMXDecoderBase::getInputBufferSize()
 {
-	return m_omx_decoder.getInputBufferSize();
+	return decoderComponent.getInputBufferSize();
 }
 */
 void OMXDecoderBase::SetDropState(bool bDrop)
@@ -155,23 +155,23 @@ void OMXDecoderBase::SetDropState(bool bDrop)
 /*
 unsigned int OMXDecoderBase::GetFreeSpace()
 {
-	return m_omx_decoder.getInputBufferSpace();
+	return decoderComponent.getInputBufferSpace();
 }
 
 unsigned int OMXDecoderBase::GetSize()
 {
-	return m_omx_decoder.getInputBufferSize();
+	return decoderComponent.getInputBufferSize();
 }
 */
 void OMXDecoderBase::submitEOS()
 {
-	if(!m_is_open)
+	if(!isOpen)
 	{
 		return;
 	}
 
 	OMX_ERRORTYPE error = OMX_ErrorNone;
-	OMX_BUFFERHEADERTYPE *omxBuffer = m_omx_decoder.getInputBuffer();
+	OMX_BUFFERHEADERTYPE *omxBuffer = decoderComponent.getInputBuffer();
 
 	if(omxBuffer == NULL)
 	{
@@ -185,7 +185,7 @@ void OMXDecoderBase::submitEOS()
 
 	omxBuffer->nFlags = OMX_BUFFERFLAG_ENDOFFRAME | OMX_BUFFERFLAG_EOS | OMX_BUFFERFLAG_TIME_UNKNOWN;
 
-	error = m_omx_decoder.EmptyThisBuffer(omxBuffer);
+	error = decoderComponent.EmptyThisBuffer(omxBuffer);
     OMX_TRACE(error);
 
 }
@@ -193,13 +193,13 @@ void OMXDecoderBase::submitEOS()
 bool OMXDecoderBase::EOS()
 {
 	bool isEndOfStream = false;
-	if(!m_is_open)
+	if(!isOpen)
 	{
 		isEndOfStream =  true;
 	}
 	else
 	{
-		if (m_omx_decoder.EOS())
+		if (decoderComponent.EOS())
 		{
 
 			isEndOfStream =  true;
@@ -214,40 +214,40 @@ bool OMXDecoderBase::EOS()
 	return isEndOfStream;
 }
 
-bool OMXDecoderBase::Pause()
+bool OMXDecoderBase::pause()
 {
 	if(renderComponent.getHandle() == NULL)
 	{
 		return false;
 	}
 
-	if(m_Pause)
+	if(doPause)
 	{
 		return true;
 	}
 
-	m_Pause = true;
+	doPause = true;
 
-	m_omx_sched.setState(OMX_StatePause);
+	schedulerComponent.setState(OMX_StatePause);
 	renderComponent.setState(OMX_StatePause);
 
 	return true;
 }
 
-bool OMXDecoderBase::Resume()
+bool OMXDecoderBase::resume()
 {
 	if(renderComponent.getHandle() == NULL)
 	{
 		return false;
 	}
 
-	if(!m_Pause)
+	if(!doPause)
 	{
 		return true;
 	}
-	m_Pause = false;
+	doPause = false;
 
-	m_omx_sched.setState(OMX_StateExecuting);
+	schedulerComponent.setState(OMX_StateExecuting);
 	renderComponent.setState(OMX_StateExecuting);
 
 	return true;
@@ -257,7 +257,7 @@ void OMXDecoderBase::Reset()
 {
 	//ofLogVerbose(__func__) << " START";
 
-	m_omx_decoder.flushInput();
+	decoderComponent.flushInput();
 	decoderTunnel.Flush();
 
 	//ofLogVerbose(__func__) << " END";

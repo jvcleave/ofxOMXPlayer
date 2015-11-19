@@ -28,7 +28,7 @@ OMXPlayerVideoBase::OMXPlayerVideoBase()
 	pthread_cond_init(&m_packet_cond, NULL);
 	pthread_mutex_init(&m_lock, NULL);
 	pthread_mutex_init(&m_lock_decoder, NULL);
-	m_history_valid_pts = 0;
+	validHistoryPTS = 0;
 	m_flush_requested = false;
 	isExiting = false;
 }
@@ -108,9 +108,9 @@ bool OMXPlayerVideoBase::Decode(OMXPacket *pkt)
 		return false;
 	}
 	
-	m_history_valid_pts = (m_history_valid_pts << 1) | (pkt->pts != DVD_NOPTS_VALUE);
+	validHistoryPTS = (validHistoryPTS << 1) | (pkt->pts != DVD_NOPTS_VALUE);
 	double pts = pkt->pts;
-	if(pkt->pts == DVD_NOPTS_VALUE && (m_iCurrentPts == DVD_NOPTS_VALUE || count_bits(m_history_valid_pts & 0xffff) < 4))
+	if(pkt->pts == DVD_NOPTS_VALUE && (m_iCurrentPts == DVD_NOPTS_VALUE || count_bits(validHistoryPTS & 0xffff) < 4))
 	{
 		pts = pkt->dts;
 	}

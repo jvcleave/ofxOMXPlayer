@@ -43,28 +43,28 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 
 	OMX_ERRORTYPE error   = OMX_ErrorNone;
 
-	m_decoded_width  = hints.width;
-	m_decoded_height = hints.height;
+	videoWidth  = hints.width;
+	videoHeight = hints.height;
 
 
 
-	if(!m_decoded_width || !m_decoded_height)
+	if(!videoWidth || !videoHeight)
 	{
 		return false;
 	}
 
 	if(hints.extrasize > 0 && hints.extradata != NULL)
 	{
-		m_extrasize = hints.extrasize;
-		m_extradata = (uint8_t *)malloc(m_extrasize);
-		memcpy(m_extradata, hints.extradata, hints.extrasize);
+		extraSize = hints.extrasize;
+		extraData = (uint8_t *)malloc(extraSize);
+		memcpy(extraData, hints.extradata, hints.extrasize);
 	}
 
 	ProcessCodec(hints);
 
 
 	std::string componentName = "OMX.broadcom.video_decode";
-	if(!m_omx_decoder.init(componentName, OMX_IndexParamVideoInit))
+	if(!decoderComponent.init(componentName, OMX_IndexParamVideoInit))
 	{
 		return false;
 	}
@@ -76,7 +76,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	}
 
 	componentName = "OMX.broadcom.video_scheduler";
-	if(!m_omx_sched.init(componentName, OMX_IndexParamVideoInit))
+	if(!schedulerComponent.init(componentName, OMX_IndexParamVideoInit))
 	{
 		return false;
 	}
@@ -96,21 +96,21 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 		return false;
 	}
 
-	decoderTunnel.init(&m_omx_decoder,		m_omx_decoder.getOutputPort(),		&m_omx_sched,	m_omx_sched.getInputPort());
-	schedulerTunnel.init(	&m_omx_sched,		m_omx_sched.getOutputPort(),		&renderComponent,	renderComponent.getInputPort());
-	clockTunnel.init(	clockComponent,		clockComponent->getInputPort() + 1,	&m_omx_sched,	m_omx_sched.getOutputPort() + 1);
+	decoderTunnel.init(&decoderComponent,		decoderComponent.getOutputPort(),		&schedulerComponent,	schedulerComponent.getInputPort());
+	schedulerTunnel.init(	&schedulerComponent,		schedulerComponent.getOutputPort(),		&renderComponent,	renderComponent.getInputPort());
+	clockTunnel.init(	clockComponent,		clockComponent->getInputPort() + 1,	&schedulerComponent,	schedulerComponent.getOutputPort() + 1);
 
 
-	error = m_omx_decoder.setState(OMX_StateIdle);
+	error = decoderComponent.setState(OMX_StateIdle);
 	if (error != OMX_ErrorNone)
 	{
-		ofLogError(__func__) << "m_omx_decoder OMX_StateIdle FAIL";
+		ofLogError(__func__) << "decoderComponent OMX_StateIdle FAIL";
 		return false;
 	}
 
 	OMX_VIDEO_PARAM_PORTFORMATTYPE formatType;
 	OMX_INIT_STRUCTURE(formatType);
-	formatType.nPortIndex = m_omx_decoder.getInputPort();
+	formatType.nPortIndex = decoderComponent.getInputPort();
 	formatType.eCompressionFormat = m_codingType;
 
 	if (hints.fpsscale > 0 && hints.fpsrate > 0)
@@ -122,7 +122,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 		formatType.xFramerate = 25 * (1<<16);
 	}
 
-	error = m_omx_decoder.setParameter(OMX_IndexParamVideoPortFormat, &formatType);
+	error = decoderComponent.setParameter(OMX_IndexParamVideoPortFormat, &formatType);
     OMX_TRACE(error);
 
 	if(error != OMX_ErrorNone)
@@ -133,20 +133,20 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 
 	OMX_PARAM_PORTDEFINITIONTYPE portParam;
 	OMX_INIT_STRUCTURE(portParam);
-	portParam.nPortIndex = m_omx_decoder.getInputPort();
+	portParam.nPortIndex = decoderComponent.getInputPort();
 
-	error = m_omx_decoder.getParameter(OMX_IndexParamPortDefinition, &portParam);
+	error = decoderComponent.getParameter(OMX_IndexParamPortDefinition, &portParam);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
 	int numVideoBuffers = 32; //20 is minimum - can get up to 80
 	portParam.nBufferCountActual = numVideoBuffers;
 
-	portParam.format.video.nFrameWidth  = m_decoded_width;
-	portParam.format.video.nFrameHeight = m_decoded_height;
+	portParam.format.video.nFrameWidth  = videoWidth;
+	portParam.format.video.nFrameHeight = videoHeight;
 
 
-	error = m_omx_decoder.setParameter(OMX_IndexParamPortDefinition, &portParam);
+	error = decoderComponent.setParameter(OMX_IndexParamPortDefinition, &portParam);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
@@ -160,18 +160,18 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
 	OMX_INIT_STRUCTURE(concanParam);
 	concanParam.bStartWithValidFrame = OMX_FALSE;
 
-	error = m_omx_decoder.setParameter(OMX_IndexParamBrcmVideoDecodeErrorConcealment, &concanParam);
+	error = decoderComponent.setParameter(OMX_IndexParamBrcmVideoDecodeErrorConcealment, &concanParam);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
-	if(NaluFormatStartCodes(hints.codec, m_extradata, m_extrasize))
+	if(NaluFormatStartCodes(hints.codec, extraData, extraSize))
 	{
 		OMX_NALSTREAMFORMATTYPE nalStreamFormat;
 		OMX_INIT_STRUCTURE(nalStreamFormat);
-		nalStreamFormat.nPortIndex = m_omx_decoder.getInputPort();
+		nalStreamFormat.nPortIndex = decoderComponent.getInputPort();
 		nalStreamFormat.eNaluFormat = OMX_NaluFormatStartCodes;
 
-		error = m_omx_decoder.setParameter((OMX_INDEXTYPE)OMX_IndexParamNalStreamFormatSelect, &nalStreamFormat);
+		error = decoderComponent.setParameter((OMX_INDEXTYPE)OMX_IndexParamNalStreamFormatSelect, &nalStreamFormat);
         OMX_TRACE(error);
         if(error != OMX_ErrorNone) return false;
 
@@ -186,13 +186,13 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
     OMX_CONFIG_BOOLEANTYPE timeStampMode;
     OMX_INIT_STRUCTURE(timeStampMode);
     timeStampMode.bEnabled = OMX_TRUE;
-    error = m_omx_decoder.setParameter((OMX_INDEXTYPE)OMX_IndexParamBrcmVideoTimestampFifo, &timeStampMode);
+    error = decoderComponent.setParameter((OMX_INDEXTYPE)OMX_IndexParamBrcmVideoTimestampFifo, &timeStampMode);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
 
 	// Alloc buffers for the omx intput port.
-	error = m_omx_decoder.allocInputBuffers();
+	error = decoderComponent.allocInputBuffers();
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
@@ -202,7 +202,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
-	error = m_omx_decoder.setState(OMX_StateExecuting);
+	error = decoderComponent.setState(OMX_StateExecuting);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
@@ -211,7 +211,7 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
-	error = m_omx_sched.setState(OMX_StateExecuting);
+	error = schedulerComponent.setState(OMX_StateExecuting);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
@@ -275,18 +275,18 @@ bool OMXEGLImage::Open(COMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIm
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
-	m_is_open           = true;
+	isOpen           = true;
 	m_drop_state        = false;
-	m_setStartTime      = true;
+	doSetStartTime      = true;
 
 
 	ofLog(OF_LOG_VERBOSE,
 	      "%s::%s - decoder_component: 0x%p, input_port: 0x%x, output_port: 0x%x \n",
-	      "OMXEGLImage", __func__, m_omx_decoder.getHandle(), m_omx_decoder.getInputPort(), m_omx_decoder.getOutputPort());
+	      "OMXEGLImage", __func__, decoderComponent.getHandle(), decoderComponent.getInputPort(), decoderComponent.getOutputPort());
 
-	m_first_frame   = true;
+	isFirstFrame   = true;
 	// start from assuming all recent frames had valid pts
-	m_history_valid_pts = ~0;
+	validHistoryPTS = ~0;
 	return true;
 }
 
@@ -295,7 +295,7 @@ bool OMXEGLImage::Decode(uint8_t *pData, int iSize, double pts)
 	CSingleLock lock (m_critSection);
 	OMX_ERRORTYPE error;
 
-	if( m_drop_state || !m_is_open )
+	if( m_drop_state || !isOpen )
 	{
 		return true;
 	}
@@ -308,7 +308,7 @@ bool OMXEGLImage::Decode(uint8_t *pData, int iSize, double pts)
 		while(demuxer_bytes)
 		{
 			// 500ms timeout
-			OMX_BUFFERHEADERTYPE *omxBuffer = m_omx_decoder.getInputBuffer(500);
+			OMX_BUFFERHEADERTYPE *omxBuffer = decoderComponent.getInputBuffer(500);
 			if(omxBuffer == NULL)
 			{
                 ofLogVerbose(__func__) << "timeout";
@@ -318,11 +318,11 @@ bool OMXEGLImage::Decode(uint8_t *pData, int iSize, double pts)
 			omxBuffer->nFlags = 0;
 			omxBuffer->nOffset = 0;
 
-			if(m_setStartTime)
+			if(doSetStartTime)
 			{
 				omxBuffer->nFlags |= OMX_BUFFERFLAG_STARTTIME;
 				ofLog(OF_LOG_VERBOSE, "%s : setStartTime %f\n", __func__, (pts == DVD_NOPTS_VALUE ? 0.0 : pts) / DVD_TIME_BASE);
-				m_setStartTime = false;
+				doSetStartTime = false;
 			}
 			else if(pts == DVD_NOPTS_VALUE)
 			{
@@ -344,7 +344,7 @@ bool OMXEGLImage::Decode(uint8_t *pData, int iSize, double pts)
 			int nRetry = 0;
 			while(true)
 			{
-				error = m_omx_decoder.EmptyThisBuffer(omxBuffer);
+				error = decoderComponent.EmptyThisBuffer(omxBuffer);
                 OMX_TRACE(error);
 				if (error == OMX_ErrorNone)
 				{

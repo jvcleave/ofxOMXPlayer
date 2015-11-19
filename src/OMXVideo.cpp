@@ -24,21 +24,21 @@ bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspec
 
 	m_codingType            = OMX_VIDEO_CodingUnused;
 
-	m_decoded_width  = hints.width;
-	m_decoded_height = hints.height;
+	videoWidth  = hints.width;
+	videoHeight = hints.height;
 
 	m_hdmi_clock_sync = hdmi_clock_sync;
 
-	if(!m_decoded_width || !m_decoded_height)
+	if(!videoWidth || !videoHeight)
 	{
 		return false;
 	}
 
 	if(hints.extrasize > 0 && hints.extradata != NULL)
 	{
-		m_extrasize = hints.extrasize;
-		m_extradata = (uint8_t *)malloc(m_extrasize);
-		memcpy(m_extradata, hints.extradata, hints.extrasize);
+		extraSize = hints.extrasize;
+		extraData = (uint8_t *)malloc(extraSize);
+		memcpy(extraData, hints.extradata, hints.extrasize);
 	}
 
 	ProcessCodec(hints);
@@ -54,7 +54,7 @@ bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspec
 	}
 
 	std::string componentName = "OMX.broadcom.video_decode";
-	if(!m_omx_decoder.init(componentName, OMX_IndexParamVideoInit))
+	if(!decoderComponent.init(componentName, OMX_IndexParamVideoInit))
 	{
 		return false;
 	}
@@ -66,7 +66,7 @@ bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspec
 	}
 
 	componentName = "OMX.broadcom.video_scheduler";
-	if(!m_omx_sched.init(componentName, OMX_IndexParamVideoInit))
+	if(!schedulerComponent.init(componentName, OMX_IndexParamVideoInit))
 	{
 		return false;
 	}
@@ -97,28 +97,28 @@ bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspec
 
 	if(m_deinterlace)
 	{
-		decoderTunnel.init(&m_omx_decoder, m_omx_decoder.getOutputPort(), &m_omx_image_fx, m_omx_image_fx.getInputPort());
-		m_omx_tunnel_image_fx.init(&m_omx_image_fx, m_omx_image_fx.getOutputPort(), &m_omx_sched, m_omx_sched.getInputPort());
+		decoderTunnel.init(&decoderComponent, decoderComponent.getOutputPort(), &m_omx_image_fx, m_omx_image_fx.getInputPort());
+		m_omx_tunnel_image_fx.init(&m_omx_image_fx, m_omx_image_fx.getOutputPort(), &schedulerComponent, schedulerComponent.getInputPort());
 	}
 	else
 	{
-		decoderTunnel.init(&m_omx_decoder, m_omx_decoder.getOutputPort(), &m_omx_sched, m_omx_sched.getInputPort());
+		decoderTunnel.init(&decoderComponent, decoderComponent.getOutputPort(), &schedulerComponent, schedulerComponent.getInputPort());
 	}
 
-	schedulerTunnel.init(&m_omx_sched, m_omx_sched.getOutputPort(), &renderComponent, renderComponent.getInputPort());
-	clockTunnel.init(clockComponent, clockComponent->getInputPort() + 1, &m_omx_sched, m_omx_sched.getOutputPort() + 1);
+	schedulerTunnel.init(&schedulerComponent, schedulerComponent.getOutputPort(), &renderComponent, renderComponent.getInputPort());
+	clockTunnel.init(clockComponent, clockComponent->getInputPort() + 1, &schedulerComponent, schedulerComponent.getOutputPort() + 1);
 
 	error = clockTunnel.Establish(false);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
-	error = m_omx_decoder.setState(OMX_StateIdle);
+	error = decoderComponent.setState(OMX_StateIdle);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
 	OMX_VIDEO_PARAM_PORTFORMATTYPE formatType;
 	OMX_INIT_STRUCTURE(formatType);
-	formatType.nPortIndex = m_omx_decoder.getInputPort();
+	formatType.nPortIndex = decoderComponent.getInputPort();
 	formatType.eCompressionFormat = m_codingType;
 
 	if (hints.fpsscale > 0 && hints.fpsrate > 0)
@@ -130,26 +130,26 @@ bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspec
 		formatType.xFramerate = 25 * (1<<16);
 	}
     
-	error = m_omx_decoder.setParameter(OMX_IndexParamVideoPortFormat, &formatType);
+	error = decoderComponent.setParameter(OMX_IndexParamVideoPortFormat, &formatType);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
 	OMX_PARAM_PORTDEFINITIONTYPE portParam;
 	OMX_INIT_STRUCTURE(portParam);
-	portParam.nPortIndex = m_omx_decoder.getInputPort();
+	portParam.nPortIndex = decoderComponent.getInputPort();
 
-	error = m_omx_decoder.getParameter(OMX_IndexParamPortDefinition, &portParam);
+	error = decoderComponent.getParameter(OMX_IndexParamPortDefinition, &portParam);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
-	portParam.nPortIndex = m_omx_decoder.getInputPort();
+	portParam.nPortIndex = decoderComponent.getInputPort();
 	int videoBuffers = 60;
 	portParam.nBufferCountActual = videoBuffers;
 
-	portParam.format.video.nFrameWidth  = m_decoded_width;
-	portParam.format.video.nFrameHeight = m_decoded_height;
+	portParam.format.video.nFrameWidth  = videoWidth;
+	portParam.format.video.nFrameHeight = videoHeight;
 
-	error = m_omx_decoder.setParameter(OMX_IndexParamPortDefinition, &portParam);
+	error = decoderComponent.setParameter(OMX_IndexParamPortDefinition, &portParam);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
@@ -157,7 +157,7 @@ bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspec
 	OMX_INIT_STRUCTURE(concanParam);
 	concanParam.bStartWithValidFrame = OMX_FALSE;
 
-	error = m_omx_decoder.setParameter(OMX_IndexParamBrcmVideoDecodeErrorConcealment, &concanParam);
+	error = decoderComponent.setParameter(OMX_IndexParamBrcmVideoDecodeErrorConcealment, &concanParam);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
@@ -168,7 +168,7 @@ bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspec
 		OMX_INIT_STRUCTURE(extra_buffers);
 		extra_buffers.nU32 = 3;
 
-		error = m_omx_decoder.setParameter(OMX_IndexParamBrcmExtraBuffers, &extra_buffers);
+		error = decoderComponent.setParameter(OMX_IndexParamBrcmExtraBuffers, &extra_buffers);
         OMX_TRACE(error);
         if(error != OMX_ErrorNone) return false;
 	}
@@ -182,19 +182,19 @@ bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspec
     OMX_CONFIG_BOOLEANTYPE timeStampMode;
     OMX_INIT_STRUCTURE(timeStampMode);
     timeStampMode.bEnabled = OMX_TRUE;
-    error = m_omx_decoder.setParameter((OMX_INDEXTYPE)OMX_IndexParamBrcmVideoTimestampFifo, &timeStampMode);
+    error = decoderComponent.setParameter((OMX_INDEXTYPE)OMX_IndexParamBrcmVideoTimestampFifo, &timeStampMode);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
 
-	if(NaluFormatStartCodes(hints.codec, m_extradata, m_extrasize))
+	if(NaluFormatStartCodes(hints.codec, extraData, extraSize))
 	{
 		OMX_NALSTREAMFORMATTYPE nalStreamFormat;
 		OMX_INIT_STRUCTURE(nalStreamFormat);
-		nalStreamFormat.nPortIndex = m_omx_decoder.getInputPort();
+		nalStreamFormat.nPortIndex = decoderComponent.getInputPort();
 		nalStreamFormat.eNaluFormat = OMX_NaluFormatStartCodes;
 
-		error = m_omx_decoder.setParameter((OMX_INDEXTYPE)OMX_IndexParamNalStreamFormatSelect, &nalStreamFormat);
+		error = decoderComponent.setParameter((OMX_INDEXTYPE)OMX_IndexParamNalStreamFormatSelect, &nalStreamFormat);
         OMX_TRACE(error);
         if(error != OMX_ErrorNone) return false;
 	}
@@ -218,7 +218,7 @@ bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspec
 	}
 
 	// Alloc buffers for the omx input port.
-	error = m_omx_decoder.allocInputBuffers();
+	error = decoderComponent.allocInputBuffers();
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
@@ -227,7 +227,7 @@ bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspec
     if(error != OMX_ErrorNone) return false;
 
 	
-	error = m_omx_decoder.setState(OMX_StateExecuting);
+	error = decoderComponent.setState(OMX_StateExecuting);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
@@ -263,7 +263,7 @@ bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspec
     if(error != OMX_ErrorNone) return false;
 
 	
-	error = m_omx_sched.setState(OMX_StateExecuting);
+	error = schedulerComponent.setState(OMX_StateExecuting);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 	
@@ -279,9 +279,9 @@ bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspec
 		return false;
 	}
 
-	m_is_open           = true;
+	isOpen           = true;
 	m_drop_state        = false;
-	m_setStartTime      = true;
+	doSetStartTime      = true;
 	OMX_CONFIG_DISPLAYREGIONTYPE configDisplay;
 	OMX_INIT_STRUCTURE(configDisplay);
 	configDisplay.nPortIndex = renderComponent.getInputPort();
@@ -293,7 +293,7 @@ bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspec
 	}else 
 	{
 		
-		float fAspect = (float)hints.aspect / (float)m_decoded_width * (float)m_decoded_height;
+		float fAspect = (float)hints.aspect / (float)videoWidth * (float)videoHeight;
 		float par = hints.aspect ? fAspect/display_aspect : 0.0f;
 		// only set aspect when we have a aspect and display doesn't match the aspect
 		bool doDisplayChange = true;
@@ -319,13 +319,13 @@ bool COMXVideo::Open(COMXStreamInfo& hints, OMXClock *clock, float display_aspec
 
 	ofLog(OF_LOG_VERBOSE,
 	      "%s::%s - decoder_component(0x%p), input_port(0x%x), output_port(0x%x) deinterlace %d hdmiclocksync %d\n",
-	      "OMXVideo", __func__, m_omx_decoder.getHandle(), m_omx_decoder.getInputPort(), m_omx_decoder.getOutputPort(),
+	      "OMXVideo", __func__, decoderComponent.getHandle(), decoderComponent.getInputPort(), decoderComponent.getOutputPort(),
 	      m_deinterlace, m_hdmi_clock_sync);
 
-	m_first_frame   = true;
+	isFirstFrame   = true;
 
 	// start from assuming all recent frames had valid pts
-	m_history_valid_pts = ~0;
+	validHistoryPTS = ~0;
 	return true;
 }
 
@@ -337,7 +337,7 @@ void COMXVideo::onUpdate(ofEventArgs& args)
 }
 void COMXVideo::updateFrameCount()
 {
-	if (!m_is_open) {
+	if (!isOpen) {
 		return;
 	}
 	OMX_ERRORTYPE error;
@@ -386,7 +386,7 @@ bool COMXVideo::Decode(uint8_t *pData, int iSize, double pts)
 	CSingleLock lock (m_critSection);
 	OMX_ERRORTYPE error;
 
-	if( m_drop_state || !m_is_open )
+	if( m_drop_state || !isOpen )
 	{
 		return true;
 	}
@@ -399,7 +399,7 @@ bool COMXVideo::Decode(uint8_t *pData, int iSize, double pts)
 		while(demuxer_bytes)
 		{
 			// 500ms timeout
-			OMX_BUFFERHEADERTYPE *omxBuffer = m_omx_decoder.getInputBuffer(500);
+			OMX_BUFFERHEADERTYPE *omxBuffer = decoderComponent.getInputBuffer(500);
 			if(omxBuffer == NULL)
 			{
 				ofLogError(__func__) << "Decode timeout";
@@ -409,11 +409,11 @@ bool COMXVideo::Decode(uint8_t *pData, int iSize, double pts)
 			omxBuffer->nFlags = 0;
 			omxBuffer->nOffset = 0;
 
-			if(m_setStartTime)
+			if(doSetStartTime)
 			{
 				omxBuffer->nFlags |= OMX_BUFFERFLAG_STARTTIME;
 				ofLog(OF_LOG_VERBOSE, "OMXVideo::Decode VDec : setStartTime %f\n", (pts == DVD_NOPTS_VALUE ? 0.0 : pts) / DVD_TIME_BASE);
-				m_setStartTime = false;
+				doSetStartTime = false;
 			}
 			else if(pts == DVD_NOPTS_VALUE)
 			{
@@ -436,7 +436,7 @@ bool COMXVideo::Decode(uint8_t *pData, int iSize, double pts)
 			int nRetry = 0;
 			while(true)
 			{
-				error = m_omx_decoder.EmptyThisBuffer(omxBuffer);
+				error = decoderComponent.EmptyThisBuffer(omxBuffer);
                 OMX_TRACE(error);
 				if (error == OMX_ErrorNone)
 				{
@@ -496,7 +496,7 @@ void COMXVideo::setDisplayRect(ofRectangle& rectangle)
 		displayRect = rectangle;
 	}
 	
-	if(!m_is_open)
+	if(!isOpen)
 	{
 		return;
 	}

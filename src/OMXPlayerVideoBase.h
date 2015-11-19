@@ -70,7 +70,7 @@ class OMXPlayerVideoBase: public OMXThread
 		void						UnLockDecoder();
 
 
-		uint32_t					m_history_valid_pts;
+		uint32_t					validHistoryPTS;
 		bool						m_flush_requested;
 
 		bool						isExiting;

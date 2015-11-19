@@ -123,9 +123,9 @@ class COMXAudio
 		unsigned int AddPackets(void* data, unsigned int len, double dts, double pts);
 		unsigned int GetSpace();
 		bool Deinitialize();
-		bool Pause();
+		bool pause();
 		bool Stop();
-		bool Resume();
+		bool resume();
 
 		long getCurrentVolume() const;
 		void Mute(bool bMute);
@@ -157,7 +157,7 @@ class COMXAudio
 
 	private:
 		bool          m_Initialized;
-		bool          m_Pause;
+		bool          doPause;
 		bool          m_CanPause;
 		long          m_CurrentVolume;
 		long          m_drc;
@@ -174,13 +174,13 @@ class COMXAudio
 		Component*    clockComponent;
 		OMXClock*     omxClock;
 		bool          m_external_clock;
-		bool          m_setStartTime;
+		bool          doSetStartTime;
 		int           m_SampleSize;
-		bool          m_first_frame;
+		bool          isFirstFrame;
 		int           m_SampleRate;
 		OMX_AUDIO_CODINGTYPE m_eEncoding;
-		uint8_t       *m_extradata;
-		int           m_extrasize;
+		uint8_t       *extraData;
+		int           extraSize;
 
 		OMX_AUDIO_PARAM_PCMMODETYPE m_pcm_output;
 		OMX_AUDIO_PARAM_PCMMODETYPE m_pcm_input;
@@ -190,7 +190,7 @@ class COMXAudio
 	protected:
 		Component renderComponent;
 		Component m_omx_mixer;
-		Component m_omx_decoder;
+		Component decoderComponent;
 		Tunnel     clockTunnel;
 		Tunnel     mixerTunnel;
 		Tunnel     decoderTunnel;
