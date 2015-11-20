@@ -128,7 +128,7 @@ class OMXAudio
 		}
 		float getCurrentAttenuation()
 		{
-			return m_remap.getCurrentAttenuation();
+			return remapObject.getCurrentAttenuation();
 		}
 		void submitEOS();
 		bool EOS();
@@ -146,33 +146,33 @@ class OMXAudio
 	private:
 		bool          isInitialized;
 		bool          doPause;
-		bool          m_CanPause;
-		long          m_CurrentVolume;
+		bool          canPause;
+		long          currentVolume;
 		long          DRC;
 		bool          m_Passthrough;
-		bool          m_normalize_downmix;
-		unsigned int  m_BytesPerSec;
-		unsigned int  m_BufferLen;
-		unsigned int  m_ChunkLen;
-		unsigned int  m_InputChannels;
-		unsigned int  m_OutputChannels;
-		unsigned int  m_downmix_channels;
+		bool          doNormalizeDownmix;
+		unsigned int  bytesPerSecond;
+		unsigned int  bufferLength;
+		unsigned int  chunkLength;
+		unsigned int  numInputChannels;
+		unsigned int  numOutputChannels;
+		unsigned int  numDownmixChannels;
 		unsigned int  m_BitsPerSample;
 		Component*    clockComponent;
 		OMXClock*     omxClock;
-		bool          m_external_clock;
+		bool          hasExternalClock;
 		bool          doSetStartTime;
-		int           m_SampleSize;
+		int           sampleSize;
 		bool          isFirstFrame;
-		int           m_SampleRate;
+		int           sampleRate;
 		OMX_AUDIO_CODINGTYPE m_eEncoding;
 		uint8_t       *extraData;
 		int           extraSize;
 
-		OMX_AUDIO_PARAM_PCMMODETYPE m_pcm_output;
-		OMX_AUDIO_PARAM_PCMMODETYPE m_pcm_input;
-		OMX_AUDIO_PARAM_DTSTYPE     m_dtsParam;
-		WAVEFORMATEXTENSIBLE        m_wave_header;
+		OMX_AUDIO_PARAM_PCMMODETYPE pcm_output;
+		OMX_AUDIO_PARAM_PCMMODETYPE pcm_input;
+		OMX_AUDIO_PARAM_DTSTYPE     dtsParam;
+		WAVEFORMATEXTENSIBLE        waveFormat;
 
 	protected:
 		Component renderComponent;
@@ -181,5 +181,5 @@ class OMXAudio
 		Tunnel     clockTunnel;
 		Tunnel     mixerTunnel;
 		Tunnel     decoderTunnel;
-		CPCMRemap m_remap;
+		CPCMRemap remapObject;
 };

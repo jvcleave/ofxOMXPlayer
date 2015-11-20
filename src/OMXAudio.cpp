@@ -99,24 +99,24 @@ OMXAudio::OMXAudio()
 {
     isInitialized = false;
     doPause = false;
-    m_CanPause = false;
-    m_CurrentVolume = 0;
+    canPause = false;
+    currentVolume = 0;
     m_Passthrough = false;
-    m_normalize_downmix= true;
-    m_BytesPerSec = 0;
-    m_BufferLen = 0;
-    m_ChunkLen = 0;
-    m_InputChannels = 0;
-    m_OutputChannels = 0;
-    m_downmix_channels= 0;
+    doNormalizeDownmix= true;
+    bytesPerSecond = 0;
+    bufferLength = 0;
+    chunkLength = 0;
+    numInputChannels = 0;
+    numOutputChannels = 0;
+    numDownmixChannels= 0;
     m_BitsPerSample = 0;
     clockComponent = NULL;
     omxClock = NULL;
-    m_external_clock = false;
+    hasExternalClock = false;
     doSetStartTime = false;
-    m_SampleSize = 0;
+    sampleSize = 0;
     isFirstFrame = true;
-    m_SampleRate = 0;
+    sampleRate = 0;
     m_eEncoding = OMX_AUDIO_CodingPCM;
     extraData = NULL;
     extraSize = 0;
@@ -173,39 +173,39 @@ bool OMXAudio::init(string device,
 		m_Passthrough =true;
 	}*/
 
-	memset(&m_wave_header, 0x0, sizeof(m_wave_header));
+	memset(&waveFormat, 0x0, sizeof(waveFormat));
 
-	m_CurrentVolume = 0;
+	currentVolume = 0;
 
-	m_downmix_channels = downmixChannels;
-	m_normalize_downmix = !boostOnDownmix;
+	numDownmixChannels = downmixChannels;
+	doNormalizeDownmix = !boostOnDownmix;
 
-	m_InputChannels = iChannels;
-	m_remap.Reset();
+	numInputChannels = iChannels;
+	remapObject.Reset();
 
-	OMX_INIT_STRUCTURE(m_pcm_output);
-	m_OutputChannels = 2;
-	m_pcm_output.nChannels = m_OutputChannels;
-	m_pcm_output.eChannelMapping[0] = OMX_AUDIO_ChannelLF;
-	m_pcm_output.eChannelMapping[1] = OMX_AUDIO_ChannelRF;
-	m_pcm_output.eChannelMapping[2] = OMX_AUDIO_ChannelMax;
+	OMX_INIT_STRUCTURE(pcm_output);
+	numOutputChannels = 2;
+	pcm_output.nChannels = numOutputChannels;
+	pcm_output.eChannelMapping[0] = OMX_AUDIO_ChannelLF;
+	pcm_output.eChannelMapping[1] = OMX_AUDIO_ChannelRF;
+	pcm_output.eChannelMapping[2] = OMX_AUDIO_ChannelMax;
 
-	OMX_INIT_STRUCTURE(m_pcm_input);
-	m_pcm_input.nChannels = m_OutputChannels;
-	m_pcm_input.eChannelMapping[0] = OMX_AUDIO_ChannelLF;
-	m_pcm_input.eChannelMapping[1] = OMX_AUDIO_ChannelRF;
-	m_pcm_input.eChannelMapping[2] = OMX_AUDIO_ChannelMax;
+	OMX_INIT_STRUCTURE(pcm_input);
+	pcm_input.nChannels = numOutputChannels;
+	pcm_input.eChannelMapping[0] = OMX_AUDIO_ChannelLF;
+	pcm_input.eChannelMapping[1] = OMX_AUDIO_ChannelRF;
+	pcm_input.eChannelMapping[2] = OMX_AUDIO_ChannelMax;
 
-	m_wave_header.Format.nChannels  = m_OutputChannels;
-	m_wave_header.dwChannelMask     = SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT;
+	waveFormat.Format.nChannels  = numOutputChannels;
+	waveFormat.dwChannelMask     = SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT;
 
 	// set the input format, and get the channel layout so we know what we need to open
-	enum PCMChannels *outLayout = m_remap.SetInputFormat (iChannels, channelMap, uiBitsPerSample / 8, uiSamplesPerSec);;
+	enum PCMChannels *outLayout = remapObject.SetInputFormat (iChannels, channelMap, uiBitsPerSample / 8, uiSamplesPerSec);;
 
 	if (!m_Passthrough && channelMap && outLayout)
 	{
 		/* setup output channel map */
-		m_OutputChannels = 0;
+		numOutputChannels = 0;
 		int ch = 0, map;
 		int chan = 0;
 		while(outLayout[ch] != PCM_INVALID && chan < OMX_AUDIO_MAXCHANNELS)
@@ -214,7 +214,7 @@ bool OMXAudio::init(string device,
 			{
 				if (outLayout[ch] == OMXChannelMap[map])
 				{
-					m_pcm_output.eChannelMapping[chan] = OMXChannels[map];
+					pcm_output.eChannelMapping[chan] = OMXChannels[map];
 					chan++;
 					break;
 				}
@@ -222,12 +222,12 @@ bool OMXAudio::init(string device,
 			++ch;
 		}
 
-		m_OutputChannels = chan;
+		numOutputChannels = chan;
 
 		/* setup input channel map */
 		for (chan=0; chan < OMX_AUDIO_MAXCHANNELS; chan++)
 		{
-			m_pcm_input.eChannelMapping[chan] = OMX_AUDIO_ChannelNone;
+			pcm_input.eChannelMapping[chan] = OMX_AUDIO_ChannelNone;
 		}
 
 		ch = 0;
@@ -240,8 +240,8 @@ bool OMXAudio::init(string device,
 			{
 				if (channelMap[ch] == OMXChannelMap[map])
 				{
-					m_pcm_input.eChannelMapping[chan] = OMXChannels[map];
-					m_wave_header.dwChannelMask |= WAVEChannels[map];
+					pcm_input.eChannelMapping[chan] = OMXChannels[map];
+					waveFormat.dwChannelMask |= WAVEChannels[map];
 					chan++;
 					break;
 				}
@@ -250,47 +250,47 @@ bool OMXAudio::init(string device,
 		}
 	}
 
-	// set the m_pcm_output parameters
-	m_pcm_output.eNumData            = OMX_NumericalDataSigned;
-	m_pcm_output.eEndian             = OMX_EndianLittle;
-	m_pcm_output.bInterleaved        = OMX_TRUE;
-	m_pcm_output.nBitPerSample       = uiBitsPerSample;
-	m_pcm_output.ePCMMode            = OMX_AUDIO_PCMModeLinear;
-	m_pcm_output.nChannels           = m_OutputChannels;
-	m_pcm_output.nSamplingRate       = uiSamplesPerSec;
+	// set the pcm_output parameters
+	pcm_output.eNumData            = OMX_NumericalDataSigned;
+	pcm_output.eEndian             = OMX_EndianLittle;
+	pcm_output.bInterleaved        = OMX_TRUE;
+	pcm_output.nBitPerSample       = uiBitsPerSample;
+	pcm_output.ePCMMode            = OMX_AUDIO_PCMModeLinear;
+	pcm_output.nChannels           = numOutputChannels;
+	pcm_output.nSamplingRate       = uiSamplesPerSec;
 
-	m_SampleRate    = uiSamplesPerSec;
+	sampleRate    = uiSamplesPerSec;
 	m_BitsPerSample = uiBitsPerSample;
-	m_BufferLen     = m_BytesPerSec = uiSamplesPerSec * (uiBitsPerSample >> 3) * m_InputChannels;
-	m_BufferLen     *= AUDIO_BUFFER_SECONDS;
-	m_ChunkLen      = 6144;
-	//m_ChunkLen      = 2048;
+	bufferLength     = bytesPerSecond = uiSamplesPerSec * (uiBitsPerSample >> 3) * numInputChannels;
+	bufferLength     *= AUDIO_BUFFER_SECONDS;
+	chunkLength      = 6144;
+	//chunkLength      = 2048;
 
-	m_wave_header.Samples.wValidBitsPerSample = uiBitsPerSample;
-	m_wave_header.Samples.wSamplesPerBlock    = 0;
-	m_wave_header.Format.nChannels            = m_InputChannels;
-	m_wave_header.Format.nBlockAlign          = m_InputChannels * (uiBitsPerSample >> 3);
-	m_wave_header.Format.wFormatTag           = WAVE_FORMAT_PCM;
-	m_wave_header.Format.nSamplesPerSec       = uiSamplesPerSec;
-	m_wave_header.Format.nAvgBytesPerSec      = m_BytesPerSec;
-	m_wave_header.Format.wBitsPerSample       = uiBitsPerSample;
-	m_wave_header.Samples.wValidBitsPerSample = uiBitsPerSample;
-	m_wave_header.Format.cbSize               = 0;
-	m_wave_header.SubFormat                   = KSDATAFORMAT_SUBTYPE_PCM;
+	waveFormat.Samples.wValidBitsPerSample = uiBitsPerSample;
+	waveFormat.Samples.wSamplesPerBlock    = 0;
+	waveFormat.Format.nChannels            = numInputChannels;
+	waveFormat.Format.nBlockAlign          = numInputChannels * (uiBitsPerSample >> 3);
+	waveFormat.Format.wFormatTag           = WAVE_FORMAT_PCM;
+	waveFormat.Format.nSamplesPerSec       = uiSamplesPerSec;
+	waveFormat.Format.nAvgBytesPerSec      = bytesPerSecond;
+	waveFormat.Format.wBitsPerSample       = uiBitsPerSample;
+	waveFormat.Samples.wValidBitsPerSample = uiBitsPerSample;
+	waveFormat.Format.cbSize               = 0;
+	waveFormat.SubFormat                   = KSDATAFORMAT_SUBTYPE_PCM;
 
-	//m_SampleSize              = (m_pcm_output.nChannels * m_pcm_output.nBitPerSample * m_pcm_output.nSamplingRate)>>3;
-	m_SampleSize              = (m_pcm_input.nChannels * m_pcm_output.nBitPerSample * m_pcm_output.nSamplingRate)>>3;
+	//sampleSize              = (pcm_output.nChannels * pcm_output.nBitPerSample * pcm_output.nSamplingRate)>>3;
+	sampleSize              = (pcm_input.nChannels * pcm_output.nBitPerSample * pcm_output.nSamplingRate)>>3;
 
-	m_pcm_input.eNumData              = OMX_NumericalDataSigned;
-	m_pcm_input.eEndian               = OMX_EndianLittle;
-	m_pcm_input.bInterleaved          = OMX_TRUE;
-	m_pcm_input.nBitPerSample         = uiBitsPerSample;
-	m_pcm_input.ePCMMode              = OMX_AUDIO_PCMModeLinear;
-	m_pcm_input.nChannels             = m_InputChannels;
-	m_pcm_input.nSamplingRate         = uiSamplesPerSec;
+	pcm_input.eNumData              = OMX_NumericalDataSigned;
+	pcm_input.eEndian               = OMX_EndianLittle;
+	pcm_input.bInterleaved          = OMX_TRUE;
+	pcm_input.nBitPerSample         = uiBitsPerSample;
+	pcm_input.ePCMMode              = OMX_AUDIO_PCMModeLinear;
+	pcm_input.nChannels             = numInputChannels;
+	pcm_input.nSamplingRate         = uiSamplesPerSec;
 
-	printPCM(&m_pcm_input);
-	printPCM(&m_pcm_output);
+	printPCM(&pcm_input);
+	printPCM(&pcm_output);
 
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	std::string componentName = "";
@@ -367,8 +367,8 @@ bool OMXAudio::init(string device,
 
 	port_param.format.audio.eEncoding = m_eEncoding;
 
-	port_param.nBufferSize = m_ChunkLen;
-	port_param.nBufferCountActual = m_BufferLen / m_ChunkLen;
+	port_param.nBufferSize = chunkLength;
+	port_param.nBufferCountActual = bufferLength / chunkLength;
 
 	error = decoderComponent.setParameter(OMX_IndexParamPortDefinition, &port_param);
     OMX_TRACE(error);
@@ -381,7 +381,7 @@ bool OMXAudio::init(string device,
 	if(omxClock == NULL)
 	{
 		/* no external clock set. generate one */
-		m_external_clock = false;
+		hasExternalClock = false;
 
 		omxClock = new OMXClock();
 
@@ -405,7 +405,7 @@ bool OMXAudio::init(string device,
 		return false;
 	}
 
-	if(!m_external_clock)
+	if(!hasExternalClock)
 	{
 		error = clockComponent->setState(OMX_StateExecuting);
         OMX_TRACE(error);
@@ -490,14 +490,14 @@ bool OMXAudio::init(string device,
 		}
 
 		omxBuffer->nOffset = 0;
-		omxBuffer->nFilledLen = sizeof(m_wave_header);
+		omxBuffer->nFilledLen = sizeof(waveFormat);
 		if(omxBuffer->nFilledLen > omxBuffer->nAllocLen)
 		{
 			ofLog(OF_LOG_ERROR, "OMXAudio::init - omxBuffer->nFilledLen > omxBuffer->nAllocLen");
 			return false;
 		}
 		memset((unsigned char *)omxBuffer->pBuffer, 0x0, omxBuffer->nAllocLen);
-		memcpy((unsigned char *)omxBuffer->pBuffer, &m_wave_header, omxBuffer->nFilledLen);
+		memcpy((unsigned char *)omxBuffer->pBuffer, &waveFormat, omxBuffer->nFilledLen);
 		omxBuffer->nFlags = OMX_BUFFERFLAG_CODECCONFIG | OMX_BUFFERFLAG_ENDOFFRAME;
 
 		error = decoderComponent.EmptyThisBuffer(omxBuffer);
@@ -513,10 +513,10 @@ bool OMXAudio::init(string device,
 	doSetStartTime  = true;
 	isFirstFrame   = true;
 
-	setCurrentVolume(m_CurrentVolume);
+	setCurrentVolume(currentVolume);
 
 	ofLog(OF_LOG_VERBOSE, "OMXAudio::init Ouput bps %d samplerate %d channels %d device %s buffer size %d bytes per second %d passthrough %d",
-	      (int)m_pcm_output.nBitPerSample, (int)m_pcm_output.nSamplingRate, (int)m_pcm_output.nChannels, deviceuse.c_str(), m_BufferLen, m_BytesPerSec, m_Passthrough);
+	      (int)pcm_output.nBitPerSample, (int)pcm_output.nSamplingRate, (int)pcm_output.nChannels, deviceuse.c_str(), bufferLength, bytesPerSecond, m_Passthrough);
 
 	return true;
 }
@@ -529,7 +529,7 @@ bool OMXAudio::Deinitialize()
 		return true;
 	}
 
-	if(!m_external_clock && omxClock != NULL)
+	if(!hasExternalClock && omxClock != NULL)
 	{
 		omxClock->stop();
 	}
@@ -558,14 +558,14 @@ bool OMXAudio::Deinitialize()
 	decoderComponent.Deinitialize();
 
 	isInitialized = false;
-	m_BytesPerSec = 0;
-	m_BufferLen   = 0;
+	bytesPerSecond = 0;
+	bufferLength   = 0;
 
-	if(!m_external_clock && omxClock != NULL)
+	if(!hasExternalClock && omxClock != NULL)
 	{
 		delete omxClock;
 		omxClock  = NULL;
-		m_external_clock = false;
+		hasExternalClock = false;
 	}
 
 	clockComponent = NULL;
@@ -661,7 +661,7 @@ bool OMXAudio::Stop()
 //***********************************************************************************************
 long OMXAudio::getCurrentVolume() const
 {
-	return m_CurrentVolume;
+	return currentVolume;
 }
 
 //***********************************************************************************************
@@ -678,7 +678,7 @@ void OMXAudio::mute(bool bMute)
 	}
 	else
 	{
-		setCurrentVolume(m_CurrentVolume);
+		setCurrentVolume(currentVolume);
 	}
 }
 
@@ -690,17 +690,17 @@ bool OMXAudio::setCurrentVolume(long nVolume)
 		return false;
 	}
 
-	m_CurrentVolume = nVolume;
+	currentVolume = nVolume;
 
-	if((m_downmix_channels == 6 || m_downmix_channels == 8) &&
-	        m_OutputChannels == 2)
+	if((numDownmixChannels == 6 || numDownmixChannels == 8) &&
+	        numOutputChannels == 2)
 	{
 		// Convert from millibels to amplitude ratio
 		double r = pow(10, nVolume / 2000.0);
 
 		float* coeff = NULL;
 
-		switch(m_downmix_channels)
+		switch(numDownmixChannels)
 		{
 			case 6:
 				coeff = downmixing_coefficients_6;
@@ -712,7 +712,7 @@ bool OMXAudio::setCurrentVolume(long nVolume)
 				assert(0);
 		}
 
-		if(m_normalize_downmix)
+		if(doNormalizeDownmix)
 		{
 			double sum_L = 0;
 			double sum_R = 0;
@@ -882,36 +882,36 @@ unsigned int OMXAudio::addPackets(void* data, unsigned int len, double dts, doub
 			if(!m_Passthrough)
 			{
 				/* setup mixer input */
-				m_pcm_input.nPortIndex      = m_omx_mixer.getInputPort();
-				error = m_omx_mixer.setParameter(OMX_IndexParamAudioPcm, &m_pcm_input);
+				pcm_input.nPortIndex      = m_omx_mixer.getInputPort();
+				error = m_omx_mixer.setParameter(OMX_IndexParamAudioPcm, &pcm_input);
 				OMX_TRACE(error);
                 
-				error = m_omx_mixer.getParameter(OMX_IndexParamAudioPcm, &m_pcm_input);
+				error = m_omx_mixer.getParameter(OMX_IndexParamAudioPcm, &pcm_input);
 				OMX_TRACE(error);
 
 				/* setup mixer output */
-				m_pcm_output.nPortIndex      = m_omx_mixer.getOutputPort();
-				error = m_omx_mixer.setParameter(OMX_IndexParamAudioPcm, &m_pcm_output);
+				pcm_output.nPortIndex      = m_omx_mixer.getOutputPort();
+				error = m_omx_mixer.setParameter(OMX_IndexParamAudioPcm, &pcm_output);
 				OMX_TRACE(error);
                 
-				error = m_omx_mixer.getParameter(OMX_IndexParamAudioPcm, &m_pcm_output);
+				error = m_omx_mixer.getParameter(OMX_IndexParamAudioPcm, &pcm_output);
 				OMX_TRACE(error);
                 
-				m_pcm_output.nPortIndex      = renderComponent.getInputPort();
-				error = renderComponent.setParameter(OMX_IndexParamAudioPcm, &m_pcm_output);
+				pcm_output.nPortIndex      = renderComponent.getInputPort();
+				error = renderComponent.setParameter(OMX_IndexParamAudioPcm, &pcm_output);
 				OMX_TRACE(error);
                 
-				error = renderComponent.getParameter(OMX_IndexParamAudioPcm, &m_pcm_output);
+				error = renderComponent.getParameter(OMX_IndexParamAudioPcm, &pcm_output);
 				OMX_TRACE(error);
 
-				printPCM(&m_pcm_input);
-				printPCM(&m_pcm_output);
+				printPCM(&pcm_input);
+				printPCM(&pcm_output);
 			}
 			else
 			{
-				m_pcm_output.nPortIndex      = decoderComponent.getOutputPort();
-				decoderComponent.getParameter(OMX_IndexParamAudioPcm, &m_pcm_output);
-				printPCM(&m_pcm_output);
+				pcm_output.nPortIndex      = decoderComponent.getOutputPort();
+				decoderComponent.getParameter(OMX_IndexParamAudioPcm, &pcm_output);
+				printPCM(&pcm_output);
 
 				OMX_AUDIO_PARAM_PORTFORMATTYPE formatType;
 				OMX_INIT_STRUCTURE(formatType);
@@ -932,8 +932,8 @@ unsigned int OMXAudio::addPackets(void* data, unsigned int len, double dts, doub
 
 					m_ddParam.nPortIndex      = renderComponent.getInputPort();
 
-					m_ddParam.nChannels       = m_InputChannels; //(m_InputChannels == 6) ? 8 : m_InputChannels;
-					m_ddParam.nSampleRate     = m_SampleRate;
+					m_ddParam.nChannels       = numInputChannels; //(numInputChannels == 6) ? 8 : numInputChannels;
+					m_ddParam.nSampleRate     = sampleRate;
 					m_ddParam.eBitStreamId    = OMX_AUDIO_DDPBitStreamIdAC3;
 					m_ddParam.nBitRate        = 0;
 
@@ -952,23 +952,23 @@ unsigned int OMXAudio::addPackets(void* data, unsigned int len, double dts, doub
 				}
 				else if(m_eEncoding == OMX_AUDIO_CodingDTS)
 				{
-					m_dtsParam.nPortIndex      = renderComponent.getInputPort();
+					dtsParam.nPortIndex      = renderComponent.getInputPort();
 
-					m_dtsParam.nChannels       = m_InputChannels; //(m_InputChannels == 6) ? 8 : m_InputChannels;
-					m_dtsParam.nBitRate        = 0;
+					dtsParam.nChannels       = numInputChannels; //(numInputChannels == 6) ? 8 : numInputChannels;
+					dtsParam.nBitRate        = 0;
 
 					for(unsigned int i = 0; i < OMX_MAX_CHANNELS; i++)
 					{
-						if(i >= m_dtsParam.nChannels)
+						if(i >= dtsParam.nChannels)
 						{
 							break;
 						}
 
-						m_dtsParam.eChannelMapping[i] = OMXChannels[i];
+						dtsParam.eChannelMapping[i] = OMXChannels[i];
 					}
 
-					renderComponent.setParameter(OMX_IndexParamAudioDts, &m_dtsParam);
-					renderComponent.getParameter(OMX_IndexParamAudioDts, &m_dtsParam);
+					renderComponent.setParameter(OMX_IndexParamAudioDts, &dtsParam);
+					renderComponent.getParameter(OMX_IndexParamAudioDts, &dtsParam);
 				}
 			}
 
@@ -989,12 +989,12 @@ unsigned int OMXAudio::addPackets(void* data, unsigned int len, double dts, doub
 
 float OMXAudio::getCacheTotal()
 {
-	return (float)m_BufferLen / (float)m_BytesPerSec;
+	return (float)bufferLength / (float)bytesPerSecond;
 }
 
 unsigned int OMXAudio::getChunkLen()
 {
-	return m_ChunkLen;
+	return chunkLength;
 }
 
 
@@ -1066,7 +1066,7 @@ bool OMXAudio::setClock(OMXClock *clock)
 	}
 
 	omxClock = clock;
-	m_external_clock = true;
+	hasExternalClock = true;
 	return true;
 }
 
