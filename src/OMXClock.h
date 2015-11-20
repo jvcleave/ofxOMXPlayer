@@ -32,7 +32,7 @@ class OMXClock
 		void Lock();
 		void UnLock();
 		bool init(bool has_video, bool has_audio);
-		void OMXDeinitialize();
+		void deinit();
 		bool isPaused()
 		{
 			return pauseState;

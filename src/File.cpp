@@ -34,7 +34,7 @@ void CFile::rewindFile()
 	rewind(fileObject);
 }
 //*********************************************************************************************
-bool CFile::Open(std::string& strFileName, unsigned int flags)
+bool CFile::open(std::string& strFileName, unsigned int flags)
 {
 	m_flags = flags;
 

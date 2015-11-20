@@ -50,7 +50,7 @@ OMXPlayerVideo::~OMXPlayerVideo()
 	//ofLogVerbose(__func__) << "END";
 }
 
-bool OMXPlayerVideo::Open(OMXStreamInfo& hints, OMXClock *av_clock, bool deinterlace, bool hdmi_clock_sync, float display_aspect)
+bool OMXPlayerVideo::open(OMXStreamInfo& hints, OMXClock *av_clock, bool deinterlace, bool hdmi_clock_sync, float display_aspect)
 {
 	//ofLogVerbose(__func__) << "OMXPlayerVideo Open";
 
@@ -121,7 +121,7 @@ bool OMXPlayerVideo::openDecoder()
 	nonTextureDecoder->setDisplayRect(displayRect);
 
 	decoder = (OMXDecoderBase*)nonTextureDecoder;
-	if(!nonTextureDecoder->Open(omxStreamInfo, omxClock, m_display_aspect, m_Deinterlace, m_hdmi_clock_sync))
+	if(!nonTextureDecoder->open(omxStreamInfo, omxClock, m_display_aspect, m_Deinterlace, m_hdmi_clock_sync))
 	{
 
 		closeDecoder();

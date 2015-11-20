@@ -106,7 +106,7 @@ class OMXReader
 	public:
 		OMXReader();
 		~OMXReader();
-		bool Open(std::string filename, bool doSkipAvProbe);
+		bool open(std::string filename, bool doSkipAvProbe);
 		void ClearStreams();
 		bool close();
 		//void FlushRead();

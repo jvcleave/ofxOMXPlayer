@@ -73,7 +73,7 @@ static offset_t dvd_file_seek(void *h, offset_t pos, int whence)
 		return pFile->Seek(pos, whence & ~AVSEEK_FORCE);
 }
 
-bool OMXReader::Open(std::string filename, bool doSkipAvProbe)
+bool OMXReader::open(std::string filename, bool doSkipAvProbe)
 {
 	
 	currentPTS = DVD_NOPTS_VALUE;
@@ -131,7 +131,7 @@ bool OMXReader::Open(std::string filename, bool doSkipAvProbe)
 	{
 		fileObject = new CFile();
 		
-		if (!fileObject->Open(fileName, flags))
+		if (!fileObject->open(fileName, flags))
 		{
 			ofLog(OF_LOG_ERROR, "OMXPlayer::OpenFile - %s ", fileName.c_str());
 			close();

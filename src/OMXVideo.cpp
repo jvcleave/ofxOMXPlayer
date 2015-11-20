@@ -18,7 +18,7 @@ OMXVideo::~OMXVideo()
 	//ofLogVerbose(__func__) << "removed update listener";
 }
 
-bool OMXVideo::Open(OMXStreamInfo& hints, OMXClock *clock, float display_aspect, bool deinterlace, bool hdmi_clock_sync)
+bool OMXVideo::open(OMXStreamInfo& hints, OMXClock *clock, float display_aspect, bool deinterlace, bool hdmi_clock_sync)
 {
 	OMX_ERRORTYPE error   = OMX_ErrorNone;
 

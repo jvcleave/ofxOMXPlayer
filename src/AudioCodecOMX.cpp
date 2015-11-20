@@ -48,7 +48,7 @@ AudioCodecOMX::~AudioCodecOMX()
 	Dispose();
 }
 
-bool AudioCodecOMX::Open(OMXStreamInfo& hints)
+bool AudioCodecOMX::open(OMXStreamInfo& hints)
 {
 	AVCodec* pCodec;
 	m_bOpenedCodec = false;
@@ -60,7 +60,7 @@ bool AudioCodecOMX::Open(OMXStreamInfo& hints)
 	pCodec = avcodec_find_decoder(hints.codec);
 	if (!pCodec)
 	{
-		ofLog(OF_LOG_ERROR, "AudioCodecOMX::Open() Unable to find codec %d", hints.codec);
+		ofLog(OF_LOG_ERROR, "AudioCodecOMX::open() Unable to find codec %d", hints.codec);
 		return false;
 	}
 
@@ -95,7 +95,7 @@ bool AudioCodecOMX::Open(OMXStreamInfo& hints)
 
 	if (avcodec_open2(m_pCodecContext, pCodec, NULL) < 0)
 	{
-		ofLog(OF_LOG_ERROR, "AudioCodecOMX::Open() Unable to open codec");
+		ofLog(OF_LOG_ERROR, "AudioCodecOMX::open() Unable to open codec");
 		Dispose();
 		return false;
 	}

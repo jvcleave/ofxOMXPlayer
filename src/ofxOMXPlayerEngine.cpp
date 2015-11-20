@@ -96,7 +96,7 @@ ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
 
 	omxReader.close();
 
-	clock.OMXDeinitialize();
+	//clock.deinit();
     
 	//ofLogVerbose(__func__) << "~ofxOMXPlayerEngine END";
 
@@ -179,7 +179,7 @@ bool ofxOMXPlayerEngine::didReadFile(bool doSkipAvProbe)
     
     unsigned long long startTime = ofGetElapsedTimeMillis();
     
-    bool didOpenMovie = omxReader.Open(moviePath.c_str(), doSkipAvProbe);
+    bool didOpenMovie = omxReader.open(moviePath.c_str(), doSkipAvProbe);
     
     unsigned long long endTime = ofGetElapsedTimeMillis();
     ofLogNotice(__func__) << "didOpenMovie TOOK " << endTime-startTime <<  " MS";
@@ -311,7 +311,7 @@ bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
 		{
 			eglPlayer = new OMXPlayerEGLImage();
 		}
-		didVideoOpen = eglPlayer->Open(videoStreamInfo, &clock, eglImage);
+		didVideoOpen = eglPlayer->open(videoStreamInfo, &clock, eglImage);
 		videoPlayer = (OMXPlayerVideoBase*)eglPlayer;
 	}
 	else
@@ -328,7 +328,7 @@ bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
 		displayRect = omxPlayerSettings.displayRect;
 		nonEglPlayer->setDisplayRect(displayRect);
 		
-		didVideoOpen = nonEglPlayer->Open(videoStreamInfo, &clock, deinterlace, hdmi_clock_sync, display_aspect);
+		didVideoOpen = nonEglPlayer->open(videoStreamInfo, &clock, deinterlace, hdmi_clock_sync, display_aspect);
 		videoPlayer = (OMXPlayerVideoBase*)nonEglPlayer;
 		
 
@@ -344,7 +344,7 @@ bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
 			deviceString = "omx:local";
 		}
 		audioPlayer = new OMXPlayerAudio();
-		didAudioOpen = audioPlayer->Open(audioStreamInfo, &clock, &omxReader, deviceString);
+		didAudioOpen = audioPlayer->open(audioStreamInfo, &clock, &omxReader, deviceString);
 		if (didAudioOpen)
 		{
 			//ofLogVerbose(__func__) << " AUDIO PLAYER OPEN PASS";

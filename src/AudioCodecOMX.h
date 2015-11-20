@@ -39,7 +39,7 @@ class AudioCodecOMX
 	public:
 		AudioCodecOMX();
 		~AudioCodecOMX();
-		bool Open(OMXStreamInfo& hints);
+		bool open(OMXStreamInfo& hints);
 		void Dispose();
 		int decode(BYTE* pData, int iSize);
 		int GetData(BYTE** dst);

@@ -36,7 +36,7 @@ namespace XFILE
 			CFile();
 			~CFile();
 
-			bool Open(std::string& strFileName, unsigned int flags = 0);
+			bool open(std::string& strFileName, unsigned int flags = 0);
 			bool OpenForWrite(std::string& strFileName, bool bOverWrite);
 			unsigned int Read(void* lpBuf, int64_t uiBufSize);
 			int Write(void* lpBuf, int64_t uiBufSize);

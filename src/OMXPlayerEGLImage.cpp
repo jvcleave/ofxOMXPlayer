@@ -19,7 +19,7 @@ OMXPlayerEGLImage::~OMXPlayerEGLImage()
 }
 
 
-bool OMXPlayerEGLImage::Open(OMXStreamInfo& hints, OMXClock *av_clock, EGLImageKHR eglImage)
+bool OMXPlayerEGLImage::open(OMXStreamInfo& hints, OMXClock *av_clock, EGLImageKHR eglImage)
 {
 
 	//ofLogVerbose(__func__) << " OMXPlayerEGLImage Open";
@@ -90,7 +90,7 @@ bool OMXPlayerEGLImage::openDecoder()
 
 	decoder = (OMXDecoderBase*)eglImageDecoder;
 
-	if(!eglImageDecoder->Open(omxStreamInfo, omxClock, eglImage))
+	if(!eglImageDecoder->open(omxStreamInfo, omxClock, eglImage))
 	{
 		closeDecoder();
 		return false;

@@ -85,7 +85,7 @@ void OMXPlayerAudio::UnLockDecoder()
 	pthread_mutex_unlock(&m_lock_decoder);
 }
 
-bool OMXPlayerAudio::Open(OMXStreamInfo& hints, 
+bool OMXPlayerAudio::open(OMXStreamInfo& hints, 
                           OMXClock *av_clock, 
                           OMXReader *omx_reader,
                           std::string device)
@@ -403,7 +403,7 @@ bool OMXPlayerAudio::openCodec()
 {
 	audioCodecOMX = new AudioCodecOMX();
 
-	if(!audioCodecOMX->Open(omxStreamInfo))
+	if(!audioCodecOMX->open(omxStreamInfo))
 	{
 		delete audioCodecOMX;
 		audioCodecOMX = NULL;
@@ -423,7 +423,7 @@ void OMXPlayerAudio::closeCodec()
 	audioCodecOMX = NULL;
 }
 
-OMXAudio::EEncoded OMXPlayerAudio::IsPassthrough(OMXStreamInfo hints)
+OMXAudio::EEncoded OMXPlayerAudio::processPassthrough(OMXStreamInfo hints)
 {
     if(deviceName == "omx:local")
     {
@@ -460,7 +460,7 @@ bool OMXPlayerAudio::openDecoder()
 
 	if(doPassthrough)
 	{
-		m_passthrough = IsPassthrough(omxStreamInfo);
+		m_passthrough = processPassthrough(omxStreamInfo);
 	}
 
 	

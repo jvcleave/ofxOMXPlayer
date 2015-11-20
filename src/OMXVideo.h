@@ -10,7 +10,7 @@ class OMXVideo : public OMXDecoderBase
 	public:
 		OMXVideo();
 		~OMXVideo();
-		bool Open(OMXStreamInfo& hints, OMXClock *clock, float display_aspect = 0.0f, bool deinterlace = false, bool hdmi_clock_sync = false);
+		bool open(OMXStreamInfo& hints, OMXClock *clock, float display_aspect = 0.0f, bool deinterlace = false, bool hdmi_clock_sync = false);
 		
 
 		bool  decode(uint8_t *pData, int iSize, double pts);

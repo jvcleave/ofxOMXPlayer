@@ -17,7 +17,7 @@ OMXClock::OMXClock()
 
 OMXClock::~OMXClock()
 {
-	OMXDeinitialize();
+	deinit();
 
 	pthread_mutex_destroy(&m_lock);
 }
@@ -69,7 +69,7 @@ bool OMXClock::init(bool has_video, bool has_audio)
 	return true;
 }
 
-void OMXClock::OMXDeinitialize()
+void OMXClock::deinit()
 {
 	if(clockComponent.getHandle() == NULL)
 	{
