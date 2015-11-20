@@ -8,7 +8,7 @@ static bool g_abort = false;
 
 OMXReader::OMXReader()
 {
-	m_open        = false;
+	isOpen        = false;
 	fileName    = "";
 	isMatroska   = false;
 	isAVI        = false;
@@ -234,7 +234,7 @@ bool OMXReader::Open(std::string filename, bool doSkipAvProbe)
 	
 	UpdateCurrentPTS();
 	
-	m_open        = true;
+	isOpen        = true;
 	
 	return true;
 }
@@ -299,7 +299,7 @@ bool OMXReader::Close()
 	avformat_network_deinit();
 	
 		
-	m_open            = false;
+	isOpen            = false;
 	fileName        = "";
 	isMatroska       = false;
 	isAVI            = false;

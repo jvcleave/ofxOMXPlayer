@@ -90,7 +90,7 @@ bool OMXPlayerVideo::Open(OMXStreamInfo& hints, OMXClock *av_clock, bool deinter
 
 	Create();
 
-	m_open        = true;
+	isOpen        = true;
 
 	return true;
 }
@@ -170,7 +170,7 @@ bool OMXPlayerVideo::Close()
 		//ofLogVerbose(__func__) << "POST DELETE nonTextureDecoder";
 	}
 
-	m_open          = false;
+	isOpen          = false;
 	streamID     = -1;
 	currentPTS   = DVD_NOPTS_VALUE;
 	speed         = DVD_PLAYSPEED_NORMAL;

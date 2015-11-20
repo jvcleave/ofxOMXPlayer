@@ -13,7 +13,7 @@ unsigned count_bits(int32_t value)
 
 OMXPlayerVideoBase::OMXPlayerVideoBase()
 {
-	m_open          = false;
+	isOpen          = false;
 	streamID     = -1;
 	omxClock      = NULL;
 	decoder       = NULL;

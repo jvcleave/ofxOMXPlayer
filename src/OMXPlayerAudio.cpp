@@ -34,7 +34,7 @@
 
 OMXPlayerAudio::OMXPlayerAudio()
 {
-	m_open          = false;
+	isOpen          = false;
 	omxClock      = NULL;
 	omxReader    = NULL;
 	decoder       = NULL;
@@ -53,7 +53,7 @@ OMXPlayerAudio::OMXPlayerAudio()
 
 OMXPlayerAudio::~OMXPlayerAudio()
 {
-	if(m_open)
+	if(isOpen)
 	{
 		Close();
 	}
@@ -131,7 +131,7 @@ bool OMXPlayerAudio::Open(OMXStreamInfo& hints,
 
 	Create();
 
-	m_open        = true;
+	isOpen        = true;
 
 	return true;
 }
@@ -155,7 +155,7 @@ bool OMXPlayerAudio::Close()
 	closeDecoder();
 	CloseAudioCodec();
 
-	m_open          = false;
+	isOpen          = false;
 	streamID     = -1;
 	currentPTS   = DVD_NOPTS_VALUE;
 	speed         = DVD_PLAYSPEED_NORMAL;

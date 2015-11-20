@@ -57,7 +57,7 @@ bool OMXPlayerEGLImage::Open(OMXStreamInfo& hints, OMXClock *av_clock, EGLImageK
 	Create();
 
 
-	m_open        = true;
+	isOpen        = true;
 
 	return true;
 }
@@ -139,7 +139,7 @@ bool OMXPlayerEGLImage::Close()
 	};
 
 
-	m_open          = false;
+	isOpen          = false;
 	streamID     = -1;
 	currentPTS   = DVD_NOPTS_VALUE;
 	speed         = DVD_PLAYSPEED_NORMAL;

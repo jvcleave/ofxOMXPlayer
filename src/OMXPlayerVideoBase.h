@@ -23,7 +23,7 @@ class OMXPlayerVideoBase: public OMXThread
 		int							streamID;
 		std::deque<OMXPacket *>		packets;
 
-		bool						m_open;
+		bool						isOpen;
 		OMXStreamInfo				omxStreamInfo;
 		double						currentPTS;
 

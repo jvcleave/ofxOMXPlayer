@@ -83,7 +83,7 @@ class OMXReader
 		int                       videoCount;
 		int                       audioCount;
 		int                       subtitleCount;
-		bool                      m_open;
+		bool                      isOpen;
 		std::string               fileName;
 		bool                      isMatroska;
 		bool                      isAVI;
