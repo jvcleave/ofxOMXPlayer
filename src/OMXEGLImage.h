@@ -11,7 +11,7 @@ class OMXEGLImage : public OMXDecoderBase
 
 		bool Open(OMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglImage);
 		
-		bool  Decode(uint8_t *pData, int iSize, double pts);
+		bool  decode(uint8_t *pData, int iSize, double pts);
 
 		int getCurrentFrame();
 		void resetFrameCounter();

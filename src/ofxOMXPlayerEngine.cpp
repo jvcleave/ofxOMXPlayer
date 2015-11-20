@@ -454,13 +454,13 @@ void ofxOMXPlayerEngine::Process()
 
 				if(hasAudio)
 				{
-					loop_offset = audioPlayer->GetCurrentPTS();
+					loop_offset = audioPlayer->getCurrentPTS();
 				}
 				else
 				{
 					if(hasVideo)
 					{
-						loop_offset = videoPlayer->GetCurrentPTS();
+						loop_offset = videoPlayer->getCurrentPTS();
 					}
 				}
 				if (previousLoopOffset != loop_offset)

@@ -51,7 +51,7 @@ class OMXDecoderBase
 
 
 
-		virtual bool			Decode(uint8_t *pData, int iSize, double pts)=0;
+		virtual bool			decode(uint8_t *pData, int iSize, double pts)=0;
 
 
 		void submitEOS();

@@ -41,7 +41,7 @@ class AudioCodecOMX
 		~AudioCodecOMX();
 		bool Open(OMXStreamInfo& hints);
 		void Dispose();
-		int Decode(BYTE* pData, int iSize);
+		int decode(BYTE* pData, int iSize);
 		int GetData(BYTE** dst);
 		void Reset();
 		int GetChannels();

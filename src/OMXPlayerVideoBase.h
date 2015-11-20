@@ -47,16 +47,16 @@ class OMXPlayerVideoBase: public OMXThread
 		int							getSpeed();
 
 		virtual bool				Close() = 0;
-		bool						Decode(OMXPacket *pkt);
+		bool						decode(OMXPacket *pkt);
 		void						Process();
 		void						Flush();
 
 		bool						addPacket(OMXPacket *pkt);
 
-		virtual bool				OpenDecoder() =0;
+		virtual bool				openDecoder() =0;
 
 		bool						closeDecoder();
-		double						GetCurrentPTS();
+		double						getCurrentPTS();
 		double						GetFPS();
 
 		unsigned int				GetCached();

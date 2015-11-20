@@ -48,7 +48,7 @@ bool OMXPlayerEGLImage::Open(OMXStreamInfo& hints, OMXClock *av_clock, EGLImageK
 	speed       = DVD_PLAYSPEED_NORMAL;
 	m_FlipTimeStamp = omxClock->getAbsoluteClock();
 
-	if(!OpenDecoder())
+	if(!openDecoder())
 	{
 		Close();
 		return false;
@@ -63,7 +63,7 @@ bool OMXPlayerEGLImage::Open(OMXStreamInfo& hints, OMXClock *av_clock, EGLImageK
 }
 
 
-bool OMXPlayerEGLImage::OpenDecoder()
+bool OMXPlayerEGLImage::openDecoder()
 {
 	if (omxStreamInfo.fpsrate && omxStreamInfo.fpsscale)
 	{

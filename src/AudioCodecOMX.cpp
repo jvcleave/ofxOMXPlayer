@@ -136,7 +136,7 @@ void AudioCodecOMX::Dispose()
 	m_iBuffered = 0;
 }
 
-int AudioCodecOMX::Decode(BYTE* pData, int iSize)
+int AudioCodecOMX::decode(BYTE* pData, int iSize)
 {
 	int iBytesUsed, got_frame;
 	if (!m_pCodecContext)

@@ -380,7 +380,7 @@ void OMXVideo::resetFrameCounter()
 }
 
 
-bool OMXVideo::Decode(uint8_t *pData, int iSize, double pts)
+bool OMXVideo::decode(uint8_t *pData, int iSize, double pts)
 {
 	CSingleLock lock (m_critSection);
 	OMX_ERRORTYPE error;

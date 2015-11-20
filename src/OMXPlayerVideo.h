@@ -20,7 +20,7 @@ class OMXPlayerVideo : public OMXPlayerVideoBase
 		~OMXPlayerVideo();
 
 		bool Open(OMXStreamInfo& hints, OMXClock *av_clock, bool deinterlace, bool hdmi_clock_sync, float display_aspect);
-		bool OpenDecoder();
+		bool openDecoder();
 		bool Close();
 		ofRectangle displayRect;
 		void setDisplayRect(ofRectangle& rectangle);

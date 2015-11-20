@@ -13,7 +13,7 @@ class OMXVideo : public OMXDecoderBase
 		bool Open(OMXStreamInfo& hints, OMXClock *clock, float display_aspect = 0.0f, bool deinterlace = false, bool hdmi_clock_sync = false);
 		
 
-		bool  Decode(uint8_t *pData, int iSize, double pts);
+		bool  decode(uint8_t *pData, int iSize, double pts);
 
 		Component m_omx_image_fx;
 		Tunnel     m_omx_tunnel_image_fx;

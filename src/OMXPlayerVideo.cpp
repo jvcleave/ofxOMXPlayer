@@ -82,7 +82,7 @@ bool OMXPlayerVideo::Open(OMXStreamInfo& hints, OMXClock *av_clock, bool deinter
 
 	m_FlipTimeStamp = omxClock->getAbsoluteClock();
 
-	if(!OpenDecoder())
+	if(!openDecoder())
 	{
 		Close();
 		return false;
@@ -96,7 +96,7 @@ bool OMXPlayerVideo::Open(OMXStreamInfo& hints, OMXClock *av_clock, bool deinter
 }
 
 
-bool OMXPlayerVideo::OpenDecoder()
+bool OMXPlayerVideo::openDecoder()
 {
 
 	if (omxStreamInfo.fpsrate && omxStreamInfo.fpsscale)

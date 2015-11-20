@@ -37,7 +37,7 @@ class OMXPlayerAudio : public OMXThread
 		OMXClock*					omxClock;
 		OMXReader*					omxReader;
 		OMXAudio                 *decoder;
-		std::string               m_codec_name;
+		std::string               codecName;
 		std::string               deviceName;
 		bool                      doPassthrough;
 		bool                      doHardwareDecode;
@@ -70,18 +70,18 @@ class OMXPlayerAudio : public OMXThread
 		          std::string device);
     
 		bool Close();
-		bool Decode(OMXPacket *pkt);
+		bool decode(OMXPacket *pkt);
 		void Process();
 		void Flush();
 		bool addPacket(OMXPacket *pkt);
 		bool OpenAudioCodec();
 		void CloseAudioCodec();
 		OMXAudio::EEncoded IsPassthrough(OMXStreamInfo hints);
-		bool OpenDecoder();
+		bool openDecoder();
 		bool closeDecoder();
 		//double GetDelay();
 		//double GetCacheTime();
-		double GetCurrentPTS()
+		double getCurrentPTS()
 		{
 			return currentPTS;
 		};

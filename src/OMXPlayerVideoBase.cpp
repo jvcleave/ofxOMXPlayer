@@ -34,7 +34,7 @@ OMXPlayerVideoBase::OMXPlayerVideoBase()
 }
 
 
-double OMXPlayerVideoBase::GetCurrentPTS()
+double OMXPlayerVideoBase::getCurrentPTS()
 {
 	return currentPTS;
 }
@@ -101,7 +101,7 @@ void OMXPlayerVideoBase::UnLockDecoder()
 	pthread_mutex_unlock(&m_lock_decoder);
 }
 
-bool OMXPlayerVideoBase::Decode(OMXPacket *pkt)
+bool OMXPlayerVideoBase::decode(OMXPacket *pkt)
 {
 	if(!pkt)
 	{
@@ -127,7 +127,7 @@ bool OMXPlayerVideoBase::Decode(OMXPacket *pkt)
 	
 	// CLog::Log(LOGINFO, "CDVDPlayerVideo::Decode dts:%.0f pts:%.0f cur:%.0f, size:%d", pkt->dts, pkt->pts, currentPTS, pkt->size);
 	//ofLog(OF_LOG_VERBOSE, "OMXPlayerVideoBase::Decode dts:%.0f pts:%.0f cur:%.0f, size:%d", pkt->dts, pkt->pts, currentPTS, pkt->size);
-	return decoder->Decode(pkt->data, pkt->size, pts);
+	return decoder->decode(pkt->data, pkt->size, pts);
 }
 
 
@@ -246,7 +246,7 @@ void OMXPlayerVideoBase::Process()
 		}
 		else
 		{
-			if(omxPacket && Decode(omxPacket))
+			if(omxPacket && decode(omxPacket))
 			{
 				
 				OMXReader::FreePacket(omxPacket);

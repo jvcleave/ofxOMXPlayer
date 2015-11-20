@@ -122,7 +122,7 @@ bool OMXPlayerAudio::Open(OMXStreamInfo& hints,
 		return false;
 	}
 
-	m_player_error = OpenDecoder();
+	m_player_error = openDecoder();
 	if(!m_player_error)
 	{
 		Close();
@@ -166,7 +166,7 @@ bool OMXPlayerAudio::Close()
 
 
 
-bool OMXPlayerAudio::Decode(OMXPacket *pkt)
+bool OMXPlayerAudio::decode(OMXPacket *pkt)
 {
 	if(!pkt)
 	{
@@ -223,7 +223,7 @@ bool OMXPlayerAudio::Decode(OMXPacket *pkt)
 			return false;
 		}
 
-		m_player_error = OpenDecoder();
+		m_player_error = openDecoder();
 		if(!m_player_error)
 		{
 			return false;
@@ -254,7 +254,7 @@ bool OMXPlayerAudio::Decode(OMXPacket *pkt)
 		{
 			while(data_len > 0)
 			{
-				int len = audioCodecOMX->Decode((BYTE *)data_dec, data_len);
+				int len = audioCodecOMX->decode((BYTE *)data_dec, data_len);
 				if( (len < 0) || (len >  data_len) )
 				{
 					audioCodecOMX->Reset();
@@ -335,7 +335,7 @@ void OMXPlayerAudio::Process()
 			omxPacket = NULL;
 			doFlush = false;
 		}
-		else if(omxPacket && Decode(omxPacket))
+		else if(omxPacket && decode(omxPacket))
 		{
 			OMXReader::FreePacket(omxPacket);
 			omxPacket = NULL;
@@ -449,7 +449,7 @@ OMXAudio::EEncoded OMXPlayerAudio::IsPassthrough(OMXStreamInfo hints)
 
 }
 
-bool OMXPlayerAudio::OpenDecoder()
+bool OMXPlayerAudio::openDecoder()
 {
 	//ofLogVerbose(__func__) << "doHardwareDecode: " << doHardwareDecode;
 	//ofLogVerbose(__func__) << "doPassthrough: " << doPassthrough;
@@ -479,7 +479,7 @@ bool OMXPlayerAudio::OpenDecoder()
                                            doBoostOnDownmix);
 	}
 	
-	m_codec_name = omxReader->GetCodecName(OMXSTREAM_AUDIO);
+	codecName = omxReader->GetCodecName(OMXSTREAM_AUDIO);
 
 	if(!bAudioRenderOpen)
 	{
@@ -492,12 +492,12 @@ bool OMXPlayerAudio::OpenDecoder()
 		if(m_passthrough)
 		{
 			ofLog(OF_LOG_VERBOSE, "USING PASSTHROUGH, Audio codec %s channels %d samplerate %d bitspersample %d\n",
-			      m_codec_name.c_str(), 2, omxStreamInfo.samplerate, omxStreamInfo.bitspersample);
+			      codecName.c_str(), 2, omxStreamInfo.samplerate, omxStreamInfo.bitspersample);
 		}
 		else
 		{
 			ofLog(OF_LOG_VERBOSE, "PASSTHROUGH DISABLED, Audio codec %s channels %d samplerate %d bitspersample %d\n",
-			      m_codec_name.c_str(), omxStreamInfo.channels, omxStreamInfo.samplerate, omxStreamInfo.bitspersample);
+			      codecName.c_str(), omxStreamInfo.channels, omxStreamInfo.samplerate, omxStreamInfo.bitspersample);
 		}
 	}
 	return true;
