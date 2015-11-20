@@ -1,13 +1,13 @@
 #pragma once
 
 
-#include "OMXPlayerVideoBase.h"
-#include "OMXVideo.h"
+#include "VideoPlayerBase.h"
+#include "VideoDecoderNonTextured.h"
 
 
 
 
-class OMXPlayerVideo : public OMXPlayerVideoBase
+class VideoPlayerNonTextured : public VideoPlayerBase
 {
 	public:
 
@@ -15,9 +15,9 @@ class OMXPlayerVideo : public OMXPlayerVideoBase
 		float                     m_display_aspect;
 
 		bool                      m_hdmi_clock_sync;
-		OMXVideo* nonTextureDecoder;
-		OMXPlayerVideo();
-		~OMXPlayerVideo();
+		VideoDecoderNonTextured* nonTextureDecoder;
+		VideoPlayerNonTextured();
+		~VideoPlayerNonTextured();
 
 		bool open(OMXStreamInfo& hints, OMXClock *av_clock, bool deinterlace, bool hdmi_clock_sync, float display_aspect);
 		bool openDecoder();

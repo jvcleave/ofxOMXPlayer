@@ -10,7 +10,7 @@
 #include "OMXReader.h"
 #include "OMXClock.h"
 #include "OMXStreamInfo.h"
-#include "OMXAudio.h"
+#include "OMXAudioDecoder.h"
 
 
 #include "AudioCodecOMX.h"
@@ -22,7 +22,7 @@
 #include <sys/types.h>
 
 
-class OMXPlayerAudio : public OMXThread
+class OMXAudioPlayer : public OMXThread
 {
 	protected:
 		int                       streamID;
@@ -36,12 +36,12 @@ class OMXPlayerAudio : public OMXThread
 		pthread_mutex_t           m_lock_decoder;
 		OMXClock*					omxClock;
 		OMXReader*					omxReader;
-		OMXAudio*					decoder;
+		OMXAudioDecoder*					decoder;
 		std::string               codecName;
 		std::string               deviceName;
 		bool                      doPassthrough;
 		bool                      doHardwareDecode;
-		OMXAudio::EEncoded  m_passthrough;
+		OMXAudioDecoder::EEncoded  m_passthrough;
 		bool                      doBoostOnDownmix;
 		bool                      doAbort;
 		bool                      doFlush;
@@ -62,8 +62,8 @@ class OMXPlayerAudio : public OMXThread
 		void unlockDecoder();
 	private:
 	public:
-		OMXPlayerAudio();
-		~OMXPlayerAudio();
+		OMXAudioPlayer();
+		~OMXAudioPlayer();
 		bool open(OMXStreamInfo& hints,
                   OMXClock *av_clock,
                   OMXReader *omx_reader,
@@ -76,7 +76,7 @@ class OMXPlayerAudio : public OMXThread
 		bool addPacket(OMXPacket *pkt);
 		bool openCodec();
 		void closeCodec();
-		OMXAudio::EEncoded processPassthrough(OMXStreamInfo hints);
+		OMXAudioDecoder::EEncoded processPassthrough(OMXStreamInfo hints);
 		bool openDecoder();
 		bool closeDecoder();
 		double getCurrentPTS()

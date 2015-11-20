@@ -2,14 +2,14 @@
 
 #include "ofMain.h"
 
-#include "OMXDecoderBase.h"
+#include "VideoDecoderBase.h"
 
 
-class OMXVideo : public OMXDecoderBase
+class VideoDecoderNonTextured : public VideoDecoderBase
 {
 	public:
-		OMXVideo();
-		~OMXVideo();
+		VideoDecoderNonTextured();
+		~VideoDecoderNonTextured();
 		bool open(OMXStreamInfo& hints, OMXClock *clock, float display_aspect = 0.0f, bool deinterlace = false, bool hdmi_clock_sync = false);
 		
 

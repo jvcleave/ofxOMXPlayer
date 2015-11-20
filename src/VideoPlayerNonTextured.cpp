@@ -21,7 +21,7 @@
 
 
 
-#include "OMXPlayerVideo.h"
+#include "VideoPlayerNonTextured.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -31,14 +31,14 @@
 #include "XMemUtils.h"
 
 
-OMXPlayerVideo::OMXPlayerVideo()
+VideoPlayerNonTextured::VideoPlayerNonTextured()
 {
 	m_hdmi_clock_sync = false;
 	nonTextureDecoder = NULL;
 
 
 }
-OMXPlayerVideo::~OMXPlayerVideo()
+VideoPlayerNonTextured::~VideoPlayerNonTextured()
 {
 	//ofLogVerbose(__func__) << "START";
 
@@ -50,9 +50,9 @@ OMXPlayerVideo::~OMXPlayerVideo()
 	//ofLogVerbose(__func__) << "END";
 }
 
-bool OMXPlayerVideo::open(OMXStreamInfo& hints, OMXClock *av_clock, bool deinterlace, bool hdmi_clock_sync, float display_aspect)
+bool VideoPlayerNonTextured::open(OMXStreamInfo& hints, OMXClock *av_clock, bool deinterlace, bool hdmi_clock_sync, float display_aspect)
 {
-	//ofLogVerbose(__func__) << "OMXPlayerVideo Open";
+	//ofLogVerbose(__func__) << "VideoPlayerNonTextured Open";
 
 	if (!av_clock)
 	{
@@ -96,7 +96,7 @@ bool OMXPlayerVideo::open(OMXStreamInfo& hints, OMXClock *av_clock, bool deinter
 }
 
 
-bool OMXPlayerVideo::openDecoder()
+bool VideoPlayerNonTextured::openDecoder()
 {
 
 	if (omxStreamInfo.fpsrate && omxStreamInfo.fpsscale)
@@ -116,11 +116,11 @@ bool OMXPlayerVideo::openDecoder()
 
 	m_frametime = (double)DVD_TIME_BASE / m_fps;
 
-	nonTextureDecoder = new OMXVideo();
+	nonTextureDecoder = new VideoDecoderNonTextured();
 	
 	nonTextureDecoder->setDisplayRect(displayRect);
 
-	decoder = (OMXDecoderBase*)nonTextureDecoder;
+	decoder = (VideoDecoderBase*)nonTextureDecoder;
 	if(!nonTextureDecoder->open(omxStreamInfo, omxClock, m_display_aspect, m_Deinterlace, m_hdmi_clock_sync))
 	{
 
@@ -144,7 +144,7 @@ bool OMXPlayerVideo::openDecoder()
 	return true;
 }
 
-bool OMXPlayerVideo::close()
+bool VideoPlayerNonTextured::close()
 {
 	//ofLogVerbose(__func__) << " START, isExiting:" << isExiting;
 	doAbort  = true;
@@ -159,7 +159,7 @@ bool OMXPlayerVideo::close()
 		pthread_cond_broadcast(&m_packet_cond);
 		unlock();
 
-		StopThread("OMXPlayerVideo");
+		StopThread("VideoPlayerNonTextured");
 	}
 	
 	if (nonTextureDecoder && !isExiting)
@@ -179,7 +179,7 @@ bool OMXPlayerVideo::close()
 	return true;
 }
 
-bool OMXPlayerVideo::validateDisplayRect(ofRectangle& rectangle)
+bool VideoPlayerNonTextured::validateDisplayRect(ofRectangle& rectangle)
 {
 	//ofLogVerbose(__func__) << "displayRect: " << displayRect;
 	//ofLogVerbose(__func__) << "rectangle: " << rectangle;
@@ -190,7 +190,7 @@ bool OMXPlayerVideo::validateDisplayRect(ofRectangle& rectangle)
 	displayRect = rectangle;
 	return true;
 }
-void OMXPlayerVideo::setDisplayRect(ofRectangle& rectangle)
+void VideoPlayerNonTextured::setDisplayRect(ofRectangle& rectangle)
 {
 	if (ThreadHandle()) 
 	{

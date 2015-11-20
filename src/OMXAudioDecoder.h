@@ -80,12 +80,12 @@ typedef struct tWAVEFORMATEXTENSIBLE
 } __attribute__((__packed__)) WAVEFORMATEXTENSIBLE;
 
 
-class OMXAudio
+class OMXAudioDecoder
 {
 	public:
 	
-        OMXAudio();
-        ~OMXAudio();
+        OMXAudioDecoder();
+        ~OMXAudioDecoder();
     
 		enum EEncoded
 		{

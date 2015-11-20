@@ -1,8 +1,8 @@
-#include "OMXVideo.h"
+#include "VideoDecoderNonTextured.h"
 
 
 
-OMXVideo::OMXVideo()
+VideoDecoderNonTextured::VideoDecoderNonTextured()
 {
 
 	m_deinterlace       = false;
@@ -12,13 +12,13 @@ OMXVideo::OMXVideo()
 }
 
 
-OMXVideo::~OMXVideo()
+VideoDecoderNonTextured::~VideoDecoderNonTextured()
 {
-	ofRemoveListener(ofEvents().update, this, &OMXVideo::onUpdate);
+	ofRemoveListener(ofEvents().update, this, &VideoDecoderNonTextured::onUpdate);
 	//ofLogVerbose(__func__) << "removed update listener";
 }
 
-bool OMXVideo::open(OMXStreamInfo& hints, OMXClock *clock, float display_aspect, bool deinterlace, bool hdmi_clock_sync)
+bool VideoDecoderNonTextured::open(OMXStreamInfo& hints, OMXClock *clock, float display_aspect, bool deinterlace, bool hdmi_clock_sync)
 {
 	OMX_ERRORTYPE error   = OMX_ErrorNone;
 
@@ -273,7 +273,7 @@ bool OMXVideo::open(OMXStreamInfo& hints, OMXClock *clock, float display_aspect,
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
     
-	ofAddListener(ofEvents().update, this, &OMXVideo::onUpdate);
+	ofAddListener(ofEvents().update, this, &VideoDecoderNonTextured::onUpdate);
 	if(!sendDecoderConfig())
 	{
 		return false;
@@ -318,7 +318,7 @@ bool OMXVideo::open(OMXStreamInfo& hints, OMXClock *clock, float display_aspect,
 
 	ofLog(OF_LOG_VERBOSE,
 	      "%s::%s - decoder_component(0x%p), input_port(0x%x), output_port(0x%x) deinterlace %d hdmiclocksync %d\n",
-	      "OMXVideo", __func__, decoderComponent.getHandle(), decoderComponent.getInputPort(), decoderComponent.getOutputPort(),
+	      "VideoDecoderNonTextured", __func__, decoderComponent.getHandle(), decoderComponent.getInputPort(), decoderComponent.getOutputPort(),
 	      m_deinterlace, m_hdmi_clock_sync);
 
 	isFirstFrame   = true;
@@ -328,13 +328,13 @@ bool OMXVideo::open(OMXStreamInfo& hints, OMXClock *clock, float display_aspect,
 	return true;
 }
 
-void OMXVideo::onUpdate(ofEventArgs& args)
+void VideoDecoderNonTextured::onUpdate(ofEventArgs& args)
 {
     //TODO: seems to cause hang on exit
     
 	//updateFrameCount();
 }
-void OMXVideo::updateFrameCount()
+void VideoDecoderNonTextured::updateFrameCount()
 {
 	if (!isOpen) {
 		return;
@@ -369,18 +369,18 @@ void OMXVideo::updateFrameCount()
 	}
 }
 
-int OMXVideo::getCurrentFrame()
+int VideoDecoderNonTextured::getCurrentFrame()
 {
 	return frameCounter - frameOffset;
 }
 
-void OMXVideo::resetFrameCounter()
+void VideoDecoderNonTextured::resetFrameCounter()
 {
 	frameOffset = frameCounter;
 }
 
 
-bool OMXVideo::decode(uint8_t *pData, int iSize, double pts)
+bool VideoDecoderNonTextured::decode(uint8_t *pData, int iSize, double pts)
 {
 	SingleLock lock (m_critSection);
 	OMX_ERRORTYPE error;
@@ -411,7 +411,7 @@ bool OMXVideo::decode(uint8_t *pData, int iSize, double pts)
 			if(doSetStartTime)
 			{
 				omxBuffer->nFlags |= OMX_BUFFERFLAG_STARTTIME;
-				ofLog(OF_LOG_VERBOSE, "OMXVideo::Decode VDec : setStartTime %f\n", (pts == DVD_NOPTS_VALUE ? 0.0 : pts) / DVD_TIME_BASE);
+				ofLog(OF_LOG_VERBOSE, "VideoDecoderNonTextured::Decode VDec : setStartTime %f\n", (pts == DVD_NOPTS_VALUE ? 0.0 : pts) / DVD_TIME_BASE);
 				doSetStartTime = false;
 			}
 			else if(pts == DVD_NOPTS_VALUE)
@@ -464,7 +464,7 @@ bool OMXVideo::decode(uint8_t *pData, int iSize, double pts)
 	return false;
 }
 
-void OMXVideo::configureDisplay()
+void VideoDecoderNonTextured::configureDisplay()
 {
 	OMX_CONFIG_DISPLAYREGIONTYPE configDisplay;
 	OMX_INIT_STRUCTURE(configDisplay);
@@ -485,7 +485,7 @@ void OMXVideo::configureDisplay()
 	
 	renderComponent.setConfig(OMX_IndexConfigDisplayRegion, &configDisplay);
 }
-void OMXVideo::setDisplayRect(ofRectangle& rectangle)
+void VideoDecoderNonTextured::setDisplayRect(ofRectangle& rectangle)
 {
 	
 	bool hasChanged = (displayRect != rectangle);

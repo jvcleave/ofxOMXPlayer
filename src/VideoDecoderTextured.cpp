@@ -1,14 +1,14 @@
-#include "OMXEGLImage.h"
+#include "VideoDecoderTextured.h"
 
 
-OMXEGLImage::OMXEGLImage()
+VideoDecoderTextured::VideoDecoderTextured()
 {
 	frameCounter = 0;
 	frameOffset = 0;
 }
 
 
-OMX_ERRORTYPE OMXEGLImage::onFillBufferDone(OMX_HANDLETYPE hComponent,
+OMX_ERRORTYPE VideoDecoderTextured::onFillBufferDone(OMX_HANDLETYPE hComponent,
                                OMX_PTR pAppData,
                                OMX_BUFFERHEADERTYPE* pBuffer)
 {
@@ -26,18 +26,18 @@ OMX_ERRORTYPE OMXEGLImage::onFillBufferDone(OMX_HANDLETYPE hComponent,
 	return didFillBuffer;
 }
 
-int OMXEGLImage::getCurrentFrame()
+int VideoDecoderTextured::getCurrentFrame()
 {
 	
 	return renderComponent.getCurrentFrame();
 }
-void OMXEGLImage::resetFrameCounter()
+void VideoDecoderTextured::resetFrameCounter()
 {
 	//frameOffset = renderComponent.getCurrentFrame();
 	renderComponent.resetFrameCounter();
 }
 
-bool OMXEGLImage::open(OMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglImage)
+bool VideoDecoderTextured::open(OMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglImage)
 {
 
 
@@ -266,7 +266,7 @@ bool OMXEGLImage::open(OMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIma
 	}
 
 
-	renderComponent.SetCustomDecoderFillBufferDoneHandler(&OMXEGLImage::onFillBufferDone);
+	renderComponent.SetCustomDecoderFillBufferDoneHandler(&VideoDecoderTextured::onFillBufferDone);
 	error = renderComponent.setState(OMX_StateExecuting);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
@@ -281,7 +281,7 @@ bool OMXEGLImage::open(OMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIma
 
 	ofLog(OF_LOG_VERBOSE,
 	      "%s::%s - decoder_component: 0x%p, input_port: 0x%x, output_port: 0x%x \n",
-	      "OMXEGLImage", __func__, decoderComponent.getHandle(), decoderComponent.getInputPort(), decoderComponent.getOutputPort());
+	      "VideoDecoderTextured", __func__, decoderComponent.getHandle(), decoderComponent.getInputPort(), decoderComponent.getOutputPort());
 
 	isFirstFrame   = true;
 	// start from assuming all recent frames had valid pts
@@ -289,7 +289,7 @@ bool OMXEGLImage::open(OMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIma
 	return true;
 }
 
-bool OMXEGLImage::decode(uint8_t *pData, int iSize, double pts)
+bool VideoDecoderTextured::decode(uint8_t *pData, int iSize, double pts)
 {
 	SingleLock lock (m_critSection);
 	OMX_ERRORTYPE error;

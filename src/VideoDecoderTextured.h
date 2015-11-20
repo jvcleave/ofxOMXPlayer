@@ -2,12 +2,12 @@
 
 #include "ofMain.h"
 #include "ofAppEGLWindow.h"
-#include "OMXDecoderBase.h"
+#include "VideoDecoderBase.h"
 
-class OMXEGLImage : public OMXDecoderBase
+class VideoDecoderTextured : public VideoDecoderBase
 {
 	public:
-		OMXEGLImage();
+		VideoDecoderTextured();
 
 		bool open(OMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglImage);
 		
@@ -18,7 +18,7 @@ class OMXEGLImage : public OMXDecoderBase
 	static OMX_ERRORTYPE onFillBufferDone(OMX_HANDLETYPE hComponent,
 										  OMX_PTR pAppData,
 										  OMX_BUFFERHEADERTYPE* pBuffer);
-	~OMXEGLImage(){};
+	~VideoDecoderTextured(){};
 private:
 	int frameCounter;
 	int frameOffset;

@@ -1,4 +1,4 @@
-#include "OMXPlayerEGLImage.h"
+#include "VideoPlayerTextured.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -8,21 +8,21 @@
 #include "XMemUtils.h"
 
 
-OMXPlayerEGLImage::OMXPlayerEGLImage()
+VideoPlayerTextured::VideoPlayerTextured()
 {
 	eglImageDecoder = NULL;
 }
 
-OMXPlayerEGLImage::~OMXPlayerEGLImage()
+VideoPlayerTextured::~VideoPlayerTextured()
 {
 	close();
 }
 
 
-bool OMXPlayerEGLImage::open(OMXStreamInfo& hints, OMXClock *av_clock, EGLImageKHR eglImage)
+bool VideoPlayerTextured::open(OMXStreamInfo& hints, OMXClock *av_clock, EGLImageKHR eglImage)
 {
 
-	//ofLogVerbose(__func__) << " OMXPlayerEGLImage Open";
+	//ofLogVerbose(__func__) << " VideoPlayerTextured Open";
 	this->eglImage = eglImage;
 
 	if (!av_clock)
@@ -63,7 +63,7 @@ bool OMXPlayerEGLImage::open(OMXStreamInfo& hints, OMXClock *av_clock, EGLImageK
 }
 
 
-bool OMXPlayerEGLImage::openDecoder()
+bool VideoPlayerTextured::openDecoder()
 {
 	if (omxStreamInfo.fpsrate && omxStreamInfo.fpsscale)
 	{
@@ -84,11 +84,11 @@ bool OMXPlayerEGLImage::openDecoder()
 
 	if (!eglImageDecoder)
 	{
-		eglImageDecoder = new OMXEGLImage();
+		eglImageDecoder = new VideoDecoderTextured();
 
 	}
 
-	decoder = (OMXDecoderBase*)eglImageDecoder;
+	decoder = (VideoDecoderBase*)eglImageDecoder;
 
 	if(!eglImageDecoder->open(omxStreamInfo, omxClock, eglImage))
 	{
@@ -111,7 +111,7 @@ bool OMXPlayerEGLImage::openDecoder()
 	return true;
 }
 
-bool OMXPlayerEGLImage::close()
+bool VideoPlayerTextured::close()
 {
 	//ofLogVerbose(__func__) << " START, isExiting:" << isExiting;
 	doAbort  = true;
@@ -127,7 +127,7 @@ bool OMXPlayerEGLImage::close()
 		pthread_cond_broadcast(&m_packet_cond);
 		unlock();
 
-		StopThread("OMXPlayerEGLImage");
+		StopThread("VideoPlayerTextured");
 	}
 
 	if (eglImageDecoder)

@@ -20,7 +20,7 @@
 
 
 
-#include "OMXAudio.h"
+#include "OMXAudioDecoder.h"
 #include "XMemUtils.h"
 
 
@@ -95,7 +95,7 @@ float downmixing_coefficients_8[16] =
 };
 
 
-OMXAudio::OMXAudio()
+OMXAudioDecoder::OMXAudioDecoder()
 {
     isInitialized = false;
     doPause = false;
@@ -122,7 +122,7 @@ OMXAudio::OMXAudio()
     extraSize = 0;
 }
 
-OMXAudio::~OMXAudio()
+OMXAudioDecoder::~OMXAudioDecoder()
 {
 	if(isInitialized)
 	{
@@ -131,7 +131,7 @@ OMXAudio::~OMXAudio()
 }
 
 
-bool OMXAudio::init(string device, 
+bool OMXAudioDecoder::init(string device, 
                     enum PCMChannels *channelMap,
                     OMXStreamInfo& hints, 
                     OMXClock *clock, 
@@ -168,7 +168,7 @@ bool OMXAudio::init(string device,
 
 	doPassthrough = false;
 
-	/*if(bPassthrough != OMXAudio::ENCODED_NONE)
+	/*if(bPassthrough != OMXAudioDecoder::ENCODED_NONE)
 	{
 		doPassthrough =true;
 	}*/
@@ -389,7 +389,7 @@ bool OMXAudio::init(string device,
 		{
 			delete omxClock;
 			omxClock = NULL;
-			ofLog(OF_LOG_ERROR, "OMXAudio::init error creating av clock");
+			ofLog(OF_LOG_ERROR, "OMXAudioDecoder::init error creating av clock");
 			return false;
 		}
 	}
@@ -485,7 +485,7 @@ bool OMXAudio::init(string device,
 		OMX_BUFFERHEADERTYPE *omxBuffer = decoderComponent.getInputBuffer();
 		if(omxBuffer == NULL)
 		{
-			ofLog(OF_LOG_ERROR, "OMXAudio::init - buffer error");
+			ofLog(OF_LOG_ERROR, "OMXAudioDecoder::init - buffer error");
 			return false;
 		}
 
@@ -493,7 +493,7 @@ bool OMXAudio::init(string device,
 		omxBuffer->nFilledLen = sizeof(waveFormat);
 		if(omxBuffer->nFilledLen > omxBuffer->nAllocLen)
 		{
-			ofLog(OF_LOG_ERROR, "OMXAudio::init - omxBuffer->nFilledLen > omxBuffer->nAllocLen");
+			ofLog(OF_LOG_ERROR, "OMXAudioDecoder::init - omxBuffer->nFilledLen > omxBuffer->nAllocLen");
 			return false;
 		}
 		memset((unsigned char *)omxBuffer->pBuffer, 0x0, omxBuffer->nAllocLen);
@@ -515,14 +515,14 @@ bool OMXAudio::init(string device,
 
 	setCurrentVolume(currentVolume);
 
-	ofLog(OF_LOG_VERBOSE, "OMXAudio::init Ouput bps %d samplerate %d channels %d device %s buffer size %d bytes per second %d passthrough %d",
+	ofLog(OF_LOG_VERBOSE, "OMXAudioDecoder::init Ouput bps %d samplerate %d channels %d device %s buffer size %d bytes per second %d passthrough %d",
 	      (int)pcm_output.nBitPerSample, (int)pcm_output.nSamplingRate, (int)pcm_output.nChannels, deviceuse.c_str(), bufferLength, bytesPerSecond, doPassthrough);
 
 	return true;
 }
 
 //***********************************************************************************************
-bool OMXAudio::Deinitialize()
+bool OMXAudioDecoder::Deinitialize()
 {
 	if(!isInitialized)
 	{
@@ -587,7 +587,7 @@ bool OMXAudio::Deinitialize()
 	return true;
 }
 
-void OMXAudio::flush()
+void OMXAudioDecoder::flush()
 {
 	if(!isInitialized)
 	{
@@ -606,7 +606,7 @@ void OMXAudio::flush()
 }
 
 //***********************************************************************************************
-bool OMXAudio::pause()
+bool OMXAudioDecoder::pause()
 {
 	if (!isInitialized)
 	{
@@ -625,7 +625,7 @@ bool OMXAudio::pause()
 }
 
 //***********************************************************************************************
-bool OMXAudio::resume()
+bool OMXAudioDecoder::resume()
 {
 	if (!isInitialized)
 	{
@@ -644,7 +644,7 @@ bool OMXAudio::resume()
 }
 
 //***********************************************************************************************
-bool OMXAudio::Stop()
+bool OMXAudioDecoder::Stop()
 {
 	if (!isInitialized)
 	{
@@ -659,13 +659,13 @@ bool OMXAudio::Stop()
 }
 
 //***********************************************************************************************
-long OMXAudio::getCurrentVolume() const
+long OMXAudioDecoder::getCurrentVolume() const
 {
 	return currentVolume;
 }
 
 //***********************************************************************************************
-void OMXAudio::mute(bool bMute)
+void OMXAudioDecoder::mute(bool bMute)
 {
 	if(!isInitialized)
 	{
@@ -683,7 +683,7 @@ void OMXAudio::mute(bool bMute)
 }
 
 //***********************************************************************************************
-bool OMXAudio::setCurrentVolume(long nVolume)
+bool OMXAudioDecoder::setCurrentVolume(long nVolume)
 {
 	if(!isInitialized || doPassthrough)
 	{
@@ -777,23 +777,23 @@ bool OMXAudio::setCurrentVolume(long nVolume)
 
 //***********************************************************************************************
 #if 1
-unsigned int OMXAudio::GetSpace()
+unsigned int OMXAudioDecoder::GetSpace()
 {
 	int free = decoderComponent.getInputBufferSpace();
 	return free;
 }
 #endif
-unsigned int OMXAudio::addPackets(void* data, unsigned int len)
+unsigned int OMXAudioDecoder::addPackets(void* data, unsigned int len)
 {
 	return addPackets(data, len, 0, 0);
 }
 
 //***********************************************************************************************
-unsigned int OMXAudio::addPackets(void* data, unsigned int len, double dts, double pts)
+unsigned int OMXAudioDecoder::addPackets(void* data, unsigned int len, double dts, double pts)
 {
 	if(!isInitialized)
 	{
-		ofLog(OF_LOG_ERROR,"OMXAudio::addPackets - sanity failed. no valid play handle!");
+		ofLog(OF_LOG_ERROR,"OMXAudioDecoder::addPackets - sanity failed. no valid play handle!");
 		return len;
 	}
 
@@ -811,7 +811,7 @@ unsigned int OMXAudio::addPackets(void* data, unsigned int len, double dts, doub
 
 		if(omxBuffer == NULL)
 		{
-			ofLog(OF_LOG_ERROR, "OMXAudio::Decode timeout");
+			ofLog(OF_LOG_ERROR, "OMXAudioDecoder::Decode timeout");
 			return len;
 		}
 
@@ -987,18 +987,18 @@ unsigned int OMXAudio::addPackets(void* data, unsigned int len, double dts, doub
 }
 
 
-float OMXAudio::getCacheTotal()
+float OMXAudioDecoder::getCacheTotal()
 {
 	return (float)bufferLength / (float)bytesPerSecond;
 }
 
-unsigned int OMXAudio::getChunkLen()
+unsigned int OMXAudioDecoder::getChunkLen()
 {
 	return chunkLength;
 }
 
 
-unsigned int OMXAudio::GetAudioRenderingLatency()
+unsigned int OMXAudioDecoder::GetAudioRenderingLatency()
 {
 	OMX_PARAM_U32TYPE param;
 	OMX_INIT_STRUCTURE(param);
@@ -1013,7 +1013,7 @@ unsigned int OMXAudio::GetAudioRenderingLatency()
 	return param.nU32;
 }
 
-void OMXAudio::submitEOS()
+void OMXAudioDecoder::submitEOS()
 {
 	//ofLogVerbose(__func__) << "START";
 	if(!isInitialized || doPause)
@@ -1045,7 +1045,7 @@ void OMXAudio::submitEOS()
 
 }
 
-bool OMXAudio::EOS()
+bool OMXAudioDecoder::EOS()
 {
 	if(!isInitialized || doPause)
 	{
@@ -1058,7 +1058,7 @@ bool OMXAudio::EOS()
 
 
 
-bool OMXAudio::setClock(OMXClock *clock)
+bool OMXAudioDecoder::setClock(OMXClock *clock)
 {
 	if(omxClock != NULL)
 	{
@@ -1070,7 +1070,7 @@ bool OMXAudio::setClock(OMXClock *clock)
 	return true;
 }
 
-void OMXAudio::setCodingType(AVCodecID codec)
+void OMXAudioDecoder::setCodingType(AVCodecID codec)
 {
 	switch(codec)
 	{
@@ -1090,7 +1090,7 @@ void OMXAudio::setCodingType(AVCodecID codec)
 	}
 }
 
-void OMXAudio::printChannels(OMX_AUDIO_CHANNELTYPE eChannelMapping[])
+void OMXAudioDecoder::printChannels(OMX_AUDIO_CHANNELTYPE eChannelMapping[])
 {
 	for(int i = 0; i < OMX_AUDIO_MAXCHANNELS; i++)
 	{
@@ -1133,7 +1133,7 @@ void OMXAudio::printChannels(OMX_AUDIO_CHANNELTYPE eChannelMapping[])
 	}
 }
 
-void OMXAudio::printPCM(OMX_AUDIO_PARAM_PCMMODETYPE *pcm)
+void OMXAudioDecoder::printPCM(OMX_AUDIO_PARAM_PCMMODETYPE *pcm)
 {
 
 	stringstream info;

@@ -1,5 +1,5 @@
 
-#include "OMXPlayerVideoBase.h"
+#include "VideoPlayerBase.h"
 
 unsigned count_bits(int32_t value)
 {
@@ -11,7 +11,7 @@ unsigned count_bits(int32_t value)
 	return bits;
 }
 
-OMXPlayerVideoBase::OMXPlayerVideoBase()
+VideoPlayerBase::VideoPlayerBase()
 {
 	isOpen          = false;
 	streamID     = -1;
@@ -34,23 +34,23 @@ OMXPlayerVideoBase::OMXPlayerVideoBase()
 }
 
 
-double OMXPlayerVideoBase::getCurrentPTS()
+double VideoPlayerBase::getCurrentPTS()
 {
 	return currentPTS;
 }
 
-double OMXPlayerVideoBase::GetFPS()
+double VideoPlayerBase::GetFPS()
 {
 	return m_fps;
 }
 
-unsigned int OMXPlayerVideoBase::getCached()
+unsigned int VideoPlayerBase::getCached()
 {
 	return cachedSize;
 }
 
 
-int OMXPlayerVideoBase::getCurrentFrame()
+int VideoPlayerBase::getCurrentFrame()
 {
 	if (decoder) 
 	{
@@ -59,7 +59,7 @@ int OMXPlayerVideoBase::getCurrentFrame()
 	return 0;
 }
 
-void OMXPlayerVideoBase::resetFrameCounter()
+void VideoPlayerBase::resetFrameCounter()
 {
 	if (decoder) 
 	{
@@ -68,12 +68,12 @@ void OMXPlayerVideoBase::resetFrameCounter()
 }
 
 
-void OMXPlayerVideoBase::setSpeed(int speed_)
+void VideoPlayerBase::setSpeed(int speed_)
 {
 	speed = speed_;
 }
 
-int OMXPlayerVideoBase::getSpeed()
+int VideoPlayerBase::getSpeed()
 {
 	return speed;
 }
@@ -81,27 +81,27 @@ int OMXPlayerVideoBase::getSpeed()
 
 
 
-void OMXPlayerVideoBase::lock()
+void VideoPlayerBase::lock()
 {
 	pthread_mutex_lock(&m_lock);
 }
 
-void OMXPlayerVideoBase::unlock()
+void VideoPlayerBase::unlock()
 {
 	pthread_mutex_unlock(&m_lock);
 }
 
-void OMXPlayerVideoBase::lockDecoder()
+void VideoPlayerBase::lockDecoder()
 {
 	pthread_mutex_lock(&m_lock_decoder);
 }
 
-void OMXPlayerVideoBase::unlockDecoder()
+void VideoPlayerBase::unlockDecoder()
 {
 	pthread_mutex_unlock(&m_lock_decoder);
 }
 
-bool OMXPlayerVideoBase::decode(OMXPacket *pkt)
+bool VideoPlayerBase::decode(OMXPacket *pkt)
 {
 	if(!pkt)
 	{
@@ -126,15 +126,15 @@ bool OMXPlayerVideoBase::decode(OMXPacket *pkt)
 	}
 	
 	// CLog::Log(LOGINFO, "CDVDPlayerVideo::Decode dts:%.0f pts:%.0f cur:%.0f, size:%d", pkt->dts, pkt->pts, currentPTS, pkt->size);
-	//ofLog(OF_LOG_VERBOSE, "OMXPlayerVideoBase::Decode dts:%.0f pts:%.0f cur:%.0f, size:%d", pkt->dts, pkt->pts, currentPTS, pkt->size);
+	//ofLog(OF_LOG_VERBOSE, "VideoPlayerBase::Decode dts:%.0f pts:%.0f cur:%.0f, size:%d", pkt->dts, pkt->pts, currentPTS, pkt->size);
 	return decoder->decode(pkt->data, pkt->size, pts);
 }
 
 
 
-void OMXPlayerVideoBase::flush()
+void VideoPlayerBase::flush()
 {
-	//ofLogVerbose(__func__) << "OMXPlayerVideoBase::Flush start";
+	//ofLogVerbose(__func__) << "VideoPlayerBase::Flush start";
 
 
 	doFlush_requested = true;
@@ -146,7 +146,7 @@ void OMXPlayerVideoBase::flush()
 	{
 		OMXPacket *pkt = packets.front();
 		packets.pop_front();
-		//ofLogVerbose(__func__) << "OMXPlayerVideoBase->OMXReader freePacket";
+		//ofLogVerbose(__func__) << "VideoPlayerBase->OMXReader freePacket";
 		OMXReader::freePacket(pkt);
 
 	}
@@ -156,18 +156,18 @@ void OMXPlayerVideoBase::flush()
 
 	if(decoder)
 	{
-		//ofLogVerbose(__func__) << "OMXPlayerVideoBase::decoder->Reset";
+		//ofLogVerbose(__func__) << "VideoPlayerBase::decoder->Reset";
 		decoder->Reset();
 	}
 
 	unlockDecoder();
 	unlock();
-	//ofLogVerbose(__func__) << "OMXPlayerVideoBase::Flush end";
+	//ofLogVerbose(__func__) << "VideoPlayerBase::Flush end";
 }
 
 
 
-bool OMXPlayerVideoBase::addPacket(OMXPacket *pkt)
+bool VideoPlayerBase::addPacket(OMXPacket *pkt)
 {
 	bool ret = false;
 
@@ -197,7 +197,7 @@ bool OMXPlayerVideoBase::addPacket(OMXPacket *pkt)
 
 
 
-void OMXPlayerVideoBase::process()
+void VideoPlayerBase::process()
 {
 	OMXPacket *omxPacket = NULL;
 
@@ -265,7 +265,7 @@ void OMXPlayerVideoBase::process()
 	}
 }
 
-bool OMXPlayerVideoBase::closeDecoder()
+bool VideoPlayerBase::closeDecoder()
 {
 	if(decoder)
 	{
@@ -275,7 +275,7 @@ bool OMXPlayerVideoBase::closeDecoder()
 	return true;
 }
 
-void OMXPlayerVideoBase::submitEOS()
+void VideoPlayerBase::submitEOS()
 {
 	if(decoder)
 	{
@@ -283,7 +283,7 @@ void OMXPlayerVideoBase::submitEOS()
 	}
 }
 
-bool OMXPlayerVideoBase::EOS()
+bool VideoPlayerBase::EOS()
 {
 	bool atEndofStream = false;
 

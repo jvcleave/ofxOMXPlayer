@@ -1,8 +1,8 @@
 #pragma once
-#include "OMXPlayerVideoBase.h"
+#include "VideoPlayerBase.h"
 
 
-#include "OMXEGLImage.h"
+#include "VideoDecoderTextured.h"
 
 
 #include <deque>
@@ -10,18 +10,18 @@
 
 
 
-class OMXPlayerEGLImage : public OMXPlayerVideoBase
+class VideoPlayerTextured : public VideoPlayerBase
 {
 	public:
-		OMXPlayerEGLImage();
-		~OMXPlayerEGLImage();
+		VideoPlayerTextured();
+		~VideoPlayerTextured();
 
 		bool open(OMXStreamInfo& hints, OMXClock *av_clock, EGLImageKHR eglImage);
 		bool openDecoder();
 		bool close();
 
 		ofxOMXPlayerSettings settings;
-		OMXEGLImage*				eglImageDecoder;
+		VideoDecoderTextured*				eglImageDecoder;
 		EGLImageKHR eglImage;
 };
 

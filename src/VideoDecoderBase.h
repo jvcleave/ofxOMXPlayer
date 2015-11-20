@@ -16,11 +16,11 @@
 
 
 
-class OMXDecoderBase
+class VideoDecoderBase
 {
 public:
-    OMXDecoderBase();
-    virtual ~OMXDecoderBase();
+    VideoDecoderBase();
+    virtual ~VideoDecoderBase();
     OMX_VIDEO_CODINGTYPE m_codingType;
     
     Tunnel clockTunnel;

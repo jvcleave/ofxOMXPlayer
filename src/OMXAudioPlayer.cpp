@@ -20,7 +20,7 @@
  */
 
 
-#include "OMXPlayerAudio.h"
+#include "OMXAudioPlayer.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -32,7 +32,7 @@
 
 #define MAX_DATA_SIZE    3 * 1024 * 1024
 
-OMXPlayerAudio::OMXPlayerAudio()
+OMXAudioPlayer::OMXAudioPlayer()
 {
 	isOpen          = false;
 	omxClock      = NULL;
@@ -51,7 +51,7 @@ OMXPlayerAudio::OMXPlayerAudio()
 	pthread_mutex_init(&m_lock_decoder, NULL);
 }
 
-OMXPlayerAudio::~OMXPlayerAudio()
+OMXAudioPlayer::~OMXAudioPlayer()
 {
 	if(isOpen)
 	{
@@ -65,27 +65,27 @@ OMXPlayerAudio::~OMXPlayerAudio()
 	pthread_mutex_destroy(&m_lock_decoder);
 }
 
-void OMXPlayerAudio::lock()
+void OMXAudioPlayer::lock()
 {
 	pthread_mutex_lock(&m_lock);
 }
 
-void OMXPlayerAudio::unlock()
+void OMXAudioPlayer::unlock()
 {
 	pthread_mutex_unlock(&m_lock);
 }
 
-void OMXPlayerAudio::lockDecoder()
+void OMXAudioPlayer::lockDecoder()
 {
 	pthread_mutex_lock(&m_lock_decoder);
 }
 
-void OMXPlayerAudio::unlockDecoder()
+void OMXAudioPlayer::unlockDecoder()
 {
 	pthread_mutex_unlock(&m_lock_decoder);
 }
 
-bool OMXPlayerAudio::open(OMXStreamInfo& hints, 
+bool OMXAudioPlayer::open(OMXStreamInfo& hints, 
                           OMXClock *av_clock, 
                           OMXReader *omx_reader,
                           std::string device)
@@ -136,7 +136,7 @@ bool OMXPlayerAudio::open(OMXStreamInfo& hints,
 	return true;
 }
 
-bool OMXPlayerAudio::close()
+bool OMXAudioPlayer::close()
 {
 	doAbort  = true;
 	doFlush   = true;
@@ -149,7 +149,7 @@ bool OMXPlayerAudio::close()
 		pthread_cond_broadcast(&m_packet_cond);
 		unlock();
 
-		StopThread("OMXPlayerAudio");
+		StopThread("OMXAudioPlayer");
 	}
 
 	closeDecoder();
@@ -166,7 +166,7 @@ bool OMXPlayerAudio::close()
 
 
 
-bool OMXPlayerAudio::decode(OMXPacket *pkt)
+bool OMXAudioPlayer::decode(OMXPacket *pkt)
 {
 	if(!pkt)
 	{
@@ -295,7 +295,7 @@ bool OMXPlayerAudio::decode(OMXPacket *pkt)
 #endif
 }
 
-void OMXPlayerAudio::process()
+void OMXAudioPlayer::process()
 {
 	OMXPacket *omxPacket = NULL;
 
@@ -349,9 +349,9 @@ void OMXPlayerAudio::process()
 	}
 }
 
-void OMXPlayerAudio::flush()
+void OMXAudioPlayer::flush()
 {
-	//ofLogVerbose(__func__) << "OMXPlayerAudio::Flush start";
+	//ofLogVerbose(__func__) << "OMXAudioPlayer::Flush start";
 	lock();
 	lockDecoder();
 	doFlush = true;
@@ -369,10 +369,10 @@ void OMXPlayerAudio::flush()
 	}
 	unlockDecoder();
 	unlock();
-	//ofLogVerbose(__func__) << "OMXPlayerAudio::Flush end";
+	//ofLogVerbose(__func__) << "OMXAudioPlayer::Flush end";
 }
 
-bool OMXPlayerAudio::addPacket(OMXPacket *pkt)
+bool OMXAudioPlayer::addPacket(OMXPacket *pkt)
 {
 	bool ret = false;
 
@@ -399,7 +399,7 @@ bool OMXPlayerAudio::addPacket(OMXPacket *pkt)
 	return ret;
 }
 
-bool OMXPlayerAudio::openCodec()
+bool OMXAudioPlayer::openCodec()
 {
 	audioCodecOMX = new AudioCodecOMX();
 
@@ -414,7 +414,7 @@ bool OMXPlayerAudio::openCodec()
 	return true;
 }
 
-void OMXPlayerAudio::closeCodec()
+void OMXAudioPlayer::closeCodec()
 {
 	if(audioCodecOMX)
 	{
@@ -423,39 +423,39 @@ void OMXPlayerAudio::closeCodec()
 	audioCodecOMX = NULL;
 }
 
-OMXAudio::EEncoded OMXPlayerAudio::processPassthrough(OMXStreamInfo hints)
+OMXAudioDecoder::EEncoded OMXAudioPlayer::processPassthrough(OMXStreamInfo hints)
 {
     if(deviceName == "omx:local")
     {
-        return OMXAudio::ENCODED_NONE;
+        return OMXAudioDecoder::ENCODED_NONE;
     }
     
-    OMXAudio::EEncoded passthrough = OMXAudio::ENCODED_NONE;
+    OMXAudioDecoder::EEncoded passthrough = OMXAudioDecoder::ENCODED_NONE;
     
     if(hints.codec == CODEC_ID_AC3)
     {
-        passthrough = OMXAudio::ENCODED_IEC61937_AC3;
+        passthrough = OMXAudioDecoder::ENCODED_IEC61937_AC3;
     }
     if(hints.codec == CODEC_ID_EAC3)
     {
-        passthrough = OMXAudio::ENCODED_IEC61937_EAC3;
+        passthrough = OMXAudioDecoder::ENCODED_IEC61937_EAC3;
     }
     if(hints.codec == CODEC_ID_DTS)
     {
-        passthrough = OMXAudio::ENCODED_IEC61937_DTS;
+        passthrough = OMXAudioDecoder::ENCODED_IEC61937_DTS;
     }
     
     return passthrough;
 
 }
 
-bool OMXPlayerAudio::openDecoder()
+bool OMXAudioPlayer::openDecoder()
 {
 	//ofLogVerbose(__func__) << "doHardwareDecode: " << doHardwareDecode;
 	//ofLogVerbose(__func__) << "doPassthrough: " << doPassthrough;
 	bool bAudioRenderOpen = false;
 
-	decoder = new OMXAudio();
+	decoder = new OMXAudioDecoder();
 	decoder->setClock(omxClock);
 
 	if(doPassthrough)
@@ -503,7 +503,7 @@ bool OMXPlayerAudio::openDecoder()
 	return true;
 }
 
-bool OMXPlayerAudio::closeDecoder()
+bool OMXAudioPlayer::closeDecoder()
 {
 	if(decoder)
 	{
@@ -513,7 +513,7 @@ bool OMXPlayerAudio::closeDecoder()
 	return true;
 }
 
-void OMXPlayerAudio::submitEOS()
+void OMXAudioPlayer::submitEOS()
 {
 	if(decoder)
 	{
@@ -521,14 +521,14 @@ void OMXPlayerAudio::submitEOS()
 	}
 }
 
-bool OMXPlayerAudio::EOS()
+bool OMXAudioPlayer::EOS()
 {
 	return packets.empty() && (!decoder || decoder->EOS());
 }
 
-void OMXPlayerAudio::WaitCompletion()
+void OMXAudioPlayer::WaitCompletion()
 {
-	//ofLogVerbose(__func__) << "OMXPlayerAudio::WaitCompletion";
+	//ofLogVerbose(__func__) << "OMXAudioPlayer::WaitCompletion";
 	if(!decoder)
 	{
 		return;
@@ -539,13 +539,13 @@ void OMXPlayerAudio::WaitCompletion()
 	{
 		if(EOS())
 		{
-			ofLog(OF_LOG_VERBOSE, "%s::%s - got eos\n", "OMXPlayerAudio", __func__);
+			ofLog(OF_LOG_VERBOSE, "%s::%s - got eos\n", "OMXAudioPlayer", __func__);
 			break;
 		}
 
 		if(nTimeOut == 0)
 		{
-			ofLog(OF_LOG_ERROR, "%s::%s - wait for eos timed out\n", "OMXPlayerAudio", __func__);
+			ofLog(OF_LOG_ERROR, "%s::%s - wait for eos timed out\n", "OMXAudioPlayer", __func__);
 			break;
 		}
 		omxClock->sleep(50);
@@ -553,7 +553,7 @@ void OMXPlayerAudio::WaitCompletion()
 	}
 }
 
-void OMXPlayerAudio::setCurrentVolume(long nVolume)
+void OMXAudioPlayer::setCurrentVolume(long nVolume)
 {
 	//ofLogVerbose(__func__) << "nVolume: " << nVolume;
 	if(decoder)
@@ -562,7 +562,7 @@ void OMXPlayerAudio::setCurrentVolume(long nVolume)
 	}
 }
 
-long OMXPlayerAudio::getCurrentVolume()
+long OMXAudioPlayer::getCurrentVolume()
 {
 	if(decoder)
 	{
@@ -574,7 +574,7 @@ long OMXPlayerAudio::getCurrentVolume()
 	}
 }
 
-void OMXPlayerAudio::setSpeed(int speed_)
+void OMXAudioPlayer::setSpeed(int speed_)
 {
 	speed = speed_;
 }

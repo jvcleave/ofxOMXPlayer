@@ -309,16 +309,16 @@ bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
 	{
 		if (!eglPlayer)
 		{
-			eglPlayer = new OMXPlayerEGLImage();
+			eglPlayer = new VideoPlayerTextured();
 		}
 		didVideoOpen = eglPlayer->open(videoStreamInfo, &clock, eglImage);
-		videoPlayer = (OMXPlayerVideoBase*)eglPlayer;
+		videoPlayer = (VideoPlayerBase*)eglPlayer;
 	}
 	else
 	{
 		if (!nonEglPlayer)
 		{
-			nonEglPlayer = new OMXPlayerVideo();
+			nonEglPlayer = new VideoPlayerNonTextured();
 		}
 		bool deinterlace = false;
 		bool hdmi_clock_sync = true;
@@ -329,7 +329,7 @@ bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
 		nonEglPlayer->setDisplayRect(displayRect);
 		
 		didVideoOpen = nonEglPlayer->open(videoStreamInfo, &clock, deinterlace, hdmi_clock_sync, display_aspect);
-		videoPlayer = (OMXPlayerVideoBase*)nonEglPlayer;
+		videoPlayer = (VideoPlayerBase*)nonEglPlayer;
 		
 
 	}
@@ -343,7 +343,7 @@ bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
 		{
 			deviceString = "omx:local";
 		}
-		audioPlayer = new OMXPlayerAudio();
+		audioPlayer = new OMXAudioPlayer();
 		didAudioOpen = audioPlayer->open(audioStreamInfo, &clock, &omxReader, deviceString);
 		if (didAudioOpen)
 		{

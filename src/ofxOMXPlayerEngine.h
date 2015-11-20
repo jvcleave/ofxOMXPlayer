@@ -13,9 +13,9 @@ extern "C"
 
 #include "OMXThread.h"
 #include "OMXClock.h"
-#include "OMXPlayerEGLImage.h"
-#include "OMXPlayerVideo.h"
-#include "OMXPlayerAudio.h"
+#include "VideoPlayerTextured.h"
+#include "VideoPlayerNonTextured.h"
+#include "OMXAudioPlayer.h"
 
 
 
@@ -97,10 +97,10 @@ class ofxOMXPlayerEngine: public OMXThread
 		OMXClock				clock;
 
 		OMXPacket*				packet;
-		OMXPlayerVideo*			nonEglPlayer;
-		OMXPlayerEGLImage*		eglPlayer;
-		OMXPlayerVideoBase*		videoPlayer;
-		OMXPlayerAudio*			audioPlayer;
+		VideoPlayerNonTextured*			nonEglPlayer;
+		VideoPlayerTextured*		eglPlayer;
+		VideoPlayerBase*		videoPlayer;
+		OMXAudioPlayer*			audioPlayer;
 		ofxOMXPlayerListener*	listener;
 		OMXReader				omxReader;
 
