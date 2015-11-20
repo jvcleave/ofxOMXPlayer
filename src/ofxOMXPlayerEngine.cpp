@@ -222,8 +222,8 @@ bool ofxOMXPlayerEngine::setup(ofxOMXPlayerSettings& settings)
 
 		//ofLogVerbose(__func__) << "omxReader open moviePath PASS: " << moviePath;
 
-		hasVideo = omxReader.VideoStreamCount();
-		int audioStreamCount = omxReader.AudioStreamCount();
+		hasVideo = omxReader.getNumVideoStreams();
+		int audioStreamCount = omxReader.getNumAudioStreams();
 
 		if (audioStreamCount>0)
 		{
@@ -436,13 +436,13 @@ void ofxOMXPlayerEngine::Process()
 
 		}
 
-		if (omxReader.IsEof() && !packet && isCacheEmpty)
+		if (omxReader.getIsEOF() && !packet && isCacheEmpty)
 		{
 			videoPlayer->submitEOS();
 
 		}
 
-		if(doLooping && omxReader.IsEof() && !packet)
+		if(doLooping && omxReader.getIsEOF() && !packet)
 		{
 
 
@@ -491,7 +491,7 @@ void ofxOMXPlayerEngine::Process()
 		}
 		else
 		{
-			if (!doLooping && omxReader.IsEof() && !packet && isCacheEmpty)
+			if (!doLooping && omxReader.getIsEOF() && !packet && isCacheEmpty)
 			{
 				if (videoPlayer->EOS())
 				{

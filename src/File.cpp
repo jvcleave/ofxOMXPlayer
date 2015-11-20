@@ -15,7 +15,7 @@ using namespace std;
 //*********************************************************************************************
 CFile::CFile()
 {
-	m_pFile = NULL;
+	fileObject = NULL;
 	m_flags = 0;
 	m_iLength = 0;
 	m_bPipe = false;
@@ -24,14 +24,14 @@ CFile::CFile()
 //*********************************************************************************************
 CFile::~CFile()
 {
-	if(m_pFile && !m_bPipe)
+	if(fileObject && !m_bPipe)
 	{
-		fclose(m_pFile);
+		fclose(fileObject);
 	}
 }
 void CFile::rewindFile()
 {
-	rewind(m_pFile);
+	rewind(fileObject);
 }
 //*********************************************************************************************
 bool CFile::Open(std::string& strFileName, unsigned int flags)
@@ -41,19 +41,19 @@ bool CFile::Open(std::string& strFileName, unsigned int flags)
 	if (strFileName.compare(0, 5, "pipe:") == 0)
 	{
 		m_bPipe = true;
-		m_pFile = stdin;
+		fileObject = stdin;
 		m_iLength = 0;
 		return true;
 	}
-	m_pFile = fopen64(strFileName.c_str(), "r");
-	if(!m_pFile)
+	fileObject = fopen64(strFileName.c_str(), "r");
+	if(!fileObject)
 	{
 		return false;
 	}
 
-	fseeko64(m_pFile, 0, SEEK_END);
-	m_iLength = ftello64(m_pFile);
-	fseeko64(m_pFile, 0, SEEK_SET);
+	fseeko64(fileObject, 0, SEEK_END);
+	m_iLength = ftello64(fileObject);
+	fseeko64(fileObject, 0, SEEK_SET);
 
 	return true;
 }
@@ -88,12 +88,12 @@ unsigned int CFile::Read(void *lpBuf, int64_t uiBufSize)
 {
 	unsigned int ret = 0;
 
-	if(!m_pFile)
+	if(!fileObject)
 	{
 		return 0;
 	}
 
-	ret = fread(lpBuf, 1, uiBufSize, m_pFile);
+	ret = fread(lpBuf, 1, uiBufSize, fileObject);
 
 	return ret;
 }
@@ -101,22 +101,22 @@ unsigned int CFile::Read(void *lpBuf, int64_t uiBufSize)
 //*********************************************************************************************
 void CFile::Close()
 {
-	if(m_pFile && !m_bPipe)
+	if(fileObject && !m_bPipe)
 	{
-		fclose(m_pFile);
+		fclose(fileObject);
 	}
-	m_pFile = NULL;
+	fileObject = NULL;
 }
 
 //*********************************************************************************************
 int64_t CFile::Seek(int64_t iFilePosition, int iWhence)
 {
-	if (!m_pFile)
+	if (!fileObject)
 	{
 		return -1;
 	}
 
-	return fseeko64(m_pFile, iFilePosition, iWhence);;
+	return fseeko64(fileObject, iFilePosition, iWhence);;
 }
 
 //*********************************************************************************************
@@ -128,12 +128,12 @@ int64_t CFile::GetLength()
 //*********************************************************************************************
 int64_t CFile::GetPosition()
 {
-	if (!m_pFile)
+	if (!fileObject)
 	{
 		return -1;
 	}
 
-	return ftello64(m_pFile);
+	return ftello64(fileObject);
 }
 
 //*********************************************************************************************
@@ -144,7 +144,7 @@ int CFile::Write(void* lpBuf, int64_t uiBufSize)
 
 int CFile::IoControl(EIoControl request, void* param)
 {
-	if(request == IOCTRL_SEEK_POSSIBLE && m_pFile)
+	if(request == IOCTRL_SEEK_POSSIBLE && fileObject)
 	{
 		if (m_bPipe)
 		{
@@ -152,7 +152,7 @@ int CFile::IoControl(EIoControl request, void* param)
 		}
 
 		struct stat st;
-		if (fstat(fileno(m_pFile), &st) == 0)
+		if (fstat(fileno(fileObject), &st) == 0)
 		{
 			return !S_ISFIFO(st.st_mode);
 		}
@@ -161,9 +161,9 @@ int CFile::IoControl(EIoControl request, void* param)
 	return -1;
 }
 
-bool CFile::IsEOF()
+bool CFile::IsgetIsEOF()
 {
-	if (!m_pFile)
+	if (!fileObject)
 	{
 		return -1;
 	}
@@ -173,5 +173,5 @@ bool CFile::IsEOF()
 		return false;
 	}
 
-	return feof(m_pFile) != 0;
+	return feof(fileObject) != 0;
 }

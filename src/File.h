@@ -50,11 +50,11 @@ namespace XFILE
 				return 6144 /*FFMPEG_FILE_BUFFER_SIZE*/;
 			};
 			int IoControl(EIoControl request, void* param);
-			bool IsEOF();
+			bool IsgetIsEOF();
 			void rewindFile();
 		private:
 			unsigned int m_flags;
-			FILE  *m_pFile;
+			FILE  *fileObject;
 			int64_t m_iLength;
 			bool m_bPipe;
 	};

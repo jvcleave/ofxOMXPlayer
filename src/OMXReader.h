@@ -77,26 +77,26 @@ typedef struct OMXStream
 class OMXReader
 {
 	protected:
-		int                       m_video_index;
-		int                       m_audio_index;
-		int                       m_subtitle_index;
-		int                       m_video_count;
-		int                       m_audio_count;
-		int                       m_subtitle_count;
+		int                       videoIndex;
+		int                       audioIndex;
+		int                       subtitleIndex;
+		int                       videoCount;
+		int                       audioCount;
+		int                       subtitleCount;
 		bool                      m_open;
-		std::string               m_filename;
-		bool                      m_bMatroska;
-		bool                      m_bAVI;
-		XFILE::CFile              *m_pFile;
-		AVFormatContext           *m_pFormatContext;
-		AVIOContext               *m_ioContext;
-		bool                      m_eof;
-		OMXChapter                m_chapters[MAX_OMX_CHAPTERS];
-		OMXStream                 m_streams[MAX_STREAMS];
-		int                       m_chapter_count;
+		std::string               fileName;
+		bool                      isMatroska;
+		bool                      isAVI;
+		XFILE::CFile              *fileObject;
+		AVFormatContext           *avFormatContext;
+		AVIOContext               *avioContext;
+		bool                      isEOF;
+		OMXChapter                omxChapters[MAX_OMX_CHAPTERS];
+		OMXStream                 omxStreams[MAX_STREAMS];
+		int                       chapterCount;
 		double                    m_iCurrentPts;
 		int                       speed;
-		unsigned int              m_program;
+		unsigned int              programID;
 		pthread_mutex_t           m_lock;
 		void Lock();
 		void UnLock();
@@ -121,27 +121,27 @@ class OMXReader
 		bool GetHints(AVStream *stream, OMXStreamInfo *hints);
 		bool GetHints(OMXStreamType type, unsigned int index, OMXStreamInfo& hints);
 		bool GetHints(OMXStreamType type, OMXStreamInfo& hints);
-		bool IsEof();
-		int  AudioStreamCount()
+		bool getIsEOF();
+		int  getNumAudioStreams()
 		{
-			return m_audio_count;
+			return audioCount;
 		};
-		int  VideoStreamCount()
+		int  getNumVideoStreams()
 		{
-			return m_video_count;
+			return videoCount;
 		};
-		int  SubtitleStreamCount()
+		int  getNumSubtitleStreams()
 		{
-			return m_subtitle_count;
+			return subtitleCount;
 		};
 		bool SetActiveStream(OMXStreamType type, unsigned int index);
 		int  GetChapterCount()
 		{
-			return m_chapter_count;
+			return chapterCount;
 		};
 		OMXChapter GetChapter(unsigned int chapter)
 		{
-			return m_chapters[(chapter > MAX_OMX_CHAPTERS) ? MAX_OMX_CHAPTERS : chapter];
+			return omxChapters[(chapter > MAX_OMX_CHAPTERS) ? MAX_OMX_CHAPTERS : chapter];
 		};
 		static void FreePacket(OMXPacket *pkt);
 		static OMXPacket *AllocPacket(int size);
@@ -157,24 +157,24 @@ class OMXReader
 		bool SeekChapter(int chapter, double* startpts);
 		int GetAudioIndex()
 		{
-			return (m_audio_index >= 0) ? m_streams[m_audio_index].index : -1;
+			return (audioIndex >= 0) ? omxStreams[audioIndex].index : -1;
 		};
 		int GetSubtitleIndex()
 		{
-			return (m_subtitle_index >= 0) ? m_streams[m_subtitle_index].index : -1;
+			return (subtitleIndex >= 0) ? omxStreams[subtitleIndex].index : -1;
 		};
 
 		int GetRelativeIndex(size_t index)
 		{
 			//assert(index < MAX_STREAMS);
-			return m_streams[index].index;
+			return omxStreams[index].index;
 		}
 
 		int GetStreamLength();
 		static double NormalizeFrameduration(double frameduration);
 		bool IsMatroska()
 		{
-			return m_bMatroska;
+			return isMatroska;
 		};
 		std::string GetCodecName(OMXStreamType type);
 		std::string GetCodecName(OMXStreamType type, unsigned int index);
