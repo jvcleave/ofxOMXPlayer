@@ -187,7 +187,7 @@ bool ofxOMXPlayerEngine::didReadFile(bool doSkipAvProbe)
     
     if(didOpenMovie)
     {
-        omxReader.GetHints(OMXSTREAM_VIDEO, videoStreamInfo);
+        omxReader.getHints(OMXSTREAM_VIDEO, videoStreamInfo);
         if(videoStreamInfo.width > 0 || videoStreamInfo.height > 0)
         {
             passed = true;
@@ -228,7 +228,7 @@ bool ofxOMXPlayerEngine::setup(ofxOMXPlayerSettings& settings)
 		if (audioStreamCount>0)
 		{
 			hasAudio = true;
-             omxReader.GetHints(OMXSTREAM_AUDIO, audioStreamInfo);
+             omxReader.getHints(OMXSTREAM_AUDIO, audioStreamInfo);
 			//ofLogVerbose(__func__) << "HAS AUDIO";
 		}
 		else
@@ -245,7 +245,7 @@ bool ofxOMXPlayerEngine::setup(ofxOMXPlayerSettings& settings)
 		{
 			//ofLogVerbose(__func__)	<< "Video streams detection PASS";
             
-            omxReader.GetHints(OMXSTREAM_VIDEO, videoStreamInfo);
+            omxReader.getHints(OMXSTREAM_VIDEO, videoStreamInfo);
             videoWidth	= videoStreamInfo.width;
             videoHeight = videoStreamInfo.height;
             omxPlayerSettings.videoWidth	= videoStreamInfo.width;
@@ -523,7 +523,7 @@ void ofxOMXPlayerEngine::Process()
 
 		if(hasVideo && packet && omxReader.IsActive(OMXSTREAM_VIDEO, packet->stream_index))
 		{
-			if(videoPlayer->AddPacket(packet))
+			if(videoPlayer->addPacket(packet))
 			{
 				packet = NULL;
 			}
@@ -535,7 +535,7 @@ void ofxOMXPlayerEngine::Process()
 		}
 		else if(hasAudio && packet && packet->codec_type == AVMEDIA_TYPE_AUDIO)
 		{
-			if(audioPlayer->AddPacket(packet))
+			if(audioPlayer->addPacket(packet))
 			{
 				packet = NULL;
 			}

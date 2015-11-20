@@ -25,7 +25,7 @@ class OMXPlayerVideoBase: public OMXThread
 
 		bool						m_open;
 		OMXStreamInfo				omxStreamInfo;
-		double						m_iCurrentPts;
+		double						currentPTS;
 
 		pthread_cond_t				m_packet_cond;
 		//pthread_cond_t				m_picture_cond;
@@ -51,11 +51,11 @@ class OMXPlayerVideoBase: public OMXThread
 		void						Process();
 		void						Flush();
 
-		bool						AddPacket(OMXPacket *pkt);
+		bool						addPacket(OMXPacket *pkt);
 
 		virtual bool				OpenDecoder() =0;
 
-		bool						CloseDecoder();
+		bool						closeDecoder();
 		double						GetCurrentPTS();
 		double						GetFPS();
 

@@ -111,8 +111,8 @@ class OMXAudio
 
 		
 
-		unsigned int AddPackets(void* data, unsigned int len);
-		unsigned int AddPackets(void* data, unsigned int len, double dts, double pts);
+		unsigned int addPackets(void* data, unsigned int len);
+		unsigned int addPackets(void* data, unsigned int len, double dts, double pts);
 		unsigned int GetSpace();
 		bool Deinitialize();
 		bool pause();

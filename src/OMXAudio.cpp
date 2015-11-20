@@ -783,17 +783,17 @@ unsigned int OMXAudio::GetSpace()
 	return free;
 }
 #endif
-unsigned int OMXAudio::AddPackets(void* data, unsigned int len)
+unsigned int OMXAudio::addPackets(void* data, unsigned int len)
 {
-	return AddPackets(data, len, 0, 0);
+	return addPackets(data, len, 0, 0);
 }
 
 //***********************************************************************************************
-unsigned int OMXAudio::AddPackets(void* data, unsigned int len, double dts, double pts)
+unsigned int OMXAudio::addPackets(void* data, unsigned int len, double dts, double pts)
 {
 	if(!isInitialized)
 	{
-		ofLog(OF_LOG_ERROR,"OMXAudio::AddPackets - sanity failed. no valid play handle!");
+		ofLog(OF_LOG_ERROR,"OMXAudio::addPackets - sanity failed. no valid play handle!");
 		return len;
 	}
 

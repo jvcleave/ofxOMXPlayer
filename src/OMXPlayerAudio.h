@@ -29,7 +29,7 @@ class OMXPlayerAudio : public OMXThread
 		std::deque<OMXPacket *>   packets;
 		bool                      m_open;
 		OMXStreamInfo            omxStreamInfo;
-		double                    m_iCurrentPts;
+		double                    currentPTS;
 		pthread_cond_t            m_packet_cond;
 		pthread_cond_t            m_audio_cond;
 		pthread_mutex_t           m_lock;
@@ -73,17 +73,17 @@ class OMXPlayerAudio : public OMXThread
 		bool Decode(OMXPacket *pkt);
 		void Process();
 		void Flush();
-		bool AddPacket(OMXPacket *pkt);
+		bool addPacket(OMXPacket *pkt);
 		bool OpenAudioCodec();
 		void CloseAudioCodec();
 		OMXAudio::EEncoded IsPassthrough(OMXStreamInfo hints);
 		bool OpenDecoder();
-		bool CloseDecoder();
+		bool closeDecoder();
 		//double GetDelay();
 		//double GetCacheTime();
 		double GetCurrentPTS()
 		{
-			return m_iCurrentPts;
+			return currentPTS;
 		};
 		void WaitCompletion();
 		void submitEOS();

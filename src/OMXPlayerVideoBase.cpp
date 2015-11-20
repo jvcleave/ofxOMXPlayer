@@ -21,7 +21,7 @@ OMXPlayerVideoBase::OMXPlayerVideoBase()
 	doFlush         = false;
 	cachedSize   = 0;
 	m_iVideoDelay   = 0;
-	m_iCurrentPts	= DVD_NOPTS_VALUE;
+	currentPTS	= DVD_NOPTS_VALUE;
 	speed         = DVD_PLAYSPEED_NORMAL;
 
 	decoder = NULL;
@@ -36,7 +36,7 @@ OMXPlayerVideoBase::OMXPlayerVideoBase()
 
 double OMXPlayerVideoBase::GetCurrentPTS()
 {
-	return m_iCurrentPts;
+	return currentPTS;
 }
 
 double OMXPlayerVideoBase::GetFPS()
@@ -110,7 +110,7 @@ bool OMXPlayerVideoBase::Decode(OMXPacket *pkt)
 	
 	validHistoryPTS = (validHistoryPTS << 1) | (pkt->pts != DVD_NOPTS_VALUE);
 	double pts = pkt->pts;
-	if(pkt->pts == DVD_NOPTS_VALUE && (m_iCurrentPts == DVD_NOPTS_VALUE || count_bits(validHistoryPTS & 0xffff) < 4))
+	if(pkt->pts == DVD_NOPTS_VALUE && (currentPTS == DVD_NOPTS_VALUE || count_bits(validHistoryPTS & 0xffff) < 4))
 	{
 		pts = pkt->dts;
 	}
@@ -122,11 +122,11 @@ bool OMXPlayerVideoBase::Decode(OMXPacket *pkt)
 
 	if(pts != DVD_NOPTS_VALUE)
 	{
-		m_iCurrentPts = pts;
+		currentPTS = pts;
 	}
 	
-	// CLog::Log(LOGINFO, "CDVDPlayerVideo::Decode dts:%.0f pts:%.0f cur:%.0f, size:%d", pkt->dts, pkt->pts, m_iCurrentPts, pkt->size);
-	//ofLog(OF_LOG_VERBOSE, "OMXPlayerVideoBase::Decode dts:%.0f pts:%.0f cur:%.0f, size:%d", pkt->dts, pkt->pts, m_iCurrentPts, pkt->size);
+	// CLog::Log(LOGINFO, "CDVDPlayerVideo::Decode dts:%.0f pts:%.0f cur:%.0f, size:%d", pkt->dts, pkt->pts, currentPTS, pkt->size);
+	//ofLog(OF_LOG_VERBOSE, "OMXPlayerVideoBase::Decode dts:%.0f pts:%.0f cur:%.0f, size:%d", pkt->dts, pkt->pts, currentPTS, pkt->size);
 	return decoder->Decode(pkt->data, pkt->size, pts);
 }
 
@@ -151,7 +151,7 @@ void OMXPlayerVideoBase::Flush()
 
 	}
 
-	m_iCurrentPts = DVD_NOPTS_VALUE;
+	currentPTS = DVD_NOPTS_VALUE;
 	cachedSize = 0;
 
 	if(decoder)
@@ -167,7 +167,7 @@ void OMXPlayerVideoBase::Flush()
 
 
 
-bool OMXPlayerVideoBase::AddPacket(OMXPacket *pkt)
+bool OMXPlayerVideoBase::addPacket(OMXPacket *pkt)
 {
 	bool ret = false;
 
@@ -199,10 +199,10 @@ bool OMXPlayerVideoBase::AddPacket(OMXPacket *pkt)
 
 void OMXPlayerVideoBase::Process()
 {
-	OMXPacket *omx_pkt = NULL;
+	OMXPacket *omxPacket = NULL;
 
 	//m_pts was previously set to 0 - might need later...
-	//m_iCurrentPts = 0;
+	//currentPTS = 0;
 	
 	while(!doStop && !doAbort)
 	{
@@ -219,38 +219,38 @@ void OMXPlayerVideoBase::Process()
 		}
 
 		Lock();
-		if(doFlush && omx_pkt)
+		if(doFlush && omxPacket)
 		{
-			OMXReader::FreePacket(omx_pkt);
-			omx_pkt = NULL;
+			OMXReader::FreePacket(omxPacket);
+			omxPacket = NULL;
 			doFlush = false;
 		}
 		else
 		{
-			if(!omx_pkt && !packets.empty())
+			if(!omxPacket && !packets.empty())
 			{
-				omx_pkt = packets.front();
-				cachedSize -= omx_pkt->size;
-                //ofLogNotice() << "omx_pkt->pts: " << omx_pkt->pts;
+				omxPacket = packets.front();
+				cachedSize -= omxPacket->size;
+                //ofLogNotice() << "omxPacket->pts: " << omxPacket->pts;
 				packets.pop_front();
 			}
 		}
 		UnLock();
 
 		LockDecoder();
-		if(doFlush && omx_pkt)
+		if(doFlush && omxPacket)
 		{
-			OMXReader::FreePacket(omx_pkt);
-			omx_pkt = NULL;
+			OMXReader::FreePacket(omxPacket);
+			omxPacket = NULL;
 			doFlush = false;
 		}
 		else
 		{
-			if(omx_pkt && Decode(omx_pkt))
+			if(omxPacket && Decode(omxPacket))
 			{
 				
-				OMXReader::FreePacket(omx_pkt);
-				omx_pkt = NULL;
+				OMXReader::FreePacket(omxPacket);
+				omxPacket = NULL;
 			}
 		}
 		
@@ -259,13 +259,13 @@ void OMXPlayerVideoBase::Process()
 
 	}
 	
-	if(omx_pkt)
+	if(omxPacket)
 	{
-		OMXReader::FreePacket(omx_pkt);
+		OMXReader::FreePacket(omxPacket);
 	}
 }
 
-bool OMXPlayerVideoBase::CloseDecoder()
+bool OMXPlayerVideoBase::closeDecoder()
 {
 	if(decoder)
 	{

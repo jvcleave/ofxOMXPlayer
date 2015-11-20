@@ -105,7 +105,7 @@ bool OMXPlayerAudio::Open(OMXStreamInfo& hints,
 	omxClock    = av_clock;
 	omxReader  = omx_reader;
 	deviceName      = device;
-	m_iCurrentPts = DVD_NOPTS_VALUE;
+	currentPTS = DVD_NOPTS_VALUE;
 	doAbort      = false;
 	doFlush       = false;
 	cachedSize = 0;
@@ -152,12 +152,12 @@ bool OMXPlayerAudio::Close()
 		StopThread("OMXPlayerAudio");
 	}
 
-	CloseDecoder();
+	closeDecoder();
 	CloseAudioCodec();
 
 	m_open          = false;
 	streamID     = -1;
-	m_iCurrentPts   = DVD_NOPTS_VALUE;
+	currentPTS   = DVD_NOPTS_VALUE;
 	speed         = DVD_PLAYSPEED_NORMAL;
 
 
@@ -212,7 +212,7 @@ bool OMXPlayerAudio::Decode(OMXPacket *pkt)
 	        omxStreamInfo.bitspersample != pkt->hints.bitspersample)
 	{
        
-		CloseDecoder();
+		closeDecoder();
 		CloseAudioCodec();
 
 		omxStreamInfo = pkt->hints;
@@ -240,11 +240,11 @@ bool OMXPlayerAudio::Decode(OMXPacket *pkt)
 	{
 		if(pkt->pts != DVD_NOPTS_VALUE)
 		{
-			m_iCurrentPts = pkt->pts;
+			currentPTS = pkt->pts;
 		}
 		else if(pkt->dts != DVD_NOPTS_VALUE)
 		{
-			m_iCurrentPts = pkt->dts;
+			currentPTS = pkt->dts;
 		}
 
 		uint8_t *data_dec = pkt->data;
@@ -274,7 +274,7 @@ bool OMXPlayerAudio::Decode(OMXPacket *pkt)
 
 				int ret = 0;
 
-				ret = decoder->AddPackets(decoded, decoded_size, pkt->dts, pkt->pts);
+				ret = decoder->addPackets(decoded, decoded_size, pkt->dts, pkt->pts);
 
 				if(ret != decoded_size)
 				{
@@ -284,7 +284,7 @@ bool OMXPlayerAudio::Decode(OMXPacket *pkt)
 		}
 		else
 		{
-			decoder->AddPackets(pkt->data, pkt->size, pkt->dts, pkt->pts);
+			decoder->addPackets(pkt->data, pkt->size, pkt->dts, pkt->pts);
 		}
 		return true;
 	}
@@ -297,7 +297,7 @@ bool OMXPlayerAudio::Decode(OMXPacket *pkt)
 
 void OMXPlayerAudio::Process()
 {
-	OMXPacket *omx_pkt = NULL;
+	OMXPacket *omxPacket = NULL;
 
 	while(!doStop && !doAbort)
 	{
@@ -314,38 +314,38 @@ void OMXPlayerAudio::Process()
 		}
 
 		Lock();
-		if(doFlush && omx_pkt)
+		if(doFlush && omxPacket)
 		{
-			OMXReader::FreePacket(omx_pkt);
-			omx_pkt = NULL;
+			OMXReader::FreePacket(omxPacket);
+			omxPacket = NULL;
 			doFlush = false;
 		}
-		else if(!omx_pkt && !packets.empty())
+		else if(!omxPacket && !packets.empty())
 		{
-			omx_pkt = packets.front();
-			cachedSize -= omx_pkt->size;
+			omxPacket = packets.front();
+			cachedSize -= omxPacket->size;
 			packets.pop_front();
 		}
 		UnLock();
 
 		LockDecoder();
-		if(doFlush && omx_pkt)
+		if(doFlush && omxPacket)
 		{
-			OMXReader::FreePacket(omx_pkt);
-			omx_pkt = NULL;
+			OMXReader::FreePacket(omxPacket);
+			omxPacket = NULL;
 			doFlush = false;
 		}
-		else if(omx_pkt && Decode(omx_pkt))
+		else if(omxPacket && Decode(omxPacket))
 		{
-			OMXReader::FreePacket(omx_pkt);
-			omx_pkt = NULL;
+			OMXReader::FreePacket(omxPacket);
+			omxPacket = NULL;
 		}
 		UnLockDecoder();
 	}
 
-	if(omx_pkt)
+	if(omxPacket)
 	{
-		OMXReader::FreePacket(omx_pkt);
+		OMXReader::FreePacket(omxPacket);
 	}
 }
 
@@ -361,7 +361,7 @@ void OMXPlayerAudio::Flush()
 		packets.pop_front();
 		OMXReader::FreePacket(pkt);
 	}
-	m_iCurrentPts = DVD_NOPTS_VALUE;
+	currentPTS = DVD_NOPTS_VALUE;
 	cachedSize = 0;
 	if(decoder)
 	{
@@ -372,7 +372,7 @@ void OMXPlayerAudio::Flush()
 	//ofLogVerbose(__func__) << "OMXPlayerAudio::Flush end";
 }
 
-bool OMXPlayerAudio::AddPacket(OMXPacket *pkt)
+bool OMXPlayerAudio::addPacket(OMXPacket *pkt)
 {
 	bool ret = false;
 
@@ -503,7 +503,7 @@ bool OMXPlayerAudio::OpenDecoder()
 	return true;
 }
 
-bool OMXPlayerAudio::CloseDecoder()
+bool OMXPlayerAudio::closeDecoder()
 {
 	if(decoder)
 	{

@@ -18,7 +18,7 @@ OMXReader::OMXReader()
 	avFormatContext = NULL;
 	isEOF           = false;
 	chapterCount = 0;
-	m_iCurrentPts   = DVD_NOPTS_VALUE;
+	currentPTS   = DVD_NOPTS_VALUE;
 	
 	for(int i = 0; i < MAX_STREAMS; i++)
 		omxStreams[i].extradata = NULL;
@@ -76,7 +76,7 @@ static offset_t dvd_file_seek(void *h, offset_t pos, int whence)
 bool OMXReader::Open(std::string filename, bool doSkipAvProbe)
 {
 	
-	m_iCurrentPts = DVD_NOPTS_VALUE;
+	currentPTS = DVD_NOPTS_VALUE;
 	fileName    = filename; 
 	speed       = DVD_PLAYSPEED_NORMAL;
 	programID     = UINT_MAX;
@@ -311,7 +311,7 @@ bool OMXReader::Close()
 	subtitleIndex  = -1;
 	isEOF             = false;
 	chapterCount   = 0;
-	m_iCurrentPts     = DVD_NOPTS_VALUE;
+	currentPTS     = DVD_NOPTS_VALUE;
 	speed           = DVD_PLAYSPEED_NORMAL;
 	
 	ClearStreams();
@@ -321,7 +321,7 @@ bool OMXReader::Close()
 
 /*void OMXReader::FlushRead()
  {
- m_iCurrentPts = DVD_NOPTS_VALUE;
+ currentPTS = DVD_NOPTS_VALUE;
  
  if(!avFormatContext)
  return;
@@ -503,15 +503,15 @@ OMXPacket* OMXReader::Read()
 		memcpy(omxPacket->data, pkt.data, omxPacket->size);
 	
 	omxPacket->stream_index = pkt.stream_index;
-	GetHints(pStream, &omxPacket->hints);
+	getHints(pStream, &omxPacket->hints);
 	
 	omxPacket->dts = ConvertTimestamp(pkt.dts, pStream->time_base.den, pStream->time_base.num);
 	omxPacket->pts = ConvertTimestamp(pkt.pts, pStream->time_base.den, pStream->time_base.num);
 	omxPacket->duration = DVD_SEC_TO_TIME((double)pkt.duration * pStream->time_base.num / pStream->time_base.den);
 
 	// used to guess streamlength
-	if (omxPacket->dts != DVD_NOPTS_VALUE && (omxPacket->dts > m_iCurrentPts || m_iCurrentPts == DVD_NOPTS_VALUE))
-		m_iCurrentPts = omxPacket->dts;
+	if (omxPacket->dts != DVD_NOPTS_VALUE && (omxPacket->dts > currentPTS || currentPTS == DVD_NOPTS_VALUE))
+		currentPTS = omxPacket->dts;
 	
 	// check if stream has passed full duration, needed for live streams
 	if(pkt.dts != (int64_t)AV_NOPTS_VALUE)
@@ -574,13 +574,13 @@ bool OMXReader::GetStreams()
 	}
 	
 	if(videoCount)
-		SetActiveStreamInternal(OMXSTREAM_VIDEO, 0);
+		setActiveStreamInternal(OMXSTREAM_VIDEO, 0);
 	
 	if(audioCount)
-		SetActiveStreamInternal(OMXSTREAM_AUDIO, 0);
+		setActiveStreamInternal(OMXSTREAM_AUDIO, 0);
 	
 	if(subtitleCount)
-		SetActiveStreamInternal(OMXSTREAM_SUBTITLE, 0);
+		setActiveStreamInternal(OMXSTREAM_SUBTITLE, 0);
 	
 	int i = 0;
 	for(i = 0; i < MAX_OMX_CHAPTERS; i++)
@@ -645,7 +645,7 @@ void OMXReader::AddStream(int id)
 			omxStreams[id].codec_name  = GetStreamCodecName(pStream);
 			omxStreams[id].id          = id;
 			audioCount++;
-			GetHints(pStream, &omxStreams[id].hints);
+			getHints(pStream, &omxStreams[id].hints);
 			break;
 		case AVMEDIA_TYPE_VIDEO:
 			omxStreams[id].stream      = pStream;
@@ -654,7 +654,7 @@ void OMXReader::AddStream(int id)
 			omxStreams[id].codec_name  = GetStreamCodecName(pStream);
 			omxStreams[id].id          = id;
 			videoCount++;
-			GetHints(pStream, &omxStreams[id].hints);
+			getHints(pStream, &omxStreams[id].hints);
 			break;
 		case AVMEDIA_TYPE_SUBTITLE:
 			omxStreams[id].stream      = pStream;
@@ -663,7 +663,7 @@ void OMXReader::AddStream(int id)
 			omxStreams[id].codec_name  = GetStreamCodecName(pStream);
 			omxStreams[id].id          = id;
 			subtitleCount++;
-			GetHints(pStream, &omxStreams[id].hints);
+			getHints(pStream, &omxStreams[id].hints);
 			break;
 		default:
 			return;
@@ -693,7 +693,7 @@ void OMXReader::AddStream(int id)
 	}
 }
 
-bool OMXReader::SetActiveStreamInternal(OMXStreamType type, unsigned int index)
+bool OMXReader::setActiveStreamInternal(OMXStreamType type, unsigned int index)
 {
 	bool ret = false;
 	
@@ -784,7 +784,7 @@ bool OMXReader::IsActive(OMXStreamType type, int stream_index)
 	return false;
 }
 
-bool OMXReader::GetHints(AVStream *stream, OMXStreamInfo *hints)
+bool OMXReader::getHints(AVStream *stream, OMXStreamInfo *hints)
 {
 	if(!hints || !stream)
 		return false;
@@ -845,7 +845,7 @@ bool OMXReader::GetHints(AVStream *stream, OMXStreamInfo *hints)
 	return true;
 }
 
-bool OMXReader::GetHints(OMXStreamType type, unsigned int index, OMXStreamInfo &hints)
+bool OMXReader::getHints(OMXStreamType type, unsigned int index, OMXStreamInfo &hints)
 {
 	for(unsigned int i = 0; i < MAX_STREAMS; i++)
 	{
@@ -859,7 +859,7 @@ bool OMXReader::GetHints(OMXStreamType type, unsigned int index, OMXStreamInfo &
 	return false;
 }
 
-bool OMXReader::GetHints(OMXStreamType type, OMXStreamInfo &hints)
+bool OMXReader::getHints(OMXStreamType type, OMXStreamInfo &hints)
 {
 	bool ret = false;
 	
@@ -926,11 +926,11 @@ OMXPacket *OMXReader::AllocPacket(int size)
 	return pkt;
 }
 
-bool OMXReader::SetActiveStream(OMXStreamType type, unsigned int index)
+bool OMXReader::setActiveStream(OMXStreamType type, unsigned int index)
 {
 	bool ret = false;
 	Lock();
-	ret = SetActiveStreamInternal(type, index);
+	ret = setActiveStreamInternal(type, index);
 	UnLock();
 	return ret;
 }
@@ -979,29 +979,29 @@ double OMXReader::ConvertTimestamp(int64_t pts, int den, int num)
 	return timestamp*DVD_TIME_BASE;
 }
 
-int OMXReader::GetChapter()
+int OMXReader::getChapter()
 {
 	if(avFormatContext == NULL
-	   || m_iCurrentPts == DVD_NOPTS_VALUE)
+	   || currentPTS == DVD_NOPTS_VALUE)
 		return 0;
 	
 #if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(52,14,0)
 	for(unsigned i = 0; i < avFormatContext->nb_chapters; i++)
 	{
 		AVChapter *chapter = avFormatContext->chapters[i];
-		if(m_iCurrentPts >= ConvertTimestamp(chapter->start, chapter->time_base.den, chapter->time_base.num)
-		   && m_iCurrentPts <  ConvertTimestamp(chapter->end,   chapter->time_base.den, chapter->time_base.num))
+		if(currentPTS >= ConvertTimestamp(chapter->start, chapter->time_base.den, chapter->time_base.num)
+		   && currentPTS <  ConvertTimestamp(chapter->end,   chapter->time_base.den, chapter->time_base.num))
 			return i + 1;
 	}
 #endif
 	return 0;
 }
 
-void OMXReader::GetChapterName(std::string& strChapterName)
+void OMXReader::getChapterName(std::string& strChapterName)
 {
 	strChapterName = "";
 #if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(52,14,0)
-	int chapterIdx = GetChapter();
+	int chapterIdx = getChapter();
 	if(chapterIdx <= 0)
 		return;
 #if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(52,83,0)
@@ -1021,19 +1021,19 @@ void OMXReader::GetChapterName(std::string& strChapterName)
 
 void OMXReader::UpdateCurrentPTS()
 {
-	m_iCurrentPts = DVD_NOPTS_VALUE;
+	currentPTS = DVD_NOPTS_VALUE;
 	for(unsigned int i = 0; i < avFormatContext->nb_streams; i++)
 	{
 		AVStream *stream = avFormatContext->streams[i];
 		if(stream && stream->cur_dts != (int64_t)AV_NOPTS_VALUE)
 		{
 			double ts = ConvertTimestamp(stream->cur_dts, stream->time_base.den, stream->time_base.num);
-			if(m_iCurrentPts == DVD_NOPTS_VALUE || m_iCurrentPts > ts )
+			if(currentPTS == DVD_NOPTS_VALUE || currentPTS > ts )
             {
-                m_iCurrentPts = ts;
+                currentPTS = ts;
             }
 		}
-        //ofLogVerbose(__func__) << "m_iCurrentPts: " << m_iCurrentPts;
+        //ofLogVerbose(__func__) << "currentPTS: " << currentPTS;
 	}
 }
 

@@ -94,13 +94,13 @@ class OMXReader
 		OMXChapter                omxChapters[MAX_OMX_CHAPTERS];
 		OMXStream                 omxStreams[MAX_STREAMS];
 		int                       chapterCount;
-		double                    m_iCurrentPts;
+		double                    currentPTS;
 		int                       speed;
 		unsigned int              programID;
 		pthread_mutex_t           m_lock;
 		void Lock();
 		void UnLock();
-		bool SetActiveStreamInternal(OMXStreamType type, unsigned int index);
+		bool setActiveStreamInternal(OMXStreamType type, unsigned int index);
 		bool                      m_seek;
 	private:
 	public:
@@ -118,9 +118,9 @@ class OMXReader
 		void AddStream(int id);
 		bool IsActive(int stream_index);
 		bool IsActive(OMXStreamType type, int stream_index);
-		bool GetHints(AVStream *stream, OMXStreamInfo *hints);
-		bool GetHints(OMXStreamType type, unsigned int index, OMXStreamInfo& hints);
-		bool GetHints(OMXStreamType type, OMXStreamInfo& hints);
+		bool getHints(AVStream *stream, OMXStreamInfo *hints);
+		bool getHints(OMXStreamType type, unsigned int index, OMXStreamInfo& hints);
+		bool getHints(OMXStreamType type, OMXStreamInfo& hints);
 		bool getIsEOF();
 		int  getNumAudioStreams()
 		{
@@ -134,12 +134,12 @@ class OMXReader
 		{
 			return subtitleCount;
 		};
-		bool SetActiveStream(OMXStreamType type, unsigned int index);
-		int  GetChapterCount()
+		bool setActiveStream(OMXStreamType type, unsigned int index);
+		int  getChapterCount()
 		{
 			return chapterCount;
 		};
-		OMXChapter GetChapter(unsigned int chapter)
+		OMXChapter getChapter(unsigned int chapter)
 		{
 			return omxChapters[(chapter > MAX_OMX_CHAPTERS) ? MAX_OMX_CHAPTERS : chapter];
 		};
@@ -152,8 +152,8 @@ class OMXReader
 		};
 		void UpdateCurrentPTS();
 		double ConvertTimestamp(int64_t pts, int den, int num);
-		int GetChapter();
-		void GetChapterName(std::string& strChapterName);
+		int getChapter();
+		void getChapterName(std::string& strChapterName);
 		bool SeekChapter(int chapter, double* startpts);
 		int GetAudioIndex()
 		{
