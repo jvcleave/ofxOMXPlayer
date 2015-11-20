@@ -36,46 +36,46 @@ typedef unsigned char   BYTE;
 
 class AudioCodecOMX
 {
-	public:
-		AudioCodecOMX();
-		~AudioCodecOMX();
-		bool open(OMXStreamInfo& hints);
-		void Dispose();
-		int decode(BYTE* pData, int iSize);
-		int GetData(BYTE** dst);
-		void Reset();
-		int GetChannels();
-		enum PCMChannels *GetChannelMap();
-		int GetSampleRate();
-		int GetBitsPerSample();
-		string getName()
-		{
-			return "FFmpeg";
-		}
-		int GetBufferSize()
-		{
-			return m_iBuffered;
-		}
-		int GetBitRate();
-
-	protected:
-		AVCodecContext* m_pCodecContext;
-		SwrContext*     m_pConvert;
-		enum AVSampleFormat m_iSampleFormat;
-		enum PCMChannels m_channelMap[PCM_MAX_CH + 1];
-
-		AVFrame* m_pFrame1;
-		int   m_iBufferSize1;
-
-		BYTE *m_pBuffer2;
-		int   m_iBufferSize2;
-
-		bool m_bOpenedCodec;
-		int m_iBuffered;
-
-		int     m_channels;
-		uint64_t m_layout;
-
-
-		void BuildChannelMap();
+public:
+    AudioCodecOMX();
+    ~AudioCodecOMX();
+    bool open(OMXStreamInfo& hints);
+    void Dispose();
+    int decode(BYTE* pData, int iSize);
+    int GetData(BYTE** dst);
+    void Reset();
+    int GetChannels();
+    enum PCMChannels *GetChannelMap();
+    int GetSampleRate();
+    int GetBitsPerSample();
+    string getName()
+    {
+        return "FFmpeg";
+    }
+    int GetBufferSize()
+    {
+        return m_iBuffered;
+    }
+    int GetBitRate();
+    
+protected:
+    AVCodecContext* m_pCodecContext;
+    SwrContext*     m_pConvert;
+    enum AVSampleFormat m_iSampleFormat;
+    enum PCMChannels m_channelMap[PCM_MAX_CH + 1];
+    
+    AVFrame* m_pFrame1;
+    int   m_iBufferSize1;
+    
+    BYTE *m_pBuffer2;
+    int   m_iBufferSize2;
+    
+    bool m_bOpenedCodec;
+    int m_iBuffered;
+    
+    int     m_channels;
+    uint64_t m_layout;
+    
+    
+    void BuildChannelMap();
 };

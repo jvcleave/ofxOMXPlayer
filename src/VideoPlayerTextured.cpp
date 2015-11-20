@@ -22,7 +22,6 @@ VideoPlayerTextured::~VideoPlayerTextured()
 bool VideoPlayerTextured::open(OMXStreamInfo& hints, OMXClock *av_clock, EGLImageKHR eglImage)
 {
 
-	//ofLogVerbose(__func__) << " VideoPlayerTextured Open";
 	this->eglImage = eglImage;
 
 	if (!av_clock)
@@ -38,15 +37,14 @@ bool VideoPlayerTextured::open(OMXStreamInfo& hints, OMXClock *av_clock, EGLImag
 
 	omxStreamInfo       = hints;
 	omxClock    = av_clock;
-	m_fps         = 25.0f;
-	m_frametime   = 0;
+	fps         = 25.0f;
+	frameTime   = 0;
 	currentPTS = DVD_NOPTS_VALUE;
 	doAbort      = false;
 	doFlush       = false;
 	cachedSize = 0;
-	m_iVideoDelay = 0;
 	speed       = DVD_PLAYSPEED_NORMAL;
-	m_FlipTimeStamp = omxClock->getAbsoluteClock();
+	timeStampAdjustment = omxClock->getAbsoluteClock();
 
 	if(!openDecoder())
 	{
@@ -67,20 +65,20 @@ bool VideoPlayerTextured::openDecoder()
 {
 	if (omxStreamInfo.fpsrate && omxStreamInfo.fpsscale)
 	{
-		m_fps = DVD_TIME_BASE / OMXReader::normalizeFrameduration((double)DVD_TIME_BASE * omxStreamInfo.fpsscale / omxStreamInfo.fpsrate);
+		fps = DVD_TIME_BASE / OMXReader::normalizeFrameduration((double)DVD_TIME_BASE * omxStreamInfo.fpsscale / omxStreamInfo.fpsrate);
 	}
 	else
 	{
-		m_fps = 25;
+		fps = 25;
 	}
 
-	if( m_fps > 100 || m_fps < 5 )
+	if( fps > 100 || fps < 5 )
 	{
-		//ofLogVerbose(__func__) << "Invalid framerate " << m_fps  << " using forced 25fps and just trust timestamps";
-		m_fps = 25;
+		//ofLogVerbose(__func__) << "Invalid framerate " << fps  << " using forced 25fps and just trust timestamps";
+		fps = 25;
 	}
 
-	m_frametime = (double)DVD_TIME_BASE / m_fps;
+	frameTime = (double)DVD_TIME_BASE / fps;
 
 	if (!eglImageDecoder)
 	{
@@ -100,12 +98,12 @@ bool VideoPlayerTextured::openDecoder()
 	info << "Video width: "	<<	omxStreamInfo.width					<< "\n";
 	info << "Video height: "	<<	omxStreamInfo.height					<< "\n";
 	info << "Video profile: "	<<	omxStreamInfo.profile					<< "\n";
-	info << "Video fps: "		<<	m_fps							<< "\n";
+	info << "Video fps: "		<<	fps							<< "\n";
 	//ofLogVerbose(__func__) << "\n" << info.str();
 
 
 	/*ofLog(OF_LOG_VERBOSE, "Video codec %s width %d height %d profile %d fps %f\n",
-		  decoder->GetDecoderName().c_str() , omxStreamInfo.width, omxStreamInfo.height, omxStreamInfo.profile, m_fps);*/
+		  decoder->GetDecoderName().c_str() , omxStreamInfo.width, omxStreamInfo.height, omxStreamInfo.profile, fps);*/
 
 
 	return true;
@@ -140,7 +138,6 @@ bool VideoPlayerTextured::close()
 
 
 	isOpen          = false;
-	streamID     = -1;
 	currentPTS   = DVD_NOPTS_VALUE;
 	speed         = DVD_PLAYSPEED_NORMAL;
 

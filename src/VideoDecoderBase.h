@@ -13,9 +13,6 @@
 #include "OMXReader.h"
 #include "SingleLock.h"
 
-
-
-
 class VideoDecoderBase
 {
 public:
@@ -83,3 +80,4 @@ public:
     virtual void resetFrameCounter() = 0;
     CriticalSection  m_critSection;
 };
+

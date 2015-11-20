@@ -360,12 +360,12 @@ bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
 	if (isPlaying())
 	{
 
-		//ofLogVerbose(__func__) << "videoPlayer->GetFPS(): " << videoPlayer->GetFPS();
+		//ofLogVerbose(__func__) << "videoPlayer->getFPS(): " << videoPlayer->getFPS();
 
-		if(videoStreamInfo.nb_frames>0 && videoPlayer->GetFPS()>0)
+		if(videoStreamInfo.nb_frames>0 && videoPlayer->getFPS()>0)
 		{
 			nFrames =videoStreamInfo.nb_frames;
-			duration =videoStreamInfo.nb_frames / videoPlayer->GetFPS();
+			duration =videoStreamInfo.nb_frames / videoPlayer->getFPS();
 			ofLogNotice(__func__) << "duration SET: " << duration;
 		}
 		else
@@ -379,7 +379,7 @@ bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
             bool didSeek = omxReader.SeekTime(startTimeInSeconds * 1000.0f, 0, &startpts);
             if(didSeek)
             {
-                startFrame = (int)videoPlayer->GetFPS()*(int)startTimeInSeconds;
+                startFrame = (int)videoPlayer->getFPS()*(int)startTimeInSeconds;
                ofLogNotice(__func__) <<  "Seeking start of video to " << startTimeInSeconds << " seconds, frame: " << startFrame;
             }else
             {
@@ -591,7 +591,7 @@ float ofxOMXPlayerEngine::getFPS()
     if (videoPlayer)
     {
         
-        return videoPlayer->GetFPS();
+        return videoPlayer->getFPS();
     }
     return 0;
 }

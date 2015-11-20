@@ -39,7 +39,7 @@ public:
     };
     
     OMX_ERRORTYPE disableAllPorts();
-    void          Remove(OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2);
+    void          removeEvent(OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2);
     OMX_ERRORTYPE addEvent(OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2);
     OMX_ERRORTYPE waitForEvent(OMX_EVENTTYPE event, long timeout = 20);
     OMX_ERRORTYPE waitForCommand(OMX_COMMANDTYPE command, OMX_U32 nData2, long timeout=20);

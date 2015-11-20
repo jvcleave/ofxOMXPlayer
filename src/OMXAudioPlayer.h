@@ -25,7 +25,6 @@
 class OMXAudioPlayer : public OMXThread
 {
 	protected:
-		int                       streamID;
 		std::deque<OMXPacket *>   packets;
 		bool                      isOpen;
 		OMXStreamInfo            omxStreamInfo;

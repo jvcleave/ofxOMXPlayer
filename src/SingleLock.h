@@ -20,7 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ */
 
 #pragma once
 
@@ -28,47 +28,47 @@
 
 class CriticalSection
 {
-	public:
-		inline CriticalSection()
-		{
-			pthread_mutexattr_t mta;
-			pthread_mutexattr_init(&mta);
-			pthread_mutexattr_settype(&mta, PTHREAD_MUTEX_RECURSIVE);
-			pthread_mutex_init(&m_lock, &mta);
-		}
-		inline ~CriticalSection()
-		{
-			pthread_mutex_destroy(&m_lock);
-		}
-		inline void lock()
-		{
-			pthread_mutex_lock(&m_lock);
-		}
-		inline void unlock()
-		{
-			pthread_mutex_unlock(&m_lock);
-		}
-
-	protected:
-		pthread_mutex_t m_lock;
+public:
+    inline CriticalSection()
+    {
+        pthread_mutexattr_t mta;
+        pthread_mutexattr_init(&mta);
+        pthread_mutexattr_settype(&mta, PTHREAD_MUTEX_RECURSIVE);
+        pthread_mutex_init(&m_lock, &mta);
+    }
+    inline ~CriticalSection()
+    {
+        pthread_mutex_destroy(&m_lock);
+    }
+    inline void lock()
+    {
+        pthread_mutex_lock(&m_lock);
+    }
+    inline void unlock()
+    {
+        pthread_mutex_unlock(&m_lock);
+    }
+    
+protected:
+    pthread_mutex_t m_lock;
 };
 
 
 class SingleLock
 {
-	public:
-		inline SingleLock(CriticalSection& cs)
-		{
-			section = cs;
-			section.lock();
-		}
-		inline ~SingleLock()
-		{
-			section.unlock();
-		}
-
-	protected:
-		CriticalSection section;
+public:
+    inline SingleLock(CriticalSection& cs)
+    {
+        section = cs;
+        section.lock();
+    }
+    inline ~SingleLock()
+    {
+        section.unlock();
+    }
+    
+protected:
+    CriticalSection section;
 };
 
 

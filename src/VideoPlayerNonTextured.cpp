@@ -33,7 +33,7 @@
 
 VideoPlayerNonTextured::VideoPlayerNonTextured()
 {
-	m_hdmi_clock_sync = false;
+	doHDMISync = false;
 	nonTextureDecoder = NULL;
 
 
@@ -67,20 +67,19 @@ bool VideoPlayerNonTextured::open(OMXStreamInfo& hints, OMXClock *av_clock, bool
 
 	omxStreamInfo       = hints;
 	omxClock    = av_clock;
-	m_fps         = 25.0f;
-	m_frametime   = 0;
-	m_Deinterlace = deinterlace;
-	m_display_aspect = display_aspect;
+	fps         = 25.0f;
+	frameTime   = 0;
+	doDeinterlace = deinterlace;
+	displayAspectRatio = display_aspect;
 	currentPTS = DVD_NOPTS_VALUE;
 	doAbort      = false;
 	doFlush       = false;
 	cachedSize = 0;
-	m_iVideoDelay = 0;
-	m_hdmi_clock_sync = hdmi_clock_sync;
+	doHDMISync = hdmi_clock_sync;
 	speed       = DVD_PLAYSPEED_NORMAL;
 	
 
-	m_FlipTimeStamp = omxClock->getAbsoluteClock();
+	timeStampAdjustment = omxClock->getAbsoluteClock();
 
 	if(!openDecoder())
 	{
@@ -101,27 +100,27 @@ bool VideoPlayerNonTextured::openDecoder()
 
 	if (omxStreamInfo.fpsrate && omxStreamInfo.fpsscale)
 	{
-		m_fps = DVD_TIME_BASE / OMXReader::normalizeFrameduration((double)DVD_TIME_BASE * omxStreamInfo.fpsscale / omxStreamInfo.fpsrate);
+		fps = DVD_TIME_BASE / OMXReader::normalizeFrameduration((double)DVD_TIME_BASE * omxStreamInfo.fpsscale / omxStreamInfo.fpsrate);
 	}
 	else
 	{
-		m_fps = 25;
+		fps = 25;
 	}
 
-	if( m_fps > 100 || m_fps < 5 )
+	if( fps > 100 || fps < 5 )
 	{
-		ofLog(OF_LOG_VERBOSE, "Invalid framerate %d, using forced 25fps and just trust timestamps\n", (int)m_fps);
-		m_fps = 25;
+		ofLog(OF_LOG_VERBOSE, "Invalid framerate %d, using forced 25fps and just trust timestamps\n", (int)fps);
+		fps = 25;
 	}
 
-	m_frametime = (double)DVD_TIME_BASE / m_fps;
+	frameTime = (double)DVD_TIME_BASE / fps;
 
 	nonTextureDecoder = new VideoDecoderNonTextured();
 	
 	nonTextureDecoder->setDisplayRect(displayRect);
 
 	decoder = (VideoDecoderBase*)nonTextureDecoder;
-	if(!nonTextureDecoder->open(omxStreamInfo, omxClock, m_display_aspect, m_Deinterlace, m_hdmi_clock_sync))
+	if(!nonTextureDecoder->open(omxStreamInfo, omxClock, displayAspectRatio, doDeinterlace, doHDMISync))
 	{
 
 		closeDecoder();
@@ -132,11 +131,11 @@ bool VideoPlayerNonTextured::openDecoder()
 	info << "Video width: "	<<	omxStreamInfo.width					<< "\n";
 	info << "Video height: "	<<	omxStreamInfo.height					<< "\n";
 	info << "Video profile: "	<<	omxStreamInfo.profile					<< "\n";
-	info << "Video fps: "		<<	m_fps							<< "\n";
+	info << "Video fps: "		<<	fps							<< "\n";
 	//ofLogVerbose(__func__) << "\n" << info;
 
 	/*ofLog(OF_LOG_VERBOSE, "Video codec %s width %d height %d profile %d fps %f\n",
-		decoder->GetDecoderName().c_str() , omxStreamInfo.width, omxStreamInfo.height, omxStreamInfo.profile, m_fps);*/
+		decoder->GetDecoderName().c_str() , omxStreamInfo.width, omxStreamInfo.height, omxStreamInfo.profile, fps);*/
 
 
 
@@ -171,7 +170,6 @@ bool VideoPlayerNonTextured::close()
 	}
 
 	isOpen          = false;
-	streamID     = -1;
 	currentPTS   = DVD_NOPTS_VALUE;
 	speed         = DVD_PLAYSPEED_NORMAL;
 

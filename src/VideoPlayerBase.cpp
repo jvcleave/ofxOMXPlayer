@@ -14,13 +14,11 @@ unsigned count_bits(int32_t value)
 VideoPlayerBase::VideoPlayerBase()
 {
 	isOpen          = false;
-	streamID     = -1;
 	omxClock      = NULL;
 	decoder       = NULL;
-	m_fps           = 25.0f;
+	fps           = 25.0f;
 	doFlush         = false;
 	cachedSize   = 0;
-	m_iVideoDelay   = 0;
 	currentPTS	= DVD_NOPTS_VALUE;
 	speed         = DVD_PLAYSPEED_NORMAL;
 
@@ -39,9 +37,9 @@ double VideoPlayerBase::getCurrentPTS()
 	return currentPTS;
 }
 
-double VideoPlayerBase::GetFPS()
+double VideoPlayerBase::getFPS()
 {
-	return m_fps;
+	return fps;
 }
 
 unsigned int VideoPlayerBase::getCached()
@@ -115,17 +113,18 @@ bool VideoPlayerBase::decode(OMXPacket *pkt)
 		pts = pkt->dts;
 	}
 	
+#if 0
 	if (pts != DVD_NOPTS_VALUE)
 	{
 		pts += m_iVideoDelay;
 	}
-
+#endif
+    
 	if(pts != DVD_NOPTS_VALUE)
 	{
 		currentPTS = pts;
 	}
 	
-	// CLog::Log(LOGINFO, "CDVDPlayerVideo::Decode dts:%.0f pts:%.0f cur:%.0f, size:%d", pkt->dts, pkt->pts, currentPTS, pkt->size);
 	//ofLog(OF_LOG_VERBOSE, "VideoPlayerBase::Decode dts:%.0f pts:%.0f cur:%.0f, size:%d", pkt->dts, pkt->pts, currentPTS, pkt->size);
 	return decoder->decode(pkt->data, pkt->size, pts);
 }
@@ -134,7 +133,6 @@ bool VideoPlayerBase::decode(OMXPacket *pkt)
 
 void VideoPlayerBase::flush()
 {
-	//ofLogVerbose(__func__) << "VideoPlayerBase::Flush start";
 
 
 	doFlush_requested = true;
@@ -146,7 +144,6 @@ void VideoPlayerBase::flush()
 	{
 		OMXPacket *pkt = packets.front();
 		packets.pop_front();
-		//ofLogVerbose(__func__) << "VideoPlayerBase->OMXReader freePacket";
 		OMXReader::freePacket(pkt);
 
 	}
@@ -156,13 +153,11 @@ void VideoPlayerBase::flush()
 
 	if(decoder)
 	{
-		//ofLogVerbose(__func__) << "VideoPlayerBase::decoder->Reset";
 		decoder->Reset();
 	}
 
 	unlockDecoder();
 	unlock();
-	//ofLogVerbose(__func__) << "VideoPlayerBase::Flush end";
 }
 
 
@@ -293,7 +288,6 @@ bool VideoPlayerBase::EOS()
 		{
 
 			atEndofStream = true;
-			//ofLogVerbose(__func__) << "packets.empty() && decoder->EOS(): " << atEndofStream;
 		}
 	}
 	return atEndofStream;

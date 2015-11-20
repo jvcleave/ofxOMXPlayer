@@ -1,10 +1,7 @@
-
-
 #include "Component.h"
 
 
 //#define OMX_DEBUG_EVENTS
-//#define OMX_DEBUG_EVENTHANDLER
 #define COMMAND_WAIT_TIMEOUT 20
 
 static void add_timespecs(struct timespec& time, long millisecs)
@@ -17,11 +14,6 @@ static void add_timespecs(struct timespec& time, long millisecs)
 		time.tv_nsec -= 1000000000;
 	}
 }
-
-
-
-
-#pragma mark Component
 
 Component::Component()
 {
@@ -409,7 +401,7 @@ OMX_ERRORTYPE Component::disableAllPorts()
 	return OMX_ErrorNone;
 }
 
-void Component::Remove(OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2)
+void Component::removeEvent(OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2)
 {
 	for (std::vector<OMXEvent>::iterator it = omxEvents.begin(); it != omxEvents.end(); )
 	{
@@ -433,7 +425,7 @@ OMX_ERRORTYPE Component::addEvent(OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 
 	event.nData2      = nData2;
 
 	pthread_mutex_lock(&event_mutex);
-	Remove(eEvent, nData1, nData2);
+	removeEvent(eEvent, nData1, nData2);
 	omxEvents.push_back(event);
 	// this allows (all) blocked tasks to be awoken
 	pthread_cond_broadcast(&m_omx_event_cond);

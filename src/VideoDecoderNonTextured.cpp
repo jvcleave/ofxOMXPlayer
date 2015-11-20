@@ -5,8 +5,8 @@
 VideoDecoderNonTextured::VideoDecoderNonTextured()
 {
 
-	m_deinterlace       = false;
-	m_hdmi_clock_sync   = false;
+	doDeinterlace       = false;
+	doHDMISync   = false;
 	frameCounter = 0;
 	frameOffset = 0;
 }
@@ -27,7 +27,7 @@ bool VideoDecoderNonTextured::open(OMXStreamInfo& hints, OMXClock *clock, float 
 	videoWidth  = hints.width;
 	videoHeight = hints.height;
 
-	m_hdmi_clock_sync = hdmi_clock_sync;
+	doHDMISync = hdmi_clock_sync;
 
 	if(!videoWidth || !videoHeight)
 	{
@@ -46,11 +46,11 @@ bool VideoDecoderNonTextured::open(OMXStreamInfo& hints, OMXClock *clock, float 
 	if(deinterlace)
 	{
 		ofLog(OF_LOG_VERBOSE, "enable deinterlace\n");
-		m_deinterlace = true;
+		doDeinterlace = true;
 	}
 	else
 	{
-		m_deinterlace = false;
+		doDeinterlace = false;
 	}
 
 	std::string componentName = "OMX.broadcom.video_decode";
@@ -71,7 +71,7 @@ bool VideoDecoderNonTextured::open(OMXStreamInfo& hints, OMXClock *clock, float 
 		return false;
 	}
 
-	if(m_deinterlace)
+	if(doDeinterlace)
 	{
 		componentName = "OMX.broadcom.image_fx";
 		if(!m_omx_image_fx.init(componentName, OMX_IndexParamImageInit))
@@ -95,7 +95,7 @@ bool VideoDecoderNonTextured::open(OMXStreamInfo& hints, OMXClock *clock, float 
 		return false;
 	}
 
-	if(m_deinterlace)
+	if(doDeinterlace)
 	{
 		decoderTunnel.init(&decoderComponent, decoderComponent.getOutputPort(), &m_omx_image_fx, m_omx_image_fx.getInputPort());
 		m_omx_tunnel_image_fx.init(&m_omx_image_fx, m_omx_image_fx.getOutputPort(), &schedulerComponent, schedulerComponent.getInputPort());
@@ -161,7 +161,7 @@ bool VideoDecoderNonTextured::open(OMXStreamInfo& hints, OMXClock *clock, float 
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
-	if (m_deinterlace)
+	if (doDeinterlace)
 	{
 		// the deinterlace component requires 3 additional video buffers in addition to the DPB (this is normally 2).
 		OMX_PARAM_U32TYPE extra_buffers;
@@ -199,7 +199,7 @@ bool VideoDecoderNonTextured::open(OMXStreamInfo& hints, OMXClock *clock, float 
         if(error != OMX_ErrorNone) return false;
 	}
 
-	if(m_hdmi_clock_sync)
+	if(doHDMISync)
 	{
 		OMX_CONFIG_LATENCYTARGETTYPE latencyTarget;
 		OMX_INIT_STRUCTURE(latencyTarget);
@@ -231,7 +231,7 @@ bool VideoDecoderNonTextured::open(OMXStreamInfo& hints, OMXClock *clock, float 
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
-	if(m_deinterlace)
+	if(doDeinterlace)
 	{
 		OMX_CONFIG_IMAGEFILTERPARAMSTYPE image_filter;
 		OMX_INIT_STRUCTURE(image_filter);
@@ -319,7 +319,7 @@ bool VideoDecoderNonTextured::open(OMXStreamInfo& hints, OMXClock *clock, float 
 	ofLog(OF_LOG_VERBOSE,
 	      "%s::%s - decoder_component(0x%p), input_port(0x%x), output_port(0x%x) deinterlace %d hdmiclocksync %d\n",
 	      "VideoDecoderNonTextured", __func__, decoderComponent.getHandle(), decoderComponent.getInputPort(), decoderComponent.getOutputPort(),
-	      m_deinterlace, m_hdmi_clock_sync);
+	      doDeinterlace, doHDMISync);
 
 	isFirstFrame   = true;
 

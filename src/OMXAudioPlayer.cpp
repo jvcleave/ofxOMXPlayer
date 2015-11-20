@@ -156,7 +156,6 @@ bool OMXAudioPlayer::close()
 	closeCodec();
 
 	isOpen          = false;
-	streamID     = -1;
 	currentPTS   = DVD_NOPTS_VALUE;
 	speed         = DVD_PLAYSPEED_NORMAL;
 

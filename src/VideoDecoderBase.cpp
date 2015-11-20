@@ -34,21 +34,21 @@ VideoDecoderBase::~VideoDecoderBase()
 	try
 	{
 		decoderTunnel.flush();
-		/*if(m_deinterlace)
+		/*if(doDeinterlace)
 		 m_omx_tunnel_image_fx.flush();*/
 		clockTunnel.flush();
 		schedulerTunnel.flush();
 
 		clockTunnel.Deestablish();
 		decoderTunnel.Deestablish();
-		/*if(m_deinterlace)
+		/*if(doDeinterlace)
 		 m_omx_tunnel_image_fx.Deestablish();*/
 		schedulerTunnel.Deestablish();
 
 		decoderComponent.flushInput();
 
 		schedulerComponent.Deinitialize(true);
-		/*if(m_deinterlace)
+		/*if(doDeinterlace)
 		 m_omx_image_fx.Deinitialize();*/
 		decoderComponent.Deinitialize(true);
 		renderComponent.Deinitialize(true);
@@ -62,7 +62,7 @@ VideoDecoderBase::~VideoDecoderBase()
 		extraData = NULL;
 		extraSize = 0;
 
-		//m_deinterlace       = false;
+		//doDeinterlace       = false;
 		isFirstFrame       = true;
 		doSetStartTime      = true;
 	}
