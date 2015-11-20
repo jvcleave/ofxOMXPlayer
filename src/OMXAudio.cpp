@@ -105,7 +105,6 @@ OMXAudio::OMXAudio() :
 	m_CanPause        (false  ),
 	m_CurrentVolume   (0      ),
 	m_Passthrough     (false  ),
-	m_HWDecode        (false  ),
 	m_normalize_downmix(true   ),
 	m_BytesPerSec     (0      ),
 	m_BufferLen       (0      ),
@@ -140,35 +139,19 @@ bool OMXAudio::init(string device,
                     enum PCMChannels *channelMap,
                     OMXStreamInfo& hints, 
                     OMXClock *clock, 
-                    EEncoded bPassthrough, 
-                    bool bUseHWDecode,
+                    EEncoded bPassthrough,
                     bool boostOnDownmix)
 {
-	m_HWDecode = false;
 	m_Passthrough = false;
 
-	if(bPassthrough != OMXAudio::ENCODED_NONE)
-	{
-		m_Passthrough = true;
-		SetCodingType(hints.codec);
-	}
-	else 
-	{
-        if(bUseHWDecode)
-        {
-            m_HWDecode = CanHWDecode(hints.codec);  
-        }
-		SetCodingType(CODEC_ID_PCM_S16LE);
-	}
-
+    SetCodingType(CODEC_ID_PCM_S16LE);
 	if(hints.extrasize > 0 && hints.extradata != NULL)
 	{
 		extraSize = hints.extrasize;
 		extraData = (uint8_t *)malloc(extraSize);
 		memcpy(extraData, hints.extradata, hints.extrasize);
 	}
-    ofLogVerbose(__func__) << "PART 1";
-	/*return init(device, hints.channels, channelMap, hints.channels, hints.samplerate, hints.bitspersample, false, boostOnDownmix, false, bPassthrough);*/
+
     
     int iChannels = hints.channels;
     unsigned int downmixChannels = hints.channels;
@@ -189,10 +172,10 @@ bool OMXAudio::init(string device,
 
 	m_Passthrough = false;
 
-	if(bPassthrough != OMXAudio::ENCODED_NONE)
+	/*if(bPassthrough != OMXAudio::ENCODED_NONE)
 	{
 		m_Passthrough =true;
-	}
+	}*/
 
 	memset(&m_wave_header, 0x0, sizeof(m_wave_header));
 
@@ -398,21 +381,6 @@ bool OMXAudio::init(string device,
 		return false;
 	}
 
-	if(m_HWDecode)
-	{
-		OMX_AUDIO_PARAM_PORTFORMATTYPE formatType;
-		OMX_INIT_STRUCTURE(formatType);
-		formatType.nPortIndex = decoderComponent.getInputPort();
-
-		formatType.eEncoding = m_eEncoding;
-
-		error = decoderComponent.setParameter(OMX_IndexParamAudioPortFormat, &formatType);
-        OMX_TRACE(error);
-		if(error != OMX_ErrorNone)
-		{
-			return false;
-		}
-	}
 
 	if(omxClock == NULL)
 	{
@@ -543,39 +511,7 @@ bool OMXAudio::init(string device,
 			return false;
 		}
 	}
-	else if(m_HWDecode)
-	{
-		// send decoder config
-		if(extraSize > 0 && extraData != NULL)
-		{
-			OMX_BUFFERHEADERTYPE *omxBuffer = decoderComponent.getInputBuffer();
 
-			if(omxBuffer == NULL)
-			{
-				ofLog(OF_LOG_ERROR, "%s - buffer error", __func__);
-				return false;
-			}
-
-			omxBuffer->nOffset = 0;
-			omxBuffer->nFilledLen = extraSize;
-			if(omxBuffer->nFilledLen > omxBuffer->nAllocLen)
-			{
-				ofLog(OF_LOG_ERROR, "%s - omxBuffer->nFilledLen > omxBuffer->nAllocLen", __func__);
-				return false;
-			}
-
-			memset((unsigned char *)omxBuffer->pBuffer, 0x0, omxBuffer->nAllocLen);
-			memcpy((unsigned char *)omxBuffer->pBuffer, extraData, omxBuffer->nFilledLen);
-			omxBuffer->nFlags = OMX_BUFFERFLAG_CODECCONFIG | OMX_BUFFERFLAG_ENDOFFRAME;
-
-			error = decoderComponent.EmptyThisBuffer(omxBuffer);
-            OMX_TRACE(error);
-			if (error != OMX_ErrorNone)
-			{
-				return false;
-			}
-		}
-	}
 
 	isInitialized   = true;
 	doSetStartTime  = true;
@@ -583,8 +519,8 @@ bool OMXAudio::init(string device,
 
 	setCurrentVolume(m_CurrentVolume);
 
-	ofLog(OF_LOG_VERBOSE, "OMXAudio::init Ouput bps %d samplerate %d channels %d device %s buffer size %d bytes per second %d passthrough %d hwdecode %d",
-	      (int)m_pcm_output.nBitPerSample, (int)m_pcm_output.nSamplingRate, (int)m_pcm_output.nChannels, deviceuse.c_str(), m_BufferLen, m_BytesPerSec, m_Passthrough, m_HWDecode);
+	ofLog(OF_LOG_VERBOSE, "OMXAudio::init Ouput bps %d samplerate %d channels %d device %s buffer size %d bytes per second %d passthrough %d",
+	      (int)m_pcm_output.nBitPerSample, (int)m_pcm_output.nSamplingRate, (int)m_pcm_output.nChannels, deviceuse.c_str(), m_BufferLen, m_BytesPerSec, m_Passthrough);
 
 	return true;
 }
@@ -640,7 +576,6 @@ bool OMXAudio::Deinitialize()
 	omxClock  = NULL;
 
 	isInitialized = false;
-	m_HWDecode    = false;
 
 	if(extraData)
 	{
@@ -890,14 +825,6 @@ unsigned int OMXAudio::AddPackets(void* data, unsigned int len, double dts, doub
 		omxBuffer->nFilledLen = (demuxer_bytes > omxBuffer->nAllocLen) ? omxBuffer->nAllocLen : demuxer_bytes;
 		memcpy(omxBuffer->pBuffer, demuxer_content, omxBuffer->nFilledLen);
 
-		/*
-		if (m_SampleSize > 0 && pts != DVD_NOPTS_VALUE && !(omxBuffer->nFlags & OMX_BUFFERFLAG_TIME_UNKNOWN) && !m_Passthrough && !m_HWDecode)
-		{
-		  pts += ((double)omxBuffer->nFilledLen * DVD_TIME_BASE) / m_SampleSize;
-		}
-		printf("ADec : pts %f omxBuffer 0x%08x buffer 0x%08x number %d\n",
-		      (float)pts / AV_TIME_BASE, omxBuffer, omxBuffer->pBuffer, (int)omxBuffer->pAppPrivate);
-		*/
 
 		uint64_t val  = (uint64_t)(pts == DVD_NOPTS_VALUE) ? 0 : pts;
 
@@ -958,14 +885,6 @@ unsigned int OMXAudio::AddPackets(void* data, unsigned int len, double dts, doub
 
 			if(!m_Passthrough)
 			{
-				if(m_HWDecode)
-				{
-					OMX_INIT_STRUCTURE(m_pcm_input);
-					m_pcm_input.nPortIndex      = decoderComponent.getOutputPort();
-					error = decoderComponent.getParameter(OMX_IndexParamAudioPcm, &m_pcm_input);
-					OMX_TRACE(error);
-				}
-
 				/* setup mixer input */
 				m_pcm_input.nPortIndex      = m_omx_mixer.getInputPort();
 				error = m_omx_mixer.setParameter(OMX_IndexParamAudioPcm, &m_pcm_input);
@@ -1203,43 +1122,43 @@ bool OMXAudio::CanHWDecode(AVCodecID codec)
 {
 	switch(codec)
 	{
-		/*
+		
 		 case CODEC_ID_VORBIS:
-		 //ofLogVerbose(__func__) << "OMX_AUDIO_CodingVORBIS";
+		 ofLogVerbose(__func__) << "OMX_AUDIO_CodingVORBIS";
 		 m_eEncoding = OMX_AUDIO_CodingVORBIS;
-		 m_HWDecode = true;
+		 //m_HWDecode = true;
 		 break;
 		 case CODEC_ID_AAC:
-		 //ofLogVerbose(__func__) << "OMX_AUDIO_CodingAAC";
+		 ofLogVerbose(__func__) << "OMX_AUDIO_CodingAAC";
 		 m_eEncoding = OMX_AUDIO_CodingAAC;
-		 m_HWDecode = true;
+		 //m_HWDecode = true;
 		 break;
-		 */
+        
 		case CODEC_ID_MP2:
 		case CODEC_ID_MP3:
-			//ofLogVerbose(__func__) << "OMX_AUDIO_CodingMP3";
+			ofLogVerbose(__func__) << "OMX_AUDIO_CodingMP3";
 			m_eEncoding = OMX_AUDIO_CodingMP3;
-			m_HWDecode = true;
+			//m_HWDecode = true;
 			break;
 		case CODEC_ID_DTS:
-			//ofLogVerbose(__func__) << "OMX_AUDIO_CodingDTS";
+			ofLogVerbose(__func__) << "OMX_AUDIO_CodingDTS";
 			m_eEncoding = OMX_AUDIO_CodingDTS;
-			m_HWDecode = true;
+			//m_HWDecode = true;
 			break;
 		case CODEC_ID_AC3:
 		case CODEC_ID_EAC3:
-			//ofLogVerbose(__func__) << "OMX_AUDIO_CodingDDP";
+			ofLogVerbose(__func__) << "OMX_AUDIO_CodingDDP";
 			m_eEncoding = OMX_AUDIO_CodingDDP;
-			m_HWDecode = true;
+			//m_HWDecode = true;
 			break;
 		default:
-			//ofLogVerbose(__func__) << "OMX_AUDIO_CodingPCM";
+			ofLogVerbose(__func__) << "OMX_AUDIO_CodingPCM";
 			m_eEncoding = OMX_AUDIO_CodingPCM;
-			m_HWDecode = false;
+			//m_HWDecode = false;
 			break;
 	}
 
-	return m_HWDecode;
+	return false;
 }
 
 bool OMXAudio::HWDecode(AVCodecID codec)
@@ -1248,28 +1167,28 @@ bool OMXAudio::HWDecode(AVCodecID codec)
 
 	switch(codec)
 	{
-		/*
+		
 		 case CODEC_ID_VORBIS:
-		 //ofLogVerbose(__func__) << "CODEC_ID_VORBIS";
+		 ofLogVerbose(__func__) << "CODEC_ID_VORBIS";
 		 ret = true;
 		 break;
 		 case CODEC_ID_AAC:
-		 //ofLogVerbose(__func__) << "CODEC_ID_AAC";
+		 ofLogVerbose(__func__) << "CODEC_ID_AAC";
 		 ret = true;
 		 break;
-		 */
+		 
 		case CODEC_ID_MP2:
 		case CODEC_ID_MP3:
-			//ofLogVerbose(__func__) << "CODEC_ID_MP2 / CODEC_ID_MP3";
+			ofLogVerbose(__func__) << "CODEC_ID_MP2 / CODEC_ID_MP3";
 			ret = true;
 			break;
 		case CODEC_ID_DTS:
-			//ofLogVerbose(__func__) << "CODEC_ID_DTS";
+			ofLogVerbose(__func__) << "CODEC_ID_DTS";
 			ret = true;
 			break;
 		case CODEC_ID_AC3:
 		case CODEC_ID_EAC3:
-			//ofLogVerbose(__func__) << "CODEC_ID_AC3 / CODEC_ID_EAC3";
+			ofLogVerbose(__func__) << "CODEC_ID_AC3 / CODEC_ID_EAC3";
 			ret = true;
 			break;
 		default:

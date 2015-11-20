@@ -104,19 +104,8 @@ class OMXAudio
 						enum PCMChannels *channelMap,
 		                OMXStreamInfo& hints, OMXClock *clock,
 						EEncoded bPassthrough,
-						bool bUseHWDecode,
 						bool boostOnDownmix);
-	
-		/*bool init(string device,
-						int iChannels,
-						enum PCMChannels *channelMap,
-						unsigned int downmixChannels,
-						unsigned int uiSamplesPerSec,
-						unsigned int uiBitsPerSample,
-						bool bResample,
-						bool boostOnDownmix,
-						bool bIsMusic=false,
-						EEncoded bPassthrough = OMXAudio::ENCODED_NONE);*/
+
 		~OMXAudio();
 
 		unsigned int AddPackets(void* data, unsigned int len);

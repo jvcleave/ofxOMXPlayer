@@ -187,7 +187,7 @@ bool OMXPlayerAudio::Decode(OMXPacket *pkt)
 	int channels = pkt->hints.channels;
 
 	/* 6 channel have to be mapped to 8 for PCM */
-	if(!m_passthrough && !m_hw_decode)
+	if(!m_passthrough)
 	{
 		if(channels == 6)
 		{
@@ -250,7 +250,7 @@ bool OMXPlayerAudio::Decode(OMXPacket *pkt)
 		uint8_t *data_dec = pkt->data;
 		int            data_len = pkt->size;
 
-		if(!m_passthrough && !m_hw_decode)
+		if(!m_passthrough)
 		{
 			while(data_len > 0)
 			{
@@ -463,17 +463,11 @@ bool OMXPlayerAudio::OpenDecoder()
 		m_passthrough = IsPassthrough(m_hints);
 	}
 
-	if(!m_passthrough && doHardwareDecode)
-	{
-		m_hw_decode = OMXAudio::HWDecode(m_hints.codec);
-	}
+	
 
 	if(m_passthrough || doHardwareDecode)
 	{
-		if(m_passthrough)
-		{
-			m_hw_decode = false;
-		}
+		
         stringstream ss;
         ss << deviceName.substr(4);
         string name = ss.str();
@@ -481,8 +475,7 @@ bool OMXPlayerAudio::OpenDecoder()
                                            m_pChannelMap,
                                            m_hints, 
                                            omxClock,
-                                           m_passthrough,
-                                           m_hw_decode, 
+                                           m_passthrough, 
                                            doBoostOnDownmix);
 	}
 	
@@ -507,7 +500,6 @@ bool OMXPlayerAudio::OpenDecoder()
 			      m_codec_name.c_str(), m_hints.channels, m_hints.samplerate, m_hints.bitspersample);
 		}
 	}
-	//ofLogVerbose(__func__) << "m_hw_decode: " << m_hw_decode;
 	return true;
 }
 
