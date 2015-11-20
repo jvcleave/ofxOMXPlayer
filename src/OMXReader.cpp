@@ -4,24 +4,24 @@
 
 
 
-static bool g_abort = false;
 
 OMXReader::OMXReader()
 {
-	isOpen        = false;
-	fileName    = "";
-	isMatroska   = false;
-	isAVI        = false;
-	g_abort       = false;
-	fileObject       = NULL;
-	avioContext   = NULL;
+	isOpen = false;
+	fileName = "";
+	isMatroska = false;
+	isAVI = false;
+	fileObject = NULL;
+	avioContext = NULL;
 	avFormatContext = NULL;
-	isEOF           = false;
+	isEOF = false;
 	chapterCount = 0;
-	currentPTS   = DVD_NOPTS_VALUE;
+	currentPTS = DVD_NOPTS_VALUE;
 	
 	for(int i = 0; i < MAX_STREAMS; i++)
-		omxStreams[i].extradata = NULL;
+    {
+        omxStreams[i].extradata = NULL;
+    }
 	
 	ClearStreams();
 	
@@ -47,12 +47,10 @@ void OMXReader::unlock()
 
 static int interrupt_cb(void *unused)
 {
-	if(g_abort)
-		return 1;
 	return 0;
 }
 
-static int dvd_file_read(void *h, uint8_t* buf, int size)
+static int read_callback(void *h, uint8_t* buf, int size)
 {
 	if(interrupt_cb(NULL))
 		return -1;
@@ -61,7 +59,7 @@ static int dvd_file_read(void *h, uint8_t* buf, int size)
 	return pFile->Read(buf, size);
 }
 
-static offset_t dvd_file_seek(void *h, offset_t pos, int whence)
+static offset_t seek_callback(void *h, offset_t pos, int whence)
 {
 	if(interrupt_cb(NULL))
 		return -1;
@@ -140,7 +138,7 @@ bool OMXReader::open(std::string filename, bool doSkipAvProbe)
         
         buffer = (unsigned char*)av_malloc(FFMPEG_FILE_BUFFER_SIZE);
   
-		avioContext = avio_alloc_context(buffer, FFMPEG_FILE_BUFFER_SIZE, 0, fileObject, dvd_file_read, NULL, dvd_file_seek);
+		avioContext = avio_alloc_context(buffer, FFMPEG_FILE_BUFFER_SIZE, 0, fileObject, read_callback, NULL, seek_callback);
 		avioContext->max_packet_size = 6144;
 		if(avioContext->max_packet_size)
 			avioContext->max_packet_size *= FFMPEG_FILE_BUFFER_SIZE / avioContext->max_packet_size;
@@ -296,7 +294,7 @@ bool OMXReader::close()
 		fileObject = NULL;
 	}
 	
-	avformat_network_deinit();
+	
 	
 		
 	isOpen            = false;
@@ -900,16 +898,12 @@ bool OMXReader::getIsEOF()
 
 void OMXReader::freePacket(OMXPacket *pkt)
 {
-	delete pkt->data;
-	pkt->data = NULL;
-	delete pkt;
-	pkt = NULL;
-	/*if(pkt)
+	if(pkt)
 	{
 		if(pkt->data)
 			free(pkt->data);
 		free(pkt);
-	}*/
+	}
 }
 
 OMXPacket *OMXReader::allocPacket(int size)

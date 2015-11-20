@@ -8,8 +8,7 @@ class OMXInitializer
 public:
     static OMXInitializer& getInstance()
     {
-        static OMXInitializer    instance; // Guaranteed to be destroyed.
-        // Instantiated on first use.
+        static OMXInitializer instance;
         return instance;
     }
     bool isOpen;
@@ -19,7 +18,6 @@ public:
         {
             OMX_Init();
             isOpen = true;
-            //ofLogVerbose(__func__) << "";
         }
     }
     void deinit()
@@ -28,12 +26,10 @@ public:
         {
             OMX_Deinit();
             isOpen = false;
-            //ofLogVerbose(__func__) << "";
         }
     }
 private:
     OMXInitializer() {
-        //ofLogVerbose(__func__) << "";
         isOpen=false;
         av_register_all();
         avformat_network_init();
