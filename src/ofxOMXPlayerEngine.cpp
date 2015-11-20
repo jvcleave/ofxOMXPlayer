@@ -343,9 +343,11 @@ bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
 		{
 			deviceString = "omx:local";
 		}
+#if 0
 		bool m_passthrough			= false;/* passthrough overwrites hw decode */
 		int m_use_hw_audio			= false;
 		bool doBoostOnDownmix		= false;
+#endif
 		audioPlayer = new OMXPlayerAudio();
 		didAudioOpen = audioPlayer->Open(audioStreamInfo, &clock, &omxReader, deviceString);
 		if (didAudioOpen)

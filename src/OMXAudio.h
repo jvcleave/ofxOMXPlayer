@@ -138,8 +138,6 @@ class OMXAudio
 
 		bool SetClock(OMXClock *clock);
 		void SetCodingType(AVCodecID codec);
-		bool CanHWDecode(AVCodecID codec);
-		static bool HWDecode(AVCodecID codec);
 
 		void PrintChannels(OMX_AUDIO_CHANNELTYPE eChannelMapping[]);
 		void PrintPCM(OMX_AUDIO_PARAM_PCMMODETYPE *pcm);
@@ -151,7 +149,6 @@ class OMXAudio
 		long          m_CurrentVolume;
 		long          m_drc;
 		bool          m_Passthrough;
-		bool          m_HWDecode;
 		bool          m_normalize_downmix;
 		unsigned int  m_BytesPerSec;
 		unsigned int  m_BufferLen;
