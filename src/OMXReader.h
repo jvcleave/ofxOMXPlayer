@@ -95,7 +95,7 @@ class OMXReader
 		OMXStream                 m_streams[MAX_STREAMS];
 		int                       m_chapter_count;
 		double                    m_iCurrentPts;
-		int                       m_speed;
+		int                       speed;
 		unsigned int              m_program;
 		pthread_mutex_t           m_lock;
 		void Lock();
@@ -148,7 +148,7 @@ class OMXReader
 		void setSpeed(int iSpeed);
 		int getSpeed()
 		{
-			return m_speed;
+			return speed;
 		};
 		void UpdateCurrentPTS();
 		double ConvertTimestamp(int64_t pts, int den, int num);

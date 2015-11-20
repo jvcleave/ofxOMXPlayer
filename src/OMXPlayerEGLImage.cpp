@@ -43,9 +43,9 @@ bool OMXPlayerEGLImage::Open(OMXStreamInfo& hints, OMXClock *av_clock, EGLImageK
 	m_iCurrentPts = DVD_NOPTS_VALUE;
 	doAbort      = false;
 	doFlush       = false;
-	m_cached_size = 0;
+	cachedSize = 0;
 	m_iVideoDelay = 0;
-	m_speed       = DVD_PLAYSPEED_NORMAL;
+	speed       = DVD_PLAYSPEED_NORMAL;
 	m_FlipTimeStamp = omxClock->getAbsoluteClock();
 
 	if(!OpenDecoder())
@@ -88,7 +88,7 @@ bool OMXPlayerEGLImage::OpenDecoder()
 
 	}
 
-	m_decoder = (OMXDecoderBase*)eglImageDecoder;
+	decoder = (OMXDecoderBase*)eglImageDecoder;
 
 	if(!eglImageDecoder->Open(omxStreamInfo, omxClock, eglImage))
 	{
@@ -105,7 +105,7 @@ bool OMXPlayerEGLImage::OpenDecoder()
 
 
 	/*ofLog(OF_LOG_VERBOSE, "Video codec %s width %d height %d profile %d fps %f\n",
-		  m_decoder->GetDecoderName().c_str() , omxStreamInfo.width, omxStreamInfo.height, omxStreamInfo.profile, m_fps);*/
+		  decoder->GetDecoderName().c_str() , omxStreamInfo.width, omxStreamInfo.height, omxStreamInfo.profile, m_fps);*/
 
 
 	return true;
@@ -142,7 +142,7 @@ bool OMXPlayerEGLImage::Close()
 	m_open          = false;
 	streamID     = -1;
 	m_iCurrentPts   = DVD_NOPTS_VALUE;
-	m_speed         = DVD_PLAYSPEED_NORMAL;
+	speed         = DVD_PLAYSPEED_NORMAL;
 
 	//ofLogVerbose(__func__) << " END";
 	return true;

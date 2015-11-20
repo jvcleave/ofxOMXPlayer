@@ -78,7 +78,7 @@ bool OMXReader::Open(std::string filename, bool doSkipAvProbe)
 	
 	m_iCurrentPts = DVD_NOPTS_VALUE;
 	m_filename    = filename; 
-	m_speed       = DVD_PLAYSPEED_NORMAL;
+	speed       = DVD_PLAYSPEED_NORMAL;
 	m_program     = UINT_MAX;
 	AVIOInterruptCB int_cb = { interrupt_cb, NULL };
 	
@@ -227,7 +227,7 @@ bool OMXReader::Open(std::string filename, bool doSkipAvProbe)
 		}
 	}
 	
-	m_speed       = DVD_PLAYSPEED_NORMAL;
+	speed       = DVD_PLAYSPEED_NORMAL;
 	/*
 	if(dump_format)
 		av_dump_format(m_pFormatContext, 0, m_filename.c_str(), 0);*/
@@ -312,7 +312,7 @@ bool OMXReader::Close()
 	m_eof             = false;
 	m_chapter_count   = 0;
 	m_iCurrentPts     = DVD_NOPTS_VALUE;
-	m_speed           = DVD_PLAYSPEED_NORMAL;
+	speed           = DVD_PLAYSPEED_NORMAL;
 	
 	ClearStreams();
 	
@@ -400,7 +400,7 @@ AVMediaType OMXReader::PacketType(OMXPacket *pkt)
 OMXPacket* OMXReader::Read()
 {
 	AVPacket  pkt;
-	OMXPacket *m_omx_pkt = NULL;
+	OMXPacket* omxPacket = NULL;
 	int       result = -1;
 	
 	if(!m_pFormatContext)
@@ -484,9 +484,9 @@ OMXPacket* OMXReader::Read()
 		pkt.pts = AV_NOPTS_VALUE;
 	}
 	
-	m_omx_pkt = AllocPacket(pkt.size);
+	omxPacket = AllocPacket(pkt.size);
 	/* oom error allocation av packet */
-	if(!m_omx_pkt)
+	if(!omxPacket)
 	{
 		m_eof = true;
 		av_free_packet(&pkt);
@@ -494,24 +494,24 @@ OMXPacket* OMXReader::Read()
 		return NULL;
 	}
 	
-	m_omx_pkt->codec_type = pStream->codec->codec_type;
+	omxPacket->codec_type = pStream->codec->codec_type;
 	
 	/* copy content into our own packet */
-	m_omx_pkt->size = pkt.size;
+	omxPacket->size = pkt.size;
 	
 	if (pkt.data)
-		memcpy(m_omx_pkt->data, pkt.data, m_omx_pkt->size);
+		memcpy(omxPacket->data, pkt.data, omxPacket->size);
 	
-	m_omx_pkt->stream_index = pkt.stream_index;
-	GetHints(pStream, &m_omx_pkt->hints);
+	omxPacket->stream_index = pkt.stream_index;
+	GetHints(pStream, &omxPacket->hints);
 	
-	m_omx_pkt->dts = ConvertTimestamp(pkt.dts, pStream->time_base.den, pStream->time_base.num);
-	m_omx_pkt->pts = ConvertTimestamp(pkt.pts, pStream->time_base.den, pStream->time_base.num);
-	m_omx_pkt->duration = DVD_SEC_TO_TIME((double)pkt.duration * pStream->time_base.num / pStream->time_base.den);
+	omxPacket->dts = ConvertTimestamp(pkt.dts, pStream->time_base.den, pStream->time_base.num);
+	omxPacket->pts = ConvertTimestamp(pkt.pts, pStream->time_base.den, pStream->time_base.num);
+	omxPacket->duration = DVD_SEC_TO_TIME((double)pkt.duration * pStream->time_base.num / pStream->time_base.den);
 
 	// used to guess streamlength
-	if (m_omx_pkt->dts != DVD_NOPTS_VALUE && (m_omx_pkt->dts > m_iCurrentPts || m_iCurrentPts == DVD_NOPTS_VALUE))
-		m_iCurrentPts = m_omx_pkt->dts;
+	if (omxPacket->dts != DVD_NOPTS_VALUE && (omxPacket->dts > m_iCurrentPts || m_iCurrentPts == DVD_NOPTS_VALUE))
+		m_iCurrentPts = omxPacket->dts;
 	
 	// check if stream has passed full duration, needed for live streams
 	if(pkt.dts != (int64_t)AV_NOPTS_VALUE)
@@ -535,7 +535,7 @@ OMXPacket* OMXReader::Read()
 	av_free_packet(&pkt);
 	
 	UnLock();
-	return m_omx_pkt;
+	return omxPacket;
 }
 
 bool OMXReader::GetStreams()
@@ -1042,22 +1042,22 @@ void OMXReader::setSpeed(int iSpeed)
 	if(!m_pFormatContext)
 		return;
 	
-	if(m_speed != DVD_PLAYSPEED_PAUSE && iSpeed == DVD_PLAYSPEED_PAUSE)
+	if(speed != DVD_PLAYSPEED_PAUSE && iSpeed == DVD_PLAYSPEED_PAUSE)
 	{
 		av_read_pause(m_pFormatContext);
 	}
-	else if(m_speed == DVD_PLAYSPEED_PAUSE && iSpeed != DVD_PLAYSPEED_PAUSE)
+	else if(speed == DVD_PLAYSPEED_PAUSE && iSpeed != DVD_PLAYSPEED_PAUSE)
 	{
 		av_read_play(m_pFormatContext);
 	}
-	m_speed = iSpeed;
+	speed = iSpeed;
 	
 	AVDiscard discard = AVDISCARD_NONE;
-	if(m_speed > 4*DVD_PLAYSPEED_NORMAL)
+	if(speed > 4*DVD_PLAYSPEED_NORMAL)
 		discard = AVDISCARD_NONKEY;
-	else if(m_speed > 2*DVD_PLAYSPEED_NORMAL)
+	else if(speed > 2*DVD_PLAYSPEED_NORMAL)
 		discard = AVDISCARD_BIDIR;
-	else if(m_speed < DVD_PLAYSPEED_PAUSE)
+	else if(speed < DVD_PLAYSPEED_PAUSE)
 		discard = AVDISCARD_NONKEY;
 	
 	for(unsigned int i = 0; i < m_pFormatContext->nb_streams; i++)

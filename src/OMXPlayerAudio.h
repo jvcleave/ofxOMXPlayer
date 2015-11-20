@@ -36,21 +36,19 @@ class OMXPlayerAudio : public OMXThread
 		pthread_mutex_t           m_lock_decoder;
 		OMXClock*					omxClock;
 		OMXReader*					omxReader;
-		OMXAudio                 *m_decoder;
+		OMXAudio                 *decoder;
 		std::string               m_codec_name;
 		std::string               deviceName;
 		bool                      doPassthrough;
 		bool                      doHardwareDecode;
 		OMXAudio::EEncoded  m_passthrough;
-		bool                      m_hw_decode;
 		bool                      doBoostOnDownmix;
 		bool                      doAbort;
-		bool                      m_use_thread;
 		bool                      doFlush;
-		enum PCMChannels          *m_pChannelMap;
-		unsigned int              m_cached_size;
+		enum PCMChannels          *channelMap;
+		unsigned int              cachedSize;
 		AudioCodecOMX         *audioCodecOMX;
-		int                       m_speed;
+		int                       speed;
 
 		int64_t m_errortime; //timestamp of last time we measured
 
@@ -94,7 +92,7 @@ class OMXPlayerAudio : public OMXThread
 		unsigned int GetCached()
 		{
 			Lock();
-			unsigned int cached_size = m_cached_size;
+			unsigned int cached_size = cachedSize;
 			UnLock();
 			return cached_size;
 
