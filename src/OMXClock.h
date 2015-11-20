@@ -19,10 +19,10 @@ static inline int64_t FromOMXTime(OMX_TICKS ticks)
 class OMXClock
 {
 	protected:
-		bool              m_pause;
-		bool              m_has_video;
-		bool              m_has_audio;
-		int               m_omx_speed;
+		bool              pauseState;
+		bool              hasVideo;
+		bool              hasAudio;
+		int               currentSpeed;
 		pthread_mutex_t   m_lock;
 	private:
 		Component clockComponent;
@@ -35,25 +35,25 @@ class OMXClock
 		void OMXDeinitialize();
 		bool isPaused()
 		{
-			return m_pause;
+			return pauseState;
 		};
-		bool stop(bool lock = true);
-		bool start(double pts, bool lock = true);
-		bool step(int steps = 1, bool lock = true);
-		bool reset(bool lock = true);
-		double getMediaTime(bool lock = true);
-		bool getMediaTime(double pts, bool lock = true);
-		bool pause(bool lock = true);
-		bool resume(bool lock = true);
-		bool setSpeed(int speed, bool lock = true, bool pause_resume = false);
+		bool stop();
+		bool start(double pts);
+		bool step(int steps = 1);
+		bool reset();
+		double getMediaTime();
+		bool getMediaTime(double pts);
+		bool pause();
+		bool resume();
+		bool setSpeed(int speed, bool pause_resume = false);
 		int  getSpeed()
 		{
-			return m_omx_speed;
+			return currentSpeed;
 		};
-		Component *getComponent();
-		bool OMXStateExecute(bool lock = true);
-		void setToIdleState(bool lock = true);
-		bool doHDMIClockSync(bool lock = true);
+		Component* getComponent();
+		bool OMXStateExecute();
+		void setToIdleState();
+		bool doHDMIClockSync();
 		int64_t getAbsoluteClock();
 		void sleep(unsigned int dwMilliSeconds);
 };

@@ -4,11 +4,11 @@ OMXClock::OMXClock()
 {
 
 
-	m_has_video   = false;
-	m_has_audio   = false;
-	m_pause       = false;
+	hasVideo   = false;
+	hasAudio   = false;
+	pauseState       = false;
 
-	m_omx_speed  = DVD_PLAYSPEED_NORMAL;
+	currentSpeed  = DVD_PLAYSPEED_NORMAL;
 
 	pthread_mutex_init(&m_lock, NULL);
 
@@ -37,10 +37,10 @@ bool OMXClock::init(bool has_video, bool has_audio)
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	std::string componentName = "OMX.broadcom.clock";
 
-	m_has_video = has_video;
-	m_has_audio = has_audio;
+	hasVideo = has_video;
+	hasAudio = has_audio;
 
-	m_pause       = false;
+	pauseState       = false;
 
 	if(!clockComponent.init(componentName, OMX_IndexParamOtherInit))
 	{
@@ -50,7 +50,7 @@ bool OMXClock::init(bool has_video, bool has_audio)
 	OMX_TIME_CONFIG_ACTIVEREFCLOCKTYPE refClock;
 	OMX_INIT_STRUCTURE(refClock);
 
-	if(m_has_audio)
+	if(hasAudio)
 	{
 		refClock.eClock = OMX_TIME_RefClockAudio;
 	}
@@ -80,7 +80,7 @@ void OMXClock::OMXDeinitialize()
 	clockComponent.Deinitialize(true);
 }
 
-bool OMXClock::OMXStateExecute(bool lock /* = true */)
+bool OMXClock::OMXStateExecute()
 {
 	if(clockComponent.getHandle() == NULL)
 	{
@@ -88,10 +88,7 @@ bool OMXClock::OMXStateExecute(bool lock /* = true */)
 		return false;
 	}
 
-	if(lock)
-	{
-		Lock();
-	}
+	Lock();
 
 	if(clockComponent.getState() != OMX_StateExecuting)
 	{
@@ -100,23 +97,17 @@ bool OMXClock::OMXStateExecute(bool lock /* = true */)
         OMX_TRACE(error);
 		if (error != OMX_ErrorNone)
 		{
-			if(lock)
-			{
-				UnLock();
-			}
+			UnLock();
 			return false;
 		}
 	}
 
-	if(lock)
-	{
-		UnLock();
-	}
+	UnLock();
 
 	return true;
 }
 
-void OMXClock::setToIdleState(bool lock /* = true */)
+void OMXClock::setToIdleState()
 {
 	if(clockComponent.getHandle() == NULL)
 	{
@@ -124,10 +115,7 @@ void OMXClock::setToIdleState(bool lock /* = true */)
 		return;
 	}
 
-	if(lock)
-	{
-		Lock();
-	}
+	Lock();
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 
 	if(clockComponent.getState() == OMX_StateExecuting)
@@ -144,13 +132,10 @@ void OMXClock::setToIdleState(bool lock /* = true */)
 
 	}
 
-	if(lock)
-	{
-		UnLock();
-	}
+	UnLock();
 }
 
-Component *OMXClock::getComponent()
+Component* OMXClock::getComponent()
 {
 	if(!clockComponent.getHandle())
 	{
@@ -161,7 +146,7 @@ Component *OMXClock::getComponent()
 	return &clockComponent;
 }
 
-bool  OMXClock::stop(bool lock /* = true */)
+bool  OMXClock::stop()
 {
 	if(clockComponent.getHandle() == NULL)
 	{
@@ -170,10 +155,7 @@ bool  OMXClock::stop(bool lock /* = true */)
 	}
 
 
-	if(lock)
-	{
-		Lock();
-	}
+	Lock();
 
 	//ofLogVerbose(__func__) << "START";
 
@@ -187,22 +169,16 @@ bool  OMXClock::stop(bool lock /* = true */)
     OMX_TRACE(error);
 	if(error != OMX_ErrorNone)
 	{
-		if(lock)
-		{
-			UnLock();
-		}
+		UnLock();
 		return false;
 	}
 
-	if(lock)
-	{
-		UnLock();
-	}
+	UnLock();
 
 	return true;
 }
 
-bool OMXClock::start(double pts, bool lock /* = true */)
+bool OMXClock::start(double pts)
 {
 	if(clockComponent.getHandle() == NULL)
 	{
@@ -210,10 +186,7 @@ bool OMXClock::start(double pts, bool lock /* = true */)
 		return false;
 	}
 
-	if(lock)
-	{
-		Lock();
-	}
+	Lock();
     
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	OMX_TIME_CONFIG_CLOCKSTATETYPE clock;
@@ -226,22 +199,16 @@ bool OMXClock::start(double pts, bool lock /* = true */)
     OMX_TRACE(error);
 	if(error != OMX_ErrorNone)
 	{
-		if(lock)
-		{
-			UnLock();
-		}
+		UnLock();
 		return false;
 	}
 
-	if(lock)
-	{
-		UnLock();
-	}
+	UnLock();
 
 	return true;
 }
 
-bool OMXClock::step(int steps /* = 1 */, bool lock /* = true */)
+bool OMXClock::step(int steps)
 {
 	if(clockComponent.getHandle() == NULL)
 	{
@@ -249,10 +216,7 @@ bool OMXClock::step(int steps /* = 1 */, bool lock /* = true */)
 		return false;
 	}
 
-	if(lock)
-	{
-		Lock();
-	}
+	Lock();
 
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	OMX_PARAM_U32TYPE param;
@@ -265,22 +229,16 @@ bool OMXClock::step(int steps /* = 1 */, bool lock /* = true */)
     OMX_TRACE(error);
 	if(error != OMX_ErrorNone)
 	{
-		if(lock)
-		{
-			UnLock();
-		}
+		UnLock();
 		return false;
 	}
 
-	if(lock)
-	{
-		UnLock();
-	}
+	UnLock();
 
 	return true;
 }
 
-bool OMXClock::reset(bool lock /* = true */)
+bool OMXClock::reset()
 {
 	if(clockComponent.getHandle() == NULL)
 	{
@@ -288,23 +246,17 @@ bool OMXClock::reset(bool lock /* = true */)
 		return false;
 	}
 
-	if(lock)
-	{
-		Lock();
-	}
+	Lock();
 
-	stop(false);
-	start(0.0, false);
+	stop();
+	start(0.0);
 
-	if(lock)
-	{
-		UnLock();
-	}
+	UnLock();
 
 	return true;
 }
 
-double OMXClock::getMediaTime(bool lock /* = true */)
+double OMXClock::getMediaTime()
 {
 	if(clockComponent.getHandle() == NULL)
 	{
@@ -312,10 +264,7 @@ double OMXClock::getMediaTime(bool lock /* = true */)
 		return 0;
 	}
 
-	if(lock)
-	{
-		Lock();
-	}
+	Lock();
 
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	double pts = 0;
@@ -329,25 +278,19 @@ double OMXClock::getMediaTime(bool lock /* = true */)
 
 	if(error != OMX_ErrorNone)
 	{
-		if(lock)
-		{
-			UnLock();
-		}
+		UnLock();
 		return 0;
 	}
 
 	pts = (double)FromOMXTime(timeStamp.nTimestamp);
-	if(lock)
-	{
-		UnLock();
-	}
+	UnLock();
 
 	return pts;
 }
 
 // Set the media time, so calls to get media time use the updated value,
 // useful after a seek so mediatime is updated immediately (rather than waiting for first decoded packet)
-bool OMXClock::getMediaTime(double pts, bool lock /* = true*/)
+bool OMXClock::getMediaTime(double pts)
 {
 	if(clockComponent.getHandle() == NULL)
 	{
@@ -355,10 +298,7 @@ bool OMXClock::getMediaTime(double pts, bool lock /* = true*/)
 		return false;
 	}
 
-	if(lock)
-	{
-		Lock();
-	}
+	Lock();
 
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	OMX_INDEXTYPE index;
@@ -366,7 +306,7 @@ bool OMXClock::getMediaTime(double pts, bool lock /* = true*/)
 	OMX_INIT_STRUCTURE(timeStamp);
 	timeStamp.nPortIndex = clockComponent.getInputPort();
 
-	if(m_has_audio)
+	if(hasAudio)
 	{
 		index = OMX_IndexConfigTimeCurrentAudioReference;
 	}
@@ -382,21 +322,15 @@ bool OMXClock::getMediaTime(double pts, bool lock /* = true*/)
 
 	if(error != OMX_ErrorNone)
 	{
-		if(lock)
-		{
-			UnLock();
-		}
+		UnLock();
 		return false;
 	}
-	if(lock)
-	{
-		UnLock();
-	}
+	UnLock();
 
 	return true;
 }
 
-bool OMXClock::pause(bool lock /* = true */)
+bool OMXClock::pause()
 {
 	if(clockComponent.getHandle() == NULL)
 	{
@@ -404,27 +338,21 @@ bool OMXClock::pause(bool lock /* = true */)
 		return false;
 	}
 
-	if(!m_pause)
+	if(!pauseState)
 	{
-		if(lock)
+		Lock();
+
+		if (setSpeed(0, true))
 		{
-			Lock();
+			pauseState = true;
 		}
 
-		if (setSpeed(0, false, true))
-		{
-			m_pause = true;
-		}
-
-		if(lock)
-		{
-			UnLock();
-		}
+		UnLock();
 	}
-	return m_pause == true;
+	return pauseState == true;
 }
 
-bool OMXClock::resume(bool lock /* = true */)
+bool OMXClock::resume()
 {
 	if(clockComponent.getHandle() == NULL)
 	{
@@ -432,29 +360,23 @@ bool OMXClock::resume(bool lock /* = true */)
 		return false;
 	}
 
-	if(m_pause)
+	if(pauseState)
 	{
-		if(lock)
+		Lock();
+
+		if (setSpeed(currentSpeed, true))
 		{
-			Lock();
+			pauseState = false;
 		}
 
-		if (setSpeed(m_omx_speed, false, true))
-		{
-			m_pause = false;
-		}
-
-		if(lock)
-		{
-			UnLock();
-		}
+		UnLock();
 	}
-	return m_pause == false;
+	return pauseState == false;
 }
 
 #define TRICKPLAY(speed) (speed < 0 || speed > 1.2 * DVD_PLAYSPEED_NORMAL)
 
-bool OMXClock::setSpeed(int speed, bool lock /* = true */, bool pause_resume /* = false */)
+bool OMXClock::setSpeed(int speed, bool pause_resume /* = false */)
 {
 	ofLog(OF_LOG_VERBOSE, "OMXClock::setSpeed(%d)", speed);
 
@@ -464,10 +386,7 @@ bool OMXClock::setSpeed(int speed, bool lock /* = true */, bool pause_resume /* 
 		return false;
 	}
 
-	if(lock)
-	{
-		Lock();
-	}
+	Lock();
 
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	OMX_TIME_CONFIG_SCALETYPE scaleType;
@@ -477,7 +396,7 @@ bool OMXClock::setSpeed(int speed, bool lock /* = true */, bool pause_resume /* 
 	OMX_TIME_CONFIG_ACTIVEREFCLOCKTYPE refClock;
 	OMX_INIT_STRUCTURE(refClock);
 
-	if(m_has_audio && !TRICKPLAY(speed))
+	if(hasAudio && !TRICKPLAY(speed))
 	{
 		refClock.eClock = OMX_TIME_RefClockAudio;
 	}
@@ -495,11 +414,11 @@ bool OMXClock::setSpeed(int speed, bool lock /* = true */, bool pause_resume /* 
 	}
 	if (TRICKPLAY(speed))
 	{
-		step(-1, false);
+		step(-1);
 	}
 	else
 	{
-		step(0, false);
+		step(0);
 	}
 
 	if (0 && TRICKPLAY(speed))
@@ -515,27 +434,21 @@ bool OMXClock::setSpeed(int speed, bool lock /* = true */, bool pause_resume /* 
 
 	if(error != OMX_ErrorNone)
 	{
-		if(lock)
-		{
-			UnLock();
-		}
+		UnLock();
 		return false;
 	}
 
 	if (!pause_resume)
 	{
-		m_omx_speed = speed;
+		currentSpeed = speed;
 	}
 
-	if(lock)
-	{
-		UnLock();
-	}
+	UnLock();
 
 	return true;
 }
 
-bool OMXClock::doHDMIClockSync(bool lock /* = true */)
+bool OMXClock::doHDMIClockSync()
 {
 	if(clockComponent.getHandle() == NULL)
 	{
@@ -543,10 +456,7 @@ bool OMXClock::doHDMIClockSync(bool lock /* = true */)
 		return false;
 	}
 
-	if(lock)
-	{
-		Lock();
-	}
+	Lock();
 
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	OMX_CONFIG_LATENCYTARGETTYPE latencyTarget;
@@ -566,17 +476,11 @@ bool OMXClock::doHDMIClockSync(bool lock /* = true */)
 
 	if(error != OMX_ErrorNone)
 	{
-        if(lock)
-		{
-			UnLock();
-		}
+        UnLock();
 		return false;
 	}
 
-	if(lock)
-	{
-		UnLock();
-	}
+	UnLock();
 
 	return true;
 }
