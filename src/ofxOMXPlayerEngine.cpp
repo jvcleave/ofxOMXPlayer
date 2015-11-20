@@ -345,12 +345,9 @@ bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
 		}
 		bool m_passthrough			= false;/* passthrough overwrites hw decode */
 		int m_use_hw_audio			= false;
-		bool m_boost_on_downmix		= false;
-		bool m_thread_player		= true;
+		bool doBoostOnDownmix		= false;
 		audioPlayer = new OMXPlayerAudio();
-		didAudioOpen = audioPlayer->Open(audioStreamInfo, &clock, &omxReader, deviceString,
-		                                 m_passthrough, m_use_hw_audio,
-		                                 m_boost_on_downmix, m_thread_player);
+		didAudioOpen = audioPlayer->Open(audioStreamInfo, &clock, &omxReader, deviceString);
 		if (didAudioOpen)
 		{
 			//ofLogVerbose(__func__) << " AUDIO PLAYER OPEN PASS";

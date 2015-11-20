@@ -156,7 +156,7 @@ class OMXAudio
 		void PrintPCM(OMX_AUDIO_PARAM_PCMMODETYPE *pcm);
 
 	private:
-		bool          m_Initialized;
+		bool          isInitialized;
 		bool          doPause;
 		bool          m_CanPause;
 		long          m_CurrentVolume;

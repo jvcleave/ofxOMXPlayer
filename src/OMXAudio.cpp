@@ -100,7 +100,7 @@ float downmixing_coefficients_8[16] =
 //////////////////////////////////////////////////////////////////////
 //***********************************************************************************************
 OMXAudio::OMXAudio() :
-	m_Initialized     (false  ),
+	isInitialized     (false  ),
 	doPause           (false  ),
 	m_CanPause        (false  ),
 	m_CurrentVolume   (0      ),
@@ -129,7 +129,7 @@ OMXAudio::OMXAudio() :
 
 OMXAudio::~OMXAudio()
 {
-	if(m_Initialized)
+	if(isInitialized)
 	{
 		Deinitialize();
 	}
@@ -571,7 +571,7 @@ bool OMXAudio::init(string device, int iChannels, enum PCMChannels *channelMap, 
 		}
 	}
 
-	m_Initialized   = true;
+	isInitialized   = true;
 	doSetStartTime  = true;
 	isFirstFrame   = true;
 
@@ -586,7 +586,7 @@ bool OMXAudio::init(string device, int iChannels, enum PCMChannels *channelMap, 
 //***********************************************************************************************
 bool OMXAudio::Deinitialize()
 {
-	if(!m_Initialized)
+	if(!isInitialized)
 	{
 		return true;
 	}
@@ -619,7 +619,7 @@ bool OMXAudio::Deinitialize()
 	}
 	decoderComponent.Deinitialize();
 
-	m_Initialized = false;
+	isInitialized = false;
 	m_BytesPerSec = 0;
 	m_BufferLen   = 0;
 
@@ -633,7 +633,7 @@ bool OMXAudio::Deinitialize()
 	clockComponent = NULL;
 	omxClock  = NULL;
 
-	m_Initialized = false;
+	isInitialized = false;
 	m_HWDecode    = false;
 
 	if(extraData)
@@ -652,7 +652,7 @@ bool OMXAudio::Deinitialize()
 
 void OMXAudio::Flush()
 {
-	if(!m_Initialized)
+	if(!isInitialized)
 	{
 		return;
 	}
@@ -671,7 +671,7 @@ void OMXAudio::Flush()
 //***********************************************************************************************
 bool OMXAudio::pause()
 {
-	if (!m_Initialized)
+	if (!isInitialized)
 	{
 		return -1;
 	}
@@ -690,7 +690,7 @@ bool OMXAudio::pause()
 //***********************************************************************************************
 bool OMXAudio::resume()
 {
-	if (!m_Initialized)
+	if (!isInitialized)
 	{
 		return -1;
 	}
@@ -709,7 +709,7 @@ bool OMXAudio::resume()
 //***********************************************************************************************
 bool OMXAudio::Stop()
 {
-	if (!m_Initialized)
+	if (!isInitialized)
 	{
 		return -1;
 	}
@@ -730,7 +730,7 @@ long OMXAudio::getCurrentVolume() const
 //***********************************************************************************************
 void OMXAudio::Mute(bool bMute)
 {
-	if(!m_Initialized)
+	if(!isInitialized)
 	{
 		return;
 	}
@@ -748,7 +748,7 @@ void OMXAudio::Mute(bool bMute)
 //***********************************************************************************************
 bool OMXAudio::setCurrentVolume(long nVolume)
 {
-	if(!m_Initialized || m_Passthrough)
+	if(!isInitialized || m_Passthrough)
 	{
 		return false;
 	}
@@ -854,7 +854,7 @@ unsigned int OMXAudio::AddPackets(void* data, unsigned int len)
 //***********************************************************************************************
 unsigned int OMXAudio::AddPackets(void* data, unsigned int len, double dts, double pts)
 {
-	if(!m_Initialized)
+	if(!isInitialized)
 	{
 		ofLog(OF_LOG_ERROR,"OMXAudio::AddPackets - sanity failed. no valid play handle!");
 		return len;
@@ -1119,7 +1119,7 @@ unsigned int OMXAudio::GetAudioRenderingLatency()
 void OMXAudio::submitEOS()
 {
 	//ofLogVerbose(__func__) << "START";
-	if(!m_Initialized || doPause)
+	if(!isInitialized || doPause)
 	{
 		return;
 	}
@@ -1150,7 +1150,7 @@ void OMXAudio::submitEOS()
 
 bool OMXAudio::EOS()
 {
-	if(!m_Initialized || doPause)
+	if(!isInitialized || doPause)
 	{
 		return false;
 	}

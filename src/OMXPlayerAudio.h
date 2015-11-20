@@ -35,15 +35,15 @@ class OMXPlayerAudio : public OMXThread
 		pthread_mutex_t           m_lock;
 		pthread_mutex_t           m_lock_decoder;
 		OMXClock                  *omxClock;
-		OMXReader                 *m_omx_reader;
+		OMXReader                 *omxReader;
 		OMXAudio                 *m_decoder;
 		std::string               m_codec_name;
-		std::string               m_device;
-		bool                      m_use_passthrough;
-		bool                      m_use_hw_decode;
+		std::string               deviceName;
+		bool                      doPassthrough;
+		bool                      doHardwareDecode;
 		OMXAudio::EEncoded  m_passthrough;
 		bool                      m_hw_decode;
-		bool                      m_boost_on_downmix;
+		bool                      doBoostOnDownmix;
 		bool                      m_bAbort;
 		bool                      m_use_thread;
 		bool                      m_flush;
@@ -69,11 +69,7 @@ class OMXPlayerAudio : public OMXThread
 		bool Open(OMXStreamInfo& hints,
                   OMXClock *av_clock,
                   OMXReader *omx_reader,
-		          std::string device,
-                  bool passthrough,
-                  bool hw_decode,
-		          bool boost_on_downmix,
-                  bool use_thread);
+		          std::string device);
     
 		bool Close();
 		bool Decode(OMXPacket *pkt);

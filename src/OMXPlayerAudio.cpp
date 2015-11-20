@@ -35,9 +35,8 @@
 OMXPlayerAudio::OMXPlayerAudio()
 {
 	m_open          = false;
-	m_stream_id     = -1;
 	omxClock      = NULL;
-	m_omx_reader    = NULL;
+	omxReader    = NULL;
 	m_decoder       = NULL;
 	m_flush         = false;
 	m_cached_size   = 0;
@@ -68,39 +67,28 @@ OMXPlayerAudio::~OMXPlayerAudio()
 
 void OMXPlayerAudio::Lock()
 {
-	if(m_use_thread)
-	{
-		pthread_mutex_lock(&m_lock);
-	}
+	pthread_mutex_lock(&m_lock);
 }
 
 void OMXPlayerAudio::UnLock()
 {
-	if(m_use_thread)
-	{
-		pthread_mutex_unlock(&m_lock);
-	}
+	pthread_mutex_unlock(&m_lock);
 }
 
 void OMXPlayerAudio::LockDecoder()
 {
-	if(m_use_thread)
-	{
-		pthread_mutex_lock(&m_lock_decoder);
-	}
+	pthread_mutex_lock(&m_lock_decoder);
 }
 
 void OMXPlayerAudio::UnLockDecoder()
 {
-	if(m_use_thread)
-	{
-		pthread_mutex_unlock(&m_lock_decoder);
-	}
+	pthread_mutex_unlock(&m_lock_decoder);
 }
 
-bool OMXPlayerAudio::Open(OMXStreamInfo& hints, OMXClock *av_clock, OMXReader *omx_reader,
-                          std::string device, bool passthrough, bool hw_decode,
-                          bool boost_on_downmix, bool use_thread)
+bool OMXPlayerAudio::Open(OMXStreamInfo& hints, 
+                          OMXClock *av_clock, 
+                          OMXReader *omx_reader,
+                          std::string device)
 {
 	if(ThreadHandle())
 	{
@@ -115,16 +103,10 @@ bool OMXPlayerAudio::Open(OMXStreamInfo& hints, OMXClock *av_clock, OMXReader *o
 
 	m_hints       = hints;
 	omxClock    = av_clock;
-	m_omx_reader  = omx_reader;
-	m_device      = device;
-	m_passthrough = OMXAudio::ENCODED_NONE;
-	m_hw_decode   = false;
-	m_use_passthrough = passthrough;
-	m_use_hw_decode   = hw_decode;
-	m_boost_on_downmix = boost_on_downmix;
+	omxReader  = omx_reader;
+	deviceName      = device;
 	m_iCurrentPts = DVD_NOPTS_VALUE;
 	m_bAbort      = false;
-	m_use_thread  = use_thread;
 	m_flush       = false;
 	m_cached_size = 0;
 	m_pAudioCodec = NULL;
@@ -147,10 +129,7 @@ bool OMXPlayerAudio::Open(OMXStreamInfo& hints, OMXClock *av_clock, OMXReader *o
 		return false;
 	}
 
-	if(m_use_thread)
-	{
-		Create();
-	}
+	Create();
 
 	m_open        = true;
 
@@ -200,7 +179,7 @@ bool OMXPlayerAudio::Decode(OMXPacket *pkt)
 		return true;
 	}
 
-	if(!m_omx_reader->IsActive(OMXSTREAM_AUDIO, pkt->stream_index))
+	if(!omxReader->IsActive(OMXSTREAM_AUDIO, pkt->stream_index))
 	{
 		return true;
 	}
@@ -446,7 +425,7 @@ void OMXPlayerAudio::CloseAudioCodec()
 
 OMXAudio::EEncoded OMXPlayerAudio::IsPassthrough(OMXStreamInfo hints)
 {
-    if(m_device == "omx:local")
+    if(deviceName == "omx:local")
     {
         return OMXAudio::ENCODED_NONE;
     }
@@ -472,35 +451,35 @@ OMXAudio::EEncoded OMXPlayerAudio::IsPassthrough(OMXStreamInfo hints)
 
 bool OMXPlayerAudio::OpenDecoder()
 {
-	//ofLogVerbose(__func__) << "m_use_hw_decode: " << m_use_hw_decode;
-	//ofLogVerbose(__func__) << "m_use_passthrough: " << m_use_passthrough;
+	//ofLogVerbose(__func__) << "doHardwareDecode: " << doHardwareDecode;
+	//ofLogVerbose(__func__) << "doPassthrough: " << doPassthrough;
 	bool bAudioRenderOpen = false;
 
 	m_decoder = new OMXAudio();
 	m_decoder->SetClock(omxClock);
 
-	if(m_use_passthrough)
+	if(doPassthrough)
 	{
 		m_passthrough = IsPassthrough(m_hints);
 	}
 
-	if(!m_passthrough && m_use_hw_decode)
+	if(!m_passthrough && doHardwareDecode)
 	{
 		m_hw_decode = OMXAudio::HWDecode(m_hints.codec);
 	}
 
-	if(m_passthrough || m_use_hw_decode)
+	if(m_passthrough || doHardwareDecode)
 	{
 		if(m_passthrough)
 		{
 			m_hw_decode = false;
 		}
         stringstream ss;
-        ss << m_device.substr(4);
+        ss << deviceName.substr(4);
         string name = ss.str();
 		bAudioRenderOpen = m_decoder->init(name, m_pChannelMap,
 		                   m_hints, omxClock, m_passthrough,
-		                   m_hw_decode, m_boost_on_downmix);
+		                   m_hw_decode, doBoostOnDownmix);
 	}
 	else
 	{
@@ -512,14 +491,14 @@ bool OMXPlayerAudio::OpenDecoder()
 			m_hints.channels = 8;
 		}
         stringstream ss;
-        ss << m_device.substr(4);
+        ss << deviceName.substr(4);
         string name = ss.str();
 		bAudioRenderOpen = m_decoder->init(name, m_hints.channels, m_pChannelMap,
 		                   downmix_channels, m_hints.samplerate, m_hints.bitspersample,
-		                   false, m_boost_on_downmix, false, m_passthrough);
+		                   false, doBoostOnDownmix, false, m_passthrough);
 	}
 
-	m_codec_name = m_omx_reader->GetCodecName(OMXSTREAM_AUDIO);
+	m_codec_name = omxReader->GetCodecName(OMXSTREAM_AUDIO);
 
 	if(!bAudioRenderOpen)
 	{
