@@ -15,7 +15,7 @@ OMXPlayerEGLImage::OMXPlayerEGLImage()
 
 OMXPlayerEGLImage::~OMXPlayerEGLImage()
 {
-	Close();
+	close();
 }
 
 
@@ -32,7 +32,7 @@ bool OMXPlayerEGLImage::Open(OMXStreamInfo& hints, OMXClock *av_clock, EGLImageK
 
 	if(ThreadHandle())
 	{
-		Close();
+		close();
 	}
 
 
@@ -50,7 +50,7 @@ bool OMXPlayerEGLImage::Open(OMXStreamInfo& hints, OMXClock *av_clock, EGLImageK
 
 	if(!openDecoder())
 	{
-		Close();
+		close();
 		return false;
 	}
 
@@ -111,7 +111,7 @@ bool OMXPlayerEGLImage::openDecoder()
 	return true;
 }
 
-bool OMXPlayerEGLImage::Close()
+bool OMXPlayerEGLImage::close()
 {
 	//ofLogVerbose(__func__) << " START, isExiting:" << isExiting;
 	doAbort  = true;

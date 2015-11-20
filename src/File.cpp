@@ -99,7 +99,7 @@ unsigned int CFile::Read(void *lpBuf, int64_t uiBufSize)
 }
 
 //*********************************************************************************************
-void CFile::Close()
+void CFile::close()
 {
 	if(fileObject && !m_bPipe)
 	{

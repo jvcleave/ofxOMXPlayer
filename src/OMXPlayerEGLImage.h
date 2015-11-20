@@ -18,7 +18,7 @@ class OMXPlayerEGLImage : public OMXPlayerVideoBase
 
 		bool Open(OMXStreamInfo& hints, OMXClock *av_clock, EGLImageKHR eglImage);
 		bool openDecoder();
-		bool Close();
+		bool close();
 
 		ofxOMXPlayerSettings settings;
 		OMXEGLImage*				eglImageDecoder;

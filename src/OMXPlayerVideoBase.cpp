@@ -44,7 +44,7 @@ double OMXPlayerVideoBase::GetFPS()
 	return m_fps;
 }
 
-unsigned int OMXPlayerVideoBase::GetCached()
+unsigned int OMXPlayerVideoBase::getCached()
 {
 	return cachedSize;
 }

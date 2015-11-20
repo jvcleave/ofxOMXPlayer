@@ -94,7 +94,7 @@ ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
 		packet = NULL;
 	}
 
-	omxReader.Close();
+	omxReader.close();
 
 	clock.OMXDeinitialize();
     
@@ -421,14 +421,14 @@ void ofxOMXPlayerEngine::Process()
 		{
 			if (hasAudio)
 			{
-				if (!audioPlayer->GetCached() && !videoPlayer->GetCached())
+				if (!audioPlayer->getCached() && !videoPlayer->getCached())
 				{
 					isCacheEmpty = true;
 				}
 			}
 			else
 			{
-				if (!videoPlayer->GetCached())
+				if (!videoPlayer->getCached())
 				{
 					isCacheEmpty = true;
 				}
@@ -513,7 +513,7 @@ void ofxOMXPlayerEngine::Process()
 		}
 		if (hasAudio)
 		{
-			if(audioPlayer->Error())
+			if(audioPlayer->getError())
 			{
 				ofLogError(__func__) << "audio player error.";
 				hasAudio = false;

@@ -42,7 +42,7 @@ OMXPlayerVideo::~OMXPlayerVideo()
 {
 	//ofLogVerbose(__func__) << "START";
 
-	Close();
+	close();
 
 	pthread_cond_destroy(&m_packet_cond);
 	pthread_mutex_destroy(&m_lock);
@@ -61,7 +61,7 @@ bool OMXPlayerVideo::Open(OMXStreamInfo& hints, OMXClock *av_clock, bool deinter
 
 	if(ThreadHandle())
 	{
-		Close();
+		close();
 	}
 
 
@@ -84,7 +84,7 @@ bool OMXPlayerVideo::Open(OMXStreamInfo& hints, OMXClock *av_clock, bool deinter
 
 	if(!openDecoder())
 	{
-		Close();
+		close();
 		return false;
 	}
 
@@ -144,7 +144,7 @@ bool OMXPlayerVideo::openDecoder()
 	return true;
 }
 
-bool OMXPlayerVideo::Close()
+bool OMXPlayerVideo::close()
 {
 	//ofLogVerbose(__func__) << " START, isExiting:" << isExiting;
 	doAbort  = true;

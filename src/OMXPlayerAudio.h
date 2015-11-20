@@ -53,7 +53,7 @@ class OMXPlayerAudio : public OMXThread
 		int64_t m_errortime; //timestamp of last time we measured
 
 
-		bool   m_player_error;
+		bool   hasErrors;
 
 
 		void Lock();
@@ -69,13 +69,13 @@ class OMXPlayerAudio : public OMXThread
                   OMXReader *omx_reader,
 		          std::string device);
     
-		bool Close();
+		bool close();
 		bool decode(OMXPacket *pkt);
 		void Process();
 		void Flush();
 		bool addPacket(OMXPacket *pkt);
-		bool OpenAudioCodec();
-		void CloseAudioCodec();
+		bool openCodec();
+		void closeCodec();
 		OMXAudio::EEncoded IsPassthrough(OMXStreamInfo hints);
 		bool openDecoder();
 		bool closeDecoder();
@@ -89,7 +89,7 @@ class OMXPlayerAudio : public OMXThread
 		void submitEOS();
 		bool EOS();
 
-		unsigned int GetCached()
+		unsigned int getCached()
 		{
 			Lock();
 			unsigned int cached_size = cachedSize;
@@ -101,8 +101,8 @@ class OMXPlayerAudio : public OMXThread
 		void setCurrentVolume(long nVolume);
 		long getCurrentVolume();
 		void setSpeed(int iSpeed);
-		bool Error()
+		bool getError()
 		{
-			return !m_player_error;
+			return !hasErrors;
 		};
 };

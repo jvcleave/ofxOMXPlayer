@@ -43,7 +43,7 @@ namespace XFILE
 			int64_t Seek(int64_t iFilePosition, int iWhence = SEEK_SET);
 			int64_t GetPosition();
 			int64_t GetLength();
-			void Close();
+			void close();
 			static bool Exists(std::string& strFileName, bool bUseCache = true);
 			int GetChunkSize()
 			{

@@ -30,7 +30,7 @@ OMXReader::OMXReader()
 
 OMXReader::~OMXReader()
 {
-	Close();
+	close();
 	
 	pthread_mutex_destroy(&m_lock);
 }
@@ -123,7 +123,7 @@ bool OMXReader::Open(std::string filename, bool doSkipAvProbe)
 		if(result < 0)
 		{
 			ofLog(OF_LOG_ERROR, "OMXPlayer::OpenFile - avformat_open_input %s ", fileName.c_str());
-			Close();
+			close();
 			return false;
 		}
 	}
@@ -134,7 +134,7 @@ bool OMXReader::Open(std::string filename, bool doSkipAvProbe)
 		if (!fileObject->Open(fileName, flags))
 		{
 			ofLog(OF_LOG_ERROR, "OMXPlayer::OpenFile - %s ", fileName.c_str());
-			Close();
+			close();
 			return false;
 		}
         
@@ -154,7 +154,7 @@ bool OMXReader::Open(std::string filename, bool doSkipAvProbe)
 		if(!iformat)
 		{
 			ofLog(OF_LOG_ERROR, "OMXPlayer::OpenFile - av_probe_input_buffer %s ", fileName.c_str());
-			Close();
+			close();
 			return false;
 		}
         
@@ -169,7 +169,7 @@ bool OMXReader::Open(std::string filename, bool doSkipAvProbe)
 		result = avformat_open_input(&avFormatContext, fileName.c_str(), iformat, NULL);
 		if(result < 0)
 		{
-			Close();
+			close();
 			return false;
 		}
 	}
@@ -202,14 +202,14 @@ bool OMXReader::Open(std::string filename, bool doSkipAvProbe)
         
         if(result < 0)
         {
-            Close();
+            close();
             return false;
         }
     }
     
 	if(!GetStreams())
 	{
-		Close();
+		close();
 		return false;
 	}
 	
@@ -268,7 +268,7 @@ void OMXReader::ClearStreams()
 	programID     = UINT_MAX;
 }
 
-bool OMXReader::Close()
+bool OMXReader::close()
 {
 	if (avFormatContext)
 	{
@@ -291,7 +291,7 @@ bool OMXReader::Close()
 	
 	if(fileObject)
 	{
-		fileObject->Close();
+		fileObject->close();
 		delete fileObject;
 		fileObject = NULL;
 	}

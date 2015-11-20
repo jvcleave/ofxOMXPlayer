@@ -43,7 +43,7 @@ OMXPlayerAudio::OMXPlayerAudio()
 	channelMap   = NULL;
 	audioCodecOMX   = NULL;
 	speed         = DVD_PLAYSPEED_NORMAL;
-	m_player_error  = true;
+	hasErrors  = true;
 
 	pthread_cond_init(&m_packet_cond, NULL);
 	pthread_cond_init(&m_audio_cond, NULL);
@@ -55,7 +55,7 @@ OMXPlayerAudio::~OMXPlayerAudio()
 {
 	if(isOpen)
 	{
-		Close();
+		close();
 	}
 
 
@@ -92,7 +92,7 @@ bool OMXPlayerAudio::Open(OMXStreamInfo& hints,
 {
 	if(ThreadHandle())
 	{
-		Close();
+		close();
 	}
 
 	if (!av_clock)
@@ -115,17 +115,17 @@ bool OMXPlayerAudio::Open(OMXStreamInfo& hints,
 
 // omxClock->SetMasterClock(false);
 
-	m_player_error = OpenAudioCodec();
-	if(!m_player_error)
+	hasErrors = openCodec();
+	if(!hasErrors)
 	{
-		Close();
+		close();
 		return false;
 	}
 
-	m_player_error = openDecoder();
-	if(!m_player_error)
+	hasErrors = openDecoder();
+	if(!hasErrors)
 	{
-		Close();
+		close();
 		return false;
 	}
 
@@ -136,7 +136,7 @@ bool OMXPlayerAudio::Open(OMXStreamInfo& hints,
 	return true;
 }
 
-bool OMXPlayerAudio::Close()
+bool OMXPlayerAudio::close()
 {
 	doAbort  = true;
 	doFlush   = true;
@@ -153,7 +153,7 @@ bool OMXPlayerAudio::Close()
 	}
 
 	closeDecoder();
-	CloseAudioCodec();
+	closeCodec();
 
 	isOpen          = false;
 	streamID     = -1;
@@ -213,18 +213,18 @@ bool OMXPlayerAudio::decode(OMXPacket *pkt)
 	{
        
 		closeDecoder();
-		CloseAudioCodec();
+		closeCodec();
 
 		omxStreamInfo = pkt->hints;
 
-		m_player_error = OpenAudioCodec();
-		if(!m_player_error)
+		hasErrors = openCodec();
+		if(!hasErrors)
 		{
 			return false;
 		}
 
-		m_player_error = openDecoder();
-		if(!m_player_error)
+		hasErrors = openDecoder();
+		if(!hasErrors)
 		{
 			return false;
 		}
@@ -399,7 +399,7 @@ bool OMXPlayerAudio::addPacket(OMXPacket *pkt)
 	return ret;
 }
 
-bool OMXPlayerAudio::OpenAudioCodec()
+bool OMXPlayerAudio::openCodec()
 {
 	audioCodecOMX = new AudioCodecOMX();
 
@@ -414,7 +414,7 @@ bool OMXPlayerAudio::OpenAudioCodec()
 	return true;
 }
 
-void OMXPlayerAudio::CloseAudioCodec()
+void OMXPlayerAudio::closeCodec()
 {
 	if(audioCodecOMX)
 	{

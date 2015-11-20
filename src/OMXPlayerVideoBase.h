@@ -46,7 +46,7 @@ class OMXPlayerVideoBase: public OMXThread
 		void						setSpeed(int speed);
 		int							getSpeed();
 
-		virtual bool				Close() = 0;
+		virtual bool				close() = 0;
 		bool						decode(OMXPacket *pkt);
 		void						Process();
 		void						Flush();
@@ -59,7 +59,7 @@ class OMXPlayerVideoBase: public OMXThread
 		double						getCurrentPTS();
 		double						GetFPS();
 
-		unsigned int				GetCached();
+		unsigned int				getCached();
 	
 		void						submitEOS();
 		bool						EOS();
