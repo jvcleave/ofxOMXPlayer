@@ -376,7 +376,7 @@ bool OMXClock::resume()
 
 #define TRICKPLAY(speed) (speed < 0 || speed > 1.2 * DVD_PLAYSPEED_NORMAL)
 
-bool OMXClock::setSpeed(int speed, bool pause_resume /* = false */)
+bool OMXClock::setSpeed(int speed, bool doResume /* = false */)
 {
 	ofLog(OF_LOG_VERBOSE, "OMXClock::setSpeed(%d)", speed);
 
@@ -438,7 +438,7 @@ bool OMXClock::setSpeed(int speed, bool pause_resume /* = false */)
 		return false;
 	}
 
-	if (!pause_resume)
+	if (!doResume)
 	{
 		currentSpeed = speed;
 	}

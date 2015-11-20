@@ -45,7 +45,7 @@ class OMXClock
 		bool getMediaTime(double pts);
 		bool pause();
 		bool resume();
-		bool setSpeed(int speed, bool pause_resume = false);
+		bool setSpeed(int speed, bool doResume = false);
 		int  getSpeed()
 		{
 			return currentSpeed;

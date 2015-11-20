@@ -246,7 +246,7 @@ void OMXDecoderBase::Reset()
 }
 
 
-void OMXDecoderBase::ProcessCodec(OMXStreamInfo& hints)
+void OMXDecoderBase::processCodec(OMXStreamInfo& hints)
 {
 	switch (hints.codec)
 	{

@@ -60,7 +60,7 @@ bool OMXEGLImage::Open(OMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIma
 		memcpy(extraData, hints.extradata, hints.extrasize);
 	}
 
-	ProcessCodec(hints);
+	processCodec(hints);
 
 
 	std::string componentName = "OMX.broadcom.video_decode";

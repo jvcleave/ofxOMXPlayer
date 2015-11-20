@@ -41,7 +41,7 @@ bool OMXVideo::Open(OMXStreamInfo& hints, OMXClock *clock, float display_aspect,
 		memcpy(extraData, hints.extradata, hints.extrasize);
 	}
 
-	ProcessCodec(hints);
+	processCodec(hints);
 
 	if(deinterlace)
 	{
