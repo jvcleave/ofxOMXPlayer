@@ -400,7 +400,7 @@ bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
 	}
 }
 
-void ofxOMXPlayerEngine::Process()
+void ofxOMXPlayerEngine::process()
 {
 	while (!doStop)
 	{

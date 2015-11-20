@@ -67,7 +67,7 @@ pthread_t OMXThread::ThreadHandle()
 void *OMXThread::Run(void *arg)
 {
 	OMXThread *thread = static_cast<OMXThread *>(arg);
-	thread->Process();
+	thread->process();
 
 	//ofLog(OF_LOG_VERBOSE, "%s::%s - Exited thread with  id %d ", CLASSNAME, __func__, (int)thread->ThreadHandle());
 	pthread_exit(NULL);

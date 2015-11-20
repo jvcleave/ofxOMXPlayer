@@ -36,7 +36,7 @@ class OMXPlayerAudio : public OMXThread
 		pthread_mutex_t           m_lock_decoder;
 		OMXClock*					omxClock;
 		OMXReader*					omxReader;
-		OMXAudio                 *decoder;
+		OMXAudio*					decoder;
 		std::string               codecName;
 		std::string               deviceName;
 		bool                      doPassthrough;
@@ -71,7 +71,7 @@ class OMXPlayerAudio : public OMXThread
     
 		bool close();
 		bool decode(OMXPacket *pkt);
-		void Process();
+		void process();
 		void flush();
 		bool addPacket(OMXPacket *pkt);
 		bool openCodec();

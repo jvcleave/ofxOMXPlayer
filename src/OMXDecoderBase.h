@@ -60,7 +60,7 @@ class OMXDecoderBase
 		bool					resume();
 		bool					pause();
 
-		bool					SendDecoderConfig();
+		bool					sendDecoderConfig();
 		bool					NaluFormatStartCodes(enum AVCodecID codec, uint8_t *in_extradata, int in_extrasize);
 
 		unsigned int			GetFreeSpace();

@@ -68,7 +68,7 @@ class ofxOMXPlayerEngine: public OMXThread
 		void		removeListener();
 
 		//OMXThread inheritance
-		void		Process();
+		void		process();
 
 		OMXStreamInfo			videoStreamInfo;
 		OMXStreamInfo			audioStreamInfo;

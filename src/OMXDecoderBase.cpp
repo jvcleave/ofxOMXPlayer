@@ -103,7 +103,7 @@ bool OMXDecoderBase::NaluFormatStartCodes(enum AVCodecID codec, uint8_t *in_extr
 
 
 
-bool OMXDecoderBase::SendDecoderConfig()
+bool OMXDecoderBase::sendDecoderConfig()
 {
 	OMX_ERRORTYPE error   = OMX_ErrorNone;
 

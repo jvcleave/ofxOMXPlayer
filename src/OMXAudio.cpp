@@ -140,7 +140,7 @@ bool OMXAudio::init(string device,
 {
 	m_Passthrough = false;
 
-    SetCodingType(CODEC_ID_PCM_S16LE);
+    setCodingType(CODEC_ID_PCM_S16LE);
 	if(hints.extrasize > 0 && hints.extradata != NULL)
 	{
 		extraSize = hints.extrasize;
@@ -289,8 +289,8 @@ bool OMXAudio::init(string device,
 	m_pcm_input.nChannels             = m_InputChannels;
 	m_pcm_input.nSamplingRate         = uiSamplesPerSec;
 
-	PrintPCM(&m_pcm_input);
-	PrintPCM(&m_pcm_output);
+	printPCM(&m_pcm_input);
+	printPCM(&m_pcm_output);
 
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	std::string componentName = "";
@@ -665,7 +665,7 @@ long OMXAudio::getCurrentVolume() const
 }
 
 //***********************************************************************************************
-void OMXAudio::Mute(bool bMute)
+void OMXAudio::mute(bool bMute)
 {
 	if(!isInitialized)
 	{
@@ -904,14 +904,14 @@ unsigned int OMXAudio::addPackets(void* data, unsigned int len, double dts, doub
 				error = renderComponent.getParameter(OMX_IndexParamAudioPcm, &m_pcm_output);
 				OMX_TRACE(error);
 
-				PrintPCM(&m_pcm_input);
-				PrintPCM(&m_pcm_output);
+				printPCM(&m_pcm_input);
+				printPCM(&m_pcm_output);
 			}
 			else
 			{
 				m_pcm_output.nPortIndex      = decoderComponent.getOutputPort();
 				decoderComponent.getParameter(OMX_IndexParamAudioPcm, &m_pcm_output);
-				PrintPCM(&m_pcm_output);
+				printPCM(&m_pcm_output);
 
 				OMX_AUDIO_PARAM_PORTFORMATTYPE formatType;
 				OMX_INIT_STRUCTURE(formatType);
@@ -987,12 +987,12 @@ unsigned int OMXAudio::addPackets(void* data, unsigned int len, double dts, doub
 }
 
 
-float OMXAudio::GetCacheTotal()
+float OMXAudio::getCacheTotal()
 {
 	return (float)m_BufferLen / (float)m_BytesPerSec;
 }
 
-unsigned int OMXAudio::GetChunkLen()
+unsigned int OMXAudio::getChunkLen()
 {
 	return m_ChunkLen;
 }
@@ -1058,7 +1058,7 @@ bool OMXAudio::EOS()
 
 
 
-bool OMXAudio::SetClock(OMXClock *clock)
+bool OMXAudio::setClock(OMXClock *clock)
 {
 	if(omxClock != NULL)
 	{
@@ -1070,7 +1070,7 @@ bool OMXAudio::SetClock(OMXClock *clock)
 	return true;
 }
 
-void OMXAudio::SetCodingType(AVCodecID codec)
+void OMXAudio::setCodingType(AVCodecID codec)
 {
 	switch(codec)
 	{
@@ -1090,7 +1090,7 @@ void OMXAudio::SetCodingType(AVCodecID codec)
 	}
 }
 
-void OMXAudio::PrintChannels(OMX_AUDIO_CHANNELTYPE eChannelMapping[])
+void OMXAudio::printChannels(OMX_AUDIO_CHANNELTYPE eChannelMapping[])
 {
 	for(int i = 0; i < OMX_AUDIO_MAXCHANNELS; i++)
 	{
@@ -1133,7 +1133,7 @@ void OMXAudio::PrintChannels(OMX_AUDIO_CHANNELTYPE eChannelMapping[])
 	}
 }
 
-void OMXAudio::PrintPCM(OMX_AUDIO_PARAM_PCMMODETYPE *pcm)
+void OMXAudio::printPCM(OMX_AUDIO_PARAM_PCMMODETYPE *pcm)
 {
 
 	stringstream info;
@@ -1148,7 +1148,7 @@ void OMXAudio::PrintPCM(OMX_AUDIO_PARAM_PCMMODETYPE *pcm)
 	info << "nSamplingRate: "	<< (int)pcm->nSamplingRate		<< "\n";
 	//ofLogVerbose(__func__) << "\n" <<  info.str();
 
-	//PrintChannels(pcm->eChannelMapping);
+	//printChannels(pcm->eChannelMapping);
 }
 
 

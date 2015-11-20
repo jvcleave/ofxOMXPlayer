@@ -97,10 +97,10 @@ class OMXAudio
 			ENCODED_IEC61937_UNKNOWN,
 		};
 		
-		unsigned int GetChunkLen();
+		unsigned int getChunkLen();
 		//float GetDelay();
 		//float GetCacheTime();
-		float GetCacheTotal();
+		float getCacheTotal();
 		unsigned int GetAudioRenderingLatency();
 		
 		bool init(string device,
@@ -120,36 +120,35 @@ class OMXAudio
 		bool resume();
 
 		long getCurrentVolume() const;
-		void Mute(bool bMute);
+		void mute(bool bMute);
 		bool setCurrentVolume(long nVolume);
-		void SetDynamicRangeCompression(long drc)
+		void setDynamicRangeCompression(long drc)
 		{
-			m_drc = drc;
+			DRC = drc;
 		}
-		float GetCurrentAttenuation()
+		float getCurrentAttenuation()
 		{
-			return m_remap.GetCurrentAttenuation();
+			return m_remap.getCurrentAttenuation();
 		}
 		void submitEOS();
 		bool EOS();
 
 		void flush();
-		void DoAudioWork();
 
-		void Process();
+		void process();
 
-		bool SetClock(OMXClock *clock);
-		void SetCodingType(AVCodecID codec);
+		bool setClock(OMXClock *clock);
+		void setCodingType(AVCodecID codec);
 
-		void PrintChannels(OMX_AUDIO_CHANNELTYPE eChannelMapping[]);
-		void PrintPCM(OMX_AUDIO_PARAM_PCMMODETYPE *pcm);
+		void printChannels(OMX_AUDIO_CHANNELTYPE eChannelMapping[]);
+		void printPCM(OMX_AUDIO_PARAM_PCMMODETYPE *pcm);
 
 	private:
 		bool          isInitialized;
 		bool          doPause;
 		bool          m_CanPause;
 		long          m_CurrentVolume;
-		long          m_drc;
+		long          DRC;
 		bool          m_Passthrough;
 		bool          m_normalize_downmix;
 		unsigned int  m_BytesPerSec;

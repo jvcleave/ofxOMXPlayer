@@ -113,7 +113,7 @@ class OMXReader
 		bool SeekTime(int time, bool backwords, double *startpts, bool doLoopOnFail = true);
 		AVMediaType PacketType(OMXPacket *pkt);
 		OMXPacket *Read();
-		void Process();
+		void process();
 		bool GetStreams();
 		void AddStream(int id);
 		bool IsActive(int stream_index);

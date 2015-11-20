@@ -197,7 +197,7 @@ bool OMXPlayerVideoBase::addPacket(OMXPacket *pkt)
 
 
 
-void OMXPlayerVideoBase::Process()
+void OMXPlayerVideoBase::process()
 {
 	OMXPacket *omxPacket = NULL;
 

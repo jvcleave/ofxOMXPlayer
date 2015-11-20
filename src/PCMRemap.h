@@ -140,7 +140,7 @@ public:
     int  InBytesToFrames (int bytes );
     int  FramesToOutBytes(int frames);
     int  FramesToInBytes (int frames);
-    float GetCurrentAttenuation() { return m_attenuationMin; }
+    float getCurrentAttenuation() { return m_attenuationMin; }
 };
 
 #endif

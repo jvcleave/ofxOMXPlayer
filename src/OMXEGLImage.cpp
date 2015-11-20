@@ -255,13 +255,13 @@ bool OMXEGLImage::Open(OMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIma
     if(error != OMX_ErrorNone) return false;
 
 
-	if(SendDecoderConfig())
+	if(sendDecoderConfig())
 	{
-		//ofLogVerbose(__func__) << "SendDecoderConfig PASS";
+		//ofLogVerbose(__func__) << "sendDecoderConfig PASS";
 	}
 	else
 	{
-		ofLog(OF_LOG_ERROR, "SendDecoderConfig FAIL");
+		ofLog(OF_LOG_ERROR, "sendDecoderConfig FAIL");
 		return false;
 	}
 

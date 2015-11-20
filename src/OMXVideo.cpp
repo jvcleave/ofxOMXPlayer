@@ -274,7 +274,7 @@ bool OMXVideo::Open(OMXStreamInfo& hints, OMXClock *clock, float display_aspect,
     if(error != OMX_ErrorNone) return false;
     
 	ofAddListener(ofEvents().update, this, &OMXVideo::onUpdate);
-	if(!SendDecoderConfig())
+	if(!sendDecoderConfig())
 	{
 		return false;
 	}

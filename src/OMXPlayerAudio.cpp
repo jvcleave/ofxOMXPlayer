@@ -295,7 +295,7 @@ bool OMXPlayerAudio::decode(OMXPacket *pkt)
 #endif
 }
 
-void OMXPlayerAudio::Process()
+void OMXPlayerAudio::process()
 {
 	OMXPacket *omxPacket = NULL;
 
@@ -456,7 +456,7 @@ bool OMXPlayerAudio::openDecoder()
 	bool bAudioRenderOpen = false;
 
 	decoder = new OMXAudio();
-	decoder->SetClock(omxClock);
+	decoder->setClock(omxClock);
 
 	if(doPassthrough)
 	{

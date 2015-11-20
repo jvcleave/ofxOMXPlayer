@@ -18,7 +18,7 @@ class OMXThread
 		OMXThread();
 		virtual ~OMXThread();
 		bool Create();
-		virtual void Process() = 0;
+		virtual void process() = 0;
 		bool Running();
 		pthread_t ThreadHandle();
 		bool StopThread(std::string className = "UNDEFINED");
