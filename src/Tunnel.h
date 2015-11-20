@@ -9,7 +9,7 @@ public:
     ~Tunnel();
     
     void init(Component*, unsigned int, Component*, unsigned int);
-    OMX_ERRORTYPE Flush();
+    OMX_ERRORTYPE flush();
     OMX_ERRORTYPE Deestablish(bool doWait = true);
     OMX_ERRORTYPE Establish(bool portSettingsChanged);
     string sourceComponentName;

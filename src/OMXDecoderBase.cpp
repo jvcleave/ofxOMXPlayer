@@ -33,11 +33,11 @@ OMXDecoderBase::~OMXDecoderBase()
 	//TODO fix this?
 	try
 	{
-		decoderTunnel.Flush();
+		decoderTunnel.flush();
 		/*if(m_deinterlace)
-		 m_omx_tunnel_image_fx.Flush();*/
-		clockTunnel.Flush();
-		schedulerTunnel.Flush();
+		 m_omx_tunnel_image_fx.flush();*/
+		clockTunnel.flush();
+		schedulerTunnel.flush();
 
 		clockTunnel.Deestablish();
 		decoderTunnel.Deestablish();
@@ -240,7 +240,7 @@ void OMXDecoderBase::Reset()
 	//ofLogVerbose(__func__) << " START";
 
 	decoderComponent.flushInput();
-	decoderTunnel.Flush();
+	decoderTunnel.flush();
 
 	//ofLogVerbose(__func__) << " END";
 }

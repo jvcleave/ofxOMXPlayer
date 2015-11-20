@@ -141,7 +141,7 @@ bool OMXPlayerAudio::close()
 	doAbort  = true;
 	doFlush   = true;
 
-	Flush();
+	flush();
 
 	if(ThreadHandle())
 	{
@@ -349,7 +349,7 @@ void OMXPlayerAudio::Process()
 	}
 }
 
-void OMXPlayerAudio::Flush()
+void OMXPlayerAudio::flush()
 {
 	//ofLogVerbose(__func__) << "OMXPlayerAudio::Flush start";
 	Lock();
@@ -365,7 +365,7 @@ void OMXPlayerAudio::Flush()
 	cachedSize = 0;
 	if(decoder)
 	{
-		decoder->Flush();
+		decoder->flush();
 	}
 	UnLockDecoder();
 	UnLock();

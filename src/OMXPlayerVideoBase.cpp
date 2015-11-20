@@ -132,7 +132,7 @@ bool OMXPlayerVideoBase::decode(OMXPacket *pkt)
 
 
 
-void OMXPlayerVideoBase::Flush()
+void OMXPlayerVideoBase::flush()
 {
 	//ofLogVerbose(__func__) << "OMXPlayerVideoBase::Flush start";
 

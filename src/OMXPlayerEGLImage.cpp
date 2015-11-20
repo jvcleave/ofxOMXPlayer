@@ -117,7 +117,7 @@ bool OMXPlayerEGLImage::close()
 	doAbort  = true;
 	doFlush   = true;
 	
-	Flush();
+	flush();
 	
 
 	if(ThreadHandle())

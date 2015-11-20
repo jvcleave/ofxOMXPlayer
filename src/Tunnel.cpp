@@ -48,7 +48,7 @@ void Tunnel::init(Component *src_component, unsigned int src_port, Component *de
     destinationComponentName = destinationComponent->getName();
 }
 
-OMX_ERRORTYPE Tunnel::Flush()
+OMX_ERRORTYPE Tunnel::flush()
 {
     if(!sourceComponent || !destinationComponent || !isEstablished)
     {

@@ -49,7 +49,7 @@ class OMXPlayerVideoBase: public OMXThread
 		virtual bool				close() = 0;
 		bool						decode(OMXPacket *pkt);
 		void						Process();
-		void						Flush();
+		void						flush();
 
 		bool						addPacket(OMXPacket *pkt);
 

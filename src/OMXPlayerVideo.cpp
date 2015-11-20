@@ -150,7 +150,7 @@ bool OMXPlayerVideo::close()
 	doAbort  = true;
 	doFlush   = true;
 
-	Flush();
+	flush();
 
 	if(ThreadHandle())
 	{

@@ -534,12 +534,12 @@ bool OMXAudio::Deinitialize()
 		omxClock->stop();
 	}
 
-	decoderTunnel.Flush();
+	decoderTunnel.flush();
 	if(!m_Passthrough)
 	{
-		mixerTunnel.Flush();
+		mixerTunnel.flush();
 	}
-	clockTunnel.Flush();
+	clockTunnel.flush();
 
 	clockTunnel.Deestablish(true);
 	if(!m_Passthrough)
@@ -587,7 +587,7 @@ bool OMXAudio::Deinitialize()
 	return true;
 }
 
-void OMXAudio::Flush()
+void OMXAudio::flush()
 {
 	if(!isInitialized)
 	{
@@ -595,10 +595,10 @@ void OMXAudio::Flush()
 	}
 
 	decoderComponent.flushInput();
-	decoderTunnel.Flush();
+	decoderTunnel.flush();
 	if(!m_Passthrough)
 	{
-		mixerTunnel.Flush();
+		mixerTunnel.flush();
 	}
 
 	//doSetStartTime  = true;
@@ -651,7 +651,7 @@ bool OMXAudio::Stop()
 		return -1;
 	}
 
-	Flush();
+	flush();
 
 	doPause = false;
 

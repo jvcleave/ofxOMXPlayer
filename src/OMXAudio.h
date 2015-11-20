@@ -133,7 +133,7 @@ class OMXAudio
 		void submitEOS();
 		bool EOS();
 
-		void Flush();
+		void flush();
 		void DoAudioWork();
 
 		void Process();

@@ -72,7 +72,7 @@ class OMXPlayerAudio : public OMXThread
 		bool close();
 		bool decode(OMXPacket *pkt);
 		void Process();
-		void Flush();
+		void flush();
 		bool addPacket(OMXPacket *pkt);
 		bool openCodec();
 		void closeCodec();
