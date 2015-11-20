@@ -84,6 +84,9 @@ class OMXAudio
 {
 	public:
 	
+        OMXAudio();
+        ~OMXAudio();
+    
 		enum EEncoded
 		{
 			ENCODED_NONE = 0,
@@ -99,14 +102,14 @@ class OMXAudio
 		//float GetCacheTime();
 		float GetCacheTotal();
 		unsigned int GetAudioRenderingLatency();
-		OMXAudio();
+		
 		bool init(string device,
 						enum PCMChannels *channelMap,
 		                OMXStreamInfo& hints, OMXClock *clock,
 						EEncoded bPassthrough,
 						bool boostOnDownmix);
 
-		~OMXAudio();
+		
 
 		unsigned int AddPackets(void* data, unsigned int len);
 		unsigned int AddPackets(void* data, unsigned int len, double dts, double pts);
@@ -127,7 +130,6 @@ class OMXAudio
 		{
 			return m_remap.GetCurrentAttenuation();
 		}
-		int SetPlaySpeed(int iSpeed);
 		void submitEOS();
 		bool EOS();
 

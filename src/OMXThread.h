@@ -11,7 +11,7 @@ class OMXThread
 		pthread_mutex_t     m_lock;
 		pthread_t           m_thread;
 		volatile bool       m_running;
-		volatile bool       m_bStop;
+		volatile bool       doStop;
 	private:
 		static void *Run(void *arg);
 	public:

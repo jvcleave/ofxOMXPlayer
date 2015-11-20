@@ -20,11 +20,11 @@ class OMXPlayerVideoBase: public OMXThread
 		OMXPlayerVideoBase();
 		//~OMXPlayerVideoBase();
 		OMXDecoderBase*				m_decoder;
-		int							m_stream_id;
-		std::deque<OMXPacket *>		m_packets;
+		int							streamID;
+		std::deque<OMXPacket *>		packets;
 
 		bool						m_open;
-		OMXStreamInfo				m_hints;
+		OMXStreamInfo				omxStreamInfo;
 		double						m_iCurrentPts;
 
 		pthread_cond_t				m_packet_cond;
@@ -35,8 +35,8 @@ class OMXPlayerVideoBase: public OMXThread
 		OMXClock*					omxClock;
 		float						m_fps;
 		double						m_frametime;
-		bool						m_bAbort;
-		bool						m_flush;
+		bool						doAbort;
+		bool						doFlush;
 		int							m_speed;
 		double						m_FlipTimeStamp; // time stamp of last flippage. used to play at a forced framerate
 		double						m_iVideoDelay;
@@ -71,7 +71,7 @@ class OMXPlayerVideoBase: public OMXThread
 
 
 		uint32_t					validHistoryPTS;
-		bool						m_flush_requested;
+		bool						doFlush_requested;
 
 		bool						isExiting;
 	

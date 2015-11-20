@@ -13,7 +13,7 @@
 #include "OMXAudio.h"
 
 
-#include "OMXAudioCodecOMX.h"
+#include "AudioCodecOMX.h"
 
 #include "OMXThread.h"
 
@@ -25,17 +25,17 @@
 class OMXPlayerAudio : public OMXThread
 {
 	protected:
-		int                       m_stream_id;
-		std::deque<OMXPacket *>   m_packets;
+		int                       streamID;
+		std::deque<OMXPacket *>   packets;
 		bool                      m_open;
-		OMXStreamInfo            m_hints;
+		OMXStreamInfo            omxStreamInfo;
 		double                    m_iCurrentPts;
 		pthread_cond_t            m_packet_cond;
 		pthread_cond_t            m_audio_cond;
 		pthread_mutex_t           m_lock;
 		pthread_mutex_t           m_lock_decoder;
-		OMXClock                  *omxClock;
-		OMXReader                 *omxReader;
+		OMXClock*					omxClock;
+		OMXReader*					omxReader;
 		OMXAudio                 *m_decoder;
 		std::string               m_codec_name;
 		std::string               deviceName;
@@ -44,12 +44,12 @@ class OMXPlayerAudio : public OMXThread
 		OMXAudio::EEncoded  m_passthrough;
 		bool                      m_hw_decode;
 		bool                      doBoostOnDownmix;
-		bool                      m_bAbort;
+		bool                      doAbort;
 		bool                      m_use_thread;
-		bool                      m_flush;
+		bool                      doFlush;
 		enum PCMChannels          *m_pChannelMap;
 		unsigned int              m_cached_size;
-		OMXAudioCodecOMX         *m_pAudioCodec;
+		AudioCodecOMX         *audioCodecOMX;
 		int                       m_speed;
 
 		int64_t m_errortime; //timestamp of last time we measured

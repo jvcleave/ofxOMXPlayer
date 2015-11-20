@@ -36,13 +36,13 @@ bool OMXPlayerEGLImage::Open(OMXStreamInfo& hints, OMXClock *av_clock, EGLImageK
 	}
 
 
-	m_hints       = hints;
+	omxStreamInfo       = hints;
 	omxClock    = av_clock;
 	m_fps         = 25.0f;
 	m_frametime   = 0;
 	m_iCurrentPts = DVD_NOPTS_VALUE;
-	m_bAbort      = false;
-	m_flush       = false;
+	doAbort      = false;
+	doFlush       = false;
 	m_cached_size = 0;
 	m_iVideoDelay = 0;
 	m_speed       = DVD_PLAYSPEED_NORMAL;
@@ -65,9 +65,9 @@ bool OMXPlayerEGLImage::Open(OMXStreamInfo& hints, OMXClock *av_clock, EGLImageK
 
 bool OMXPlayerEGLImage::OpenDecoder()
 {
-	if (m_hints.fpsrate && m_hints.fpsscale)
+	if (omxStreamInfo.fpsrate && omxStreamInfo.fpsscale)
 	{
-		m_fps = DVD_TIME_BASE / OMXReader::NormalizeFrameduration((double)DVD_TIME_BASE * m_hints.fpsscale / m_hints.fpsrate);
+		m_fps = DVD_TIME_BASE / OMXReader::NormalizeFrameduration((double)DVD_TIME_BASE * omxStreamInfo.fpsscale / omxStreamInfo.fpsrate);
 	}
 	else
 	{
@@ -90,22 +90,22 @@ bool OMXPlayerEGLImage::OpenDecoder()
 
 	m_decoder = (OMXDecoderBase*)eglImageDecoder;
 
-	if(!eglImageDecoder->Open(m_hints, omxClock, eglImage))
+	if(!eglImageDecoder->Open(omxStreamInfo, omxClock, eglImage))
 	{
 		CloseDecoder();
 		return false;
 	}
 
 	stringstream info;
-	info << "Video width: "	<<	m_hints.width					<< "\n";
-	info << "Video height: "	<<	m_hints.height					<< "\n";
-	info << "Video profile: "	<<	m_hints.profile					<< "\n";
+	info << "Video width: "	<<	omxStreamInfo.width					<< "\n";
+	info << "Video height: "	<<	omxStreamInfo.height					<< "\n";
+	info << "Video profile: "	<<	omxStreamInfo.profile					<< "\n";
 	info << "Video fps: "		<<	m_fps							<< "\n";
 	//ofLogVerbose(__func__) << "\n" << info.str();
 
 
 	/*ofLog(OF_LOG_VERBOSE, "Video codec %s width %d height %d profile %d fps %f\n",
-		  m_decoder->GetDecoderName().c_str() , m_hints.width, m_hints.height, m_hints.profile, m_fps);*/
+		  m_decoder->GetDecoderName().c_str() , omxStreamInfo.width, omxStreamInfo.height, omxStreamInfo.profile, m_fps);*/
 
 
 	return true;
@@ -114,8 +114,8 @@ bool OMXPlayerEGLImage::OpenDecoder()
 bool OMXPlayerEGLImage::Close()
 {
 	//ofLogVerbose(__func__) << " START, isExiting:" << isExiting;
-	m_bAbort  = true;
-	m_flush   = true;
+	doAbort  = true;
+	doFlush   = true;
 	
 	Flush();
 	
@@ -140,7 +140,7 @@ bool OMXPlayerEGLImage::Close()
 
 
 	m_open          = false;
-	m_stream_id     = -1;
+	streamID     = -1;
 	m_iCurrentPts   = DVD_NOPTS_VALUE;
 	m_speed         = DVD_PLAYSPEED_NORMAL;
 

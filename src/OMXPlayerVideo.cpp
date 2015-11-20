@@ -65,15 +65,15 @@ bool OMXPlayerVideo::Open(OMXStreamInfo& hints, OMXClock *av_clock, bool deinter
 	}
 
 
-	m_hints       = hints;
+	omxStreamInfo       = hints;
 	omxClock    = av_clock;
 	m_fps         = 25.0f;
 	m_frametime   = 0;
 	m_Deinterlace = deinterlace;
 	m_display_aspect = display_aspect;
 	m_iCurrentPts = DVD_NOPTS_VALUE;
-	m_bAbort      = false;
-	m_flush       = false;
+	doAbort      = false;
+	doFlush       = false;
 	m_cached_size = 0;
 	m_iVideoDelay = 0;
 	m_hdmi_clock_sync = hdmi_clock_sync;
@@ -99,9 +99,9 @@ bool OMXPlayerVideo::Open(OMXStreamInfo& hints, OMXClock *av_clock, bool deinter
 bool OMXPlayerVideo::OpenDecoder()
 {
 
-	if (m_hints.fpsrate && m_hints.fpsscale)
+	if (omxStreamInfo.fpsrate && omxStreamInfo.fpsscale)
 	{
-		m_fps = DVD_TIME_BASE / OMXReader::NormalizeFrameduration((double)DVD_TIME_BASE * m_hints.fpsscale / m_hints.fpsrate);
+		m_fps = DVD_TIME_BASE / OMXReader::NormalizeFrameduration((double)DVD_TIME_BASE * omxStreamInfo.fpsscale / omxStreamInfo.fpsrate);
 	}
 	else
 	{
@@ -121,7 +121,7 @@ bool OMXPlayerVideo::OpenDecoder()
 	nonTextureDecoder->setDisplayRect(displayRect);
 
 	m_decoder = (OMXDecoderBase*)nonTextureDecoder;
-	if(!nonTextureDecoder->Open(m_hints, omxClock, m_display_aspect, m_Deinterlace, m_hdmi_clock_sync))
+	if(!nonTextureDecoder->Open(omxStreamInfo, omxClock, m_display_aspect, m_Deinterlace, m_hdmi_clock_sync))
 	{
 
 		CloseDecoder();
@@ -129,14 +129,14 @@ bool OMXPlayerVideo::OpenDecoder()
 	}
 	
 	stringstream info;
-	info << "Video width: "	<<	m_hints.width					<< "\n";
-	info << "Video height: "	<<	m_hints.height					<< "\n";
-	info << "Video profile: "	<<	m_hints.profile					<< "\n";
+	info << "Video width: "	<<	omxStreamInfo.width					<< "\n";
+	info << "Video height: "	<<	omxStreamInfo.height					<< "\n";
+	info << "Video profile: "	<<	omxStreamInfo.profile					<< "\n";
 	info << "Video fps: "		<<	m_fps							<< "\n";
 	//ofLogVerbose(__func__) << "\n" << info;
 
 	/*ofLog(OF_LOG_VERBOSE, "Video codec %s width %d height %d profile %d fps %f\n",
-		m_decoder->GetDecoderName().c_str() , m_hints.width, m_hints.height, m_hints.profile, m_fps);*/
+		m_decoder->GetDecoderName().c_str() , omxStreamInfo.width, omxStreamInfo.height, omxStreamInfo.profile, m_fps);*/
 
 
 
@@ -147,8 +147,8 @@ bool OMXPlayerVideo::OpenDecoder()
 bool OMXPlayerVideo::Close()
 {
 	//ofLogVerbose(__func__) << " START, isExiting:" << isExiting;
-	m_bAbort  = true;
-	m_flush   = true;
+	doAbort  = true;
+	doFlush   = true;
 
 	Flush();
 
@@ -171,7 +171,7 @@ bool OMXPlayerVideo::Close()
 	}
 
 	m_open          = false;
-	m_stream_id     = -1;
+	streamID     = -1;
 	m_iCurrentPts   = DVD_NOPTS_VALUE;
 	m_speed         = DVD_PLAYSPEED_NORMAL;
 

@@ -95,35 +95,31 @@ float downmixing_coefficients_8[16] =
 };
 
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-//***********************************************************************************************
-OMXAudio::OMXAudio() :
-	isInitialized     (false  ),
-	doPause           (false  ),
-	m_CanPause        (false  ),
-	m_CurrentVolume   (0      ),
-	m_Passthrough     (false  ),
-	m_normalize_downmix(true   ),
-	m_BytesPerSec     (0      ),
-	m_BufferLen       (0      ),
-	m_ChunkLen        (0      ),
-	m_InputChannels   (0      ),
-	m_OutputChannels  (0      ),
-	m_downmix_channels(0      ),
-	m_BitsPerSample   (0      ),
-	clockComponent       (NULL   ),
-	omxClock        (NULL   ),
-	m_external_clock  (false  ),
-	doSetStartTime    (false  ),
-	m_SampleSize      (0      ),
-	isFirstFrame     (true   ),
-	m_SampleRate      (0      ),
-	m_eEncoding       (OMX_AUDIO_CodingPCM),
-	extraData       (NULL   ),
-	extraSize       (0      )
+OMXAudio::OMXAudio()
 {
+    isInitialized = false;
+    doPause = false;
+    m_CanPause = false;
+    m_CurrentVolume = 0;
+    m_Passthrough = false;
+    m_normalize_downmix= true;
+    m_BytesPerSec = 0;
+    m_BufferLen = 0;
+    m_ChunkLen = 0;
+    m_InputChannels = 0;
+    m_OutputChannels = 0;
+    m_downmix_channels= 0;
+    m_BitsPerSample = 0;
+    clockComponent = NULL;
+    omxClock = NULL;
+    m_external_clock = false;
+    doSetStartTime = false;
+    m_SampleSize = 0;
+    isFirstFrame = true;
+    m_SampleRate = 0;
+    m_eEncoding = OMX_AUDIO_CodingPCM;
+    extraData = NULL;
+    extraSize = 0;
 }
 
 OMXAudio::~OMXAudio()
@@ -990,41 +986,17 @@ unsigned int OMXAudio::AddPackets(void* data, unsigned int len, double dts, doub
 	return len;
 }
 
-//***********************************************************************************************
-#if 0
-float OMXAudio::GetDelay()
-{
-	unsigned int free = decoderComponent.getInputBufferSize() - decoderComponent.getInputBufferSpace();
-	return (float)free / (float)m_BytesPerSec;
-}
 
-
-float OMXAudio::GetCacheTime()
-{
-	float fBufferLenFull = (float)m_BufferLen - (float)GetSpace();
-	if(fBufferLenFull < 0)
-	{
-		fBufferLenFull = 0;
-	}
-	float ret = fBufferLenFull / (float)m_BytesPerSec;
-	return ret;
-}
-#endif
 float OMXAudio::GetCacheTotal()
 {
 	return (float)m_BufferLen / (float)m_BytesPerSec;
 }
 
-//***********************************************************************************************
 unsigned int OMXAudio::GetChunkLen()
 {
 	return m_ChunkLen;
 }
-//***********************************************************************************************
-int OMXAudio::SetPlaySpeed(int iSpeed)
-{
-	return 0;
-}
+
 
 unsigned int OMXAudio::GetAudioRenderingLatency()
 {

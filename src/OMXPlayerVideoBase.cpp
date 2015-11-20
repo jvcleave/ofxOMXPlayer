@@ -14,11 +14,11 @@ unsigned count_bits(int32_t value)
 OMXPlayerVideoBase::OMXPlayerVideoBase()
 {
 	m_open          = false;
-	m_stream_id     = -1;
+	streamID     = -1;
 	omxClock      = NULL;
 	m_decoder       = NULL;
 	m_fps           = 25.0f;
-	m_flush         = false;
+	doFlush         = false;
 	m_cached_size   = 0;
 	m_iVideoDelay   = 0;
 	m_iCurrentPts	= DVD_NOPTS_VALUE;
@@ -29,7 +29,7 @@ OMXPlayerVideoBase::OMXPlayerVideoBase()
 	pthread_mutex_init(&m_lock, NULL);
 	pthread_mutex_init(&m_lock_decoder, NULL);
 	validHistoryPTS = 0;
-	m_flush_requested = false;
+	doFlush_requested = false;
 	isExiting = false;
 }
 
@@ -137,15 +137,15 @@ void OMXPlayerVideoBase::Flush()
 	//ofLogVerbose(__func__) << "OMXPlayerVideoBase::Flush start";
 
 
-	m_flush_requested = true;
+	doFlush_requested = true;
 	Lock();
 	LockDecoder();
-	m_flush_requested = false;
-	m_flush = true;
-	while (!m_packets.empty())
+	doFlush_requested = false;
+	doFlush = true;
+	while (!packets.empty())
 	{
-		OMXPacket *pkt = m_packets.front();
-		m_packets.pop_front();
+		OMXPacket *pkt = packets.front();
+		packets.pop_front();
 		//ofLogVerbose(__func__) << "OMXPlayerVideoBase->OMXReader FreePacket";
 		OMXReader::FreePacket(pkt);
 
@@ -176,7 +176,7 @@ bool OMXPlayerVideoBase::AddPacket(OMXPacket *pkt)
 		return ret;
 	}
 
-	if(m_bStop || m_bAbort)
+	if(doStop || doAbort)
 	{
 		return ret;
 	}
@@ -185,7 +185,7 @@ bool OMXPlayerVideoBase::AddPacket(OMXPacket *pkt)
 	{
 		Lock();
 			m_cached_size += pkt->size;
-			m_packets.push_back(pkt);
+			packets.push_back(pkt);
 		UnLock();
 		ret = true;
 		pthread_cond_broadcast(&m_packet_cond);
@@ -204,45 +204,45 @@ void OMXPlayerVideoBase::Process()
 	//m_pts was previously set to 0 - might need later...
 	//m_iCurrentPts = 0;
 	
-	while(!m_bStop && !m_bAbort)
+	while(!doStop && !doAbort)
 	{
 		Lock();
-		if(m_packets.empty())
+		if(packets.empty())
 		{
 			pthread_cond_wait(&m_packet_cond, &m_lock);
 		}
 		UnLock();
 
-		if(m_bAbort)
+		if(doAbort)
 		{
 			break;
 		}
 
 		Lock();
-		if(m_flush && omx_pkt)
+		if(doFlush && omx_pkt)
 		{
 			OMXReader::FreePacket(omx_pkt);
 			omx_pkt = NULL;
-			m_flush = false;
+			doFlush = false;
 		}
 		else
 		{
-			if(!omx_pkt && !m_packets.empty())
+			if(!omx_pkt && !packets.empty())
 			{
-				omx_pkt = m_packets.front();
+				omx_pkt = packets.front();
 				m_cached_size -= omx_pkt->size;
                 //ofLogNotice() << "omx_pkt->pts: " << omx_pkt->pts;
-				m_packets.pop_front();
+				packets.pop_front();
 			}
 		}
 		UnLock();
 
 		LockDecoder();
-		if(m_flush && omx_pkt)
+		if(doFlush && omx_pkt)
 		{
 			OMXReader::FreePacket(omx_pkt);
 			omx_pkt = NULL;
-			m_flush = false;
+			doFlush = false;
 		}
 		else
 		{
@@ -289,11 +289,11 @@ bool OMXPlayerVideoBase::EOS()
 
 	if (m_decoder)
 	{
-		if (m_packets.empty() && m_decoder->EOS())
+		if (packets.empty() && m_decoder->EOS())
 		{
 
 			atEndofStream = true;
-			//ofLogVerbose(__func__) << "m_packets.empty() && m_decoder->EOS(): " << atEndofStream;
+			//ofLogVerbose(__func__) << "packets.empty() && m_decoder->EOS(): " << atEndofStream;
 		}
 	}
 	return atEndofStream;
