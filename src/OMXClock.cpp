@@ -22,12 +22,12 @@ OMXClock::~OMXClock()
 	pthread_mutex_destroy(&m_lock);
 }
 
-void OMXClock::Lock()
+void OMXClock::lock()
 {
 	pthread_mutex_lock(&m_lock);
 }
 
-void OMXClock::UnLock()
+void OMXClock::unlock()
 {
 	pthread_mutex_unlock(&m_lock);
 }
@@ -88,7 +88,7 @@ bool OMXClock::OMXStateExecute()
 		return false;
 	}
 
-	Lock();
+	lock();
 
 	if(clockComponent.getState() != OMX_StateExecuting)
 	{
@@ -97,12 +97,12 @@ bool OMXClock::OMXStateExecute()
         OMX_TRACE(error);
 		if (error != OMX_ErrorNone)
 		{
-			UnLock();
+			unlock();
 			return false;
 		}
 	}
 
-	UnLock();
+	unlock();
 
 	return true;
 }
@@ -115,7 +115,7 @@ void OMXClock::setToIdleState()
 		return;
 	}
 
-	Lock();
+	lock();
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 
 	if(clockComponent.getState() == OMX_StateExecuting)
@@ -132,7 +132,7 @@ void OMXClock::setToIdleState()
 
 	}
 
-	UnLock();
+	unlock();
 }
 
 Component* OMXClock::getComponent()
@@ -155,7 +155,7 @@ bool  OMXClock::stop()
 	}
 
 
-	Lock();
+	lock();
 
 	//ofLogVerbose(__func__) << "START";
 
@@ -169,11 +169,11 @@ bool  OMXClock::stop()
     OMX_TRACE(error);
 	if(error != OMX_ErrorNone)
 	{
-		UnLock();
+		unlock();
 		return false;
 	}
 
-	UnLock();
+	unlock();
 
 	return true;
 }
@@ -186,7 +186,7 @@ bool OMXClock::start(double pts)
 		return false;
 	}
 
-	Lock();
+	lock();
     
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	OMX_TIME_CONFIG_CLOCKSTATETYPE clock;
@@ -199,11 +199,11 @@ bool OMXClock::start(double pts)
     OMX_TRACE(error);
 	if(error != OMX_ErrorNone)
 	{
-		UnLock();
+		unlock();
 		return false;
 	}
 
-	UnLock();
+	unlock();
 
 	return true;
 }
@@ -216,7 +216,7 @@ bool OMXClock::step(int steps)
 		return false;
 	}
 
-	Lock();
+	lock();
 
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	OMX_PARAM_U32TYPE param;
@@ -229,11 +229,11 @@ bool OMXClock::step(int steps)
     OMX_TRACE(error);
 	if(error != OMX_ErrorNone)
 	{
-		UnLock();
+		unlock();
 		return false;
 	}
 
-	UnLock();
+	unlock();
 
 	return true;
 }
@@ -246,12 +246,12 @@ bool OMXClock::reset()
 		return false;
 	}
 
-	Lock();
+	lock();
 
 	stop();
 	start(0.0);
 
-	UnLock();
+	unlock();
 
 	return true;
 }
@@ -264,7 +264,7 @@ double OMXClock::getMediaTime()
 		return 0;
 	}
 
-	Lock();
+	lock();
 
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	double pts = 0;
@@ -278,12 +278,12 @@ double OMXClock::getMediaTime()
 
 	if(error != OMX_ErrorNone)
 	{
-		UnLock();
+		unlock();
 		return 0;
 	}
 
 	pts = (double)FromOMXTime(timeStamp.nTimestamp);
-	UnLock();
+	unlock();
 
 	return pts;
 }
@@ -298,7 +298,7 @@ bool OMXClock::getMediaTime(double pts)
 		return false;
 	}
 
-	Lock();
+	lock();
 
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	OMX_INDEXTYPE index;
@@ -322,10 +322,10 @@ bool OMXClock::getMediaTime(double pts)
 
 	if(error != OMX_ErrorNone)
 	{
-		UnLock();
+		unlock();
 		return false;
 	}
-	UnLock();
+	unlock();
 
 	return true;
 }
@@ -340,14 +340,14 @@ bool OMXClock::pause()
 
 	if(!pauseState)
 	{
-		Lock();
+		lock();
 
 		if (setSpeed(0, true))
 		{
 			pauseState = true;
 		}
 
-		UnLock();
+		unlock();
 	}
 	return pauseState == true;
 }
@@ -362,14 +362,14 @@ bool OMXClock::resume()
 
 	if(pauseState)
 	{
-		Lock();
+		lock();
 
 		if (setSpeed(currentSpeed, true))
 		{
 			pauseState = false;
 		}
 
-		UnLock();
+		unlock();
 	}
 	return pauseState == false;
 }
@@ -386,7 +386,7 @@ bool OMXClock::setSpeed(int speed, bool doResume /* = false */)
 		return false;
 	}
 
-	Lock();
+	lock();
 
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	OMX_TIME_CONFIG_SCALETYPE scaleType;
@@ -434,7 +434,7 @@ bool OMXClock::setSpeed(int speed, bool doResume /* = false */)
 
 	if(error != OMX_ErrorNone)
 	{
-		UnLock();
+		unlock();
 		return false;
 	}
 
@@ -443,7 +443,7 @@ bool OMXClock::setSpeed(int speed, bool doResume /* = false */)
 		currentSpeed = speed;
 	}
 
-	UnLock();
+	unlock();
 
 	return true;
 }
@@ -456,7 +456,7 @@ bool OMXClock::doHDMIClockSync()
 		return false;
 	}
 
-	Lock();
+	lock();
 
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	OMX_CONFIG_LATENCYTARGETTYPE latencyTarget;
@@ -476,11 +476,11 @@ bool OMXClock::doHDMIClockSync()
 
 	if(error != OMX_ErrorNone)
 	{
-        UnLock();
+        unlock();
 		return false;
 	}
 
-	UnLock();
+	unlock();
 
 	return true;
 }

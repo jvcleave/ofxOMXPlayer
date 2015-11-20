@@ -1,9 +1,5 @@
 #include "OMXThread.h"
 
-#ifdef CLASSNAME
-#undef CLASSNAME
-#endif
-#define CLASSNAME "OMXThread"
 
 OMXThread::OMXThread()
 {
@@ -41,7 +37,6 @@ bool OMXThread::Create()
 {
 	if(m_running)
 	{
-		//ofLog(OF_LOG_ERROR, "%s::%s - Thread already running ", CLASSNAME, __func__);
 		return false;
 	}
 
@@ -50,7 +45,6 @@ bool OMXThread::Create()
 
 	pthread_create(&m_thread, &m_tattr, &OMXThread::Run, this);
 
-	//ofLog(OF_LOG_VERBOSE, "%s::%s - Thread with id %d started ", CLASSNAME, __func__, (int)m_thread);
 	return true;
 }
 
@@ -69,26 +63,23 @@ void *OMXThread::Run(void *arg)
 	OMXThread *thread = static_cast<OMXThread *>(arg);
 	thread->process();
 
-	//ofLog(OF_LOG_VERBOSE, "%s::%s - Exited thread with  id %d ", CLASSNAME, __func__, (int)thread->ThreadHandle());
 	pthread_exit(NULL);
 }
 
-void OMXThread::Lock()
+void OMXThread::lock()
 {
 	if(!m_running)
 	{
-		//ofLog(OF_LOG_ERROR, "%s::%s - No thread running ", CLASSNAME, __func__);
 		return;
 	}
 
 	pthread_mutex_lock(&m_lock);
 }
 
-void OMXThread::UnLock()
+void OMXThread::unlock()
 {
 	if(!m_running)
 	{
-		//ofLog(OF_LOG_ERROR, "%s::%s - No thread running ", CLASSNAME, __func__);
 		return;
 	}
 

@@ -291,7 +291,7 @@ bool OMXEGLImage::open(OMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglIma
 
 bool OMXEGLImage::decode(uint8_t *pData, int iSize, double pts)
 {
-	CSingleLock lock (m_critSection);
+	SingleLock lock (m_critSection);
 	OMX_ERRORTYPE error;
 
 	if(!isOpen )

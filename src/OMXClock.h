@@ -29,8 +29,8 @@ class OMXClock
 	public:
 		OMXClock();
 		~OMXClock();
-		void Lock();
-		void UnLock();
+		void lock();
+		void unlock();
 		bool init(bool has_video, bool has_audio);
 		void deinit();
 		bool isPaused()

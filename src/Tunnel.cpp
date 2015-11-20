@@ -26,12 +26,12 @@ Tunnel::~Tunnel()
     pthread_mutex_destroy(&m_lock);
 }
 
-void Tunnel::Lock()
+void Tunnel::lock()
 {
     pthread_mutex_lock(&m_lock);
 }
 
-void Tunnel::UnLock()
+void Tunnel::unlock()
 {
     pthread_mutex_unlock(&m_lock);
 }
@@ -55,7 +55,7 @@ OMX_ERRORTYPE Tunnel::flush()
         return OMX_ErrorUndefined;
     }
     
-    Lock();
+    lock();
     if(sourceComponent->getHandle())
     {
         sourceComponent->flushAll();
@@ -66,7 +66,7 @@ OMX_ERRORTYPE Tunnel::flush()
         destinationComponent->flushAll();
     }
     
-    UnLock();
+    unlock();
     return OMX_ErrorNone;
 }
 
@@ -83,7 +83,7 @@ OMX_ERRORTYPE Tunnel::Deestablish(bool doWait)
         return OMX_ErrorUndefined;
     }
     
-    Lock();
+    lock();
     OMX_ERRORTYPE error = OMX_ErrorNone;
     
     if(sourceComponent->getHandle() && havePortSettingsChanged && doWait)
@@ -112,21 +112,21 @@ OMX_ERRORTYPE Tunnel::Deestablish(bool doWait)
         error = OMX_SetupTunnel(destinationComponent->getHandle(), destinationPort, NULL, 0);
         OMX_TRACE(error);
     }
-    UnLock();
+    unlock();
     isEstablished = false;
     return OMX_ErrorNone;
 }
 
 OMX_ERRORTYPE Tunnel::Establish(bool portSettingsChanged)
 {
-    Lock();
+    lock();
     
     OMX_ERRORTYPE error = OMX_ErrorNone;
     OMX_PARAM_U32TYPE param;
     OMX_INIT_STRUCTURE(param);
     if(!sourceComponent || !destinationComponent)
     {
-        UnLock();
+        unlock();
         return OMX_ErrorUndefined;
     }
     
@@ -136,7 +136,7 @@ OMX_ERRORTYPE Tunnel::Establish(bool portSettingsChanged)
         OMX_TRACE(error);
         if(error != OMX_ErrorNone)
         {
-            UnLock();
+            unlock();
             return error;
         }
     }
@@ -149,7 +149,7 @@ OMX_ERRORTYPE Tunnel::Establish(bool portSettingsChanged)
         OMX_TRACE(error);
         if(error != OMX_ErrorNone)
         {
-            UnLock();
+            unlock();
             return error;
         }
     }
@@ -171,7 +171,7 @@ OMX_ERRORTYPE Tunnel::Establish(bool portSettingsChanged)
         OMX_TRACE(error);
         if(error != OMX_ErrorNone)
         {
-            UnLock();
+            unlock();
             return error;
         }
         else
@@ -181,7 +181,7 @@ OMX_ERRORTYPE Tunnel::Establish(bool portSettingsChanged)
     }
     else
     {
-        UnLock();
+        unlock();
         return OMX_ErrorUndefined;
     }
     
@@ -191,7 +191,7 @@ OMX_ERRORTYPE Tunnel::Establish(bool portSettingsChanged)
         OMX_TRACE(error);
         if(error != OMX_ErrorNone)
         {
-            UnLock();
+            unlock();
             return error;
         }
     }
@@ -202,7 +202,7 @@ OMX_ERRORTYPE Tunnel::Establish(bool portSettingsChanged)
         OMX_TRACE(error);
         if(error != OMX_ErrorNone)
         {
-            UnLock();
+            unlock();
             return error;
         }
     }
@@ -216,14 +216,14 @@ OMX_ERRORTYPE Tunnel::Establish(bool portSettingsChanged)
             OMX_TRACE(error);
             if(error != OMX_ErrorNone)
             {
-                UnLock();
+                unlock();
                 return error;
             }
             error = destinationComponent->setState(OMX_StateIdle);
             OMX_TRACE(error);
             if(error != OMX_ErrorNone)
             {
-                UnLock();
+                unlock();
                 return error;
             }
         }
@@ -234,14 +234,14 @@ OMX_ERRORTYPE Tunnel::Establish(bool portSettingsChanged)
         error = sourceComponent->waitForCommand(OMX_CommandPortEnable, sourcePort);
         if(error != OMX_ErrorNone)
         {
-            UnLock();
+            unlock();
             return error;
         }
     }
     
     havePortSettingsChanged = portSettingsChanged;
     
-    UnLock();
+    unlock();
     
     
     return error;

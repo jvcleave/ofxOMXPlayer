@@ -142,8 +142,8 @@ private:
     bool          m_eos;
     bool          doFlushInput;
     bool          doFlushOutput;
-    void              Lock();
-    void              UnLock();
+    void              lock();
+    void              unlock();
     
     int frameCounter;
     int frameOffset;

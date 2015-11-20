@@ -1,4 +1,4 @@
-// SingleLock.h: interface for the CSingleLock class.
+// SingleLock.h: interface for the SingleLock class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -26,25 +26,25 @@
 
 #include <pthread.h>
 
-class CCriticalSection
+class CriticalSection
 {
 	public:
-		inline CCriticalSection()
+		inline CriticalSection()
 		{
 			pthread_mutexattr_t mta;
 			pthread_mutexattr_init(&mta);
 			pthread_mutexattr_settype(&mta, PTHREAD_MUTEX_RECURSIVE);
 			pthread_mutex_init(&m_lock, &mta);
 		}
-		inline ~CCriticalSection()
+		inline ~CriticalSection()
 		{
 			pthread_mutex_destroy(&m_lock);
 		}
-		inline void Lock()
+		inline void lock()
 		{
 			pthread_mutex_lock(&m_lock);
 		}
-		inline void Unlock()
+		inline void unlock()
 		{
 			pthread_mutex_unlock(&m_lock);
 		}
@@ -54,21 +54,21 @@ class CCriticalSection
 };
 
 
-class CSingleLock
+class SingleLock
 {
 	public:
-		inline CSingleLock(CCriticalSection& cs)
+		inline SingleLock(CriticalSection& cs)
 		{
-			m_section = cs;
-			m_section.Lock();
+			section = cs;
+			section.lock();
 		}
-		inline ~CSingleLock()
+		inline ~SingleLock()
 		{
-			m_section.Unlock();
+			section.unlock();
 		}
 
 	protected:
-		CCriticalSection m_section;
+		CriticalSection section;
 };
 
 

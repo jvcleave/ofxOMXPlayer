@@ -35,12 +35,12 @@ OMXReader::~OMXReader()
 	pthread_mutex_destroy(&m_lock);
 }
 
-void OMXReader::Lock()
+void OMXReader::lock()
 {
 	pthread_mutex_lock(&m_lock);
 }
 
-void OMXReader::UnLock()
+void OMXReader::unlock()
 {
 	pthread_mutex_unlock(&m_lock);
 }
@@ -343,7 +343,7 @@ bool OMXReader::SeekTime(int time, bool backwords, double *startpts, bool doLoop
 		return false;
 	}
 	
-	Lock();
+	lock();
 	
 	//FlushRead();
 	
@@ -384,7 +384,7 @@ bool OMXReader::SeekTime(int time, bool backwords, double *startpts, bool doLoop
 	}
 
    
-	UnLock();
+	unlock();
 
 	return (ret >= 0);
 }
@@ -406,7 +406,7 @@ OMXPacket* OMXReader::Read()
 	if(!avFormatContext)
 		return NULL;
 	
-	Lock();
+	lock();
 	
 	// assume we are not eof
 	if(avFormatContext->pb)
@@ -421,7 +421,7 @@ OMXPacket* OMXReader::Read()
 	if (result < 0)
 	{
 		isEOF = true;
-		UnLock();
+		unlock();
 		return NULL;
 	}
 	else if (pkt.size < 0 || pkt.stream_index >= MAX_OMX_STREAMS)
@@ -436,7 +436,7 @@ OMXPacket* OMXReader::Read()
 		av_free_packet(&pkt);
 		
 		isEOF = true;
-		UnLock();
+		unlock();
 		return NULL;
 	}
 	
@@ -447,7 +447,7 @@ OMXPacket* OMXReader::Read()
 	 if(!IsActive(pkt.stream_index))
 	 {
 	 av_free_packet(&pkt);
-	 UnLock();
+	 unlock();
 	 return NULL;
 	 }
 	 */
@@ -490,7 +490,7 @@ OMXPacket* OMXReader::Read()
 	{
 		isEOF = true;
 		av_free_packet(&pkt);
-		UnLock();
+		unlock();
 		return NULL;
 	}
 	
@@ -534,7 +534,7 @@ OMXPacket* OMXReader::Read()
 	
 	av_free_packet(&pkt);
 	
-	UnLock();
+	unlock();
 	return omxPacket;
 }
 
@@ -929,9 +929,9 @@ OMXPacket *OMXReader::AllocPacket(int size)
 bool OMXReader::setActiveStream(OMXStreamType type, unsigned int index)
 {
 	bool ret = false;
-	Lock();
+	lock();
 	ret = setActiveStreamInternal(type, index);
-	UnLock();
+	unlock();
 	return ret;
 }
 
@@ -1153,7 +1153,7 @@ std::string OMXReader::GetCodecName(OMXStreamType type)
 {
 	std::string strStreamName;
 	
-	Lock();
+	lock();
 	switch (type)
 	{
 		case OMXSTREAM_AUDIO:
@@ -1171,7 +1171,7 @@ std::string OMXReader::GetCodecName(OMXStreamType type)
 		default:
 			break;
 	}
-	UnLock();
+	unlock();
 	
 	return strStreamName;
 }

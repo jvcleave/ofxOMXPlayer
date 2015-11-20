@@ -104,12 +104,12 @@ void Component::setEOS(bool isEndofStream)
 {
 	m_eos = isEndofStream;
 }
-void Component::Lock()
+void Component::lock()
 {
 	pthread_mutex_lock(&m_lock);
 }
 
-void Component::UnLock()
+void Component::unlock()
 {
 	pthread_mutex_unlock(&m_lock);
 }
@@ -168,26 +168,26 @@ void Component::flushAll()
 void Component::flushInput()
 {
 	
-	Lock();
+	lock();
 
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	error = OMX_SendCommand(handle, OMX_CommandFlush, inputPort, NULL);
     OMX_TRACE(error);
 	
-	UnLock();
+	unlock();
 }
 
 void Component::flushOutput()
 {
 
-	Lock();
+	lock();
 
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	error = OMX_SendCommand(handle, OMX_CommandFlush, outputPort, NULL);
 	OMX_TRACE(error);
     
 
-	UnLock();
+	unlock();
 }
 
 // timeout in milliseconds
@@ -355,7 +355,7 @@ OMX_ERRORTYPE Component::disableAllPorts()
 {
     assert(!handle);
     
-	Lock();
+	lock();
 
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 
@@ -404,7 +404,7 @@ OMX_ERRORTYPE Component::disableAllPorts()
 		}
 	}
 
-	UnLock();
+	unlock();
 
 	return OMX_ErrorNone;
 }
@@ -582,14 +582,14 @@ OMX_ERRORTYPE Component::setState(OMX_STATETYPE state)
 {
 	assert(!handle);
 
-	Lock();
+	lock();
 
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	OMX_STATETYPE state_actual = OMX_StateMax;
     ofLogVerbose(__func__) << componentName << " state requested: " << OMX_Maps::getInstance().omxStateNames[state];
 	if(state == state_actual)
 	{
-		UnLock();
+		unlock();
 		return OMX_ErrorNone;
 	}
 
@@ -608,12 +608,12 @@ OMX_ERRORTYPE Component::setState(OMX_STATETYPE state)
         OMX_TRACE(error);
 		if(error == OMX_ErrorSameState)
 		{
-			UnLock();
+			unlock();
 			return OMX_ErrorNone;
 		}
 	}
 
-	UnLock();
+	unlock();
 
 	return error;
 }
@@ -626,76 +626,76 @@ unsigned int Component::getInputBufferSpace()
 
 OMX_STATETYPE Component::getState()
 {
-    Lock();
+    lock();
     
     OMX_STATETYPE state;
     OMX_ERRORTYPE error = OMX_GetState(handle, &state);
     OMX_TRACE(error);
     
-    UnLock();
+    unlock();
     return state;
 
 }
 
 OMX_ERRORTYPE Component::setParameter(OMX_INDEXTYPE paramIndex, OMX_PTR paramStruct)
 {
-	Lock();
+	lock();
 
 	OMX_ERRORTYPE error = OMX_SetParameter(handle, paramIndex, paramStruct);
     OMX_TRACE(error);
     
-	UnLock();
+	unlock();
 	return error;
 }
 
 OMX_ERRORTYPE Component::getParameter(OMX_INDEXTYPE paramIndex, OMX_PTR paramStruct)
 {
-	Lock();
+	lock();
 
 	OMX_ERRORTYPE error = OMX_GetParameter(handle, paramIndex, paramStruct);
     OMX_TRACE(error);
 
 
-	UnLock();
+	unlock();
 	return error;
 }
 
 OMX_ERRORTYPE Component::setConfig(OMX_INDEXTYPE configIndex, OMX_PTR configStruct)
 {
-    Lock();
+    lock();
     
 	OMX_ERRORTYPE error = OMX_SetConfig(handle, configIndex, configStruct);
     OMX_TRACE(error);
 
-	UnLock();
+	unlock();
 	return error;
 }
 
 OMX_ERRORTYPE Component::getConfig(OMX_INDEXTYPE configIndex, OMX_PTR configStruct)
 {
-	Lock();
+	lock();
 
 	OMX_ERRORTYPE error = OMX_GetConfig(handle, configIndex, configStruct);
     OMX_TRACE(error);
     
-	UnLock();
+	unlock();
 	return error;
 }
 
 OMX_ERRORTYPE Component::sendCommand(OMX_COMMANDTYPE cmd, OMX_U32 cmdParam, OMX_PTR cmdParamData)
 {
-	Lock();
+	lock();
 
 	OMX_ERRORTYPE error = OMX_SendCommand(handle, cmd, cmdParam, cmdParamData);
     OMX_TRACE(error);
     
-	UnLock();
+	unlock();
 	return error;
 }
 
 OMX_ERRORTYPE Component::enablePort(unsigned int port)//default: wait=false
 {
-	Lock();
+	lock();
 	
 	OMX_PARAM_PORTDEFINITIONTYPE portFormat;
 	OMX_INIT_STRUCTURE(portFormat);
@@ -713,12 +713,12 @@ OMX_ERRORTYPE Component::enablePort(unsigned int port)//default: wait=false
 
 		if(error != OMX_ErrorNone)
 		{
-			UnLock();
+			unlock();
             return error;
 		}
     }
 
-	UnLock();
+	unlock();
 
 	return error;
 }
@@ -728,13 +728,13 @@ OMX_ERRORTYPE Component::disablePort(unsigned int port)//default: wait=false
 
 	OMX_ERRORTYPE error = OMX_ErrorUndefined;
 
-	Lock();
+	lock();
     ofLogVerbose(__func__) << componentName << " port: " << port;
 	error = OMX_SendCommand(handle, OMX_CommandPortDisable, port, NULL);
     OMX_TRACE(error);
 	if(error == OMX_ErrorNone)
 	{
-		UnLock();
+		unlock();
 		return error;
 	}
 	OMX_PARAM_PORTDEFINITIONTYPE portFormat;
@@ -753,22 +753,22 @@ OMX_ERRORTYPE Component::disablePort(unsigned int port)//default: wait=false
 
 		if(error != OMX_ErrorNone)
 		{
-			UnLock();
+			unlock();
 			return error;
 		}
     }
-	UnLock();
+	unlock();
 	return error;
 }
 
 OMX_ERRORTYPE Component::useEGLImage(OMX_BUFFERHEADERTYPE** ppBufferHdr, OMX_U32 nPortIndex, OMX_PTR pAppPrivate, void* eglImage)
 {
-	Lock();
+	lock();
 
 	OMX_ERRORTYPE error = OMX_UseEGLImage(handle, ppBufferHdr, nPortIndex, pAppPrivate, eglImage);
     OMX_TRACE(error);
 
-	UnLock();
+	unlock();
 	return error;
 }
 

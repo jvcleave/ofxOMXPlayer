@@ -56,8 +56,8 @@ class OMXPlayerAudio : public OMXThread
 		bool   hasErrors;
 
 
-		void Lock();
-		void UnLock();
+		void lock();
+		void unlock();
 		void LockDecoder();
 		void UnLockDecoder();
 	private:
@@ -89,9 +89,9 @@ class OMXPlayerAudio : public OMXThread
 
 		unsigned int getCached()
 		{
-			Lock();
+			lock();
 			unsigned int cached_size = cachedSize;
-			UnLock();
+			unlock();
 			return cached_size;
 
 		};

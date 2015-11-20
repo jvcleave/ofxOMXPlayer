@@ -65,12 +65,12 @@ OMXPlayerAudio::~OMXPlayerAudio()
 	pthread_mutex_destroy(&m_lock_decoder);
 }
 
-void OMXPlayerAudio::Lock()
+void OMXPlayerAudio::lock()
 {
 	pthread_mutex_lock(&m_lock);
 }
 
-void OMXPlayerAudio::UnLock()
+void OMXPlayerAudio::unlock()
 {
 	pthread_mutex_unlock(&m_lock);
 }
@@ -145,9 +145,9 @@ bool OMXPlayerAudio::close()
 
 	if(ThreadHandle())
 	{
-		Lock();
+		lock();
 		pthread_cond_broadcast(&m_packet_cond);
-		UnLock();
+		unlock();
 
 		StopThread("OMXPlayerAudio");
 	}
@@ -301,19 +301,19 @@ void OMXPlayerAudio::process()
 
 	while(!doStop && !doAbort)
 	{
-		Lock();
+		lock();
 		if(packets.empty())
 		{
 			pthread_cond_wait(&m_packet_cond, &m_lock);
 		}
-		UnLock();
+		unlock();
 
 		if(doAbort)
 		{
 			break;
 		}
 
-		Lock();
+		lock();
 		if(doFlush && omxPacket)
 		{
 			OMXReader::FreePacket(omxPacket);
@@ -326,7 +326,7 @@ void OMXPlayerAudio::process()
 			cachedSize -= omxPacket->size;
 			packets.pop_front();
 		}
-		UnLock();
+		unlock();
 
 		LockDecoder();
 		if(doFlush && omxPacket)
@@ -352,7 +352,7 @@ void OMXPlayerAudio::process()
 void OMXPlayerAudio::flush()
 {
 	//ofLogVerbose(__func__) << "OMXPlayerAudio::Flush start";
-	Lock();
+	lock();
 	LockDecoder();
 	doFlush = true;
 	while (!packets.empty())
@@ -368,7 +368,7 @@ void OMXPlayerAudio::flush()
 		decoder->flush();
 	}
 	UnLockDecoder();
-	UnLock();
+	unlock();
 	//ofLogVerbose(__func__) << "OMXPlayerAudio::Flush end";
 }
 
@@ -388,10 +388,10 @@ bool OMXPlayerAudio::addPacket(OMXPacket *pkt)
 
 	if((cachedSize + pkt->size) < MAX_DATA_SIZE)
 	{
-		Lock();
+		lock();
 		cachedSize += pkt->size;
 		packets.push_back(pkt);
-		UnLock();
+		unlock();
 		ret = true;
 		pthread_cond_broadcast(&m_packet_cond);
 	}

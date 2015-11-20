@@ -51,7 +51,7 @@ ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
 	//ofLogVerbose(__func__) << " START";
 	//ofLogVerbose(__func__) << " isExiting: " << isExiting;
 
-	//Lock();
+	//lock();
 	doStop = true;
 
 	if(ThreadHandle())
@@ -117,19 +117,19 @@ void ofxOMXPlayerEngine::startExit()
 
 void ofxOMXPlayerEngine::setNormalSpeed()
 {
-    Lock();
+    lock();
 	speedMultiplier = 1;
 	clock.setSpeed(normalPlaySpeed);
 	omxReader.setSpeed(normalPlaySpeed);
 	//ofLogVerbose(__func__) << "clock speed: " << clock.getSpeed();
 	//ofLogVerbose(__func__) << "reader speed: " << omxReader.getSpeed();
-    UnLock();
+    unlock();
 }
 
 int ofxOMXPlayerEngine::increaseSpeed()
 {
 
-	Lock();
+	lock();
 	//ofLogVerbose(__func__) << " START";
 	doSeek = true;
 	
@@ -144,7 +144,7 @@ int ofxOMXPlayerEngine::increaseSpeed()
         omxReader.setSpeed(newSpeed);
         //ofLogVerbose(__func__) << "newSpeed: " << newSpeed;
     }
-    UnLock();
+    unlock();
     return speedMultiplier;
 }
 
@@ -281,10 +281,10 @@ bool ofxOMXPlayerEngine::setup(ofxOMXPlayerSettings& settings)
 
 void ofxOMXPlayerEngine::setDisplayRect(float x, float y, float w, float h)
 {
-	Lock();
+	lock();
 		ofRectangle displayArea(x, y, w, h);
 		setDisplayRect(displayArea);
-	UnLock();
+	unlock();
 }
 
 void ofxOMXPlayerEngine::setDisplayRect(ofRectangle& rectangle)

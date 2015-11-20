@@ -98,8 +98,8 @@ class OMXReader
 		int                       speed;
 		unsigned int              programID;
 		pthread_mutex_t           m_lock;
-		void Lock();
-		void UnLock();
+		void lock();
+		void unlock();
 		bool setActiveStreamInternal(OMXStreamType type, unsigned int index);
 		bool                      m_seek;
 	private:

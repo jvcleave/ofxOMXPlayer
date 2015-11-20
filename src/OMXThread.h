@@ -22,6 +22,6 @@ class OMXThread
 		bool Running();
 		pthread_t ThreadHandle();
 		bool StopThread(std::string className = "UNDEFINED");
-		void Lock();
-		void UnLock();
+		void lock();
+		void unlock();
 };

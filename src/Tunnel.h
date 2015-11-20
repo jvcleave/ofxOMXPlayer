@@ -22,6 +22,6 @@ private:
     Component*      destinationComponent;
     unsigned int    sourcePort;
     unsigned int    destinationPort;
-    void            Lock();
-    void            UnLock();
+    void            lock();
+    void            unlock();
 };

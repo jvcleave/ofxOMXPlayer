@@ -64,8 +64,8 @@ class OMXPlayerVideoBase: public OMXThread
 		void						submitEOS();
 		bool						EOS();
 
-		void						Lock();
-		void						UnLock();
+		void						lock();
+		void						unlock();
 		void						LockDecoder();
 		void						UnLockDecoder();
 

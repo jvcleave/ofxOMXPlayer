@@ -122,10 +122,10 @@ bool OMXPlayerEGLImage::close()
 
 	if(ThreadHandle())
 	{
-		Lock();
+		lock();
 		//ofLogVerbose(__func__) << "WE ARE STILL THREADED";
 		pthread_cond_broadcast(&m_packet_cond);
-		UnLock();
+		unlock();
 
 		StopThread("OMXPlayerEGLImage");
 	}

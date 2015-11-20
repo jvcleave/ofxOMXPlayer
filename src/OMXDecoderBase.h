@@ -81,5 +81,5 @@ public:
     
     virtual int getCurrentFrame() = 0;
     virtual void resetFrameCounter() = 0;
-    CCriticalSection  m_critSection;
+    CriticalSection  m_critSection;
 };

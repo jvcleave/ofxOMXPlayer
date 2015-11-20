@@ -81,12 +81,12 @@ int OMXPlayerVideoBase::getSpeed()
 
 
 
-void OMXPlayerVideoBase::Lock()
+void OMXPlayerVideoBase::lock()
 {
 	pthread_mutex_lock(&m_lock);
 }
 
-void OMXPlayerVideoBase::UnLock()
+void OMXPlayerVideoBase::unlock()
 {
 	pthread_mutex_unlock(&m_lock);
 }
@@ -138,7 +138,7 @@ void OMXPlayerVideoBase::flush()
 
 
 	doFlush_requested = true;
-	Lock();
+	lock();
 	LockDecoder();
 	doFlush_requested = false;
 	doFlush = true;
@@ -161,7 +161,7 @@ void OMXPlayerVideoBase::flush()
 	}
 
 	UnLockDecoder();
-	UnLock();
+	unlock();
 	//ofLogVerbose(__func__) << "OMXPlayerVideoBase::Flush end";
 }
 
@@ -183,10 +183,10 @@ bool OMXPlayerVideoBase::addPacket(OMXPacket *pkt)
 
 	if((cachedSize + pkt->size) < MAX_DATA_SIZE)
 	{
-		Lock();
+		lock();
 			cachedSize += pkt->size;
 			packets.push_back(pkt);
-		UnLock();
+		unlock();
 		ret = true;
 		pthread_cond_broadcast(&m_packet_cond);
 	}
@@ -206,19 +206,19 @@ void OMXPlayerVideoBase::process()
 	
 	while(!doStop && !doAbort)
 	{
-		Lock();
+		lock();
 		if(packets.empty())
 		{
 			pthread_cond_wait(&m_packet_cond, &m_lock);
 		}
-		UnLock();
+		unlock();
 
 		if(doAbort)
 		{
 			break;
 		}
 
-		Lock();
+		lock();
 		if(doFlush && omxPacket)
 		{
 			OMXReader::FreePacket(omxPacket);
@@ -235,7 +235,7 @@ void OMXPlayerVideoBase::process()
 				packets.pop_front();
 			}
 		}
-		UnLock();
+		unlock();
 
 		LockDecoder();
 		if(doFlush && omxPacket)

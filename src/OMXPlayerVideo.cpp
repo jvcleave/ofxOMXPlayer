@@ -154,10 +154,10 @@ bool OMXPlayerVideo::close()
 
 	if(ThreadHandle())
 	{
-		Lock();
+		lock();
 		//ofLogVerbose(__func__) << "WE ARE STILL THREADED";
 		pthread_cond_broadcast(&m_packet_cond);
-		UnLock();
+		unlock();
 
 		StopThread("OMXPlayerVideo");
 	}
@@ -194,14 +194,14 @@ void OMXPlayerVideo::setDisplayRect(ofRectangle& rectangle)
 {
 	if (ThreadHandle()) 
 	{
-		Lock();
+		lock();
 			if(validateDisplayRect(rectangle))
 			{
 				LockDecoder();
 					nonTextureDecoder->setDisplayRect(displayRect);
 				UnLockDecoder();
 			}
-		UnLock();
+		unlock();
 	}else 
 	{
 		validateDisplayRect(rectangle);
