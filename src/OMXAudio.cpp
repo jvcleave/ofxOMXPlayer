@@ -136,9 +136,13 @@ OMXAudio::~OMXAudio()
 }
 
 
-bool OMXAudio::init(string device, enum PCMChannels *channelMap,
-                           OMXStreamInfo& hints, OMXClock *clock, EEncoded bPassthrough, bool bUseHWDecode,
-                           bool boostOnDownmix)
+bool OMXAudio::init(string device, 
+                    enum PCMChannels *channelMap,
+                    OMXStreamInfo& hints, 
+                    OMXClock *clock, 
+                    EEncoded bPassthrough, 
+                    bool bUseHWDecode,
+                    bool boostOnDownmix)
 {
 	m_HWDecode = false;
 	m_Passthrough = false;
@@ -148,12 +152,12 @@ bool OMXAudio::init(string device, enum PCMChannels *channelMap,
 		m_Passthrough = true;
 		SetCodingType(hints.codec);
 	}
-	else if(bUseHWDecode)
+	else 
 	{
-		m_HWDecode = CanHWDecode(hints.codec);
-	}
-	else
-	{
+        if(bUseHWDecode)
+        {
+            m_HWDecode = CanHWDecode(hints.codec);  
+        }
 		SetCodingType(CODEC_ID_PCM_S16LE);
 	}
 
@@ -163,12 +167,14 @@ bool OMXAudio::init(string device, enum PCMChannels *channelMap,
 		extraData = (uint8_t *)malloc(extraSize);
 		memcpy(extraData, hints.extradata, hints.extrasize);
 	}
+    ofLogVerbose(__func__) << "PART 1";
+	/*return init(device, hints.channels, channelMap, hints.channels, hints.samplerate, hints.bitspersample, false, boostOnDownmix, false, bPassthrough);*/
+    
+    int iChannels = hints.channels;
+    unsigned int downmixChannels = hints.channels;
+    unsigned int uiSamplesPerSec = hints.samplerate;
+    unsigned int uiBitsPerSample = hints.bitspersample;
 
-	return init(device, hints.channels, channelMap, hints.channels, hints.samplerate, hints.bitspersample, false, boostOnDownmix, false, bPassthrough);
-}
-
-bool OMXAudio::init(string device, int iChannels, enum PCMChannels *channelMap, unsigned int downmixChannels, unsigned int uiSamplesPerSec, unsigned int uiBitsPerSample, bool bResample, bool boostOnDownmix, bool bIsMusic, EEncoded bPassthrough)
-{
 	std::string deviceuse;
 	if(device == "hdmi")
 	{
@@ -179,7 +185,7 @@ bool OMXAudio::init(string device, int iChannels, enum PCMChannels *channelMap, 
 		deviceuse = "local";
 	}
 
-
+    ofLogVerbose(__func__) << "PART 2";
 
 	m_Passthrough = false;
 

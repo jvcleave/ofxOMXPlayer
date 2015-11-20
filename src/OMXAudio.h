@@ -107,7 +107,7 @@ class OMXAudio
 						bool bUseHWDecode,
 						bool boostOnDownmix);
 	
-		bool init(string device,
+		/*bool init(string device,
 						int iChannels,
 						enum PCMChannels *channelMap,
 						unsigned int downmixChannels,
@@ -116,7 +116,7 @@ class OMXAudio
 						bool bResample,
 						bool boostOnDownmix,
 						bool bIsMusic=false,
-						EEncoded bPassthrough = OMXAudio::ENCODED_NONE);
+						EEncoded bPassthrough = OMXAudio::ENCODED_NONE);*/
 		~OMXAudio();
 
 		unsigned int AddPackets(void* data, unsigned int len);

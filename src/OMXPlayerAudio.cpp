@@ -477,27 +477,15 @@ bool OMXPlayerAudio::OpenDecoder()
         stringstream ss;
         ss << deviceName.substr(4);
         string name = ss.str();
-		bAudioRenderOpen = m_decoder->init(name, m_pChannelMap,
-		                   m_hints, omxClock, m_passthrough,
-		                   m_hw_decode, doBoostOnDownmix);
+		bAudioRenderOpen = m_decoder->init(name, 
+                                           m_pChannelMap,
+                                           m_hints, 
+                                           omxClock,
+                                           m_passthrough,
+                                           m_hw_decode, 
+                                           doBoostOnDownmix);
 	}
-	else
-	{
-		unsigned int downmix_channels = m_hints.channels;
-
-		/* omx needs 6 channels packed into 8 for PCM */
-		if(m_hints.channels == 6)
-		{
-			m_hints.channels = 8;
-		}
-        stringstream ss;
-        ss << deviceName.substr(4);
-        string name = ss.str();
-		bAudioRenderOpen = m_decoder->init(name, m_hints.channels, m_pChannelMap,
-		                   downmix_channels, m_hints.samplerate, m_hints.bitspersample,
-		                   false, doBoostOnDownmix, false, m_passthrough);
-	}
-
+	
 	m_codec_name = omxReader->GetCodecName(OMXSTREAM_AUDIO);
 
 	if(!bAudioRenderOpen)
