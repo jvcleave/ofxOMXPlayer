@@ -114,10 +114,10 @@ class OMXReader
 		AVMediaType PacketType(OMXPacket *pkt);
 		OMXPacket *Read();
 		void process();
-		bool GetStreams();
-		void AddStream(int id);
-		bool IsActive(int stream_index);
-		bool IsActive(OMXStreamType type, int stream_index);
+		bool getStreams();
+		void addStream(int id);
+		bool isActive(int stream_index);
+		bool isActive(OMXStreamType type, int stream_index);
 		bool getHints(AVStream *stream, OMXStreamInfo *hints);
 		bool getHints(OMXStreamType type, unsigned int index, OMXStreamInfo& hints);
 		bool getHints(OMXStreamType type, OMXStreamInfo& hints);
@@ -143,46 +143,46 @@ class OMXReader
 		{
 			return omxChapters[(chapter > MAX_OMX_CHAPTERS) ? MAX_OMX_CHAPTERS : chapter];
 		};
-		static void FreePacket(OMXPacket *pkt);
-		static OMXPacket *AllocPacket(int size);
+		static void freePacket(OMXPacket *pkt);
+		static OMXPacket* allocPacket(int size);
 		void setSpeed(int iSpeed);
 		int getSpeed()
 		{
 			return speed;
 		};
-		void UpdateCurrentPTS();
+		void updateCurrentPTS();
 		double ConvertTimestamp(int64_t pts, int den, int num);
 		int getChapter();
 		void getChapterName(std::string& strChapterName);
-		bool SeekChapter(int chapter, double* startpts);
-		int GetAudioIndex()
+		bool seekChapter(int chapter, double* startpts);
+		int getAudioIndex()
 		{
 			return (audioIndex >= 0) ? omxStreams[audioIndex].index : -1;
 		};
-		int GetSubtitleIndex()
+		int getSubtitleIndex()
 		{
 			return (subtitleIndex >= 0) ? omxStreams[subtitleIndex].index : -1;
 		};
 
-		int GetRelativeIndex(size_t index)
+		int getRelativeIndex(size_t index)
 		{
 			//assert(index < MAX_STREAMS);
 			return omxStreams[index].index;
 		}
 
-		int GetStreamLength();
-		static double NormalizeFrameduration(double frameduration);
+		int getStreamLength();
+		static double normalizeFrameduration(double frameduration);
 		bool IsMatroska()
 		{
 			return isMatroska;
 		};
-		std::string GetCodecName(OMXStreamType type);
-		std::string GetCodecName(OMXStreamType type, unsigned int index);
-		std::string GetStreamCodecName(AVStream *stream);
-		std::string GetStreamLanguage(OMXStreamType type, unsigned int index);
-		std::string GetStreamName(OMXStreamType type, unsigned int index);
-		std::string GetStreamType(OMXStreamType type, unsigned int index);
-		bool CanSeek();
+		std::string getCodecName(OMXStreamType type);
+		std::string getCodecName(OMXStreamType type, unsigned int index);
+		std::string getStreamCodecName(AVStream *stream);
+		std::string getStreamLanguage(OMXStreamType type, unsigned int index);
+		std::string getStreamName(OMXStreamType type, unsigned int index);
+		std::string getStreamType(OMXStreamType type, unsigned int index);
+		bool canSeek();
 		bool wasFileRewound;
 };
 

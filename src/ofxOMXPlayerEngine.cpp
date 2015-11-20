@@ -90,7 +90,7 @@ ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
 
 	if(packet)
 	{
-		omxReader.FreePacket(packet);
+		omxReader.freePacket(packet);
 		packet = NULL;
 	}
 
@@ -373,7 +373,7 @@ bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
 
 			//file is weird (like test.h264) and has no reported frames
 		}
-        if (startTimeInSeconds !=0 && omxReader.CanSeek())
+        if (startTimeInSeconds !=0 && omxReader.canSeek())
         {
             
             bool didSeek = omxReader.SeekTime(startTimeInSeconds * 1000.0f, 0, &startpts);
@@ -521,7 +521,7 @@ void ofxOMXPlayerEngine::process()
 		}
 
 
-		if(hasVideo && packet && omxReader.IsActive(OMXSTREAM_VIDEO, packet->stream_index))
+		if(hasVideo && packet && omxReader.isActive(OMXSTREAM_VIDEO, packet->stream_index))
 		{
 			if(videoPlayer->addPacket(packet))
 			{
@@ -548,7 +548,7 @@ void ofxOMXPlayerEngine::process()
 		{
 			if(packet)
 			{
-				omxReader.FreePacket(packet);
+				omxReader.freePacket(packet);
 				packet = NULL;
 			}else {
 				clock.sleep(10);

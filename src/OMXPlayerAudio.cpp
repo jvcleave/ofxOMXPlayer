@@ -75,12 +75,12 @@ void OMXPlayerAudio::unlock()
 	pthread_mutex_unlock(&m_lock);
 }
 
-void OMXPlayerAudio::LockDecoder()
+void OMXPlayerAudio::lockDecoder()
 {
 	pthread_mutex_lock(&m_lock_decoder);
 }
 
-void OMXPlayerAudio::UnLockDecoder()
+void OMXPlayerAudio::unlockDecoder()
 {
 	pthread_mutex_unlock(&m_lock_decoder);
 }
@@ -179,7 +179,7 @@ bool OMXPlayerAudio::decode(OMXPacket *pkt)
 		return true;
 	}
 
-	if(!omxReader->IsActive(OMXSTREAM_AUDIO, pkt->stream_index))
+	if(!omxReader->isActive(OMXSTREAM_AUDIO, pkt->stream_index))
 	{
 		return true;
 	}
@@ -316,7 +316,7 @@ void OMXPlayerAudio::process()
 		lock();
 		if(doFlush && omxPacket)
 		{
-			OMXReader::FreePacket(omxPacket);
+			OMXReader::freePacket(omxPacket);
 			omxPacket = NULL;
 			doFlush = false;
 		}
@@ -328,24 +328,24 @@ void OMXPlayerAudio::process()
 		}
 		unlock();
 
-		LockDecoder();
+		lockDecoder();
 		if(doFlush && omxPacket)
 		{
-			OMXReader::FreePacket(omxPacket);
+			OMXReader::freePacket(omxPacket);
 			omxPacket = NULL;
 			doFlush = false;
 		}
 		else if(omxPacket && decode(omxPacket))
 		{
-			OMXReader::FreePacket(omxPacket);
+			OMXReader::freePacket(omxPacket);
 			omxPacket = NULL;
 		}
-		UnLockDecoder();
+		unlockDecoder();
 	}
 
 	if(omxPacket)
 	{
-		OMXReader::FreePacket(omxPacket);
+		OMXReader::freePacket(omxPacket);
 	}
 }
 
@@ -353,13 +353,13 @@ void OMXPlayerAudio::flush()
 {
 	//ofLogVerbose(__func__) << "OMXPlayerAudio::Flush start";
 	lock();
-	LockDecoder();
+	lockDecoder();
 	doFlush = true;
 	while (!packets.empty())
 	{
 		OMXPacket *pkt = packets.front();
 		packets.pop_front();
-		OMXReader::FreePacket(pkt);
+		OMXReader::freePacket(pkt);
 	}
 	currentPTS = DVD_NOPTS_VALUE;
 	cachedSize = 0;
@@ -367,7 +367,7 @@ void OMXPlayerAudio::flush()
 	{
 		decoder->flush();
 	}
-	UnLockDecoder();
+	unlockDecoder();
 	unlock();
 	//ofLogVerbose(__func__) << "OMXPlayerAudio::Flush end";
 }
@@ -479,7 +479,7 @@ bool OMXPlayerAudio::openDecoder()
                                            doBoostOnDownmix);
 	}
 	
-	codecName = omxReader->GetCodecName(OMXSTREAM_AUDIO);
+	codecName = omxReader->getCodecName(OMXSTREAM_AUDIO);
 
 	if(!bAudioRenderOpen)
 	{

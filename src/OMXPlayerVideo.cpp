@@ -101,7 +101,7 @@ bool OMXPlayerVideo::openDecoder()
 
 	if (omxStreamInfo.fpsrate && omxStreamInfo.fpsscale)
 	{
-		m_fps = DVD_TIME_BASE / OMXReader::NormalizeFrameduration((double)DVD_TIME_BASE * omxStreamInfo.fpsscale / omxStreamInfo.fpsrate);
+		m_fps = DVD_TIME_BASE / OMXReader::normalizeFrameduration((double)DVD_TIME_BASE * omxStreamInfo.fpsscale / omxStreamInfo.fpsrate);
 	}
 	else
 	{
@@ -197,9 +197,9 @@ void OMXPlayerVideo::setDisplayRect(ofRectangle& rectangle)
 		lock();
 			if(validateDisplayRect(rectangle))
 			{
-				LockDecoder();
+				lockDecoder();
 					nonTextureDecoder->setDisplayRect(displayRect);
-				UnLockDecoder();
+				unlockDecoder();
 			}
 		unlock();
 	}else 

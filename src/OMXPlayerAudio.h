@@ -58,8 +58,8 @@ class OMXPlayerAudio : public OMXThread
 
 		void lock();
 		void unlock();
-		void LockDecoder();
-		void UnLockDecoder();
+		void lockDecoder();
+		void unlockDecoder();
 	private:
 	public:
 		OMXPlayerAudio();

@@ -66,8 +66,8 @@ class OMXPlayerVideoBase: public OMXThread
 
 		void						lock();
 		void						unlock();
-		void						LockDecoder();
-		void						UnLockDecoder();
+		void						lockDecoder();
+		void						unlockDecoder();
 
 
 		uint32_t					validHistoryPTS;
