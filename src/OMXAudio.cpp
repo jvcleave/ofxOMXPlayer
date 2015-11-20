@@ -101,7 +101,7 @@ OMXAudio::OMXAudio()
     doPause = false;
     canPause = false;
     currentVolume = 0;
-    m_Passthrough = false;
+    doPassthrough = false;
     doNormalizeDownmix= true;
     bytesPerSecond = 0;
     bufferLength = 0;
@@ -138,7 +138,7 @@ bool OMXAudio::init(string device,
                     EEncoded bPassthrough,
                     bool boostOnDownmix)
 {
-	m_Passthrough = false;
+	doPassthrough = false;
 
     setCodingType(CODEC_ID_PCM_S16LE);
 	if(hints.extrasize > 0 && hints.extradata != NULL)
@@ -166,11 +166,11 @@ bool OMXAudio::init(string device,
 
     ofLogVerbose(__func__) << "PART 2";
 
-	m_Passthrough = false;
+	doPassthrough = false;
 
 	/*if(bPassthrough != OMXAudio::ENCODED_NONE)
 	{
-		m_Passthrough =true;
+		doPassthrough =true;
 	}*/
 
 	memset(&waveFormat, 0x0, sizeof(waveFormat));
@@ -202,7 +202,7 @@ bool OMXAudio::init(string device,
 	// set the input format, and get the channel layout so we know what we need to open
 	enum PCMChannels *outLayout = remapObject.SetInputFormat (iChannels, channelMap, uiBitsPerSample / 8, uiSamplesPerSec);;
 
-	if (!m_Passthrough && channelMap && outLayout)
+	if (!doPassthrough && channelMap && outLayout)
 	{
 		/* setup output channel map */
 		numOutputChannels = 0;
@@ -331,7 +331,7 @@ bool OMXAudio::init(string device,
 		return false;
 	}
 
-	if(!m_Passthrough)
+	if(!doPassthrough)
 	{
 		componentName = "OMX.broadcom.audio_mixer";
 		if(!m_omx_mixer.init(componentName, OMX_IndexParamAudioInit))
@@ -340,7 +340,7 @@ bool OMXAudio::init(string device,
 		}
 	}
 
-	if(m_Passthrough)
+	if(doPassthrough)
 	{
 		OMX_CONFIG_BOOLEANTYPE boolType;
 		OMX_INIT_STRUCTURE(boolType);
@@ -423,7 +423,7 @@ bool OMXAudio::init(string device,
 		return false;
 	}
 
-	if(!m_Passthrough)
+	if(!doPassthrough)
 	{
 		decoderTunnel.init(&decoderComponent, decoderComponent.getOutputPort(), &m_omx_mixer, m_omx_mixer.getInputPort());
 		error = decoderTunnel.Establish(false);
@@ -516,7 +516,7 @@ bool OMXAudio::init(string device,
 	setCurrentVolume(currentVolume);
 
 	ofLog(OF_LOG_VERBOSE, "OMXAudio::init Ouput bps %d samplerate %d channels %d device %s buffer size %d bytes per second %d passthrough %d",
-	      (int)pcm_output.nBitPerSample, (int)pcm_output.nSamplingRate, (int)pcm_output.nChannels, deviceuse.c_str(), bufferLength, bytesPerSecond, m_Passthrough);
+	      (int)pcm_output.nBitPerSample, (int)pcm_output.nSamplingRate, (int)pcm_output.nChannels, deviceuse.c_str(), bufferLength, bytesPerSecond, doPassthrough);
 
 	return true;
 }
@@ -535,14 +535,14 @@ bool OMXAudio::Deinitialize()
 	}
 
 	decoderTunnel.flush();
-	if(!m_Passthrough)
+	if(!doPassthrough)
 	{
 		mixerTunnel.flush();
 	}
 	clockTunnel.flush();
 
 	clockTunnel.Deestablish(true);
-	if(!m_Passthrough)
+	if(!doPassthrough)
 	{
 		mixerTunnel.Deestablish(true);
 	}
@@ -551,7 +551,7 @@ bool OMXAudio::Deinitialize()
 	decoderComponent.flushInput();
 
 	renderComponent.Deinitialize();
-	if(!m_Passthrough)
+	if(!doPassthrough)
 	{
 		m_omx_mixer.Deinitialize();
 	}
@@ -596,7 +596,7 @@ void OMXAudio::flush()
 
 	decoderComponent.flushInput();
 	decoderTunnel.flush();
-	if(!m_Passthrough)
+	if(!doPassthrough)
 	{
 		mixerTunnel.flush();
 	}
@@ -685,7 +685,7 @@ void OMXAudio::mute(bool bMute)
 //***********************************************************************************************
 bool OMXAudio::setCurrentVolume(long nVolume)
 {
-	if(!isInitialized || m_Passthrough)
+	if(!isInitialized || doPassthrough)
 	{
 		return false;
 	}
@@ -872,14 +872,14 @@ unsigned int OMXAudio::addPackets(void* data, unsigned int len, double dts, doub
 			renderComponent.waitForEvent(OMX_EventPortSettingsChanged);
 
 			renderComponent.disablePort(renderComponent.getInputPort());
-			if(!m_Passthrough)
+			if(!doPassthrough)
 			{
 				m_omx_mixer.disablePort(m_omx_mixer.getOutputPort());
 				m_omx_mixer.disablePort(m_omx_mixer.getInputPort());
 			}
 			decoderComponent.disablePort(decoderComponent.getOutputPort());
 
-			if(!m_Passthrough)
+			if(!doPassthrough)
 			{
 				/* setup mixer input */
 				pcm_input.nPortIndex      = m_omx_mixer.getInputPort();
@@ -973,7 +973,7 @@ unsigned int OMXAudio::addPackets(void* data, unsigned int len, double dts, doub
 			}
 
 			renderComponent.enablePort(renderComponent.getInputPort());
-			if(!m_Passthrough)
+			if(!doPassthrough)
 			{
 				m_omx_mixer.enablePort(m_omx_mixer.getOutputPort());
 				m_omx_mixer.enablePort(m_omx_mixer.getInputPort());

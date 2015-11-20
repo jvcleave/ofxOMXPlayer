@@ -149,7 +149,7 @@ class OMXAudio
 		bool          canPause;
 		long          currentVolume;
 		long          DRC;
-		bool          m_Passthrough;
+		bool          doPassthrough;
 		bool          doNormalizeDownmix;
 		unsigned int  bytesPerSecond;
 		unsigned int  bufferLength;

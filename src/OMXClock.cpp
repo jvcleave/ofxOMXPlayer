@@ -345,49 +345,6 @@ double OMXClock::getMediaTime(bool lock /* = true */)
 	return pts;
 }
 
-double OMXClock::OMXClockAdjustment(bool lock /* = true */)
-{
-	if(clockComponent.getHandle() == NULL)
-	{
-		ofLogError(__func__) << "NO CLOCK YET";
-		return 0;
-	}
-
-	if(lock)
-	{
-		Lock();
-	}
-
-	OMX_ERRORTYPE error = OMX_ErrorNone;
-	double pts = 0;
-
-	OMX_TIME_CONFIG_TIMESTAMPTYPE timeStamp;
-	OMX_INIT_STRUCTURE(timeStamp);
-	timeStamp.nPortIndex = clockComponent.getInputPort();
-
-	error = clockComponent.getConfig(OMX_IndexConfigClockAdjustment, &timeStamp);
-    OMX_TRACE(error);
-
-	if(error != OMX_ErrorNone)
-	{
-		if(lock)
-		{
-			UnLock();
-		}
-		return 0;
-	}
-
-	pts = (double)FromOMXTime(timeStamp.nTimestamp);
-	
-	if(lock)
-	{
-		UnLock();
-	}
-
-	return pts;
-}
-
-
 // Set the media time, so calls to get media time use the updated value,
 // useful after a seek so mediatime is updated immediately (rather than waiting for first decoded packet)
 bool OMXClock::getMediaTime(double pts, bool lock /* = true*/)

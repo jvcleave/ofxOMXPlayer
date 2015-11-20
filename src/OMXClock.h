@@ -42,7 +42,6 @@ class OMXClock
 		bool step(int steps = 1, bool lock = true);
 		bool reset(bool lock = true);
 		double getMediaTime(bool lock = true);
-		double OMXClockAdjustment(bool lock = true);
 		bool getMediaTime(double pts, bool lock = true);
 		bool pause(bool lock = true);
 		bool resume(bool lock = true);
