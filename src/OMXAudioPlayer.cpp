@@ -43,7 +43,7 @@ OMXAudioPlayer::OMXAudioPlayer()
 	channelMap   = NULL;
 	audioCodecOMX   = NULL;
 	speed         = DVD_PLAYSPEED_NORMAL;
-	hasErrors  = true;
+	hasErrors  = false;
 
 	pthread_cond_init(&m_packet_cond, NULL);
 	pthread_cond_init(&m_audio_cond, NULL);
@@ -115,18 +115,20 @@ bool OMXAudioPlayer::open(OMXStreamInfo& hints,
 
 // omxClock->SetMasterClock(false);
 
-	hasErrors = openCodec();
-	if(!hasErrors)
+    bool success  = openCodec();
+	if(!success)
 	{
+        ofLogError(__func__) << "openCodec: " << success;
 		close();
-		return false;
+		return success;
 	}
 
-	hasErrors = openDecoder();
-	if(!hasErrors)
+	success = openDecoder();
+	if(!success)
 	{
+        ofLogError(__func__) << "openDecoder: " << success;
 		close();
-		return false;
+		return success;
 	}
 
 	Create();
@@ -216,17 +218,10 @@ bool OMXAudioPlayer::decode(OMXPacket *pkt)
 
 		omxStreamInfo = pkt->hints;
 
-		hasErrors = openCodec();
-		if(!hasErrors)
-		{
-			return false;
-		}
-
-		hasErrors = openDecoder();
-		if(!hasErrors)
-		{
-			return false;
-		}
+        
+        ofLogError(__func__) << "CRASHING HERE" << __LINE__;
+        _Exit(0);
+        
 	}
     
 #if 1
@@ -464,8 +459,8 @@ bool OMXAudioPlayer::openDecoder()
 
 	
 
-	if(m_passthrough || doHardwareDecode)
-	{
+	//if(m_passthrough || doHardwareDecode)
+	//{
 		
         stringstream ss;
         ss << deviceName.substr(4);
@@ -476,12 +471,13 @@ bool OMXAudioPlayer::openDecoder()
                                            omxClock,
                                            m_passthrough, 
                                            doBoostOnDownmix);
-	}
+	
 	
 	codecName = omxReader->getCodecName(OMXSTREAM_AUDIO);
 
 	if(!bAudioRenderOpen)
 	{
+        ofLogError(__func__) << "bAudioRenderOpen: " << bAudioRenderOpen;
 		delete decoder;
 		decoder = NULL;
 		return false;

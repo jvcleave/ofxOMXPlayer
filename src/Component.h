@@ -21,19 +21,19 @@ public:
     Component();
     ~Component();
     
-    OMX_HANDLETYPE    getHandle()
+    OMX_HANDLETYPE getHandle()
     {
         return handle;
     };
-    unsigned int      getInputPort()
+    unsigned int getInputPort()
     {
         return inputPort;
     };
-    unsigned int      getOutputPort()
+    unsigned int getOutputPort()
     {
         return outputPort;
     };
-    std::string       getName()
+    string getName()
     {
         return componentName;
     };
@@ -55,17 +55,17 @@ public:
     OMX_ERRORTYPE useEGLImage(OMX_BUFFERHEADERTYPE**, OMX_U32, OMX_PTR, void*);
     
     bool init(string&, OMX_INDEXTYPE);
-    bool Deinitialize(bool doFlush=true);
+    bool Deinitialize(string caller="UNDEFINED");
     
     // Decoder delegate callback routines.
-    static OMX_ERRORTYPE DecoderEventHandlerCallback(OMX_HANDLETYPE, OMX_PTR, OMX_EVENTTYPE, OMX_U32, OMX_U32, OMX_PTR);
-    static OMX_ERRORTYPE DecoderEmptyBufferDoneCallback(OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*);
-    static OMX_ERRORTYPE DecoderFillBufferDoneCallback(OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*);
+    static OMX_ERRORTYPE EventHandlerCallback(OMX_HANDLETYPE, OMX_PTR, OMX_EVENTTYPE, OMX_U32, OMX_U32, OMX_PTR);
+    static OMX_ERRORTYPE EmptyBufferDoneCallback(OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*);
+    static OMX_ERRORTYPE FillBufferDoneCallback(OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*);
     
     // OMXCore decoder callback routines.
-    OMX_ERRORTYPE DecoderEventHandler(OMX_HANDLETYPE, OMX_PTR, OMX_EVENTTYPE, OMX_U32, OMX_U32, OMX_PTR);
-    OMX_ERRORTYPE DecoderEmptyBufferDone(OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*);
-    OMX_ERRORTYPE DecoderFillBufferDone(OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*);
+    //OMX_ERRORTYPE EventHandler(OMX_HANDLETYPE, OMX_PTR, OMX_EVENTTYPE, OMX_U32, OMX_U32, OMX_PTR);
+    //OMX_ERRORTYPE EmptyBufferDone(OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*);
+    //OMX_ERRORTYPE FillBufferDone(OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*);
     
     OMX_ERRORTYPE EmptyThisBuffer(OMX_BUFFERHEADERTYPE*);
     OMX_ERRORTYPE FillThisBuffer(OMX_BUFFERHEADERTYPE*);
@@ -85,22 +85,26 @@ public:
     
     OMX_ERRORTYPE allocInputBuffers();
     OMX_ERRORTYPE allocOutputBuffers();
-    
+    OMX_ERRORTYPE freeInputBuffers();
+    OMX_ERRORTYPE freeOutputBuffers();
     void resetEOS();
     bool EOS()
     {
         return m_eos;
     };
     void setEOS(bool isEndOfStream);
-    void SetCustomDecoderFillBufferDoneHandler(OMX_ERRORTYPE (*p)(OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*))
+    void setFillBufferDoneHandler(OMX_ERRORTYPE (*p)(OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*))
     {
-        CustomDecoderFillBufferDoneHandler = p;
+        CustomFillBufferDoneHandler = p;
     };
-    void SetCustomDecoderEmptyBufferDoneHandler(OMX_ERRORTYPE (*p)(OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*))
+    void setEmptyBufferDoneHandler(OMX_ERRORTYPE (*p)(OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*))
     {
-        CustomDecoderEmptyBufferDoneHandler = p;
+        CustomEmptyBufferDoneHandler = p;
     };
     
+    //additional event handlers
+    OMX_ERRORTYPE (*CustomFillBufferDoneHandler)(OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*);
+    OMX_ERRORTYPE (*CustomEmptyBufferDoneHandler)(OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*);
     
     int getCurrentFrame();
     void resetFrameCounter();
@@ -120,9 +124,7 @@ private:
     
     OMX_CALLBACKTYPE  callbacks;
     
-    //additional event handlers
-    OMX_ERRORTYPE (*CustomDecoderFillBufferDoneHandler)(OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*);
-    OMX_ERRORTYPE (*CustomDecoderEmptyBufferDoneHandler)(OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*);
+
     
     // OMXCore input buffers (demuxer packets)
     pthread_mutex_t   m_omx_input_mutex;

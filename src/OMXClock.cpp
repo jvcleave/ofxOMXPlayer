@@ -60,9 +60,9 @@ bool OMXClock::init(bool has_video, bool has_audio)
 	}
 
 	error = clockComponent.setConfig(OMX_IndexConfigTimeActiveRefClock, &refClock);
+    OMX_TRACE(error);
 	if(error != OMX_ErrorNone)
 	{
-		ofLogError(__func__) << " setting OMX_IndexConfigTimeCurrentAudioReference";
 		return false;
 	}
 
@@ -77,7 +77,7 @@ void OMXClock::deinit()
 		return;
 	}
 
-	clockComponent.Deinitialize(true);
+	clockComponent.Deinitialize();
 }
 
 bool OMXClock::OMXStateExecute()

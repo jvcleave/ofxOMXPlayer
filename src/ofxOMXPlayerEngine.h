@@ -94,7 +94,7 @@ class ofxOMXPlayerEngine: public OMXThread
 	private:
 
 		
-		OMXClock				clock;
+		OMXClock*				clock;
 
 		OMXPacket*				packet;
 		VideoPlayerNonTextured*			nonEglPlayer;

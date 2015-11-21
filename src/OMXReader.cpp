@@ -896,6 +896,7 @@ bool OMXReader::getIsEOF()
 	return isEOF;
 }
 
+//__attribute__((always_inline))
 void OMXReader::freePacket(OMXPacket *pkt)
 {
 	if(pkt)

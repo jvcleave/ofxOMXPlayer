@@ -53,10 +53,6 @@ bool AudioCodecOMX::open(OMXStreamInfo& hints)
 	AVCodec* pCodec;
 	m_bOpenedCodec = false;
 
-
-
-	avcodec_register_all();
-
 	pCodec = avcodec_find_decoder(hints.codec);
 	if (!pCodec)
 	{

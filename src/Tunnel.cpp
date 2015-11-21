@@ -4,8 +4,8 @@
 
 Tunnel::Tunnel()
 {
-    sourceComponentName = "UNDEFINED_sourceComponentName";
-    destinationComponentName = "UNDEFINED_destinationComponentName";
+    sourceComponentName = "UNDEFINED";
+    destinationComponentName = "UNDEFINED";
     sourceComponent       = NULL;
     destinationComponent       = NULL;
     sourcePort            = 0;
@@ -70,7 +70,7 @@ OMX_ERRORTYPE Tunnel::flush()
     return OMX_ErrorNone;
 }
 
-OMX_ERRORTYPE Tunnel::Deestablish(bool doWait)
+OMX_ERRORTYPE Tunnel::Deestablish()
 {
     
     if (!isEstablished)
@@ -85,33 +85,51 @@ OMX_ERRORTYPE Tunnel::Deestablish(bool doWait)
     
     lock();
     OMX_ERRORTYPE error = OMX_ErrorNone;
-    
-    if(sourceComponent->getHandle() && havePortSettingsChanged && doWait)
+    string debugString = sourceComponent->getName() + " : " + destinationComponent->getName();
+    if(sourceComponent->getHandle() && havePortSettingsChanged)
     {
         error = sourceComponent->waitForEvent(OMX_EventPortSettingsChanged);
         OMX_TRACE(error);
     }
+    error = sourceComponent->disableAllPorts();
+    OMX_TRACE(error, debugString);
+    
+    error = destinationComponent->disableAllPorts();
+    OMX_TRACE(error, debugString);
+    
+    error = OMX_SetupTunnel(destinationComponent->getHandle(), destinationPort, NULL, 0);
+    OMX_TRACE(error, debugString);
+    
+    error = OMX_SetupTunnel(sourceComponent->getHandle(), sourcePort, NULL, 0);
+    OMX_TRACE(error, debugString);
+    
+    /*
     if(sourceComponent->getHandle())
     {
-        error = sourceComponent->disablePort(sourcePort);
-        OMX_TRACE(error);
+        //error = sourceComponent->disablePort(sourcePort); 
+        
+        
+        
     }
     if(destinationComponent->getHandle())
     {
         error = destinationComponent->disablePort(destinationPort);
-        OMX_TRACE(error);
+        OMX_TRACE(error, debugString);
     }
+     
     if(sourceComponent->getHandle())
     {
         error = OMX_SetupTunnel(sourceComponent->getHandle(), sourcePort, NULL, 0);
-        OMX_TRACE(error);
+        OMX_TRACE(error, debugString);
     }
     
     if(destinationComponent->getHandle())
     {
         error = OMX_SetupTunnel(destinationComponent->getHandle(), destinationPort, NULL, 0);
-        OMX_TRACE(error);
+        OMX_TRACE(error, debugString);
     }
+    */
+    
     unlock();
     isEstablished = false;
     return OMX_ErrorNone;

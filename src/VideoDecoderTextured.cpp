@@ -266,7 +266,7 @@ bool VideoDecoderTextured::open(OMXStreamInfo& hints, OMXClock *clock, EGLImageK
 	}
 
 
-	renderComponent.SetCustomDecoderFillBufferDoneHandler(&VideoDecoderTextured::onFillBufferDone);
+	renderComponent.setFillBufferDoneHandler(&VideoDecoderTextured::onFillBufferDone);
 	error = renderComponent.setState(OMX_StateExecuting);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;

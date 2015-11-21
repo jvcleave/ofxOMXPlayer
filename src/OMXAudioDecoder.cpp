@@ -298,7 +298,8 @@ bool OMXAudioDecoder::init(string device,
 	componentName = "OMX.broadcom.audio_render";
 	if(!renderComponent.init(componentName, OMX_IndexParamAudioInit))
 	{
-		return false;
+        ofLogError(__func__) << "renderComponent: FAIL";
+		 return false;
 	}
 
 	OMX_CONFIG_BOOLEANTYPE configBool;
@@ -309,7 +310,7 @@ bool OMXAudioDecoder::init(string device,
     OMX_TRACE(error);
 	if (error != OMX_ErrorNone)
 	{
-		return false;
+		 return false;
 	}
 
 	renderComponent.resetEOS();
@@ -322,13 +323,14 @@ bool OMXAudioDecoder::init(string device,
     OMX_TRACE(error);
 	if (error != OMX_ErrorNone)
 	{
-		return false;
+		 return false;
 	}
 
 	componentName = "OMX.broadcom.audio_decode";
 	if(!decoderComponent.init(componentName, OMX_IndexParamAudioInit))
 	{
-		return false;
+        ofLogError(__func__) << "decoderComponent: FAIL";
+		 return false;
 	}
 
 	if(!doPassthrough)
@@ -336,7 +338,8 @@ bool OMXAudioDecoder::init(string device,
 		componentName = "OMX.broadcom.audio_mixer";
 		if(!m_omx_mixer.init(componentName, OMX_IndexParamAudioInit))
 		{
-			return false;
+            ofLogError(__func__) << "m_omx_mixer: FAIL";
+			 return false;
 		}
 	}
 
@@ -349,7 +352,7 @@ bool OMXAudioDecoder::init(string device,
         OMX_TRACE(error);
 		if(error != OMX_ErrorNone)
 		{
-			return false;
+			 return false;
 		}
 	}
 
@@ -362,7 +365,7 @@ bool OMXAudioDecoder::init(string device,
     OMX_TRACE(error);
 	if(error != OMX_ErrorNone)
 	{
-		return false;
+		 return false;
 	}
 
 	port_param.format.audio.eEncoding = m_eEncoding;
@@ -374,13 +377,12 @@ bool OMXAudioDecoder::init(string device,
     OMX_TRACE(error);
 	if(error != OMX_ErrorNone)
 	{
-		return false;
+		 return false;
 	}
 
-
+    /*
 	if(omxClock == NULL)
 	{
-		/* no external clock set. generate one */
 		hasExternalClock = false;
 
 		omxClock = new OMXClock();
@@ -390,10 +392,11 @@ bool OMXAudioDecoder::init(string device,
 			delete omxClock;
 			omxClock = NULL;
 			ofLog(OF_LOG_ERROR, "OMXAudioDecoder::init error creating av clock");
-			return false;
+			 return false;
 		}
 	}
-
+    */
+    
 	clockComponent = omxClock->getComponent();
 
 	clockTunnel.init(clockComponent, clockComponent->getInputPort(), &renderComponent, renderComponent.getInputPort()+1);
@@ -402,7 +405,7 @@ bool OMXAudioDecoder::init(string device,
     OMX_TRACE(error);
 	if(error != OMX_ErrorNone)
 	{
-		return false;
+		 return false;
 	}
 
 	if(!hasExternalClock)
@@ -411,7 +414,7 @@ bool OMXAudioDecoder::init(string device,
         OMX_TRACE(error);
 		if (error != OMX_ErrorNone)
 		{
-			return false;
+			 return false;
 		}
 	}
 
@@ -420,7 +423,7 @@ bool OMXAudioDecoder::init(string device,
     OMX_TRACE(error);
 	if(error != OMX_ErrorNone)
 	{
-		return false;
+		 return false;
 	}
 
 	if(!doPassthrough)
@@ -430,14 +433,14 @@ bool OMXAudioDecoder::init(string device,
         OMX_TRACE(error);
 		if(error != OMX_ErrorNone)
 		{
-			return false;
+			 return false;
 		}
 
 		error = decoderComponent.setState(OMX_StateExecuting);
         OMX_TRACE(error);
 		if(error != OMX_ErrorNone)
 		{
-			return false;
+			 return false;
 		}
 
 		mixerTunnel.init(&m_omx_mixer, m_omx_mixer.getOutputPort(), &renderComponent, renderComponent.getInputPort());
@@ -445,14 +448,14 @@ bool OMXAudioDecoder::init(string device,
         OMX_TRACE(error);
 		if(error != OMX_ErrorNone)
 		{
-			return false;
+			 return false;
 		}
 
 		error = m_omx_mixer.setState(OMX_StateExecuting);
         OMX_TRACE(error);
 		if(error != OMX_ErrorNone)
 		{
-			return false;
+			 return false;
 		}
 	}
 	else
@@ -462,14 +465,14 @@ bool OMXAudioDecoder::init(string device,
         OMX_TRACE(error);
 		if(error != OMX_ErrorNone)
 		{
-			return false;
+			 return false;
 		}
 
 		error = decoderComponent.setState(OMX_StateExecuting);
         OMX_TRACE(error);
 		if(error != OMX_ErrorNone)
 		{
-			return false;
+			 return false;
 		}
 	}
 
@@ -477,7 +480,7 @@ bool OMXAudioDecoder::init(string device,
     OMX_TRACE(error);
 	if(error != OMX_ErrorNone)
 	{
-		return false;
+		 return false;
 	}
 
 	if(m_eEncoding == OMX_AUDIO_CodingPCM)
@@ -486,7 +489,7 @@ bool OMXAudioDecoder::init(string device,
 		if(omxBuffer == NULL)
 		{
 			ofLog(OF_LOG_ERROR, "OMXAudioDecoder::init - buffer error");
-			return false;
+			 return false;
 		}
 
 		omxBuffer->nOffset = 0;
@@ -494,7 +497,7 @@ bool OMXAudioDecoder::init(string device,
 		if(omxBuffer->nFilledLen > omxBuffer->nAllocLen)
 		{
 			ofLog(OF_LOG_ERROR, "OMXAudioDecoder::init - omxBuffer->nFilledLen > omxBuffer->nAllocLen");
-			return false;
+			 return false;
 		}
 		memset((unsigned char *)omxBuffer->pBuffer, 0x0, omxBuffer->nAllocLen);
 		memcpy((unsigned char *)omxBuffer->pBuffer, &waveFormat, omxBuffer->nFilledLen);
@@ -504,7 +507,7 @@ bool OMXAudioDecoder::init(string device,
         OMX_TRACE(error);
 		if (error != OMX_ErrorNone)
 		{
-			return false;
+			 return false;
 		}
 	}
 
@@ -533,41 +536,56 @@ bool OMXAudioDecoder::Deinitialize()
 	{
 		omxClock->stop();
 	}
-
-	decoderTunnel.flush();
+    
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    
+	/*error = decoderTunnel.flush();
+    OMX_TRACE(error);
 	if(!doPassthrough)
 	{
-		mixerTunnel.flush();
+		error = mixerTunnel.flush();
+        OMX_TRACE(error);
 	}
-	clockTunnel.flush();
-
-	clockTunnel.Deestablish(true);
+	error = clockTunnel.flush();
+    OMX_TRACE(error);
+    */
+	error = clockTunnel.Deestablish();
+    OMX_TRACE(error);
 	if(!doPassthrough)
 	{
-		mixerTunnel.Deestablish(true);
+		error = mixerTunnel.Deestablish();
+        OMX_TRACE(error);
 	}
-	decoderTunnel.Deestablish(true);
+	error = decoderTunnel.Deestablish();
+    OMX_TRACE(error);
 
-	decoderComponent.flushInput();
+	//error = decoderComponent.flushInput();
+    //OMX_TRACE(error);
 
-	renderComponent.Deinitialize();
+    bool didDeinit = false;
+
+	didDeinit = renderComponent.Deinitialize();
+    ofLogVerbose(__func__) << "didDeinit: " << didDeinit;
 	if(!doPassthrough)
 	{
-		m_omx_mixer.Deinitialize();
+		didDeinit = m_omx_mixer.Deinitialize();
+        ofLogVerbose(__func__) << "didDeinit: " << didDeinit;
 	}
-	decoderComponent.Deinitialize();
+	didDeinit = decoderComponent.Deinitialize();
+    ofLogVerbose(__func__) << "didDeinit: " << didDeinit;
 
 	isInitialized = false;
 	bytesPerSecond = 0;
 	bufferLength   = 0;
 
+    
 	if(!hasExternalClock && omxClock != NULL)
 	{
-		delete omxClock;
+        delete omxClock;
 		omxClock  = NULL;
 		hasExternalClock = false;
 	}
-
+    
 	clockComponent = NULL;
 	omxClock  = NULL;
 
@@ -687,7 +705,7 @@ bool OMXAudioDecoder::setCurrentVolume(long nVolume)
 {
 	if(!isInitialized || doPassthrough)
 	{
-		return false;
+		 return false;
 	}
 
 	currentVolume = nVolume;
@@ -751,7 +769,7 @@ bool OMXAudioDecoder::setCurrentVolume(long nVolume)
         OMX_TRACE(error);
 		if(error != OMX_ErrorNone)
 		{
-			return false;
+			 return false;
 		}
 	}
 	else
@@ -767,7 +785,7 @@ bool OMXAudioDecoder::setCurrentVolume(long nVolume)
         OMX_TRACE(error);
 		if(error != OMX_ErrorNone)
 		{
-			return false;
+			 return false;
 		}
 	}
 
@@ -1049,7 +1067,7 @@ bool OMXAudioDecoder::EOS()
 {
 	if(!isInitialized || doPause)
 	{
-		return false;
+		 return false;
 	}
 	unsigned int latency = GetAudioRenderingLatency();
 	return renderComponent.EOS() && latency <= 0;
@@ -1062,7 +1080,7 @@ bool OMXAudioDecoder::setClock(OMXClock *clock)
 {
 	if(omxClock != NULL)
 	{
-		return false;
+		 return false;
 	}
 
 	omxClock = clock;

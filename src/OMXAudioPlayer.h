@@ -100,6 +100,8 @@ class OMXAudioPlayer : public OMXThread
 		void setSpeed(int iSpeed);
 		bool getError()
 		{
-			return !hasErrors;
+            //TODO remove
+            return false;
+			//return !hasErrors;
 		};
 };

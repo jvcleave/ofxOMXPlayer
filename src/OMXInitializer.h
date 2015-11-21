@@ -25,6 +25,7 @@ public:
         if (isOpen)
         {
             OMX_Deinit();
+            avformat_network_deinit();
             isOpen = false;
         }
     }

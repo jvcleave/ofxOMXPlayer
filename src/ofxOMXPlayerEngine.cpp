@@ -27,8 +27,8 @@ ofxOMXPlayerEngine::ofxOMXPlayerEngine()
 	videoPlayer			= NULL;
 	eglPlayer			= NULL;
 	nonEglPlayer		= NULL;
-
 	audioPlayer			= NULL;
+    clock               = NULL;
 
 	listener			= NULL;
 
@@ -43,7 +43,8 @@ ofxOMXPlayerEngine::ofxOMXPlayerEngine()
 	isExiting = false;
 
 	eglImage = NULL;
-
+    
+    
 }
 
 ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
@@ -96,7 +97,10 @@ ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
 
 	omxReader.close();
 
-	//clock.deinit();
+    delete clock;
+    clock = NULL;
+    
+	//clock->deinit();
     
 	//ofLogVerbose(__func__) << "~ofxOMXPlayerEngine END";
 
@@ -119,9 +123,9 @@ void ofxOMXPlayerEngine::setNormalSpeed()
 {
     lock();
 	speedMultiplier = 1;
-	clock.setSpeed(normalPlaySpeed);
+	clock->setSpeed(normalPlaySpeed);
 	omxReader.setSpeed(normalPlaySpeed);
-	//ofLogVerbose(__func__) << "clock speed: " << clock.getSpeed();
+	//ofLogVerbose(__func__) << "clock speed: " << clock->getSpeed();
 	//ofLogVerbose(__func__) << "reader speed: " << omxReader.getSpeed();
     unlock();
 }
@@ -133,14 +137,14 @@ int ofxOMXPlayerEngine::increaseSpeed()
 	//ofLogVerbose(__func__) << " START";
 	doSeek = true;
 	
-	//ofLogVerbose(__func__) << "clock speed: " << clock.getSpeed();
+	//ofLogVerbose(__func__) << "clock speed: " << clock->getSpeed();
 	//ofLogVerbose(__func__) << "reader speed: " << omxReader.getSpeed();
     if(speedMultiplier+1 <=4)
     {
         speedMultiplier++;
         int newSpeed = normalPlaySpeed*speedMultiplier;
         
-        clock.setSpeed(newSpeed);
+        clock->setSpeed(newSpeed);
         omxReader.setSpeed(newSpeed);
         //ofLogVerbose(__func__) << "newSpeed: " << newSpeed;
     }
@@ -150,7 +154,7 @@ int ofxOMXPlayerEngine::increaseSpeed()
 
 void ofxOMXPlayerEngine::rewind()
 {
-	//ofLogVerbose(__func__) << "clock speed: " << clock.getSpeed();
+	//ofLogVerbose(__func__) << "clock speed: " << clock->getSpeed();
 	//ofLogVerbose(__func__) << "reader speed: " << omxReader.getSpeed();
 	if(speedMultiplier-1 == 0)
 	{
@@ -168,7 +172,7 @@ void ofxOMXPlayerEngine::rewind()
 	}
 	int newSpeed = normalPlaySpeed*speedMultiplier;
 
-	clock.setSpeed(newSpeed);
+	clock->setSpeed(newSpeed);
 	omxReader.setSpeed(newSpeed);
 	//ofLogVerbose(__func__) << "newSpeed: " << newSpeed;
 
@@ -254,8 +258,14 @@ bool ofxOMXPlayerEngine::setup(ofxOMXPlayerSettings& settings)
             //ofLogVerbose(__func__) << "SET videoWidth: "	<< videoWidth;
             //ofLogVerbose(__func__) << "SET videoHeight: "	<< videoHeight;
             //ofLogVerbose(__func__) << "videoStreamInfo.nb_frames " <<videoStreamInfo.nb_frames;
+            if(clock)
+            {
+                delete clock;
+                clock = NULL;
+            }
+            clock = new OMXClock();
             
-			if(clock.init(hasVideo, hasAudio))
+			if(clock->init(hasVideo, hasAudio))
 			{
 				//ofLogVerbose(__func__) << "clock Init PASS";
 				return true;
@@ -311,7 +321,7 @@ bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
 		{
 			eglPlayer = new VideoPlayerTextured();
 		}
-		didVideoOpen = eglPlayer->open(videoStreamInfo, &clock, eglImage);
+		didVideoOpen = eglPlayer->open(videoStreamInfo, clock, eglImage);
 		videoPlayer = (VideoPlayerBase*)eglPlayer;
 	}
 	else
@@ -328,7 +338,7 @@ bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
 		displayRect = omxPlayerSettings.displayRect;
 		nonEglPlayer->setDisplayRect(displayRect);
 		
-		didVideoOpen = nonEglPlayer->open(videoStreamInfo, &clock, deinterlace, hdmi_clock_sync, display_aspect);
+		didVideoOpen = nonEglPlayer->open(videoStreamInfo, clock, deinterlace, hdmi_clock_sync, display_aspect);
 		videoPlayer = (VideoPlayerBase*)nonEglPlayer;
 		
 
@@ -344,7 +354,7 @@ bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
 			deviceString = "omx:local";
 		}
 		audioPlayer = new OMXAudioPlayer();
-		didAudioOpen = audioPlayer->open(audioStreamInfo, &clock, &omxReader, deviceString);
+		didAudioOpen = audioPlayer->open(audioStreamInfo, clock, &omxReader, deviceString);
 		if (didAudioOpen)
 		{
 			//ofLogVerbose(__func__) << " AUDIO PLAYER OPEN PASS";
@@ -386,8 +396,8 @@ bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
                 ofLogError(__func__) << "COULD NOT SEEK TO " << startTimeInSeconds;
             }
         }
-		clock.OMXStateExecute();
-		clock.start(startpts);
+		clock->OMXStateExecute();
+		clock->start(startpts);
 
 		ofLogNotice(__func__) << "Opened video PASS";
 		Create();
@@ -484,7 +494,7 @@ void ofxOMXPlayerEngine::process()
 			}
 			else
 			{
-				clock.sleep(10);
+				clock->sleep(10);
 				continue;
 			}
 
@@ -515,8 +525,8 @@ void ofxOMXPlayerEngine::process()
 		{
 			if(audioPlayer->getError())
 			{
-				ofLogError(__func__) << "audio player error.";
-				hasAudio = false;
+				//ofLogError(__func__) << "audio player error.";
+				//hasAudio = false;
 			}
 		}
 
@@ -529,7 +539,7 @@ void ofxOMXPlayerEngine::process()
 			}
 			else
 			{
-				clock.sleep(10);
+				clock->sleep(10);
 			}
 			
 		}
@@ -541,7 +551,7 @@ void ofxOMXPlayerEngine::process()
 			}
 			else
 			{
-				clock.sleep(10);
+				clock->sleep(10);
 			}
 		}
 		else
@@ -551,7 +561,7 @@ void ofxOMXPlayerEngine::process()
 				omxReader.freePacket(packet);
 				packet = NULL;
 			}else {
-				clock.sleep(10);
+				clock->sleep(10);
 			}
 
 		}
@@ -576,12 +586,12 @@ void ofxOMXPlayerEngine::setPaused(bool doPause)
 	if(doPause)
 	{
 
-		clock.pause();
+		clock->pause();
 	}
 	else
 	{
 
-		clock.resume();
+		clock->resume();
 	}
 
 }
@@ -633,7 +643,7 @@ double ofxOMXPlayerEngine::getMediaTime()
 	double mediaTime = 0.0;
 	if(isPlaying())
 	{
-		mediaTime =  clock.getMediaTime();
+		mediaTime =  clock->getMediaTime();
 	}
 
 	return mediaTime;
@@ -641,7 +651,7 @@ double ofxOMXPlayerEngine::getMediaTime()
 
 bool ofxOMXPlayerEngine::isPaused()
 {
-	return clock.isPaused();
+	return clock->isPaused();
 }
 
 
@@ -651,7 +661,7 @@ void ofxOMXPlayerEngine::stepFrameForward()
 	{
 		setPaused(true);
 	}
-	clock.step(1);
+	clock->step(1);
 }
 
 

@@ -27,7 +27,47 @@ VideoDecoderBase::VideoDecoderBase()
 
 VideoDecoderBase::~VideoDecoderBase()
 {
+    SingleLock lock (m_critSection);
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    error = clockTunnel.Deestablish();
+    OMX_TRACE(error);
+    
+    error = decoderTunnel.Deestablish();
+    OMX_TRACE(error);
+    
+    error = schedulerTunnel.Deestablish();
+    OMX_TRACE(error);
+    
+    bool didDeinit = false;
+    
+    didDeinit = schedulerComponent.Deinitialize(__func__); 
+    ofLogVerbose(__func__) << "didDeinit: " << didDeinit;
+    
+    didDeinit = decoderComponent.Deinitialize(__func__); 
+    ofLogVerbose(__func__) << "didDeinit: " << didDeinit;
 
+    
+    didDeinit = renderComponent.Deinitialize(__func__); 
+    ofLogVerbose(__func__) << "didDeinit: " << didDeinit;
+
+    
+    omxClock          = NULL;
+    clockComponent = NULL;
+    isOpen       = false;
+
+}
+
+#if 0
+VideoDecoderBase::~VideoDecoderBase()
+{
+
+    
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    
+    error = clockTunnel.Deestablish();
+    OMX_TRACE(error);
+    error = decoderTunnel.Deestablish();
+    OMX_TRACE(error);
 	//ofLogVerbose(__func__) << " START ---------";
 	//return;
 	//TODO fix this?
@@ -39,19 +79,18 @@ VideoDecoderBase::~VideoDecoderBase()
 		clockTunnel.flush();
 		schedulerTunnel.flush();
 
-		clockTunnel.Deestablish();
-		decoderTunnel.Deestablish();
+		
 		/*if(doDeinterlace)
 		 m_omx_tunnel_image_fx.Deestablish();*/
 		schedulerTunnel.Deestablish();
 
 		decoderComponent.flushInput();
 
-		schedulerComponent.Deinitialize(true);
+		schedulerComponent.Deinitialize(__func__);
 		/*if(doDeinterlace)
 		 m_omx_image_fx.Deinitialize();*/
-		decoderComponent.Deinitialize(true);
-		renderComponent.Deinitialize(true);
+		decoderComponent.Deinitialize(__func__);
+		renderComponent.Deinitialize(__func__);
 
 		isOpen       = false;
 
@@ -78,7 +117,7 @@ VideoDecoderBase::~VideoDecoderBase()
 
 	//ofLogVerbose(__func__) << "END ---------";
 }
-
+#endif
 bool VideoDecoderBase::NaluFormatStartCodes(enum AVCodecID codec, uint8_t *in_extradata, int in_extrasize)
 {
 	switch(codec)

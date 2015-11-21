@@ -26,10 +26,9 @@ Component::Component()
     m_input_buffer_size = 0;
 	
 	doFlushInput         = false;
-	doFlushOutput        = false;
 
-	CustomDecoderFillBufferDoneHandler = NULL;
-	CustomDecoderEmptyBufferDoneHandler = NULL;
+	CustomFillBufferDoneHandler = NULL;
+	CustomEmptyBufferDoneHandler = NULL;
 
 	m_eos                 = false;
 
@@ -50,7 +49,7 @@ Component::Component()
 
 Component::~Component()
 {
-	Deinitialize();
+	Deinitialize(__func__);
 
 	pthread_mutex_destroy(&m_omx_input_mutex);
 	pthread_mutex_destroy(&m_omx_output_mutex);
@@ -159,24 +158,24 @@ void Component::flushAll()
 
 void Component::flushInput()
 {
-	
+	assert(!handle);
 	lock();
 
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	error = OMX_SendCommand(handle, OMX_CommandFlush, inputPort, NULL);
-    OMX_TRACE(error);
+    OMX_TRACE(error, getName());
 	
 	unlock();
 }
 
 void Component::flushOutput()
 {
-
+    assert(!handle);
 	lock();
 
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	error = OMX_SendCommand(handle, OMX_CommandFlush, outputPort, NULL);
-	OMX_TRACE(error);
+	OMX_TRACE(error, getName());
     
 
 	unlock();
@@ -339,7 +338,6 @@ OMX_ERRORTYPE Component::allocOutputBuffers()
         outputBuffersAvailable.push(buffer);
 	}
 
-	doFlushOutput = false;
 
 	return error;
 }
@@ -596,13 +594,26 @@ OMX_ERRORTYPE Component::setState(OMX_STATETYPE state)
 	}
 	else
 	{
-		error = waitForCommand(OMX_CommandStateSet, state);
+        error = waitForCommand(OMX_CommandStateSet, state);
         OMX_TRACE(error);
-		if(error == OMX_ErrorSameState)
-		{
-			unlock();
-			return OMX_ErrorNone;
-		}
+        if(error == OMX_ErrorSameState)
+        {
+            unlock();
+            return error;
+        }
+       
+		if(componentName == "OMX.broadcom.audio_mixer")
+        {
+            error = OMX_ErrorNone;
+            unlock();
+            return error;
+        }
+        /*if(error == OMX_ErrorPortUnpopulated)
+        {
+            ofLogError(__func__) << componentName <<  " threw OMX_ErrorPortUnpopulated"; 
+            unlock();
+            return error;
+        }*/
 	}
 
 	unlock();
@@ -769,9 +780,9 @@ bool Component::init( std::string& component_name, OMX_INDEXTYPE index)
 
 	componentName = component_name;
 
-	callbacks.EventHandler    = &Component::DecoderEventHandlerCallback;
-	callbacks.EmptyBufferDone = &Component::DecoderEmptyBufferDoneCallback;
-	callbacks.FillBufferDone  = &Component::DecoderFillBufferDoneCallback;
+	callbacks.EventHandler    = &Component::EventHandlerCallback;
+	callbacks.EmptyBufferDone = &Component::EmptyBufferDoneCallback;
+	callbacks.FillBufferDone  = &Component::FillBufferDoneCallback;
 
 	// Get video component handle setting up callbacks, component is in loaded state on return.
 	OMX_ERRORTYPE error = OMX_GetHandle(&handle, (char*)component_name.c_str(), this, &callbacks);
@@ -779,10 +790,11 @@ bool Component::init( std::string& component_name, OMX_INDEXTYPE index)
     
 	if (error != OMX_ErrorNone)
 	{
-		Deinitialize();
+        ofLogVerbose(__func__) << componentName << " FAIL ";
+		Deinitialize(__func__);
 		return false;
 	}
-    ofLogVerbose(__func__) << componentName << " PASS ";
+    
     
 	OMX_PORT_PARAM_TYPE port_param;
 	OMX_INIT_STRUCTURE(port_param);
@@ -800,8 +812,8 @@ bool Component::init( std::string& component_name, OMX_INDEXTYPE index)
 
 	if(componentName == "OMX.broadcom.audio_mixer")
 	{
-		inputPort  = port_param.nStartPortNumber + 1;
-		outputPort = port_param.nStartPortNumber;
+		inputPort  = 232;
+		outputPort = 231;
 	}
 
 	if (outputPort > port_param.nStartPortNumber+port_param.nPorts-1)
@@ -811,29 +823,105 @@ bool Component::init( std::string& component_name, OMX_INDEXTYPE index)
 
 
 	doExit = false;
-	doFlushInput   = false;
-	doFlushOutput  = false;
+	//doFlushInput   = false;
 
 	return true;
 }
 
-bool Component::Deinitialize(bool doFlush)//doFlush default: true
+OMX_ERRORTYPE Component::freeInputBuffers()
 {
+    assert(!handle);
+    
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    
+    if(inputBuffers.empty())
+    {
+        return OMX_ErrorNone;
+    }
+    
+    //m_flush_input = true;
+    
+    pthread_mutex_lock(&m_omx_input_mutex);
+    pthread_cond_broadcast(&m_input_buffer_cond);
+    
+    error = disablePort(inputPort);
+    OMX_TRACE(error);
+    
+    for (size_t i = 0; i < inputBuffers.size(); i++)
+    {
+        error = OMX_FreeBuffer(handle, inputPort, inputBuffers[i]);
+        OMX_TRACE(error);
+    }
+    
+    inputBuffers.clear();
+
+    //error =  waitForCommand(OMX_CommandPortDisable, inputPort);
+    //OMX_TRACE(error);
+    
+    while (!inputBuffersAvailable.empty())
+    {
+        inputBuffersAvailable.pop();
+    }
+    
+    pthread_mutex_unlock(&m_omx_input_mutex);
+    
+    return error;
+}
+
+OMX_ERRORTYPE Component::freeOutputBuffers()
+{
+    assert(!handle);
+    
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    
+    if(outputBuffers.empty())
+    {
+        return OMX_ErrorNone;
+    }
+    
+    pthread_mutex_lock(&m_omx_output_mutex);
+    pthread_cond_broadcast(&m_output_buffer_cond);
+    
+    error = disablePort(outputPort);
+    OMX_TRACE(error);
+    
+    for (size_t i = 0; i < outputBuffers.size(); i++)
+    {        
+        error = OMX_FreeBuffer(handle, outputPort, outputBuffers[i]);
+        OMX_TRACE(error);
+    }
+    outputBuffers.clear();
+    
+    //error =  waitForCommand(OMX_CommandPortDisable, outputPort);
+    //OMX_TRACE(error);
+    
+    
+    while (!outputBuffersAvailable.empty())
+    {
+        outputBuffersAvailable.pop();
+    }
+    
+    pthread_mutex_unlock(&m_omx_output_mutex);
+    
+    return error;
+}
+
+
+bool Component::Deinitialize(string caller)
+{
+    ofLogVerbose(__func__) << componentName;
 	doExit = true;
 
-	doFlushInput   = true;
-	doFlushOutput  = true;
+	//doFlushInput   = true;
 
 	if(handle)
 	{
-		if(doFlush)
-		{
-			flushAll();
-		}
+		
+        flushAll();
+		
 
-
-		//FreeOutputBuffers(true);
-		//FreeInputBuffers(true);
+        freeOutputBuffers();
+		freeInputBuffers();
 
 		if(getState() == OMX_StateExecuting)
 		{
@@ -855,101 +943,160 @@ bool Component::Deinitialize(bool doFlush)//doFlush default: true
 
 
 		handle = NULL;
-	}
+	}else
+    {
+        ofLogError(__func__) << "NO HANDLE! caller: " << caller;
+    }
 
 	inputPort    = 0;
 	outputPort   = 0;
-	componentName = "";
+	//componentName = "";
 
-	CustomDecoderFillBufferDoneHandler = NULL;
-	CustomDecoderEmptyBufferDoneHandler = NULL;
+	CustomFillBufferDoneHandler = NULL;
+	CustomEmptyBufferDoneHandler = NULL;
 
 
 
 	return true;
 }
 
-// DecoderEventHandler -- OMX event callback
-OMX_ERRORTYPE Component::DecoderEventHandlerCallback(
-    OMX_HANDLETYPE hComponent,
-    OMX_PTR pAppData,
-    OMX_EVENTTYPE eEvent,
-    OMX_U32 nData1,
-    OMX_U32 nData2,
-    OMX_PTR pEventData)
+//All events callback
+OMX_ERRORTYPE Component::EventHandlerCallback(OMX_HANDLETYPE hComponent,
+                                              OMX_PTR pAppData,
+                                              OMX_EVENTTYPE event,
+                                              OMX_U32 nData1,
+                                              OMX_U32 nData2,
+                                              OMX_PTR pEventData)
 {
-	if(!pAppData)
-	{
-		return OMX_ErrorNone;
-	}
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    if(!pAppData)
+    {
+        return error;
+    }
 
-	if (eEvent == OMX_EventPortSettingsChanged )
-	{
-		//ofLogVerbose(__func__) << "OMX_EventPortSettingsChanged at ofGetElapsedTimeMillis: " << ofGetElapsedTimeMillis();
-	}
 	Component *component = static_cast<Component*>(pAppData);
-	return component->DecoderEventHandler(hComponent, pAppData, eEvent, nData1, nData2, pEventData);
+    component->addEvent(event, nData1, nData2);
+    bool debugEvents = false;
+    
+    if(debugEvents)
+    {
+        for (int i=0; i<OMX_Maps::getInstance().eventTypes.size(); i++) 
+        {
+            ofLogVerbose() << component->getName() << OMX_Maps::getInstance().eventTypes[event];
+        } 
+    }
+    bool resourceError = false;
+    if(event == OMX_EventError)
+    {
+        OMX_TRACE((OMX_ERRORTYPE) nData1);
+        switch((OMX_S32)nData1)
+        {
+            case OMX_ErrorInsufficientResources:
+            case OMX_ErrorStreamCorrupt:
+            {
+                resourceError = true;
+                break;
+            }
+        }
+    }
+    if(resourceError)
+    {
+        pthread_cond_broadcast(&component->m_output_buffer_cond);
+        pthread_cond_broadcast(&component->m_input_buffer_cond);
+        pthread_cond_broadcast(&component->m_omx_event_cond); 
+    }
+    
+    if (event == OMX_EventBufferFlag)
+    {
+        if(nData2 & OMX_BUFFERFLAG_EOS)
+        {
+            
+            pthread_mutex_lock(&component->eos_mutex);
+            component->m_eos = true;
+            pthread_mutex_unlock(&component->eos_mutex);
+        }
+        
+    }
+	return error;
 }
 
-// DecoderEmptyBufferDone -- OMXCore input buffer has been emptied
-OMX_ERRORTYPE Component::DecoderEmptyBufferDoneCallback(
-    OMX_HANDLETYPE hComponent,
-    OMX_PTR pAppData,
-    OMX_BUFFERHEADERTYPE* pBuffer)
+//Input buffer has been emptied
+OMX_ERRORTYPE Component::EmptyBufferDoneCallback(OMX_HANDLETYPE hComponent,
+                                                 OMX_PTR pAppData,
+                                                 OMX_BUFFERHEADERTYPE* pBuffer)
 {
-	if(!pAppData)
-	{
-		return OMX_ErrorNone;
-	}
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    if(!pAppData)
+    {
+        return error;
+    }
 
 	Component *component = static_cast<Component*>(pAppData);
-	#ifdef OMX_DEBUG_EVENTS
-		ofLogVerbose(__func__) << component->getName();
-	#endif
-	if(component->CustomDecoderEmptyBufferDoneHandler)
-	{
-		OMX_ERRORTYPE error = (*(component->CustomDecoderEmptyBufferDoneHandler))(hComponent, pAppData, pBuffer);
-		if(error != OMX_ErrorNone)
-		{
-			return error;
-		}
-	}
 
-	return component->DecoderEmptyBufferDone( hComponent, pAppData, pBuffer);
+	if(component->CustomEmptyBufferDoneHandler)
+	{
+		error = (*(component->CustomEmptyBufferDoneHandler))(hComponent, pAppData, pBuffer);
+        
+	}else
+    {
+        pthread_mutex_lock(&component->m_omx_input_mutex);
+        component->inputBuffersAvailable.push(pBuffer);
+        
+        // this allows (all) blocked tasks to be awoken
+        pthread_cond_broadcast(&component->m_input_buffer_cond);
+        
+        pthread_mutex_unlock(&component->m_omx_input_mutex);
+    }
+
+    OMX_TRACE(error, component->getName());
+    return error;
 }
 
-// DecoderFillBufferDone -- OMXCore output buffer has been filled
-OMX_ERRORTYPE Component::DecoderFillBufferDoneCallback(
-    OMX_HANDLETYPE hComponent,
-    OMX_PTR pAppData,
-    OMX_BUFFERHEADERTYPE* pBuffer)
+//output buffer has been filled
+OMX_ERRORTYPE Component::FillBufferDoneCallback(OMX_HANDLETYPE hComponent,
+                                                OMX_PTR pAppData,
+                                                OMX_BUFFERHEADERTYPE* pBuffer)
 {
+    OMX_ERRORTYPE error = OMX_ErrorNone;
 	if(!pAppData)
 	{
-		return OMX_ErrorNone;
+		return error;
 	}
 
-	Component *component = static_cast<Component*>(pAppData);
-	if(component->CustomDecoderFillBufferDoneHandler)
+	Component* component = static_cast<Component*>(pAppData);
+	if(component->CustomFillBufferDoneHandler)
 	{
-		OMX_ERRORTYPE error = (*(component->CustomDecoderFillBufferDoneHandler))(hComponent, pAppData, pBuffer);
+		error = (*(component->CustomFillBufferDoneHandler))(hComponent, pAppData, pBuffer);
         OMX_TRACE(error);
-        if(error != OMX_ErrorNone)
-		{
-			return error;
-		}
-	}
-
-	return component->DecoderFillBufferDone(hComponent, pAppData, pBuffer);
+        
+	}else
+    {
+        pthread_mutex_lock(&component->m_omx_output_mutex);
+        component->outputBuffersAvailable.push(pBuffer);
+        
+        // this allows (all) blocked tasks to be awoken
+        pthread_cond_broadcast(&component->m_output_buffer_cond);
+        
+        pthread_mutex_unlock(&component->m_omx_output_mutex);
+        
+        sem_post(&component->m_omx_fill_buffer_done);
+    }
+    
+    if (error == OMX_ErrorIncorrectStateOperation) 
+    {
+        ofLogError() << component->getName() << "THREW OMX_ErrorIncorrectStateOperation";
+    }
+	return error;
 }
-
-OMX_ERRORTYPE Component::DecoderEmptyBufferDone(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_BUFFERHEADERTYPE* pBuffer)
+/*
+OMX_ERRORTYPE Component::EmptyBufferDone(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_BUFFERHEADERTYPE* pBuffer)
 {
-	if(!pAppData || doExit)
-	{
-		return OMX_ErrorNone;
-	}
 
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    if(!pAppData || doExit)
+    {
+        return error;
+    }
 	Component *component = static_cast<Component*>(pAppData);
 
 	pthread_mutex_lock(&component->m_omx_input_mutex);
@@ -963,7 +1110,7 @@ OMX_ERRORTYPE Component::DecoderEmptyBufferDone(OMX_HANDLETYPE hComponent, OMX_P
 	return OMX_ErrorNone;
 }
 
-OMX_ERRORTYPE Component::DecoderFillBufferDone(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_BUFFERHEADERTYPE* pBuffer)
+OMX_ERRORTYPE Component::FillBufferDone(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_BUFFERHEADERTYPE* pBuffer)
 {
 	if(!pAppData || doExit)
 	{
@@ -985,8 +1132,7 @@ OMX_ERRORTYPE Component::DecoderFillBufferDone(OMX_HANDLETYPE hComponent, OMX_PT
 	return OMX_ErrorNone;
 }
 
-// DecoderEmptyBufferDone -- OMXCore input buffer has been emptied
-OMX_ERRORTYPE Component::DecoderEventHandler(
+OMX_ERRORTYPE Component::EventHandler(
     OMX_HANDLETYPE hComponent,
     OMX_PTR pAppData,
     OMX_EVENTTYPE eEvent,
@@ -1018,3 +1164,4 @@ OMX_ERRORTYPE Component::DecoderEventHandler(
 	}
 	return OMX_ErrorNone;
 }
+ */
