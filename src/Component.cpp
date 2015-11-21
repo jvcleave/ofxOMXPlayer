@@ -48,7 +48,11 @@ Component::Component()
 
 Component::~Component()
 {
-	Deinitialize(__func__);
+    if(handle)
+    {
+       Deinitialize(__func__); 
+    }
+	
 
 	pthread_mutex_destroy(&m_omx_input_mutex);
 	pthread_mutex_destroy(&m_omx_output_mutex);
@@ -181,7 +185,7 @@ void Component::flushOutput()
 }
 
 // timeout in milliseconds
-OMX_BUFFERHEADERTYPE *Component::getInputBuffer(long timeout)
+OMX_BUFFERHEADERTYPE* Component::getInputBuffer(long timeout)
 {
 	assert(!handle);
     
@@ -212,7 +216,7 @@ OMX_BUFFERHEADERTYPE *Component::getInputBuffer(long timeout)
 	return omx_input_buffer;
 }
 
-OMX_BUFFERHEADERTYPE *Component::getOutputBuffer()
+OMX_BUFFERHEADERTYPE* Component::getOutputBuffer()
 {
     assert(!handle);
 	OMX_BUFFERHEADERTYPE *omx_output_buffer = NULL;
@@ -435,7 +439,7 @@ OMX_ERRORTYPE Component::addEvent(OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 
 // timeout in milliseconds
 OMX_ERRORTYPE Component::waitForEvent(OMX_EVENTTYPE eventType, long timeout)
 {
-    ofLogVerbose(__func__) << componentName << " eventType: " << eventType;
+    ofLogVerbose(__func__) << "\n" << componentName << "\n" << "eventType: " << OMX_Maps::getInstance().getEvent(eventType) << "\n";
 
 
 	pthread_mutex_lock(&event_mutex);
@@ -503,7 +507,7 @@ OMX_ERRORTYPE Component::waitForEvent(OMX_EVENTTYPE eventType, long timeout)
 OMX_ERRORTYPE Component::waitForCommand(OMX_COMMANDTYPE command, OMX_U32 nData2, long timeout) //timeout default = 2000
 {
 
-    ofLogVerbose(__func__) << componentName << " command " << OMX_Maps::getInstance().commandNames[command];
+    ofLogVerbose(__func__) << "\n" << componentName << " command " << OMX_Maps::getInstance().commandNames[command] << "\n";
     
 	pthread_mutex_lock(&event_mutex);
 	struct timespec endtime;
@@ -550,14 +554,14 @@ OMX_ERRORTYPE Component::waitForCommand(OMX_COMMANDTYPE command, OMX_U32 nData2,
 		int retcode = pthread_cond_timedwait(&m_omx_event_cond, &event_mutex, &endtime);
 		if (retcode != 0)
 		{
-			ofLog(OF_LOG_VERBOSE,
+			ofLog(OF_LOG_ERROR,
 			      "Component::waitForCommand %s		\n \
 				  wait timeout event.eEvent %s              \n \
-				  event.command 0x%08x						\n \
+				  event.command %s						\n \
 				  event.nData2 %d\n",
 			      componentName.c_str(),
 			      OMX_Maps::getInstance().getEvent(eEvent).c_str(),
-			      (int)command,
+			      OMX_Maps::getInstance().commandNames[command].c_str(),
 			      (int)nData2);
 			pthread_mutex_unlock(&event_mutex);
 			return OMX_ErrorMax;
@@ -574,8 +578,10 @@ OMX_ERRORTYPE Component::setState(OMX_STATETYPE state)
 	lock();
 
 	OMX_ERRORTYPE error = OMX_ErrorNone;
-	OMX_STATETYPE state_actual = OMX_StateMax;
-    ofLogVerbose(__func__) << componentName << " state requested: " << OMX_Maps::getInstance().omxStateNames[state];
+	OMX_STATETYPE state_actual;
+    error = OMX_GetState(handle, &state_actual);
+    OMX_TRACE(error);
+    
 	if(state == state_actual)
 	{
 		unlock();
@@ -914,21 +920,25 @@ bool Component::Deinitialize(string caller)
 
         freeOutputBuffers();
 		freeInputBuffers();
-
-		if(getState() == OMX_StateExecuting)
-		{
-			setState(OMX_StatePause);
-		}
-
-		if(getState() != OMX_StateIdle)
-		{
-			setState(OMX_StateIdle);
-		}
-
-		if(getState() != OMX_StateLoaded)
-		{
-			setState(OMX_StateLoaded);
-		}
+        
+        if(componentName != "OMX.broadcom.egl_render")
+        {
+            if(getState() == OMX_StateExecuting)
+            {
+                setState(OMX_StatePause);
+            }
+            
+            if(getState() != OMX_StateIdle)
+            {
+                setState(OMX_StateIdle);
+            }
+            
+            if(getState() != OMX_StateLoaded)
+            {
+                setState(OMX_StateLoaded);
+            }
+        }
+		
 
 		OMX_ERRORTYPE error = OMX_FreeHandle(handle);
         OMX_TRACE(error);

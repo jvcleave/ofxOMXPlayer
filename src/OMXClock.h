@@ -26,14 +26,15 @@ class OMXClock
 		pthread_mutex_t   m_lock;
 	private:
 		Component clockComponent;
+        void lock();
+        void unlock();
 	public:
 		OMXClock();
 		~OMXClock();
-		void lock();
-		void unlock();
+
 		bool init(bool has_video, bool has_audio);
-		void deinit();
-		bool isPaused()
+
+        bool isPaused()
 		{
 			return pauseState;
 		};
@@ -42,7 +43,7 @@ class OMXClock
 		bool step(int steps = 1);
 		bool reset();
 		double getMediaTime();
-		bool getMediaTime(double pts);
+		bool setMediaTime(double pts);
 		bool pause();
 		bool resume();
 		bool setSpeed(int speed, bool doResume = false);
@@ -51,9 +52,7 @@ class OMXClock
 			return currentSpeed;
 		};
 		Component* getComponent();
-		bool OMXStateExecute();
-		void setToIdleState();
-		bool doHDMIClockSync();
+		bool enableHDMISync();
 		int64_t getAbsoluteClock();
 		void sleep(unsigned int dwMilliSeconds);
 };

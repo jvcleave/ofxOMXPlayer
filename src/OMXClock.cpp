@@ -17,8 +17,7 @@ OMXClock::OMXClock()
 
 OMXClock::~OMXClock()
 {
-	deinit();
-
+    clockComponent.Deinitialize(__func__);
 	pthread_mutex_destroy(&m_lock);
 }
 
@@ -58,7 +57,7 @@ bool OMXClock::init(bool has_video, bool has_audio)
 	{
 		refClock.eClock = OMX_TIME_RefClockVideo;
 	}
-
+    
 	error = clockComponent.setConfig(OMX_IndexConfigTimeActiveRefClock, &refClock);
     OMX_TRACE(error);
 	if(error != OMX_ErrorNone)
@@ -69,71 +68,6 @@ bool OMXClock::init(bool has_video, bool has_audio)
 	return true;
 }
 
-void OMXClock::deinit()
-{
-	if(clockComponent.getHandle() == NULL)
-	{
-		ofLogError(__func__) << "NO CLOCK YET";
-		return;
-	}
-
-	clockComponent.Deinitialize();
-}
-
-bool OMXClock::OMXStateExecute()
-{
-	if(clockComponent.getHandle() == NULL)
-	{
-		ofLogError(__func__) << "NO CLOCK YET";
-		return false;
-	}
-
-	lock();
-
-	if(clockComponent.getState() != OMX_StateExecuting)
-	{
-		OMX_ERRORTYPE error = OMX_ErrorNone;
-		error = clockComponent.setState(OMX_StateExecuting);
-        OMX_TRACE(error);
-		if (error != OMX_ErrorNone)
-		{
-			unlock();
-			return false;
-		}
-	}
-
-	unlock();
-
-	return true;
-}
-
-void OMXClock::setToIdleState()
-{
-	if(clockComponent.getHandle() == NULL)
-	{
-		ofLogError(__func__) << "NO CLOCK YET";
-		return;
-	}
-
-	lock();
-	OMX_ERRORTYPE error = OMX_ErrorNone;
-
-	if(clockComponent.getState() == OMX_StateExecuting)
-	{
-		error = clockComponent.setState(OMX_StatePause);
-        OMX_TRACE(error);
-
-	}
-
-	if(clockComponent.getState() != OMX_StateIdle)
-	{
-		error = clockComponent.setState(OMX_StateIdle);
-        OMX_TRACE(error);
-
-	}
-
-	unlock();
-}
 
 Component* OMXClock::getComponent()
 {
@@ -187,8 +121,18 @@ bool OMXClock::start(double pts)
 	}
 
 	lock();
-    
-	OMX_ERRORTYPE error = OMX_ErrorNone;
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    if(clockComponent.getState() != OMX_StateExecuting)
+    {
+        
+        error = clockComponent.setState(OMX_StateExecuting);
+        OMX_TRACE(error);
+        if (error != OMX_ErrorNone)
+        {
+            unlock();
+            return false;
+        }
+    };
 	OMX_TIME_CONFIG_CLOCKSTATETYPE clock;
 	OMX_INIT_STRUCTURE(clock);
 
@@ -290,7 +234,7 @@ double OMXClock::getMediaTime()
 
 // Set the media time, so calls to get media time use the updated value,
 // useful after a seek so mediatime is updated immediately (rather than waiting for first decoded packet)
-bool OMXClock::getMediaTime(double pts)
+bool OMXClock::setMediaTime(double pts)
 {
 	if(clockComponent.getHandle() == NULL)
 	{
@@ -448,7 +392,7 @@ bool OMXClock::setSpeed(int speed, bool doResume /* = false */)
 	return true;
 }
 
-bool OMXClock::doHDMIClockSync()
+bool OMXClock::enableHDMISync()
 {
 	if(clockComponent.getHandle() == NULL)
 	{

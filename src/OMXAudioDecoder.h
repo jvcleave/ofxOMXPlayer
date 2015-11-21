@@ -110,11 +110,11 @@ class OMXAudioDecoder
 						bool boostOnDownmix);
 
 		
-
+        bool deinit();
 		unsigned int addPackets(void* data, unsigned int len);
 		unsigned int addPackets(void* data, unsigned int len, double dts, double pts);
 		unsigned int GetSpace();
-		bool Deinitialize();
+		
 		bool pause();
 		bool Stop();
 		bool resume();
@@ -175,7 +175,7 @@ class OMXAudioDecoder
 
 	protected:
 		Component renderComponent;
-		Component m_omx_mixer;
+		Component mixerComponent;
 		Component decoderComponent;
 		Tunnel     clockTunnel;
 		Tunnel     mixerTunnel;

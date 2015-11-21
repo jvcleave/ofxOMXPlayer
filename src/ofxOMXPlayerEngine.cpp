@@ -100,11 +100,6 @@ ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
     delete clock;
     clock = NULL;
     
-	//clock->deinit();
-    
-	//ofLogVerbose(__func__) << "~ofxOMXPlayerEngine END";
-
-
 }
 
 void ofxOMXPlayerEngine::startExit()
@@ -396,7 +391,7 @@ bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
                 ofLogError(__func__) << "COULD NOT SEEK TO " << startTimeInSeconds;
             }
         }
-		clock->OMXStateExecute();
+		
 		clock->start(startpts);
 
 		ofLogNotice(__func__) << "Opened video PASS";
