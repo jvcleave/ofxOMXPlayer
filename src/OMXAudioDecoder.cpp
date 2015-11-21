@@ -101,7 +101,6 @@ OMXAudioDecoder::OMXAudioDecoder()
     doPause = false;
     canPause = false;
     currentVolume = 0;
-    doPassthrough = false;
     doNormalizeDownmix= true;
     bytesPerSecond = 0;
     bufferLength = 0;
@@ -134,11 +133,9 @@ OMXAudioDecoder::~OMXAudioDecoder()
 bool OMXAudioDecoder::init(string device, 
                     enum PCMChannels *channelMap,
                     OMXStreamInfo& hints, 
-                    OMXClock *clock, 
-                    EEncoded bPassthrough,
+                    OMXClock *clock,
                     bool boostOnDownmix)
 {
-	doPassthrough = false;
 
     setCodingType(CODEC_ID_PCM_S16LE);
 	if(hints.extrasize > 0 && hints.extradata != NULL)
@@ -164,14 +161,6 @@ bool OMXAudioDecoder::init(string device,
 		deviceuse = "local";
 	}
 
-    ofLogVerbose(__func__) << "PART 2";
-
-	doPassthrough = false;
-
-	/*if(bPassthrough != OMXAudioDecoder::ENCODED_NONE)
-	{
-		doPassthrough =true;
-	}*/
 
 	memset(&waveFormat, 0x0, sizeof(waveFormat));
 
@@ -202,7 +191,7 @@ bool OMXAudioDecoder::init(string device,
 	// set the input format, and get the channel layout so we know what we need to open
 	enum PCMChannels *outLayout = remapObject.SetInputFormat (iChannels, channelMap, uiBitsPerSample / 8, uiSamplesPerSec);;
 
-	if (!doPassthrough && channelMap && outLayout)
+	if (channelMap && outLayout)
 	{
 		/* setup output channel map */
 		numOutputChannels = 0;
@@ -333,28 +322,14 @@ bool OMXAudioDecoder::init(string device,
 		 return false;
 	}
 
-	if(!doPassthrough)
-	{
-		componentName = "OMX.broadcom.audio_mixer";
-		if(!m_omx_mixer.init(componentName, OMX_IndexParamAudioInit))
-		{
-            ofLogError(__func__) << "m_omx_mixer: FAIL";
-			 return false;
-		}
-	}
+    componentName = "OMX.broadcom.audio_mixer";
+    if(!m_omx_mixer.init(componentName, OMX_IndexParamAudioInit))
+    {
+        ofLogError(__func__) << "m_omx_mixer: FAIL";
+        return false;
+    }
 
-	if(doPassthrough)
-	{
-		OMX_CONFIG_BOOLEANTYPE boolType;
-		OMX_INIT_STRUCTURE(boolType);
-		boolType.bEnabled = OMX_TRUE;
-		error = decoderComponent.setParameter(OMX_IndexParamBrcmDecoderPassThrough, &boolType);
-        OMX_TRACE(error);
-		if(error != OMX_ErrorNone)
-		{
-			 return false;
-		}
-	}
+	
 
 	// set up the number/size of buffers
 	OMX_PARAM_PORTDEFINITIONTYPE port_param;
@@ -426,55 +401,35 @@ bool OMXAudioDecoder::init(string device,
 		 return false;
 	}
 
-	if(!doPassthrough)
-	{
-		decoderTunnel.init(&decoderComponent, decoderComponent.getOutputPort(), &m_omx_mixer, m_omx_mixer.getInputPort());
-		error = decoderTunnel.Establish(false);
-        OMX_TRACE(error);
-		if(error != OMX_ErrorNone)
-		{
-			 return false;
-		}
-
-		error = decoderComponent.setState(OMX_StateExecuting);
-        OMX_TRACE(error);
-		if(error != OMX_ErrorNone)
-		{
-			 return false;
-		}
-
-		mixerTunnel.init(&m_omx_mixer, m_omx_mixer.getOutputPort(), &renderComponent, renderComponent.getInputPort());
-		error = mixerTunnel.Establish(false);
-        OMX_TRACE(error);
-		if(error != OMX_ErrorNone)
-		{
-			 return false;
-		}
-
-		error = m_omx_mixer.setState(OMX_StateExecuting);
-        OMX_TRACE(error);
-		if(error != OMX_ErrorNone)
-		{
-			 return false;
-		}
-	}
-	else
-	{
-		decoderTunnel.init(&decoderComponent, decoderComponent.getOutputPort(), &renderComponent, renderComponent.getInputPort());
-		error = decoderTunnel.Establish(false);
-        OMX_TRACE(error);
-		if(error != OMX_ErrorNone)
-		{
-			 return false;
-		}
-
-		error = decoderComponent.setState(OMX_StateExecuting);
-        OMX_TRACE(error);
-		if(error != OMX_ErrorNone)
-		{
-			 return false;
-		}
-	}
+    decoderTunnel.init(&decoderComponent, decoderComponent.getOutputPort(), &m_omx_mixer, m_omx_mixer.getInputPort());
+    error = decoderTunnel.Establish(false);
+    OMX_TRACE(error);
+    if(error != OMX_ErrorNone)
+    {
+        return false;
+    }
+    
+    error = decoderComponent.setState(OMX_StateExecuting);
+    OMX_TRACE(error);
+    if(error != OMX_ErrorNone)
+    {
+        return false;
+    }
+    
+    mixerTunnel.init(&m_omx_mixer, m_omx_mixer.getOutputPort(), &renderComponent, renderComponent.getInputPort());
+    error = mixerTunnel.Establish(false);
+    OMX_TRACE(error);
+    if(error != OMX_ErrorNone)
+    {
+        return false;
+    }
+    
+    error = m_omx_mixer.setState(OMX_StateExecuting);
+    OMX_TRACE(error);
+    if(error != OMX_ErrorNone)
+    {
+        return false;
+    }
 
 	error = renderComponent.setState(OMX_StateExecuting);
     OMX_TRACE(error);
@@ -518,8 +473,8 @@ bool OMXAudioDecoder::init(string device,
 
 	setCurrentVolume(currentVolume);
 
-	ofLog(OF_LOG_VERBOSE, "OMXAudioDecoder::init Ouput bps %d samplerate %d channels %d device %s buffer size %d bytes per second %d passthrough %d",
-	      (int)pcm_output.nBitPerSample, (int)pcm_output.nSamplingRate, (int)pcm_output.nChannels, deviceuse.c_str(), bufferLength, bytesPerSecond, doPassthrough);
+	ofLog(OF_LOG_VERBOSE, "OMXAudioDecoder::init Ouptut bps %d samplerate %d channels %d device %s buffer size %d bytes per second %d",
+	      (int)pcm_output.nBitPerSample, (int)pcm_output.nSamplingRate, (int)pcm_output.nChannels, deviceuse.c_str(), bufferLength, bytesPerSecond);
 
 	return true;
 }
@@ -539,39 +494,22 @@ bool OMXAudioDecoder::Deinitialize()
     
     OMX_ERRORTYPE error = OMX_ErrorNone;
     
-	/*error = decoderTunnel.flush();
-    OMX_TRACE(error);
-	if(!doPassthrough)
-	{
-		error = mixerTunnel.flush();
-        OMX_TRACE(error);
-	}
-	error = clockTunnel.flush();
-    OMX_TRACE(error);
-    */
+
 	error = clockTunnel.Deestablish();
     OMX_TRACE(error);
-	if(!doPassthrough)
-	{
-		error = mixerTunnel.Deestablish();
-        OMX_TRACE(error);
-	}
+    error = mixerTunnel.Deestablish();
+    OMX_TRACE(error);
 	error = decoderTunnel.Deestablish();
     OMX_TRACE(error);
 
-	//error = decoderComponent.flushInput();
-    //OMX_TRACE(error);
 
     bool didDeinit = false;
 
-	didDeinit = renderComponent.Deinitialize();
+	didDeinit = renderComponent.Deinitialize(__func__);
     ofLogVerbose(__func__) << "didDeinit: " << didDeinit;
-	if(!doPassthrough)
-	{
-		didDeinit = m_omx_mixer.Deinitialize();
-        ofLogVerbose(__func__) << "didDeinit: " << didDeinit;
-	}
-	didDeinit = decoderComponent.Deinitialize();
+    didDeinit = m_omx_mixer.Deinitialize(__func__);
+    ofLogVerbose(__func__) << "didDeinit: " << didDeinit;
+	didDeinit = decoderComponent.Deinitialize(__func__);
     ofLogVerbose(__func__) << "didDeinit: " << didDeinit;
 
 	isInitialized = false;
@@ -614,10 +552,7 @@ void OMXAudioDecoder::flush()
 
 	decoderComponent.flushInput();
 	decoderTunnel.flush();
-	if(!doPassthrough)
-	{
-		mixerTunnel.flush();
-	}
+	mixerTunnel.flush();
 
 	//doSetStartTime  = true;
 	//isFirstFrame   = true;
@@ -703,7 +638,7 @@ void OMXAudioDecoder::mute(bool bMute)
 //***********************************************************************************************
 bool OMXAudioDecoder::setCurrentVolume(long nVolume)
 {
-	if(!isInitialized || doPassthrough)
+	if(!isInitialized)
 	{
 		 return false;
 	}
@@ -890,112 +825,39 @@ unsigned int OMXAudioDecoder::addPackets(void* data, unsigned int len, double dt
 			renderComponent.waitForEvent(OMX_EventPortSettingsChanged);
 
 			renderComponent.disablePort(renderComponent.getInputPort());
-			if(!doPassthrough)
-			{
-				m_omx_mixer.disablePort(m_omx_mixer.getOutputPort());
-				m_omx_mixer.disablePort(m_omx_mixer.getInputPort());
-			}
+            m_omx_mixer.disablePort(m_omx_mixer.getOutputPort());
+            m_omx_mixer.disablePort(m_omx_mixer.getInputPort());
 			decoderComponent.disablePort(decoderComponent.getOutputPort());
 
-			if(!doPassthrough)
-			{
-				/* setup mixer input */
-				pcm_input.nPortIndex      = m_omx_mixer.getInputPort();
-				error = m_omx_mixer.setParameter(OMX_IndexParamAudioPcm, &pcm_input);
-				OMX_TRACE(error);
-                
-				error = m_omx_mixer.getParameter(OMX_IndexParamAudioPcm, &pcm_input);
-				OMX_TRACE(error);
-
-				/* setup mixer output */
-				pcm_output.nPortIndex      = m_omx_mixer.getOutputPort();
-				error = m_omx_mixer.setParameter(OMX_IndexParamAudioPcm, &pcm_output);
-				OMX_TRACE(error);
-                
-				error = m_omx_mixer.getParameter(OMX_IndexParamAudioPcm, &pcm_output);
-				OMX_TRACE(error);
-                
-				pcm_output.nPortIndex      = renderComponent.getInputPort();
-				error = renderComponent.setParameter(OMX_IndexParamAudioPcm, &pcm_output);
-				OMX_TRACE(error);
-                
-				error = renderComponent.getParameter(OMX_IndexParamAudioPcm, &pcm_output);
-				OMX_TRACE(error);
-
-				printPCM(&pcm_input);
-				printPCM(&pcm_output);
-			}
-			else
-			{
-				pcm_output.nPortIndex      = decoderComponent.getOutputPort();
-				decoderComponent.getParameter(OMX_IndexParamAudioPcm, &pcm_output);
-				printPCM(&pcm_output);
-
-				OMX_AUDIO_PARAM_PORTFORMATTYPE formatType;
-				OMX_INIT_STRUCTURE(formatType);
-				formatType.nPortIndex = renderComponent.getInputPort();
-
-				error = renderComponent.getParameter(OMX_IndexParamAudioPortFormat, &formatType);
-				OMX_TRACE(error);
-
-				formatType.eEncoding = m_eEncoding;
-
-				error = renderComponent.setParameter(OMX_IndexParamAudioPortFormat, &formatType);
-				OMX_TRACE(error);
-
-				if(m_eEncoding == OMX_AUDIO_CodingDDP)
-				{
-					OMX_AUDIO_PARAM_DDPTYPE m_ddParam;
-					OMX_INIT_STRUCTURE(m_ddParam);
-
-					m_ddParam.nPortIndex      = renderComponent.getInputPort();
-
-					m_ddParam.nChannels       = numInputChannels; //(numInputChannels == 6) ? 8 : numInputChannels;
-					m_ddParam.nSampleRate     = sampleRate;
-					m_ddParam.eBitStreamId    = OMX_AUDIO_DDPBitStreamIdAC3;
-					m_ddParam.nBitRate        = 0;
-
-					for(unsigned int i = 0; i < OMX_MAX_CHANNELS; i++)
-					{
-						if(i >= m_ddParam.nChannels)
-						{
-							break;
-						}
-
-						m_ddParam.eChannelMapping[i] = OMXChannels[i];
-					}
-
-					renderComponent.setParameter(OMX_IndexParamAudioDdp, &m_ddParam);
-					renderComponent.getParameter(OMX_IndexParamAudioDdp, &m_ddParam);
-				}
-				else if(m_eEncoding == OMX_AUDIO_CodingDTS)
-				{
-					dtsParam.nPortIndex      = renderComponent.getInputPort();
-
-					dtsParam.nChannels       = numInputChannels; //(numInputChannels == 6) ? 8 : numInputChannels;
-					dtsParam.nBitRate        = 0;
-
-					for(unsigned int i = 0; i < OMX_MAX_CHANNELS; i++)
-					{
-						if(i >= dtsParam.nChannels)
-						{
-							break;
-						}
-
-						dtsParam.eChannelMapping[i] = OMXChannels[i];
-					}
-
-					renderComponent.setParameter(OMX_IndexParamAudioDts, &dtsParam);
-					renderComponent.getParameter(OMX_IndexParamAudioDts, &dtsParam);
-				}
-			}
+            /* setup mixer input */
+            pcm_input.nPortIndex      = m_omx_mixer.getInputPort();
+            error = m_omx_mixer.setParameter(OMX_IndexParamAudioPcm, &pcm_input);
+            OMX_TRACE(error);
+            
+            error = m_omx_mixer.getParameter(OMX_IndexParamAudioPcm, &pcm_input);
+            OMX_TRACE(error);
+            
+            /* setup mixer output */
+            pcm_output.nPortIndex      = m_omx_mixer.getOutputPort();
+            error = m_omx_mixer.setParameter(OMX_IndexParamAudioPcm, &pcm_output);
+            OMX_TRACE(error);
+            
+            error = m_omx_mixer.getParameter(OMX_IndexParamAudioPcm, &pcm_output);
+            OMX_TRACE(error);
+            
+            pcm_output.nPortIndex      = renderComponent.getInputPort();
+            error = renderComponent.setParameter(OMX_IndexParamAudioPcm, &pcm_output);
+            OMX_TRACE(error);
+            
+            error = renderComponent.getParameter(OMX_IndexParamAudioPcm, &pcm_output);
+            OMX_TRACE(error);
+            
+            printPCM(&pcm_input);
+            printPCM(&pcm_output);
 
 			renderComponent.enablePort(renderComponent.getInputPort());
-			if(!doPassthrough)
-			{
-				m_omx_mixer.enablePort(m_omx_mixer.getOutputPort());
-				m_omx_mixer.enablePort(m_omx_mixer.getInputPort());
-			}
+            m_omx_mixer.enablePort(m_omx_mixer.getOutputPort());
+            m_omx_mixer.enablePort(m_omx_mixer.getInputPort());
 			decoderComponent.enablePort(decoderComponent.getOutputPort());
 		}
 

@@ -21,8 +21,6 @@ VideoDecoderBase::VideoDecoderBase()
 	isFirstFrame       = true;
 	omxClock			= NULL;
 	clockComponent			= NULL;
-	//ofLogVerbose(__func__) << "VideoDecoderBase::CONSTRUCT";
-
 }
 
 VideoDecoderBase::~VideoDecoderBase()
@@ -50,74 +48,19 @@ VideoDecoderBase::~VideoDecoderBase()
     didDeinit = renderComponent.Deinitialize(__func__); 
     ofLogVerbose(__func__) << "didDeinit: " << didDeinit;
 
-    
+    if(extraData)
+    {
+        free(extraData);
+    }
+    extraData = NULL;
+
     omxClock          = NULL;
     clockComponent = NULL;
     isOpen       = false;
 
 }
 
-#if 0
-VideoDecoderBase::~VideoDecoderBase()
-{
 
-    
-    OMX_ERRORTYPE error = OMX_ErrorNone;
-    
-    error = clockTunnel.Deestablish();
-    OMX_TRACE(error);
-    error = decoderTunnel.Deestablish();
-    OMX_TRACE(error);
-	//ofLogVerbose(__func__) << " START ---------";
-	//return;
-	//TODO fix this?
-	try
-	{
-		decoderTunnel.flush();
-		/*if(doDeinterlace)
-		 m_omx_tunnel_image_fx.flush();*/
-		clockTunnel.flush();
-		schedulerTunnel.flush();
-
-		
-		/*if(doDeinterlace)
-		 m_omx_tunnel_image_fx.Deestablish();*/
-		schedulerTunnel.Deestablish();
-
-		decoderComponent.flushInput();
-
-		schedulerComponent.Deinitialize(__func__);
-		/*if(doDeinterlace)
-		 m_omx_image_fx.Deinitialize();*/
-		decoderComponent.Deinitialize(__func__);
-		renderComponent.Deinitialize(__func__);
-
-		isOpen       = false;
-
-		if(extraData)
-		{
-			free(extraData);
-		}
-		extraData = NULL;
-		extraSize = 0;
-
-		//doDeinterlace       = false;
-		isFirstFrame       = true;
-		doSetStartTime      = true;
-	}
-	catch (int e)
-	{
-		ofLogError(__func__) << "An exception occurred. Exception: " << e << '\n';
-	}
-	isOpen       = false;
-	//ofLogVerbose(__func__) << " END ---------";
-
-	//omxClock->stop();
-	//omxClock->setToIdleState();
-
-	//ofLogVerbose(__func__) << "END ---------";
-}
-#endif
 bool VideoDecoderBase::NaluFormatStartCodes(enum AVCodecID codec, uint8_t *in_extradata, int in_extrasize)
 {
 	switch(codec)

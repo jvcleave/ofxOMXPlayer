@@ -32,7 +32,6 @@ Component::Component()
 
 	m_eos                 = false;
 
-	doExit = false;
 
 	pthread_mutex_init(&m_omx_input_mutex, NULL);
 	pthread_mutex_init(&m_omx_output_mutex, NULL);
@@ -821,10 +820,6 @@ bool Component::init( std::string& component_name, OMX_INDEXTYPE index)
 		outputPort = port_param.nStartPortNumber+port_param.nPorts-1;
 	}
 
-
-	doExit = false;
-	//doFlushInput   = false;
-
 	return true;
 }
 
@@ -909,10 +904,7 @@ OMX_ERRORTYPE Component::freeOutputBuffers()
 
 bool Component::Deinitialize(string caller)
 {
-    ofLogVerbose(__func__) << componentName;
-	doExit = true;
-
-	//doFlushInput   = true;
+    ofLogVerbose(__func__) << componentName << " by caller: " << caller;
 
 	if(handle)
 	{
@@ -1084,84 +1076,7 @@ OMX_ERRORTYPE Component::FillBufferDoneCallback(OMX_HANDLETYPE hComponent,
     
     if (error == OMX_ErrorIncorrectStateOperation) 
     {
-        ofLogError() << component->getName() << "THREW OMX_ErrorIncorrectStateOperation";
+        ofLogError() << component->getName() << " THREW OMX_ErrorIncorrectStateOperation";
     }
 	return error;
 }
-/*
-OMX_ERRORTYPE Component::EmptyBufferDone(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_BUFFERHEADERTYPE* pBuffer)
-{
-
-    OMX_ERRORTYPE error = OMX_ErrorNone;
-    if(!pAppData || doExit)
-    {
-        return error;
-    }
-	Component *component = static_cast<Component*>(pAppData);
-
-	pthread_mutex_lock(&component->m_omx_input_mutex);
-	component->inputBuffersAvailable.push(pBuffer);
-
-	// this allows (all) blocked tasks to be awoken
-	pthread_cond_broadcast(&component->m_input_buffer_cond);
-
-	pthread_mutex_unlock(&component->m_omx_input_mutex);
-
-	return OMX_ErrorNone;
-}
-
-OMX_ERRORTYPE Component::FillBufferDone(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_BUFFERHEADERTYPE* pBuffer)
-{
-	if(!pAppData || doExit)
-	{
-		return OMX_ErrorNone;
-	}
-
-	Component *component = static_cast<Component*>(pAppData);
-
-	pthread_mutex_lock(&component->m_omx_output_mutex);
-	component->outputBuffersAvailable.push(pBuffer);
-
-	// this allows (all) blocked tasks to be awoken
-	pthread_cond_broadcast(&component->m_output_buffer_cond);
-
-	pthread_mutex_unlock(&component->m_omx_output_mutex);
-
-	sem_post(&component->m_omx_fill_buffer_done);
-
-	return OMX_ErrorNone;
-}
-
-OMX_ERRORTYPE Component::EventHandler(
-    OMX_HANDLETYPE hComponent,
-    OMX_PTR pAppData,
-    OMX_EVENTTYPE eEvent,
-    OMX_U32 nData1,
-    OMX_U32 nData2,
-    OMX_PTR pEventData)
-{
-	Component *component = static_cast<Component*>(pAppData);
-	addEvent(eEvent, nData1, nData2);
-	if (eEvent == OMX_EventBufferFlag)
-	{
-		if(nData2 & OMX_BUFFERFLAG_EOS)
-		{
-
-			pthread_mutex_lock(&component->eos_mutex);
-			component->m_eos = true;
-			pthread_mutex_unlock(&component->eos_mutex);
-		}
-		
-	}
-	else
-	{
-		if (eEvent == OMX_EventError)
-		{
-            OMX_TRACE((OMX_ERRORTYPE) nData1);
-			sem_post(&component->m_omx_fill_buffer_done);
-		}
-
-	}
-	return OMX_ErrorNone;
-}
- */

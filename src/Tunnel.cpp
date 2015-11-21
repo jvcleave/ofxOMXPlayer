@@ -103,33 +103,6 @@ OMX_ERRORTYPE Tunnel::Deestablish()
     error = OMX_SetupTunnel(sourceComponent->getHandle(), sourcePort, NULL, 0);
     OMX_TRACE(error, debugString);
     
-    /*
-    if(sourceComponent->getHandle())
-    {
-        //error = sourceComponent->disablePort(sourcePort); 
-        
-        
-        
-    }
-    if(destinationComponent->getHandle())
-    {
-        error = destinationComponent->disablePort(destinationPort);
-        OMX_TRACE(error, debugString);
-    }
-     
-    if(sourceComponent->getHandle())
-    {
-        error = OMX_SetupTunnel(sourceComponent->getHandle(), sourcePort, NULL, 0);
-        OMX_TRACE(error, debugString);
-    }
-    
-    if(destinationComponent->getHandle())
-    {
-        error = OMX_SetupTunnel(destinationComponent->getHandle(), destinationPort, NULL, 0);
-        OMX_TRACE(error, debugString);
-    }
-    */
-    
     unlock();
     isEstablished = false;
     return OMX_ErrorNone;

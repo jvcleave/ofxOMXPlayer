@@ -105,8 +105,8 @@ class OMXAudioDecoder
 		
 		bool init(string device,
 						enum PCMChannels *channelMap,
-		                OMXStreamInfo& hints, OMXClock *clock,
-						EEncoded bPassthrough,
+		                OMXStreamInfo& hints, 
+                        OMXClock *clock,
 						bool boostOnDownmix);
 
 		
@@ -149,7 +149,6 @@ class OMXAudioDecoder
 		bool          canPause;
 		long          currentVolume;
 		long          DRC;
-		bool          doPassthrough;
 		bool          doNormalizeDownmix;
 		unsigned int  bytesPerSecond;
 		unsigned int  bufferLength;

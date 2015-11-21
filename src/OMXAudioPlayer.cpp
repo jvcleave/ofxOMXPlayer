@@ -188,13 +188,10 @@ bool OMXAudioPlayer::decode(OMXPacket *pkt)
 	int channels = pkt->hints.channels;
 
 	/* 6 channel have to be mapped to 8 for PCM */
-	if(!m_passthrough)
-	{
-		if(channels == 6)
-		{
-			channels = 8;
-		}
-	}
+    if(channels == 6)
+    {
+        channels = 8;
+    }
 
 	unsigned int old_bitrate = omxStreamInfo.bitrate;
 	unsigned int new_bitrate = pkt->hints.bitrate;
@@ -244,42 +241,36 @@ bool OMXAudioPlayer::decode(OMXPacket *pkt)
 		uint8_t *data_dec = pkt->data;
 		int            data_len = pkt->size;
 
-		if(!m_passthrough)
-		{
-			while(data_len > 0)
-			{
-				int len = audioCodecOMX->decode((BYTE *)data_dec, data_len);
-				if( (len < 0) || (len >  data_len) )
-				{
-					audioCodecOMX->Reset();
-					break;
-				}
+        while(data_len > 0)
+        {
+            int len = audioCodecOMX->decode((BYTE *)data_dec, data_len);
+            if( (len < 0) || (len >  data_len) )
+            {
+                audioCodecOMX->Reset();
+                break;
+            }
+            
+            data_dec+= len;
+            data_len -= len;
+            
+            uint8_t *decoded;
+            int decoded_size = audioCodecOMX->GetData(&decoded);
+            
+            if(decoded_size <=0)
+            {
+                continue;
+            }
+            
+            int ret = 0;
+            
+            ret = decoder->addPackets(decoded, decoded_size, pkt->dts, pkt->pts);
+            
+            if(ret != decoded_size)
+            {
+                ofLogError(__func__) << "ret : " << ret << " NOT EQUAL TO " << decoded_size;
+            }
+        }
 
-				data_dec+= len;
-				data_len -= len;
-
-				uint8_t *decoded;
-				int decoded_size = audioCodecOMX->GetData(&decoded);
-
-				if(decoded_size <=0)
-				{
-					continue;
-				}
-
-				int ret = 0;
-
-				ret = decoder->addPackets(decoded, decoded_size, pkt->dts, pkt->pts);
-
-				if(ret != decoded_size)
-				{
-					ofLogError(__func__) << "ret : " << ret << " NOT EQUAL TO " << decoded_size;
-				}
-			}
-		}
-		else
-		{
-			decoder->addPackets(pkt->data, pkt->size, pkt->dts, pkt->pts);
-		}
 		return true;
 	}
 	else
@@ -417,31 +408,6 @@ void OMXAudioPlayer::closeCodec()
 	audioCodecOMX = NULL;
 }
 
-OMXAudioDecoder::EEncoded OMXAudioPlayer::processPassthrough(OMXStreamInfo hints)
-{
-    if(deviceName == "omx:local")
-    {
-        return OMXAudioDecoder::ENCODED_NONE;
-    }
-    
-    OMXAudioDecoder::EEncoded passthrough = OMXAudioDecoder::ENCODED_NONE;
-    
-    if(hints.codec == CODEC_ID_AC3)
-    {
-        passthrough = OMXAudioDecoder::ENCODED_IEC61937_AC3;
-    }
-    if(hints.codec == CODEC_ID_EAC3)
-    {
-        passthrough = OMXAudioDecoder::ENCODED_IEC61937_EAC3;
-    }
-    if(hints.codec == CODEC_ID_DTS)
-    {
-        passthrough = OMXAudioDecoder::ENCODED_IEC61937_DTS;
-    }
-    
-    return passthrough;
-
-}
 
 bool OMXAudioPlayer::openDecoder()
 {
@@ -452,10 +418,7 @@ bool OMXAudioPlayer::openDecoder()
 	decoder = new OMXAudioDecoder();
 	decoder->setClock(omxClock);
 
-	if(doPassthrough)
-	{
-		m_passthrough = processPassthrough(omxStreamInfo);
-	}
+
 
 	
 
@@ -468,8 +431,7 @@ bool OMXAudioPlayer::openDecoder()
 		bAudioRenderOpen = decoder->init(name, 
                                            channelMap,
                                            omxStreamInfo, 
-                                           omxClock,
-                                           m_passthrough, 
+                                           omxClock, 
                                            doBoostOnDownmix);
 	
 	

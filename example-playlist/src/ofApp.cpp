@@ -34,6 +34,8 @@ unsigned long long totalAmountSkipped =0;
 //--------------------------------------------------------------
 void ofApp::setup()
 {
+    ofSetLogLevel(OF_LOG_VERBOSE);
+    
 	ofBackground(ofColor::black);
 	consoleListener.setup(this);	
 	

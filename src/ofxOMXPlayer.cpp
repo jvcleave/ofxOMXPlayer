@@ -9,7 +9,6 @@
 
 ofxOMXPlayer::ofxOMXPlayer()
 {
-    ofSetLogLevel(OF_LOG_VERBOSE);
     
     OMXInitializer::getInstance().init();
     signals.push_back(SIGINT);
@@ -660,7 +659,6 @@ void ofxOMXPlayer::close()
 ofxOMXPlayer::~ofxOMXPlayer()
 {
 	close();
-    // OMX_Deinit();
 }
 
 
