@@ -5,14 +5,14 @@
 
 class ofApp : public ofBaseApp{
 
-	public:
+public:
 
-		void setup();
-		void update();
-		void draw();
-			
-        ofRPIVideoPlayer rpiVideoPlayer;
-    
-	
+    void setup();
+    void update();
+    void draw();
+        
+    ofRPIVideoPlayer rpiVideoPlayer;
+
+    ofTexture pixelOutput;
 };
 

@@ -24,6 +24,7 @@ ofRPIVideoPlayer::ofRPIVideoPlayer()
     isPlayingState = false;
     hasNewFrame = true;
     openState = false;
+    doPixels = false;
 }
 
 bool ofRPIVideoPlayer::load(string name)
@@ -37,6 +38,16 @@ bool ofRPIVideoPlayer::load(string name)
     openState = omxPlayer.setup(settings);
     update();
     return openState;
+}
+
+void ofRPIVideoPlayer::enablePixels()
+{
+    doPixels = true;
+}
+
+void ofRPIVideoPlayer::disablePixels()
+{
+    doPixels = false;
 }
 
 void ofRPIVideoPlayer::loadAsync(string name)
@@ -118,6 +129,10 @@ void ofRPIVideoPlayer::update()
     openState = omxPlayer.getIsOpen();
     isPlayingState = !pauseState;
     hasNewFrame = omxPlayer.isFrameNew();
+    if (doPixels && hasNewFrame) 
+    {
+        omxPlayer.updatePixels();
+    }
     
 }
 

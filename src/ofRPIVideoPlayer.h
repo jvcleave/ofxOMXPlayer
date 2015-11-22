@@ -28,6 +28,9 @@ public:
     ofxOMXPlayer omxPlayer;
 	void draw(float x, float y, float w, float h);
     void draw(float x, float y);
+    void enablePixels();
+    void disablePixels();
+    bool pixelsEnabled() { return doPixels; };
 protected:
     ofPixels pixels;
     ofPixelFormat pixelFormat;
@@ -37,5 +40,6 @@ protected:
     bool openState;
     bool isPlayingState;
     bool hasNewFrame;
+    bool doPixels;
 };
 

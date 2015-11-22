@@ -1,5 +1,8 @@
 #include "ofApp.h"
 
+
+bool doPixels = false;
+
 //--------------------------------------------------------------
 void ofApp::setup()
 {
@@ -10,9 +13,14 @@ void ofApp::setup()
 	string videoPath = ofToDataPath("../../../video/Timecoded_Big_bunny_1.mov", true);
 	
 
+    bool doPixels = false; //slow
+    if(doPixels)
+    {
+       rpiVideoPlayer.enablePixels(); 
+    }
     
     rpiVideoPlayer.load(videoPath);
-	
+    
 }
 
 
@@ -20,7 +28,19 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::update()
 {
-    rpiVideoPlayer.update();	
+    rpiVideoPlayer.update();
+    
+    if(rpiVideoPlayer.pixelsEnabled())
+    {
+        if (!pixelOutput.isAllocated()) 
+        {
+            pixelOutput.allocate(rpiVideoPlayer.getWidth(), rpiVideoPlayer.getHeight(), GL_RGBA);
+        } 
+        pixelOutput.loadData(rpiVideoPlayer.getPixels(), rpiVideoPlayer.getWidth(), rpiVideoPlayer.getHeight(), GL_RGBA);
+    }
+    
+    
+    
 }
 
 
@@ -32,6 +52,11 @@ void ofApp::draw()
     int scaledHeight	= rpiVideoPlayer.getHeight()/4;
     int scaledWidth		= rpiVideoPlayer.getWidth()/4;
     rpiVideoPlayer.draw(ofGetWidth()-scaledWidth, ofGetHeight()-scaledHeight, scaledWidth, scaledHeight);
+    
+    if(rpiVideoPlayer.pixelsEnabled())
+    {
+        pixelOutput.draw(20, 20, rpiVideoPlayer.getWidth()/2, rpiVideoPlayer.getHeight()/2);
+    }
                         
     ofDrawBitmapStringHighlight(rpiVideoPlayer.omxPlayer.getInfo(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
 
