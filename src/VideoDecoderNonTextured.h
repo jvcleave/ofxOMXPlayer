@@ -3,6 +3,7 @@
 #include "ofMain.h"
 
 #include "VideoDecoderBase.h"
+#include "OMXDisplay.h"
 
 
 class VideoDecoderNonTextured : public VideoDecoderBase
@@ -32,6 +33,8 @@ public:
     bool doDeinterlace;
     bool doHDMISync;
     ofRectangle displayRect;
+    
+    OMXDisplay display;
     
 private:
     int frameCounter;

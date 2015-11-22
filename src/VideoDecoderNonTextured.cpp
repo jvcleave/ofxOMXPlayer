@@ -18,14 +18,14 @@ VideoDecoderNonTextured::~VideoDecoderNonTextured()
 	//ofLogVerbose(__func__) << "removed update listener";
 }
 
-bool VideoDecoderNonTextured::open(OMXStreamInfo& hints, OMXClock *clock, float display_aspect, bool deinterlace, bool hdmi_clock_sync)
+bool VideoDecoderNonTextured::open(OMXStreamInfo& streamInfo, OMXClock *clock, float display_aspect, bool deinterlace, bool hdmi_clock_sync)
 {
 	OMX_ERRORTYPE error   = OMX_ErrorNone;
 
 	m_codingType            = OMX_VIDEO_CodingUnused;
 
-	videoWidth  = hints.width;
-	videoHeight = hints.height;
+	videoWidth  = streamInfo.width;
+	videoHeight = streamInfo.height;
 
 	doHDMISync = hdmi_clock_sync;
 
@@ -34,14 +34,14 @@ bool VideoDecoderNonTextured::open(OMXStreamInfo& hints, OMXClock *clock, float 
 		return false;
 	}
 
-	if(hints.extrasize > 0 && hints.extradata != NULL)
+	if(streamInfo.extrasize > 0 && streamInfo.extradata != NULL)
 	{
-		extraSize = hints.extrasize;
+		extraSize = streamInfo.extrasize;
 		extraData = (uint8_t *)malloc(extraSize);
-		memcpy(extraData, hints.extradata, hints.extrasize);
+		memcpy(extraData, streamInfo.extradata, streamInfo.extrasize);
 	}
 
-	processCodec(hints);
+	processCodec(streamInfo);
 
 	if(deinterlace)
 	{
@@ -121,9 +121,9 @@ bool VideoDecoderNonTextured::open(OMXStreamInfo& hints, OMXClock *clock, float 
 	formatType.nPortIndex = decoderComponent.getInputPort();
 	formatType.eCompressionFormat = m_codingType;
 
-	if (hints.fpsscale > 0 && hints.fpsrate > 0)
+	if (streamInfo.fpsscale > 0 && streamInfo.fpsrate > 0)
 	{
-		formatType.xFramerate = (long long)(1<<16)*hints.fpsrate / hints.fpsscale;
+		formatType.xFramerate = (long long)(1<<16)*streamInfo.fpsrate / streamInfo.fpsscale;
 	}
 	else
 	{
@@ -187,7 +187,7 @@ bool VideoDecoderNonTextured::open(OMXStreamInfo& hints, OMXClock *clock, float 
     if(error != OMX_ErrorNone) return false;
 
 
-	if(NaluFormatStartCodes(hints.codec, extraData, extraSize))
+	if(NaluFormatStartCodes(streamInfo.codec, extraData, extraSize))
 	{
 		OMX_NALSTREAMFORMATTYPE nalStreamFormat;
 		OMX_INIT_STRUCTURE(nalStreamFormat);
@@ -285,6 +285,8 @@ bool VideoDecoderNonTextured::open(OMXStreamInfo& hints, OMXClock *clock, float 
 	OMX_INIT_STRUCTURE(configDisplay);
 	configDisplay.nPortIndex = renderComponent.getInputPort();
 	
+    display.setup(renderComponent, streamInfo, displayRect);
+#if 0
 	//we provided a rectangle but returned early as we were not ready
 	if (displayRect.getWidth()>0) 
 	{
@@ -292,8 +294,14 @@ bool VideoDecoderNonTextured::open(OMXStreamInfo& hints, OMXClock *clock, float 
 	}else 
 	{
 		
-		float fAspect = (float)hints.aspect / (float)videoWidth * (float)videoHeight;
-		float par = hints.aspect ? fAspect/display_aspect : 0.0f;
+		float fAspect = (float)streamInfo.aspect / (float)videoWidth * (float)videoHeight;
+        
+        float par = 0.0f;
+        if(streamInfo.aspect)
+        {
+            par = fAspect/display_aspect;
+        }
+		//float par = streamInfo.aspect ? fAspect/display_aspect : 0.0f;
 		// only set aspect when we have a aspect and display doesn't match the aspect
 		bool doDisplayChange = true;
 		if(doDisplayChange)
@@ -307,7 +315,7 @@ bool VideoDecoderNonTextured::open(OMXStreamInfo& hints, OMXClock *clock, float 
 				configDisplay.set      = OMX_DISPLAY_SET_PIXEL;
 				configDisplay.pixel_x  = aspect.num;
 				configDisplay.pixel_y  = aspect.den;
-				ofLog(OF_LOG_VERBOSE, "Aspect : num %d den %d aspect %f pixel aspect %f\n", aspect.num, aspect.den, hints.aspect, par);
+				ofLog(OF_LOG_VERBOSE, "Aspect : num %d den %d aspect %f pixel aspect %f\n", aspect.num, aspect.den, streamInfo.aspect, par);
 				error = renderComponent.setConfig(OMX_IndexConfigDisplayRegion, &configDisplay);
                 OMX_TRACE(error);
                 if(error != OMX_ErrorNone) return false;
@@ -315,7 +323,7 @@ bool VideoDecoderNonTextured::open(OMXStreamInfo& hints, OMXClock *clock, float 
 			
 		}
 	}
-
+#endif
 	ofLog(OF_LOG_VERBOSE,
 	      "%s::%s - decoder_component(0x%p), input_port(0x%x), output_port(0x%x) deinterlace %d hdmiclocksync %d\n",
 	      "VideoDecoderNonTextured", __func__, decoderComponent.getHandle(), decoderComponent.getInputPort(), decoderComponent.getOutputPort(),
@@ -466,6 +474,7 @@ bool VideoDecoderNonTextured::decode(uint8_t *pData, int iSize, double pts)
 
 void VideoDecoderNonTextured::configureDisplay()
 {
+#if 0
 	OMX_CONFIG_DISPLAYREGIONTYPE configDisplay;
 	OMX_INIT_STRUCTURE(configDisplay);
 	configDisplay.nPortIndex = renderComponent.getInputPort();
@@ -484,6 +493,7 @@ void VideoDecoderNonTextured::configureDisplay()
 	configDisplay.dest_rect.height    = displayRect.getHeight();
 	
 	renderComponent.setConfig(OMX_IndexConfigDisplayRegion, &configDisplay);
+#endif
 }
 void VideoDecoderNonTextured::setDisplayRect(ofRectangle& rectangle)
 {
