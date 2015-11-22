@@ -417,22 +417,14 @@ bool OMXAudioPlayer::openDecoder()
 
 	decoder = new OMXAudioDecoder();
 	decoder->setClock(omxClock);
-
-
-
-	
-
-	//if(m_passthrough || doHardwareDecode)
-	//{
-		
-        stringstream ss;
-        ss << deviceName.substr(4);
-        string name = ss.str();
-		bAudioRenderOpen = decoder->init(name, 
-                                           channelMap,
-                                           omxStreamInfo, 
-                                           omxClock, 
-                                           doBoostOnDownmix);
+    stringstream ss;
+    ss << deviceName.substr(4); 
+    string name = ss.str();
+    bAudioRenderOpen = decoder->init(name, 
+                                       channelMap,
+                                       omxStreamInfo, 
+                                       omxClock, 
+                                       doBoostOnDownmix);
 	
 	
 	codecName = omxReader->getCodecName(OMXSTREAM_AUDIO);
@@ -446,16 +438,17 @@ bool OMXAudioPlayer::openDecoder()
 	}
 	else
 	{
-		if(m_passthrough)
-		{
-			ofLog(OF_LOG_VERBOSE, "USING PASSTHROUGH, Audio codec %s channels %d samplerate %d bitspersample %d\n",
-			      codecName.c_str(), 2, omxStreamInfo.samplerate, omxStreamInfo.bitspersample);
-		}
-		else
-		{
-			ofLog(OF_LOG_VERBOSE, "PASSTHROUGH DISABLED, Audio codec %s channels %d samplerate %d bitspersample %d\n",
-			      codecName.c_str(), omxStreamInfo.channels, omxStreamInfo.samplerate, omxStreamInfo.bitspersample);
-		}
+        stringstream info;
+        info << "\n";
+        info << "Audio codec : " << codecName;
+        info << "\n";
+        info << "Audio channels : " << 2;
+        info << "\n";
+        info << "Audio samplerate : " << omxStreamInfo.samplerate;
+        info << "\n";
+        info << "Audio bitspersample : " << omxStreamInfo.bitspersample;
+        info << "\n";
+        ofLogVerbose(__func__) << info.str();
 	}
 	return true;
 }

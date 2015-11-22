@@ -277,10 +277,10 @@ bool OMXAudioDecoder::init(string device,
 	pcm_input.ePCMMode              = OMX_AUDIO_PCMModeLinear;
 	pcm_input.nChannels             = numInputChannels;
 	pcm_input.nSamplingRate         = uiSamplesPerSec;
-
+#ifdef DEBUG_AUDIO
 	printPCM(&pcm_input);
 	printPCM(&pcm_output);
-
+#endif
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	std::string componentName = "";
 
@@ -825,7 +825,7 @@ unsigned int OMXAudioDecoder::addPackets(void* data, unsigned int len, double dt
 		if(isFirstFrame)
 		{
 			isFirstFrame = false;
-			renderComponent.waitForEvent(OMX_EventPortSettingsChanged);
+			renderComponent.waitForEvent(OMX_EventPortSettingsChanged, 200);
 
 			renderComponent.disablePort(renderComponent.getInputPort());
             mixerComponent.disablePort(mixerComponent.getOutputPort());
@@ -854,10 +854,10 @@ unsigned int OMXAudioDecoder::addPackets(void* data, unsigned int len, double dt
             
             error = renderComponent.getParameter(OMX_IndexParamAudioPcm, &pcm_output);
             OMX_TRACE(error);
-            
+#ifdef DEBUG_AUDIO
             printPCM(&pcm_input);
             printPCM(&pcm_output);
-
+#endif
 			renderComponent.enablePort(renderComponent.getInputPort());
             mixerComponent.enablePort(mixerComponent.getOutputPort());
             mixerComponent.enablePort(mixerComponent.getInputPort());
@@ -980,31 +980,31 @@ void OMXAudioDecoder::printChannels(OMX_AUDIO_CHANNELTYPE eChannelMapping[])
 		switch(eChannelMapping[i])
 		{
 			case OMX_AUDIO_ChannelLF:
-				//ofLogVerbose(__func__) << "OMX_AUDIO_ChannelLF";
+				ofLogVerbose(__func__) << "OMX_AUDIO_ChannelLF";
 				break;
 			case OMX_AUDIO_ChannelRF:
-				//ofLogVerbose(__func__) << "OMX_AUDIO_ChannelRF";
+				ofLogVerbose(__func__) << "OMX_AUDIO_ChannelRF";
 				break;
 			case OMX_AUDIO_ChannelCF:
-				//ofLogVerbose(__func__) << "OMX_AUDIO_ChannelCF";
+				ofLogVerbose(__func__) << "OMX_AUDIO_ChannelCF";
 				break;
 			case OMX_AUDIO_ChannelLS:
-				//ofLogVerbose(__func__) << "OMX_AUDIO_ChannelLS";
+				ofLogVerbose(__func__) << "OMX_AUDIO_ChannelLS";
 				break;
 			case OMX_AUDIO_ChannelRS:
-				//ofLogVerbose(__func__) << "OMX_AUDIO_ChannelRS";
+				ofLogVerbose(__func__) << "OMX_AUDIO_ChannelRS";
 				break;
 			case OMX_AUDIO_ChannelLFE:
-				//ofLogVerbose(__func__) << "OMX_AUDIO_ChannelLFE";
+				ofLogVerbose(__func__) << "OMX_AUDIO_ChannelLFE";
 				break;
 			case OMX_AUDIO_ChannelCS:
-				//ofLogVerbose(__func__) << "OMX_AUDIO_ChannelCS";
+				ofLogVerbose(__func__) << "OMX_AUDIO_ChannelCS";
 				break;
 			case OMX_AUDIO_ChannelLR:
-				//ofLogVerbose(__func__) << "OMX_AUDIO_ChannelLR";
+				ofLogVerbose(__func__) << "OMX_AUDIO_ChannelLR";
 				break;
 			case OMX_AUDIO_ChannelRR:
-				//ofLogVerbose(__func__) << "OMX_AUDIO_ChannelRR";
+				ofLogVerbose(__func__) << "OMX_AUDIO_ChannelRR";
 				break;
 			case OMX_AUDIO_ChannelNone:
 			case OMX_AUDIO_ChannelKhronosExtensions:
@@ -1029,9 +1029,9 @@ void OMXAudioDecoder::printPCM(OMX_AUDIO_PARAM_PCMMODETYPE *pcm)
 	info << "ePCMMode: "		<< pcm->ePCMMode				<< "\n";
 	info << "nChannels: "		<< (int)pcm->nChannels			<< "\n";
 	info << "nSamplingRate: "	<< (int)pcm->nSamplingRate		<< "\n";
-	//ofLogVerbose(__func__) << "\n" <<  info.str();
+	ofLogVerbose(__func__) << "\n" <<  info.str();
 
-	//printChannels(pcm->eChannelMapping);
+	printChannels(pcm->eChannelMapping);
 }
 
 

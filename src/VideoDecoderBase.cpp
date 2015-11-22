@@ -39,15 +39,15 @@ VideoDecoderBase::~VideoDecoderBase()
     bool didDeinit = false;
     
     didDeinit = schedulerComponent.Deinitialize(__func__); 
-    if(!didDeinit); ofLogError(__func__) << "didDeinit failed on schedulerComponent";
+    if(!didDeinit) ofLogError(__func__) << "didDeinit failed on schedulerComponent";
 
     
     didDeinit = decoderComponent.Deinitialize(__func__); 
-    if(!didDeinit); ofLogError(__func__) << "didDeinit failed on decoderComponent";
+    if(!didDeinit) ofLogError(__func__) << "didDeinit failed on decoderComponent";
 
     
     didDeinit = renderComponent.Deinitialize(__func__); 
-    if(!didDeinit); ofLogError(__func__) << "didDeinit failed on renderComponent";
+    if(!didDeinit) ofLogError(__func__) << "didDeinit failed on renderComponent";
 
     if(extraData)
     {

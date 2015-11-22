@@ -121,18 +121,14 @@ bool OMXClock::start(double pts)
 	}
 
 	lock();
-    OMX_ERRORTYPE error = OMX_ErrorNone;
-    if(clockComponent.getState() != OMX_StateExecuting)
+    
+    OMX_ERRORTYPE error = clockComponent.setState(OMX_StateExecuting);
+    OMX_TRACE(error);
+    if (error != OMX_ErrorNone)
     {
-        
-        error = clockComponent.setState(OMX_StateExecuting);
-        OMX_TRACE(error);
-        if (error != OMX_ErrorNone)
-        {
-            unlock();
-            return false;
-        }
-    };
+        unlock();
+        return false;
+    }
 	OMX_TIME_CONFIG_CLOCKSTATETYPE clock;
 	OMX_INIT_STRUCTURE(clock);
 

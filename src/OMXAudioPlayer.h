@@ -40,7 +40,6 @@ class OMXAudioPlayer : public OMXThread
 		std::string               deviceName;
 		bool                      doPassthrough;
 		bool                      doHardwareDecode;
-		OMXAudioDecoder::EEncoded  m_passthrough;
 		bool                      doBoostOnDownmix;
 		bool                      doAbort;
 		bool                      doFlush;

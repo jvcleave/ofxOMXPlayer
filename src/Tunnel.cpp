@@ -2,6 +2,8 @@
 
 #pragma mark Tunnel
 
+//#define DEBUG_TUNNELS
+
 Tunnel::Tunnel()
 {
     sourceComponentName = "UNDEFINED";
@@ -56,15 +58,9 @@ OMX_ERRORTYPE Tunnel::flush()
     }
     
     lock();
-    if(sourceComponent->getHandle())
-    {
-        sourceComponent->flushAll();
-    }
     
-    if(destinationComponent->getHandle())
-    {
-        destinationComponent->flushAll();
-    }
+    sourceComponent->flushAll();
+    destinationComponent->flushAll();
     
     unlock();
     return OMX_ErrorNone;
@@ -86,7 +82,7 @@ OMX_ERRORTYPE Tunnel::Deestablish()
     lock();
     OMX_ERRORTYPE error = OMX_ErrorNone;
     string debugString = sourceComponent->getName() + " : " + destinationComponent->getName();
-    if(sourceComponent->getHandle() && havePortSettingsChanged)
+    if(havePortSettingsChanged)
     {
         error = sourceComponent->waitForEvent(OMX_EventPortSettingsChanged);
         OMX_TRACE(error);
@@ -105,7 +101,7 @@ OMX_ERRORTYPE Tunnel::Deestablish()
     
     unlock();
     isEstablished = false;
-    return OMX_ErrorNone;
+    return error;
 }
 
 OMX_ERRORTYPE Tunnel::Establish(bool portSettingsChanged)
@@ -115,25 +111,23 @@ OMX_ERRORTYPE Tunnel::Establish(bool portSettingsChanged)
     OMX_ERRORTYPE error = OMX_ErrorNone;
     OMX_PARAM_U32TYPE param;
     OMX_INIT_STRUCTURE(param);
-    if(!sourceComponent || !destinationComponent)
+    if(!sourceComponent || !destinationComponent || !sourceComponent->getHandle() || !destinationComponent->getHandle())
     {
         unlock();
         return OMX_ErrorUndefined;
     }
     
-    if(sourceComponent->getState() == OMX_StateLoaded)
+    error = sourceComponent->setState(OMX_StateIdle);
+    OMX_TRACE(error);
+    if(error != OMX_ErrorNone)
     {
-        error = sourceComponent->setState(OMX_StateIdle);
-        OMX_TRACE(error);
-        if(error != OMX_ErrorNone)
-        {
-            unlock();
-            return error;
-        }
+        unlock();
+        return error;
     }
+#ifdef DEBUG_TUNNELS
     ofLogVerbose(__func__) << sourceComponent->getName() << " TUNNELING TO " << destinationComponent->getName();
     ofLogVerbose(__func__) << "portSettingsChanged: " << portSettingsChanged;
-    
+#endif
     if(portSettingsChanged)
     {
         error = sourceComponent->waitForEvent(OMX_EventPortSettingsChanged);
@@ -144,41 +138,53 @@ OMX_ERRORTYPE Tunnel::Establish(bool portSettingsChanged)
             return error;
         }
     }
-    if(sourceComponent->getHandle())
-    {
-        error = sourceComponent->disablePort(sourcePort);
-        OMX_TRACE(error);
-    } 
     
-    if(destinationComponent->getHandle())
-    {
-        error = destinationComponent->disablePort(destinationPort);
-        OMX_TRACE(error);
-    }
+    error = sourceComponent->disablePort(sourcePort);
+    OMX_TRACE(error);
     
-    if(sourceComponent->getHandle() && destinationComponent->getHandle())
+    
+    error = destinationComponent->disablePort(destinationPort);
+    OMX_TRACE(error);
+    
+    error = OMX_SetupTunnel(sourceComponent->getHandle(), sourcePort, destinationComponent->getHandle(), destinationPort);
+    OMX_TRACE(error);
+    if(error != OMX_ErrorNone)
     {
-        error = OMX_SetupTunnel(sourceComponent->getHandle(), sourcePort, destinationComponent->getHandle(), destinationPort);
-        OMX_TRACE(error);
-        if(error != OMX_ErrorNone)
-        {
-            unlock();
-            return error;
-        }
-        else
-        {
-            isEstablished =true;
-        }
+        unlock();
+        return error;
     }
     else
     {
+        isEstablished =true;
+    }
+    
+    error = sourceComponent->enablePort(sourcePort);
+    OMX_TRACE(error);
+    if(error != OMX_ErrorNone)
+    {
         unlock();
-        return OMX_ErrorUndefined;
+        return error;
     }
     
-    if(sourceComponent->getHandle())
+    error = destinationComponent->enablePort(destinationPort);
+    OMX_TRACE(error);
+    if(error != OMX_ErrorNone)
     {
-        error = sourceComponent->enablePort(sourcePort);
+        unlock();
+        return error;
+    }
+    
+    if(destinationComponent->getState() == OMX_StateLoaded)
+    {
+        //important to wait for audio
+        error = destinationComponent->waitForCommand(OMX_CommandPortEnable, destinationPort);
+        OMX_TRACE(error);
+        if(error != OMX_ErrorNone)
+        {
+            unlock();
+            return error;
+        }
+        error = destinationComponent->setState(OMX_StateIdle);
         OMX_TRACE(error);
         if(error != OMX_ErrorNone)
         {
@@ -187,47 +193,11 @@ OMX_ERRORTYPE Tunnel::Establish(bool portSettingsChanged)
         }
     }
     
-    if(destinationComponent->getHandle())
+    error = sourceComponent->waitForCommand(OMX_CommandPortEnable, sourcePort);
+    if(error != OMX_ErrorNone)
     {
-        error = destinationComponent->enablePort(destinationPort);
-        OMX_TRACE(error);
-        if(error != OMX_ErrorNone)
-        {
-            unlock();
-            return error;
-        }
-    }
-    
-    if(destinationComponent->getHandle())
-    {
-        if(destinationComponent->getState() == OMX_StateLoaded)
-        {
-            //important to wait for audio
-            error = destinationComponent->waitForCommand(OMX_CommandPortEnable, destinationPort);
-            OMX_TRACE(error);
-            if(error != OMX_ErrorNone)
-            {
-                unlock();
-                return error;
-            }
-            error = destinationComponent->setState(OMX_StateIdle);
-            OMX_TRACE(error);
-            if(error != OMX_ErrorNone)
-            {
-                unlock();
-                return error;
-            }
-        }
-    }
-    
-    if(sourceComponent->getHandle())
-    {
-        error = sourceComponent->waitForCommand(OMX_CommandPortEnable, sourcePort);
-        if(error != OMX_ErrorNone)
-        {
-            unlock();
-            return error;
-        }
+        unlock();
+        return error;
     }
     
     havePortSettingsChanged = portSettingsChanged;
