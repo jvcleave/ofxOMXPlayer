@@ -61,6 +61,9 @@ public:
     string      getInfo();
     void        close();
     
+    ofFbo           fbo;
+    ofTexture       texture;
+    unsigned char*  pixels;
 private:
     vector<int> signals;
     bool openEngine(int startTimeInSeconds = 0);
@@ -74,8 +77,7 @@ private:
     static void signal_handler(int signum);
     ofxOMXPlayerEngine* engine;
     
-    ofFbo           fbo;
-    ofTexture       texture;
+ 
     EGLImageKHR     eglImage;
     GLuint          textureID;
     EGLDisplay      display;
@@ -83,7 +85,7 @@ private:
     ofAppEGLWindow* appEGLWindow;
     int             videoWidth;
     int             videoHeight;
-    unsigned char*  pixels;
+    
     
     bool            hasNewFrame;
     int             prevFrame;

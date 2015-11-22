@@ -774,7 +774,7 @@ void logOMXError(OMX_ERRORTYPE error, string comments="", string functionName=""
 #define GET_OMX_TRACE_4TH_ARG(arg1, arg2, arg3, arg4, ...) arg4
 #define OMX_TRACE_MACRO_CHOOSER(...) GET_OMX_TRACE_4TH_ARG(__VA_ARGS__, OMX_TRACE_3_ARGS, OMX_TRACE_2_ARGS, OMX_TRACE_1_ARGS, )
 
-//#define ENABLE_OMX_TRACE 1
+#define ENABLE_OMX_TRACE 1
 
 #if defined (ENABLE_OMX_TRACE)
 //#warning enabling OMX_TRACE
