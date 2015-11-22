@@ -18,7 +18,7 @@ class VideoDecoderBase
 public:
     VideoDecoderBase();
     virtual ~VideoDecoderBase();
-    OMX_VIDEO_CODINGTYPE m_codingType;
+    OMX_VIDEO_CODINGTYPE omxCodingType;
     
     Tunnel clockTunnel;
     Tunnel schedulerTunnel;

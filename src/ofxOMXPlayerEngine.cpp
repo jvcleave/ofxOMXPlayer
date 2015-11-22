@@ -292,7 +292,7 @@ void ofxOMXPlayerEngine::setDisplayRect(float x, float y, float w, float h)
 	unlock();
 }
 
-void ofxOMXPlayerEngine::setDisplayRect(ofRectangle& rectangle)
+void ofxOMXPlayerEngine::setDisplayRect(ofRectangle& rectangle) 
 {
 	if (displayRect == rectangle) 
 	{
@@ -327,13 +327,12 @@ bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
 		}
 		bool deinterlace = false;
 		bool hdmi_clock_sync = true;
-		float display_aspect = 1.0; 
 		
 		//initially set this
 		displayRect = omxPlayerSettings.displayRect;
 		nonEglPlayer->setDisplayRect(displayRect);
 		
-		didVideoOpen = nonEglPlayer->open(videoStreamInfo, clock, deinterlace, hdmi_clock_sync, display_aspect);
+		didVideoOpen = nonEglPlayer->open(videoStreamInfo, clock, deinterlace, hdmi_clock_sync);
 		videoPlayer = (VideoPlayerBase*)nonEglPlayer;
 		
 

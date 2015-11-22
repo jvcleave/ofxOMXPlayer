@@ -30,7 +30,7 @@ public:
             configDisplay.set     = OMX_DISPLAY_SET_FULLSCREEN;
             configDisplay.fullscreen = OMX_FALSE;
             
-            error = renderComponent.setConfig(OMX_IndexConfigDisplayRegion, &configDisplay);
+            error = renderComponent.setConfig(OMX_IndexConfigDisplayRegion, &configDisplay); 
             OMX_TRACE(error);
             
             configDisplay.set     = OMX_DISPLAY_SET_DEST_RECT;
@@ -74,6 +74,36 @@ public:
         error = renderComponent.setConfig(OMX_IndexConfigDisplayRegion, &configDisplay);
         OMX_TRACE(error);
         return error;
+    }
+    
+    void setDisplayRect(ofRectangle& rectangle)
+    {
+        bool hasChanged = (displayRect != rectangle);
+        
+        if (hasChanged) 
+        {
+            displayRect = rectangle;
+        }
+        if (hasChanged) 
+        {
+            
+            OMX_CONFIG_DISPLAYREGIONTYPE configDisplay;
+            OMX_INIT_STRUCTURE(configDisplay);
+            configDisplay.nPortIndex = renderComponent.getInputPort();
+            
+            configDisplay.set     = OMX_DISPLAY_SET_FULLSCREEN;
+            configDisplay.fullscreen = OMX_FALSE;
+            
+            renderComponent.setConfig(OMX_IndexConfigDisplayRegion, &configDisplay);
+            
+            configDisplay.set     = OMX_DISPLAY_SET_DEST_RECT;
+            configDisplay.dest_rect.x_offset  = displayRect.x;
+            configDisplay.dest_rect.y_offset  = displayRect.y;
+            configDisplay.dest_rect.width     = displayRect.getWidth();
+            configDisplay.dest_rect.height    = displayRect.getHeight();
+            
+            renderComponent.setConfig(OMX_IndexConfigDisplayRegion, &configDisplay);
+        }	
     }
     
     Component renderComponent;

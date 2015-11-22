@@ -111,7 +111,7 @@ bool VideoDecoderTextured::open(OMXStreamInfo& hints, OMXClock *clock, EGLImageK
 	OMX_VIDEO_PARAM_PORTFORMATTYPE formatType;
 	OMX_INIT_STRUCTURE(formatType);
 	formatType.nPortIndex = decoderComponent.getInputPort();
-	formatType.eCompressionFormat = m_codingType;
+	formatType.eCompressionFormat = omxCodingType;
 
 	if (hints.fpsscale > 0 && hints.fpsrate > 0)
 	{

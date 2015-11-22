@@ -18,11 +18,11 @@ VideoDecoderNonTextured::~VideoDecoderNonTextured()
 	//ofLogVerbose(__func__) << "removed update listener";
 }
 
-bool VideoDecoderNonTextured::open(OMXStreamInfo& streamInfo, OMXClock *clock, float display_aspect, bool deinterlace, bool hdmi_clock_sync)
+bool VideoDecoderNonTextured::open(OMXStreamInfo& streamInfo, OMXClock *clock, bool deinterlace, bool hdmi_clock_sync)
 {
 	OMX_ERRORTYPE error   = OMX_ErrorNone;
 
-	m_codingType            = OMX_VIDEO_CodingUnused;
+	omxCodingType            = OMX_VIDEO_CodingUnused;
 
 	videoWidth  = streamInfo.width;
 	videoHeight = streamInfo.height;
@@ -74,7 +74,7 @@ bool VideoDecoderNonTextured::open(OMXStreamInfo& streamInfo, OMXClock *clock, f
 	if(doDeinterlace)
 	{
 		componentName = "OMX.broadcom.image_fx";
-		if(!m_omx_image_fx.init(componentName, OMX_IndexParamImageInit))
+		if(!imageFXComponent.init(componentName, OMX_IndexParamImageInit))
 		{
 			return false;
 		}
@@ -97,8 +97,8 @@ bool VideoDecoderNonTextured::open(OMXStreamInfo& streamInfo, OMXClock *clock, f
 
 	if(doDeinterlace)
 	{
-		decoderTunnel.init(&decoderComponent, decoderComponent.getOutputPort(), &m_omx_image_fx, m_omx_image_fx.getInputPort());
-		m_omx_tunnel_image_fx.init(&m_omx_image_fx, m_omx_image_fx.getOutputPort(), &schedulerComponent, schedulerComponent.getInputPort());
+		decoderTunnel.init(&decoderComponent, decoderComponent.getOutputPort(), &imageFXComponent, imageFXComponent.getInputPort());
+		imageFXTunnel.init(&imageFXComponent, imageFXComponent.getOutputPort(), &schedulerComponent, schedulerComponent.getInputPort());
 	}
 	else
 	{
@@ -119,7 +119,7 @@ bool VideoDecoderNonTextured::open(OMXStreamInfo& streamInfo, OMXClock *clock, f
 	OMX_VIDEO_PARAM_PORTFORMATTYPE formatType;
 	OMX_INIT_STRUCTURE(formatType);
 	formatType.nPortIndex = decoderComponent.getInputPort();
-	formatType.eCompressionFormat = m_codingType;
+	formatType.eCompressionFormat = omxCodingType;
 
 	if (streamInfo.fpsscale > 0 && streamInfo.fpsrate > 0)
 	{
@@ -236,25 +236,25 @@ bool VideoDecoderNonTextured::open(OMXStreamInfo& streamInfo, OMXClock *clock, f
 		OMX_CONFIG_IMAGEFILTERPARAMSTYPE image_filter;
 		OMX_INIT_STRUCTURE(image_filter);
 
-		image_filter.nPortIndex = m_omx_image_fx.getOutputPort();
+		image_filter.nPortIndex = imageFXComponent.getOutputPort();
 		image_filter.nNumParams = 1;
 		image_filter.nParams[0] = 3;
 		image_filter.eImageFilter = OMX_ImageFilterDeInterlaceAdvanced;
 
-		error = m_omx_image_fx.setConfig(OMX_IndexConfigCommonImageFilterParameters, &image_filter);
+		error = imageFXComponent.setConfig(OMX_IndexConfigCommonImageFilterParameters, &image_filter);
         OMX_TRACE(error);
         if(error != OMX_ErrorNone) return false;
 
-		error = m_omx_tunnel_image_fx.Establish(false);
+		error = imageFXTunnel.Establish(false);
         OMX_TRACE(error);
         if(error != OMX_ErrorNone) return false;
 
-		error = m_omx_image_fx.setState(OMX_StateExecuting);
+		error = imageFXComponent.setState(OMX_StateExecuting);
         OMX_TRACE(error);
         if(error != OMX_ErrorNone) return false;
 
-		m_omx_image_fx.disablePort(m_omx_image_fx.getInputPort());
-		m_omx_image_fx.disablePort(m_omx_image_fx.getOutputPort());
+		imageFXComponent.disablePort(imageFXComponent.getInputPort());
+		imageFXComponent.disablePort(imageFXComponent.getOutputPort());
 
 	}
 
@@ -281,49 +281,8 @@ bool VideoDecoderNonTextured::open(OMXStreamInfo& streamInfo, OMXClock *clock, f
 
 	isOpen           = true;
 	doSetStartTime      = true;
-	OMX_CONFIG_DISPLAYREGIONTYPE configDisplay;
-	OMX_INIT_STRUCTURE(configDisplay);
-	configDisplay.nPortIndex = renderComponent.getInputPort();
 	
-    display.setup(renderComponent, streamInfo, displayRect);
-#if 0
-	//we provided a rectangle but returned early as we were not ready
-	if (displayRect.getWidth()>0) 
-	{
-		configureDisplay();
-	}else 
-	{
-		
-		float fAspect = (float)streamInfo.aspect / (float)videoWidth * (float)videoHeight;
-        
-        float par = 0.0f;
-        if(streamInfo.aspect)
-        {
-            par = fAspect/display_aspect;
-        }
-		//float par = streamInfo.aspect ? fAspect/display_aspect : 0.0f;
-		// only set aspect when we have a aspect and display doesn't match the aspect
-		bool doDisplayChange = true;
-		if(doDisplayChange)
-		{
-			if(par != 0.0f && fabs(par - 1.0f) > 0.01f)
-			{
-				
-				
-				AVRational aspect;
-				aspect = av_d2q(par, 100);
-				configDisplay.set      = OMX_DISPLAY_SET_PIXEL;
-				configDisplay.pixel_x  = aspect.num;
-				configDisplay.pixel_y  = aspect.den;
-				ofLog(OF_LOG_VERBOSE, "Aspect : num %d den %d aspect %f pixel aspect %f\n", aspect.num, aspect.den, streamInfo.aspect, par);
-				error = renderComponent.setConfig(OMX_IndexConfigDisplayRegion, &configDisplay);
-                OMX_TRACE(error);
-                if(error != OMX_ErrorNone) return false;
-			}
-			
-		}
-	}
-#endif
+	display.setup(renderComponent, streamInfo, displayRect);
 	ofLog(OF_LOG_VERBOSE,
 	      "%s::%s - decoder_component(0x%p), input_port(0x%x), output_port(0x%x) deinterlace %d hdmiclocksync %d\n",
 	      "VideoDecoderNonTextured", __func__, decoderComponent.getHandle(), decoderComponent.getInputPort(), decoderComponent.getOutputPort(),
@@ -471,49 +430,10 @@ bool VideoDecoderNonTextured::decode(uint8_t *pData, int iSize, double pts)
 
 	return false;
 }
-
-void VideoDecoderNonTextured::configureDisplay()
-{
-#if 0
-	OMX_CONFIG_DISPLAYREGIONTYPE configDisplay;
-	OMX_INIT_STRUCTURE(configDisplay);
-	configDisplay.nPortIndex = renderComponent.getInputPort();
-	
-	
-	
-	configDisplay.set     = OMX_DISPLAY_SET_FULLSCREEN;
-	configDisplay.fullscreen = OMX_FALSE;
-	
-	renderComponent.setConfig(OMX_IndexConfigDisplayRegion, &configDisplay);
-	
-	configDisplay.set     = OMX_DISPLAY_SET_DEST_RECT;
-	configDisplay.dest_rect.x_offset  = displayRect.x;
-	configDisplay.dest_rect.y_offset  = displayRect.y;
-	configDisplay.dest_rect.width     = displayRect.getWidth();
-	configDisplay.dest_rect.height    = displayRect.getHeight();
-	
-	renderComponent.setConfig(OMX_IndexConfigDisplayRegion, &configDisplay);
-#endif
-}
 void VideoDecoderNonTextured::setDisplayRect(ofRectangle& rectangle)
 {
+	display.setDisplayRect(rectangle);
 	
-	bool hasChanged = (displayRect != rectangle);
-    
-    if (hasChanged) 
-	{
-		displayRect = rectangle;
-	}
-	
-	if(!isOpen)
-	{
-		return;
-	}
-	if (hasChanged) 
-	{
-		
-		configureDisplay();
-	}	
 }
 
 

@@ -50,7 +50,7 @@ VideoPlayerNonTextured::~VideoPlayerNonTextured()
 	//ofLogVerbose(__func__) << "END";
 }
 
-bool VideoPlayerNonTextured::open(OMXStreamInfo& hints, OMXClock *av_clock, bool deinterlace, bool hdmi_clock_sync, float display_aspect)
+bool VideoPlayerNonTextured::open(OMXStreamInfo& hints, OMXClock *av_clock, bool deinterlace, bool hdmi_clock_sync)
 {
 	//ofLogVerbose(__func__) << "VideoPlayerNonTextured Open";
 
@@ -70,7 +70,6 @@ bool VideoPlayerNonTextured::open(OMXStreamInfo& hints, OMXClock *av_clock, bool
 	fps         = 25.0f;
 	frameTime   = 0;
 	doDeinterlace = deinterlace;
-	displayAspectRatio = display_aspect;
 	currentPTS = DVD_NOPTS_VALUE;
 	doAbort      = false;
 	doFlush       = false;
@@ -120,7 +119,7 @@ bool VideoPlayerNonTextured::openDecoder()
 	nonTextureDecoder->setDisplayRect(displayRect);
 
 	decoder = (VideoDecoderBase*)nonTextureDecoder;
-	if(!nonTextureDecoder->open(omxStreamInfo, omxClock, displayAspectRatio, doDeinterlace, doHDMISync))
+	if(!nonTextureDecoder->open(omxStreamInfo, omxClock, doDeinterlace, doHDMISync))
 	{
 
 		closeDecoder();

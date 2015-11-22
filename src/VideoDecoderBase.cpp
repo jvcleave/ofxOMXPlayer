@@ -240,23 +240,23 @@ void VideoDecoderBase::processCodec(OMXStreamInfo& hints)
 				case FF_PROFILE_H264_BASELINE:
 					// (role name) video_decoder.avc
 					// H.264 Baseline profile
-					m_codingType = OMX_VIDEO_CodingAVC;
+					omxCodingType = OMX_VIDEO_CodingAVC;
 					break;
 				case FF_PROFILE_H264_MAIN:
 					// (role name) video_decoder.avc
 					// H.264 Main profile
-					m_codingType = OMX_VIDEO_CodingAVC;
+					omxCodingType = OMX_VIDEO_CodingAVC;
 					break;
 				case FF_PROFILE_H264_HIGH:
 					// (role name) video_decoder.avc
 					// H.264 Main profile
-					m_codingType = OMX_VIDEO_CodingAVC;
+					omxCodingType = OMX_VIDEO_CodingAVC;
 					break;
 				case FF_PROFILE_UNKNOWN:
-					m_codingType = OMX_VIDEO_CodingAVC;
+					omxCodingType = OMX_VIDEO_CodingAVC;
 					break;
 				default:
-					m_codingType = OMX_VIDEO_CodingAVC;
+					omxCodingType = OMX_VIDEO_CodingAVC;
 					break;
 			}
 		}
@@ -264,50 +264,50 @@ void VideoDecoderBase::processCodec(OMXStreamInfo& hints)
 		case CODEC_ID_MPEG4:
 			// (role name) video_decoder.mpeg4
 			// MPEG-4, DivX 4/5 and Xvid compatible
-			m_codingType = OMX_VIDEO_CodingMPEG4;
+			omxCodingType = OMX_VIDEO_CodingMPEG4;
 			break;
 		case CODEC_ID_MPEG1VIDEO:
 		case CODEC_ID_MPEG2VIDEO:
 			// (role name) video_decoder.mpeg2
 			// MPEG-2
-			m_codingType = OMX_VIDEO_CodingMPEG2;
+			omxCodingType = OMX_VIDEO_CodingMPEG2;
 			break;
 		case CODEC_ID_H263:
 			// (role name) video_decoder.mpeg4
 			// MPEG-4, DivX 4/5 and Xvid compatible
-			m_codingType = OMX_VIDEO_CodingMPEG4;
+			omxCodingType = OMX_VIDEO_CodingMPEG4;
 			break;
 		case CODEC_ID_VP6:
 		case CODEC_ID_VP6F:
 		case CODEC_ID_VP6A:
 			// (role name) video_decoder.vp6
 			// VP6
-			m_codingType = OMX_VIDEO_CodingVP6;
+			omxCodingType = OMX_VIDEO_CodingVP6;
 			break;
 		case CODEC_ID_VP8:
 			// (role name) video_decoder.vp8
 			// VP8
-			m_codingType = OMX_VIDEO_CodingVP8;
+			omxCodingType = OMX_VIDEO_CodingVP8;
 			break;
 		case CODEC_ID_THEORA:
 			// (role name) video_decoder.theora
 			// theora
-			m_codingType = OMX_VIDEO_CodingTheora;
+			omxCodingType = OMX_VIDEO_CodingTheora;
 			break;
 		case CODEC_ID_MJPEG:
 		case CODEC_ID_MJPEGB:
 			// (role name) video_decoder.mjpg
 			// mjpg
-			m_codingType = OMX_VIDEO_CodingMJPEG;
+			omxCodingType = OMX_VIDEO_CodingMJPEG;
 			break;
 		case CODEC_ID_VC1:
 		case CODEC_ID_WMV3:
 			// (role name) video_decoder.vc1
 			// VC-1, WMV9
-			m_codingType = OMX_VIDEO_CodingWMV;
+			omxCodingType = OMX_VIDEO_CodingWMV;
 			break;
 		default:
-            m_codingType = OMX_VIDEO_CodingUnused;
+            omxCodingType = OMX_VIDEO_CodingUnused;
 			ofLog(OF_LOG_VERBOSE, "Video codec id unknown: %x\n", hints.codec);
 			break;
 	}

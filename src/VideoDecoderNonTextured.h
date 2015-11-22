@@ -12,24 +12,22 @@ public:
   
     VideoDecoderNonTextured();
     ~VideoDecoderNonTextured();
-    bool open(OMXStreamInfo& hints,
-              OMXClock *clock, 
-              float display_aspect = 0.0f, 
+    bool open(OMXStreamInfo& streamInfo,
+              OMXClock *clock,
               bool deinterlace = false, 
               bool hdmi_clock_sync = false);
     
     bool decode(uint8_t *pData, int iSize, double pts);
   
     void setDisplayRect(ofRectangle& rectangle);
-    void configureDisplay();
     void updateFrameCount();
     void onUpdate(ofEventArgs& args);
     
     int getCurrentFrame();
     void resetFrameCounter();
     
-    Component m_omx_image_fx;
-    Tunnel m_omx_tunnel_image_fx;
+    Component imageFXComponent;
+    Tunnel imageFXTunnel;
     bool doDeinterlace;
     bool doHDMISync;
     ofRectangle displayRect;
