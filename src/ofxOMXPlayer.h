@@ -65,7 +65,6 @@ public:
     ofTexture       texture;
     unsigned char*  pixels;
     
-    OMXDisplay* displayManager; 
     
 private:
     vector<int> signals;
