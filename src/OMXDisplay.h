@@ -8,20 +8,52 @@
 class OMXDisplay
 {
 public:
+    
+    void onUpdate(ofEventArgs& args)
+    {
+        if(!isReady)
+        {
+            return;
+        }
+        
+        stringstream info;
+        info << "fullscreen: " << configDisplay.fullscreen << endl; 
+        info << "noaspect: " << configDisplay.noaspect << endl;
+        info << "src_rect x: " << configDisplay.src_rect.x_offset << endl;  
+        info << "src_rect y: " << configDisplay.src_rect.y_offset << endl;  
+        info << "src_rect width: " << configDisplay.src_rect.width << endl;    
+        info << "src_rect height: " << configDisplay.src_rect.height << endl;    
+        
+        info << "dest_rect x: " << configDisplay.dest_rect.x_offset << endl; 
+        info << "dest_rect y: " << configDisplay.dest_rect.y_offset << endl; 
+        info << "dest_rect width: " << configDisplay.dest_rect.width << endl;    
+        info << "dest_rect height: " << configDisplay.dest_rect.height << endl;
+        
+        info << "pixel_x: " << configDisplay.pixel_x << endl;
+        info << "pixel_y: " << configDisplay.pixel_y << endl;
+        info << "transform: " << configDisplay.transform << endl;
+        
+        ofLogVerbose() << info.str();
+        
+    }
+    
+    
     OMXDisplay()
     {
         doMirror = false;
         isReady = false;
        
+        ofAddListener(ofEvents().update, this, &OMXDisplay::onUpdate);
     };
     
-    
+   
     OMX_ERRORTYPE setup(Component& renderComponent_, StreamInfo& streamInfo_)
     {
         
         
         renderComponent = renderComponent_;
         displayRect.set(0, 0, streamInfo.width, streamInfo.height);
+        cropRect = displayRect;
         streamInfo = streamInfo_;
         
         
@@ -110,7 +142,12 @@ public:
     
     OMX_ERRORTYPE setCrop(ofRectangle& cropRectangle)
     {
-        return setCrop(cropRectangle.x, cropRectangle.y, cropRectangle.width, cropRectangle.height);
+        if(cropRect == cropRectangle)
+        {
+            return OMX_ErrorNone;
+        }
+        cropRect = cropRectangle;
+        return setCrop(cropRect.x, cropRect.y, cropRect.width, cropRect.height);
     }
     
     OMX_ERRORTYPE setCrop(int x, int y, int w, int h)
@@ -255,6 +292,7 @@ public:
     OMX_CONFIG_DISPLAYREGIONTYPE configDisplay;
     Component renderComponent;
     ofRectangle displayRect;
+    ofRectangle cropRect;
     StreamInfo streamInfo;
     bool doMirror;
     bool isReady;

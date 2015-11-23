@@ -372,7 +372,12 @@ void ofxOMXPlayer::onUpdate(ofEventArgs& args)
         {
             hasNewFrame = false;
         }
-
+        if (!isTextureEnabled())
+        {
+            //engine->directPlayer->getOMXDisplay()->setCrop(cropRectangle);
+        }
+        
+        
     }else 
     {
         hasNewFrame = false;
@@ -389,6 +394,12 @@ bool ofxOMXPlayer::isFrameNew()
 bool ofxOMXPlayer::isTextureEnabled()
 {
     return textureEnabled;
+}
+
+
+void ofxOMXPlayer::cropVideo(ofRectangle& cropRectangle_)
+{
+    cropRectangle = cropRectangle_;
 }
 
 int ofxOMXPlayer::getHeight()

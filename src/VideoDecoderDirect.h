@@ -31,6 +31,10 @@ public:
     bool doDeinterlace;
     bool doHDMISync;    
     OMXDisplay display;
+    OMXDisplay* getOMXDisplay()
+    {
+        return &display;
+    }
     
 private:
     int frameCounter;

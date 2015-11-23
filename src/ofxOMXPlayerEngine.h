@@ -88,7 +88,7 @@ public:
     float getFPS();
     
     
-    OMXDisplay* displayManager; 
+     
 
 private:
     

@@ -66,6 +66,8 @@ public:
     unsigned char*  pixels;
     
     
+    void cropVideo(ofRectangle& cropRectangle_);
+    
 private:
     vector<int> signals;
     bool openEngine(int startTimeInSeconds = 0);
@@ -100,6 +102,11 @@ private:
     bool            didWarnAboutInaccurateCurrentFrame;
     bool            isOpen;
     int             speedMultiplier;
+    
+    
+    ofRectangle cropRectangle;
+    ofRectangle drawRectangle;
+    
     
 };
 

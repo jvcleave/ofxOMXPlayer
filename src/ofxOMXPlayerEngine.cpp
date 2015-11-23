@@ -46,6 +46,11 @@ ofxOMXPlayerEngine::ofxOMXPlayerEngine()
     
 }
 
+/*OMXDisplay* ofxOMXPlayerEngine::getOMXDisplay()
+{
+    if(!directPlayer) return null;
+    return directPlayer:
+}*/
 ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
 {
     doStop = true;
