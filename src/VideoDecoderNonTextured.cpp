@@ -432,7 +432,8 @@ bool VideoDecoderNonTextured::decode(uint8_t *pData, int iSize, double pts)
 }
 void VideoDecoderNonTextured::setDisplayRect(ofRectangle& rectangle)
 {
-	display.setDisplayRect(rectangle);
+	//display.setDisplayRect(rectangle);
+    display.cropRandom();
 	
 }
 
