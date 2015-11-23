@@ -34,212 +34,212 @@
 
 OMXAudioPlayer::OMXAudioPlayer()
 {
-	isOpen          = false;
-	omxClock      = NULL;
-	omxReader    = NULL;
-	decoder       = NULL;
-	doFlush         = false;
-	cachedSize   = 0;
-	channelMap   = NULL;
-	audioCodecOMX   = NULL;
-	speed         = DVD_PLAYSPEED_NORMAL;
-	hasErrors  = false;
+    isOpen          = false;
+    omxClock      = NULL;
+    omxReader    = NULL;
+    decoder       = NULL;
+    doFlush         = false;
+    cachedSize   = 0;
+    channelMap   = NULL;
+    audioCodecOMX   = NULL;
+    speed         = DVD_PLAYSPEED_NORMAL;
+    hasErrors  = false;
 
-	pthread_cond_init(&m_packet_cond, NULL);
-	pthread_cond_init(&m_audio_cond, NULL);
-	pthread_mutex_init(&m_lock, NULL);
-	pthread_mutex_init(&m_lock_decoder, NULL);
+    pthread_cond_init(&m_packet_cond, NULL);
+    pthread_cond_init(&m_audio_cond, NULL);
+    pthread_mutex_init(&m_lock, NULL);
+    pthread_mutex_init(&m_lock_decoder, NULL);
 }
 
 OMXAudioPlayer::~OMXAudioPlayer()
 {
-	if(isOpen)
-	{
-		close();
-	}
+    if(isOpen)
+    {
+        close();
+    }
 
 
-	pthread_cond_destroy(&m_audio_cond);
-	pthread_cond_destroy(&m_packet_cond);
-	pthread_mutex_destroy(&m_lock);
-	pthread_mutex_destroy(&m_lock_decoder);
+    pthread_cond_destroy(&m_audio_cond);
+    pthread_cond_destroy(&m_packet_cond);
+    pthread_mutex_destroy(&m_lock);
+    pthread_mutex_destroy(&m_lock_decoder);
 }
 
 void OMXAudioPlayer::lock()
 {
-	pthread_mutex_lock(&m_lock);
+    pthread_mutex_lock(&m_lock);
 }
 
 void OMXAudioPlayer::unlock()
 {
-	pthread_mutex_unlock(&m_lock);
+    pthread_mutex_unlock(&m_lock);
 }
 
 void OMXAudioPlayer::lockDecoder()
 {
-	pthread_mutex_lock(&m_lock_decoder);
+    pthread_mutex_lock(&m_lock_decoder);
 }
 
 void OMXAudioPlayer::unlockDecoder()
 {
-	pthread_mutex_unlock(&m_lock_decoder);
+    pthread_mutex_unlock(&m_lock_decoder);
 }
 
-bool OMXAudioPlayer::open(OMXStreamInfo& hints, 
+bool OMXAudioPlayer::open(StreamInfo& hints, 
                           OMXClock *av_clock, 
                           OMXReader *omx_reader,
                           std::string device)
 {
-	if(ThreadHandle())
-	{
-		close();
-	}
+    if(ThreadHandle())
+    {
+        close();
+    }
 
-	if (!av_clock)
-	{
-		return false;
-	}
+    if (!av_clock)
+    {
+        return false;
+    }
 
 
-	omxStreamInfo       = hints;
-	omxClock    = av_clock;
-	omxReader  = omx_reader;
-	deviceName      = device;
-	currentPTS = DVD_NOPTS_VALUE;
-	doAbort      = false;
-	doFlush       = false;
-	cachedSize = 0;
-	audioCodecOMX = NULL;
-	channelMap = NULL;
-	speed       = DVD_PLAYSPEED_NORMAL;
+    omxStreamInfo       = hints;
+    omxClock    = av_clock;
+    omxReader  = omx_reader;
+    deviceName      = device;
+    currentPTS = DVD_NOPTS_VALUE;
+    doAbort      = false;
+    doFlush       = false;
+    cachedSize = 0;
+    audioCodecOMX = NULL;
+    channelMap = NULL;
+    speed       = DVD_PLAYSPEED_NORMAL;
 
 // omxClock->SetMasterClock(false);
 
     bool success  = openCodec();
-	if(!success)
-	{
+    if(!success)
+    {
         ofLogError(__func__) << "openCodec: " << success;
-		close();
-		return success;
-	}
+        close();
+        return success;
+    }
 
-	success = openDecoder();
-	if(!success)
-	{
+    success = openDecoder();
+    if(!success)
+    {
         ofLogError(__func__) << "openDecoder: " << success;
-		close();
-		return success;
-	}
+        close();
+        return success;
+    }
 
-	Create();
+    Create();
 
-	isOpen        = true;
+    isOpen        = true;
 
-	return true;
+    return true;
 }
 
 bool OMXAudioPlayer::close()
 {
-	doAbort  = true;
-	doFlush   = true;
+    doAbort  = true;
+    doFlush   = true;
 
-	flush();
+    flush();
 
-	if(ThreadHandle())
-	{
-		lock();
-		pthread_cond_broadcast(&m_packet_cond);
-		unlock();
+    if(ThreadHandle())
+    {
+        lock();
+        pthread_cond_broadcast(&m_packet_cond);
+        unlock();
 
-		StopThread("OMXAudioPlayer");
-	}
+        StopThread("OMXAudioPlayer");
+    }
 
-	closeDecoder();
-	closeCodec();
+    closeDecoder();
+    closeCodec();
 
-	isOpen          = false;
-	currentPTS   = DVD_NOPTS_VALUE;
-	speed         = DVD_PLAYSPEED_NORMAL;
+    isOpen          = false;
+    currentPTS   = DVD_NOPTS_VALUE;
+    speed         = DVD_PLAYSPEED_NORMAL;
 
 
-	return true;
+    return true;
 }
 
 
 
 bool OMXAudioPlayer::decode(OMXPacket *pkt)
 {
-	if(!pkt)
-	{
-		return false;
-	}
+    if(!pkt)
+    {
+        return false;
+    }
 
-	/* last decoder reinit went wrong */
-	if(!decoder || !audioCodecOMX)
-	{
-		return true;
-	}
+    /* last decoder reinit went wrong */
+    if(!decoder || !audioCodecOMX)
+    {
+        return true;
+    }
 
-	if(!omxReader->isActive(OMXSTREAM_AUDIO, pkt->stream_index))
-	{
-		return true;
-	}
+    if(!omxReader->isActive(OMXSTREAM_AUDIO, pkt->stream_index))
+    {
+        return true;
+    }
 
-	int channels = pkt->hints.channels;
+    int channels = pkt->hints.channels;
 
-	/* 6 channel have to be mapped to 8 for PCM */
+    /* 6 channel have to be mapped to 8 for PCM */
     if(channels == 6)
     {
         channels = 8;
     }
 
-	unsigned int old_bitrate = omxStreamInfo.bitrate;
-	unsigned int new_bitrate = pkt->hints.bitrate;
+    unsigned int old_bitrate = omxStreamInfo.bitrate;
+    unsigned int new_bitrate = pkt->hints.bitrate;
 
-	/* only check bitrate changes on CODEC_ID_DTS, CODEC_ID_AC3, CODEC_ID_EAC3 */
-	if(omxStreamInfo.codec != CODEC_ID_DTS && omxStreamInfo.codec != CODEC_ID_AC3 && omxStreamInfo.codec != CODEC_ID_EAC3)
-	{
-		new_bitrate = old_bitrate = 0;
-	}
+    /* only check bitrate changes on CODEC_ID_DTS, CODEC_ID_AC3, CODEC_ID_EAC3 */
+    if(omxStreamInfo.codec != CODEC_ID_DTS && omxStreamInfo.codec != CODEC_ID_AC3 && omxStreamInfo.codec != CODEC_ID_EAC3)
+    {
+        new_bitrate = old_bitrate = 0;
+    }
 
-	/* audio codec changed. reinit device and decoder */
-	if(omxStreamInfo.codec         != pkt->hints.codec ||
-	        omxStreamInfo.channels      != channels ||
-	        omxStreamInfo.samplerate    != pkt->hints.samplerate ||
-	        old_bitrate           != new_bitrate ||
-	        omxStreamInfo.bitspersample != pkt->hints.bitspersample)
-	{
+    /* audio codec changed. reinit device and decoder */
+    if(omxStreamInfo.codec         != pkt->hints.codec ||
+            omxStreamInfo.channels      != channels ||
+            omxStreamInfo.samplerate    != pkt->hints.samplerate ||
+            old_bitrate           != new_bitrate ||
+            omxStreamInfo.bitspersample != pkt->hints.bitspersample)
+    {
        
-		closeDecoder();
-		closeCodec();
+        closeDecoder();
+        closeCodec();
 
-		omxStreamInfo = pkt->hints;
+        omxStreamInfo = pkt->hints;
 
         
         ofLogError(__func__) << "CRASHING HERE" << __LINE__;
         _Exit(0);
         
-	}
+    }
     
 #if 1
-	if(!((int)decoder->GetSpace() > pkt->size))
-	{
-		omxClock->sleep(10);
-	}
+    if(!((int)decoder->GetSpace() > pkt->size))
+    {
+        omxClock->sleep(10);
+    }
 
-	if((int)decoder->GetSpace() > pkt->size)
-	{
-		if(pkt->pts != DVD_NOPTS_VALUE)
-		{
-			currentPTS = pkt->pts;
-		}
-		else if(pkt->dts != DVD_NOPTS_VALUE)
-		{
-			currentPTS = pkt->dts;
-		}
+    if((int)decoder->GetSpace() > pkt->size)
+    {
+        if(pkt->pts != DVD_NOPTS_VALUE)
+        {
+            currentPTS = pkt->pts;
+        }
+        else if(pkt->dts != DVD_NOPTS_VALUE)
+        {
+            currentPTS = pkt->dts;
+        }
 
-		uint8_t *data_dec = pkt->data;
-		int            data_len = pkt->size;
+        uint8_t *data_dec = pkt->data;
+        int            data_len = pkt->size;
 
         while(data_len > 0)
         {
@@ -271,152 +271,152 @@ bool OMXAudioPlayer::decode(OMXPacket *pkt)
             }
         }
 
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 #endif
 }
 
 void OMXAudioPlayer::process()
 {
-	OMXPacket *omxPacket = NULL;
+    OMXPacket *omxPacket = NULL;
 
-	while(!doStop && !doAbort)
-	{
-		lock();
-		if(packets.empty())
-		{
-			pthread_cond_wait(&m_packet_cond, &m_lock);
-		}
-		unlock();
+    while(!doStop && !doAbort)
+    {
+        lock();
+        if(packets.empty())
+        {
+            pthread_cond_wait(&m_packet_cond, &m_lock);
+        }
+        unlock();
 
-		if(doAbort)
-		{
-			break;
-		}
+        if(doAbort)
+        {
+            break;
+        }
 
-		lock();
-		if(doFlush && omxPacket)
-		{
-			OMXReader::freePacket(omxPacket);
-			omxPacket = NULL;
-			doFlush = false;
-		}
-		else if(!omxPacket && !packets.empty())
-		{
-			omxPacket = packets.front();
-			cachedSize -= omxPacket->size;
-			packets.pop_front();
-		}
-		unlock();
+        lock();
+        if(doFlush && omxPacket)
+        {
+            OMXReader::freePacket(omxPacket);
+            omxPacket = NULL;
+            doFlush = false;
+        }
+        else if(!omxPacket && !packets.empty())
+        {
+            omxPacket = packets.front();
+            cachedSize -= omxPacket->size;
+            packets.pop_front();
+        }
+        unlock();
 
-		lockDecoder();
-		if(doFlush && omxPacket)
-		{
-			OMXReader::freePacket(omxPacket);
-			omxPacket = NULL;
-			doFlush = false;
-		}
-		else if(omxPacket && decode(omxPacket))
-		{
-			OMXReader::freePacket(omxPacket);
-			omxPacket = NULL;
-		}
-		unlockDecoder();
-	}
+        lockDecoder();
+        if(doFlush && omxPacket)
+        {
+            OMXReader::freePacket(omxPacket);
+            omxPacket = NULL;
+            doFlush = false;
+        }
+        else if(omxPacket && decode(omxPacket))
+        {
+            OMXReader::freePacket(omxPacket);
+            omxPacket = NULL;
+        }
+        unlockDecoder();
+    }
 
-	if(omxPacket)
-	{
-		OMXReader::freePacket(omxPacket);
-	}
+    if(omxPacket)
+    {
+        OMXReader::freePacket(omxPacket);
+    }
 }
 
 void OMXAudioPlayer::flush()
 {
-	//ofLogVerbose(__func__) << "OMXAudioPlayer::Flush start";
-	lock();
-	lockDecoder();
-	doFlush = true;
-	while (!packets.empty())
-	{
-		OMXPacket *pkt = packets.front();
-		packets.pop_front();
-		OMXReader::freePacket(pkt);
-	}
-	currentPTS = DVD_NOPTS_VALUE;
-	cachedSize = 0;
-	if(decoder)
-	{
-		decoder->flush();
-	}
-	unlockDecoder();
-	unlock();
-	//ofLogVerbose(__func__) << "OMXAudioPlayer::Flush end";
+    //ofLogVerbose(__func__) << "OMXAudioPlayer::Flush start";
+    lock();
+    lockDecoder();
+    doFlush = true;
+    while (!packets.empty())
+    {
+        OMXPacket *pkt = packets.front();
+        packets.pop_front();
+        OMXReader::freePacket(pkt);
+    }
+    currentPTS = DVD_NOPTS_VALUE;
+    cachedSize = 0;
+    if(decoder)
+    {
+        decoder->flush();
+    }
+    unlockDecoder();
+    unlock();
+    //ofLogVerbose(__func__) << "OMXAudioPlayer::Flush end";
 }
 
 bool OMXAudioPlayer::addPacket(OMXPacket *pkt)
 {
-	bool ret = false;
+    bool ret = false;
 
-	if(!pkt)
-	{
-		return ret;
-	}
+    if(!pkt)
+    {
+        return ret;
+    }
 
-	if(doStop || doAbort)
-	{
-		return ret;
-	}
+    if(doStop || doAbort)
+    {
+        return ret;
+    }
 
-	if((cachedSize + pkt->size) < MAX_DATA_SIZE)
-	{
-		lock();
-		cachedSize += pkt->size;
-		packets.push_back(pkt);
-		unlock();
-		ret = true;
-		pthread_cond_broadcast(&m_packet_cond);
-	}
+    if((cachedSize + pkt->size) < MAX_DATA_SIZE)
+    {
+        lock();
+        cachedSize += pkt->size;
+        packets.push_back(pkt);
+        unlock();
+        ret = true;
+        pthread_cond_broadcast(&m_packet_cond);
+    }
 
-	return ret;
+    return ret;
 }
 
 bool OMXAudioPlayer::openCodec()
 {
-	audioCodecOMX = new AudioCodecOMX();
+    audioCodecOMX = new AudioCodecOMX();
 
-	if(!audioCodecOMX->open(omxStreamInfo))
-	{
-		delete audioCodecOMX;
-		audioCodecOMX = NULL;
-		return false;
-	}
+    if(!audioCodecOMX->open(omxStreamInfo))
+    {
+        delete audioCodecOMX;
+        audioCodecOMX = NULL;
+        return false;
+    }
 
-	channelMap = audioCodecOMX->GetChannelMap();
-	return true;
+    channelMap = audioCodecOMX->GetChannelMap();
+    return true;
 }
 
 void OMXAudioPlayer::closeCodec()
 {
-	if(audioCodecOMX)
-	{
-		delete audioCodecOMX;
-	}
-	audioCodecOMX = NULL;
+    if(audioCodecOMX)
+    {
+        delete audioCodecOMX;
+    }
+    audioCodecOMX = NULL;
 }
 
 
 bool OMXAudioPlayer::openDecoder()
 {
-	//ofLogVerbose(__func__) << "doHardwareDecode: " << doHardwareDecode;
-	//ofLogVerbose(__func__) << "doPassthrough: " << doPassthrough;
-	bool bAudioRenderOpen = false;
+    //ofLogVerbose(__func__) << "doHardwareDecode: " << doHardwareDecode;
+    //ofLogVerbose(__func__) << "doPassthrough: " << doPassthrough;
+    bool bAudioRenderOpen = false;
 
-	decoder = new OMXAudioDecoder();
-	decoder->setClock(omxClock);
+    decoder = new OMXAudioDecoder();
+    decoder->setClock(omxClock);
     stringstream ss;
     ss << deviceName.substr(4); 
     string name = ss.str();
@@ -425,19 +425,19 @@ bool OMXAudioPlayer::openDecoder()
                                        omxStreamInfo, 
                                        omxClock, 
                                        doBoostOnDownmix);
-	
-	
-	codecName = omxReader->getCodecName(OMXSTREAM_AUDIO);
+    
+    
+    codecName = omxReader->getCodecName(OMXSTREAM_AUDIO);
 
-	if(!bAudioRenderOpen)
-	{
+    if(!bAudioRenderOpen)
+    {
         ofLogError(__func__) << "bAudioRenderOpen: " << bAudioRenderOpen;
-		delete decoder;
-		decoder = NULL;
-		return false;
-	}
-	else
-	{
+        delete decoder;
+        decoder = NULL;
+        return false;
+    }
+    else
+    {
         stringstream info;
         info << "\n";
         info << "Audio codec : " << codecName;
@@ -449,83 +449,83 @@ bool OMXAudioPlayer::openDecoder()
         info << "Audio bitspersample : " << omxStreamInfo.bitspersample;
         info << "\n";
         ofLogVerbose(__func__) << info.str();
-	}
-	return true;
+    }
+    return true;
 }
 
 bool OMXAudioPlayer::closeDecoder()
 {
-	if(decoder)
-	{
-		delete decoder;
-	}
-	decoder   = NULL;
-	return true;
+    if(decoder)
+    {
+        delete decoder;
+    }
+    decoder   = NULL;
+    return true;
 }
 
 void OMXAudioPlayer::submitEOS()
 {
-	if(decoder)
-	{
-		decoder->submitEOS();
-	}
+    if(decoder)
+    {
+        decoder->submitEOS();
+    }
 }
 
 bool OMXAudioPlayer::EOS()
 {
-	return packets.empty() && (!decoder || decoder->EOS());
+    return packets.empty() && (!decoder || decoder->EOS());
 }
 
 void OMXAudioPlayer::WaitCompletion()
 {
-	//ofLogVerbose(__func__) << "OMXAudioPlayer::WaitCompletion";
-	if(!decoder)
-	{
-		return;
-	}
+    //ofLogVerbose(__func__) << "OMXAudioPlayer::WaitCompletion";
+    if(!decoder)
+    {
+        return;
+    }
 
-	unsigned int nTimeOut = 2.0f * 1000;
-	while(nTimeOut)
-	{
-		if(EOS())
-		{
-			ofLog(OF_LOG_VERBOSE, "%s::%s - got eos\n", "OMXAudioPlayer", __func__);
-			break;
-		}
+    unsigned int nTimeOut = 2.0f * 1000;
+    while(nTimeOut)
+    {
+        if(EOS())
+        {
+            ofLog(OF_LOG_VERBOSE, "%s::%s - got eos\n", "OMXAudioPlayer", __func__);
+            break;
+        }
 
-		if(nTimeOut == 0)
-		{
-			ofLog(OF_LOG_ERROR, "%s::%s - wait for eos timed out\n", "OMXAudioPlayer", __func__);
-			break;
-		}
-		omxClock->sleep(50);
-		nTimeOut -= 50;
-	}
+        if(nTimeOut == 0)
+        {
+            ofLog(OF_LOG_ERROR, "%s::%s - wait for eos timed out\n", "OMXAudioPlayer", __func__);
+            break;
+        }
+        omxClock->sleep(50);
+        nTimeOut -= 50;
+    }
 }
 
 void OMXAudioPlayer::setCurrentVolume(long nVolume)
 {
-	//ofLogVerbose(__func__) << "nVolume: " << nVolume;
-	if(decoder)
-	{
-		decoder->setCurrentVolume(nVolume);
-	}
+    //ofLogVerbose(__func__) << "nVolume: " << nVolume;
+    if(decoder)
+    {
+        decoder->setCurrentVolume(nVolume);
+    }
 }
 
 long OMXAudioPlayer::getCurrentVolume()
 {
-	if(decoder)
-	{
-		return decoder->getCurrentVolume();
-	}
-	else
-	{
-		return 0;
-	}
+    if(decoder)
+    {
+        return decoder->getCurrentVolume();
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 void OMXAudioPlayer::setSpeed(int speed_)
 {
-	speed = speed_;
+    speed = speed_;
 }
 

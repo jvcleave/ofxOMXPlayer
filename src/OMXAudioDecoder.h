@@ -12,7 +12,7 @@
 #include "OMXClock.h"
 #include "Tunnel.h"
 
-#include "OMXStreamInfo.h"
+#include "StreamInfo.h"
 #include <assert.h>
 
 #define AUDIO_BUFFER_SECONDS 2
@@ -105,7 +105,7 @@ class OMXAudioDecoder
 		
 		bool init(string device,
 						enum PCMChannels *channelMap,
-		                OMXStreamInfo& hints, 
+		                StreamInfo& hints, 
                         OMXClock *clock,
 						bool boostOnDownmix);
 

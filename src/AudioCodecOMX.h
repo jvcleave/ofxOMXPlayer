@@ -25,7 +25,7 @@
 
 #include "LIBAV_INCLUDES.h"
 
-#include "OMXStreamInfo.h"
+#include "StreamInfo.h"
 #include "PCMRemap.h"
 
 typedef unsigned char   BYTE;
@@ -39,7 +39,7 @@ class AudioCodecOMX
 public:
     AudioCodecOMX();
     ~AudioCodecOMX();
-    bool open(OMXStreamInfo& hints);
+    bool open(StreamInfo& hints);
     void Dispose();
     int decode(BYTE* pData, int iSize);
     int GetData(BYTE** dst);

@@ -4,11 +4,11 @@
 
 #include "LIBAV_INCLUDES.h"
 
-#include "OMXStreamInfo.h"
+#include "StreamInfo.h"
 #include "OMXThread.h"
 #include <queue>
 
-#include "OMXStreamInfo.h"
+#include "StreamInfo.h"
 
 #include "File.h"
 
@@ -47,7 +47,7 @@ typedef struct OMXPacket
     int       size;
     uint8_t   *data;
     int       stream_index;
-    OMXStreamInfo hints;
+    StreamInfo hints;
     enum AVMediaType codec_type;
 } OMXPacket;
 
@@ -70,7 +70,7 @@ typedef struct OMXStream
     void* extradata;
     unsigned int extrasize;
     unsigned int index;
-    OMXStreamInfo hints;
+    StreamInfo hints;
 } OMXStream;
 
 class OMXReader
@@ -90,9 +90,9 @@ public:
     void addStream(int id);
     bool isActive(int stream_index);
     bool isActive(OMXStreamType type, int stream_index);
-    bool getHints(AVStream *stream, OMXStreamInfo *hints);
-    bool getHints(OMXStreamType type, unsigned int index, OMXStreamInfo& hints);
-    bool getHints(OMXStreamType type, OMXStreamInfo& hints);
+    bool getHints(AVStream *stream, StreamInfo *hints);
+    bool getHints(OMXStreamType type, unsigned int index, StreamInfo& hints);
+    bool getHints(OMXStreamType type, StreamInfo& hints);
     bool getIsEOF();
     int  getNumAudioStreams()
     {
@@ -168,7 +168,7 @@ protected:
     string fileName;
     bool isMatroska;
     bool isAVI;
-    XFILE::CFile* fileObject;
+    XFILE::File* fileObject;
     AVFormatContext* avFormatContext;
     AVIOContext* avioContext;
     bool isEOF;

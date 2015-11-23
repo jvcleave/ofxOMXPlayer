@@ -48,7 +48,7 @@ AudioCodecOMX::~AudioCodecOMX()
 	Dispose();
 }
 
-bool AudioCodecOMX::open(OMXStreamInfo& hints)
+bool AudioCodecOMX::open(StreamInfo& hints)
 {
 	AVCodec* pCodec;
 	m_bOpenedCodec = false;

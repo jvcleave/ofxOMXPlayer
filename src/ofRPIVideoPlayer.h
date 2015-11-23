@@ -26,7 +26,7 @@ public:
     ofPixelFormat getPixelFormat() const;
     
     ofxOMXPlayer omxPlayer;
-	void draw(float x, float y, float w, float h);
+    void draw(float x, float y, float w, float h);
     void draw(float x, float y);
     void enablePixels();
     void disablePixels();

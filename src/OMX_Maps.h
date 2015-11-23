@@ -796,68 +796,6 @@ void logOMXError(OMX_ERRORTYPE error, string comments="", string functionName=""
 //#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 //#pragma GCC diagnostic ignored "-Wunused-variable"
 
-//if this is crashing it you probably need callbacks set for components
-extern inline
-OMX_ERRORTYPE disableAllPortsForComponent(OMX_HANDLETYPE handle)
-{
-    
-    OMX_ERRORTYPE error = OMX_ErrorNone;
-    
-    
-    OMX_INDEXTYPE indexTypes[] = 
-    {
-        OMX_IndexParamAudioInit,
-        OMX_IndexParamImageInit,
-        OMX_IndexParamVideoInit, 
-        OMX_IndexParamOtherInit
-    };
-    
-    OMX_PORT_PARAM_TYPE ports;
-    OMX_INIT_STRUCTURE(ports);
-    for(int i=0; i < 4; i++)
-    {
-        error = OMX_GetParameter(handle, indexTypes[i], &ports);
-        OMX_TRACE(error);
-        if(error == OMX_ErrorNone) 
-        {
-            for(int j=0; j<ports.nPorts; j++)
-            {
-                
-                OMX_PARAM_PORTDEFINITIONTYPE portFormat;
-                OMX_INIT_STRUCTURE(portFormat);
-                portFormat.nPortIndex = ports.nStartPortNumber+j;
-                
-                error = OMX_GetParameter(handle, OMX_IndexParamPortDefinition, &portFormat);
-                OMX_TRACE(error);
-                if(error != OMX_ErrorNone)
-                {
-                    if(portFormat.bEnabled == OMX_FALSE)
-                    {
-                        continue;
-                    }
-                }
-                error = OMX_SendCommand(handle, OMX_CommandPortDisable, ports.nStartPortNumber+j, NULL);
-                OMX_TRACE(error);
-                if(error != OMX_ErrorNone)
-                {
-                    /*
-                     ofLog(OF_LOG_VERBOSE, 
-                     "disableAllPortsForComponent - Error disable port %d on component %s error: 0x%08x", 
-                     (int)(ports.nStartPortNumber) + j,
-                     "componentName", 
-                     (int)error);
-                     */
-                }
-            }
-            
-        }else
-        {
-            OMX_TRACE(error);
-        }
-    }
-    
-    return OMX_ErrorNone;
-}
 
 
 

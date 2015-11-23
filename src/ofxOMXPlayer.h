@@ -55,8 +55,8 @@ public:
     void        updatePixels();
     unsigned char*   getPixels();
     
-    OMXStreamInfo  getVideoStreamInfo();
-    OMXStreamInfo  getAudioStreamInfo();
+    StreamInfo  getVideoStreamInfo();
+    StreamInfo  getAudioStreamInfo();
     
     string      getInfo();
     void        close();

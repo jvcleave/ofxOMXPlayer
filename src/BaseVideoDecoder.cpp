@@ -2,7 +2,7 @@
 
 
 
-#include "OMXStreamInfo.h"
+#include "StreamInfo.h"
 
 #include "XMemUtils.h"
 
@@ -229,7 +229,7 @@ void BaseVideoDecoder::Reset()
 }
 
 
-void BaseVideoDecoder::processCodec(OMXStreamInfo& hints)
+void BaseVideoDecoder::processCodec(StreamInfo& hints)
 {
 	switch (hints.codec)
 	{

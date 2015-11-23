@@ -15,7 +15,7 @@ public:
     
     VideoDecoderDirect* nonTextureDecoder;
     
-    bool open(OMXStreamInfo& hints, OMXClock *av_clock, bool deinterlace, bool hdmi_clock_sync);
+    bool open(StreamInfo& hints, OMXClock *av_clock, bool deinterlace, bool hdmi_clock_sync);
     bool openDecoder();
     bool close();
     ofRectangle displayRect;

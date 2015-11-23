@@ -10,7 +10,7 @@ public:
     VideoDecoderTextured();
     ~VideoDecoderTextured(){};
     
-    bool open(OMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglImage);
+    bool open(StreamInfo& hints, OMXClock *clock, EGLImageKHR eglImage);
     
     bool  decode(uint8_t *pData, int iSize, double pts);
     

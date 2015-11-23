@@ -19,7 +19,7 @@ VideoPlayerTextured::~VideoPlayerTextured()
 }
 
 
-bool VideoPlayerTextured::open(OMXStreamInfo& hints, OMXClock *av_clock, EGLImageKHR eglImage)
+bool VideoPlayerTextured::open(StreamInfo& hints, OMXClock *av_clock, EGLImageKHR eglImage)
 {
 
 	this->eglImage = eglImage;

@@ -7,7 +7,7 @@
 
 #include "OMXReader.h"
 #include "OMXClock.h"
-#include "OMXStreamInfo.h"
+#include "StreamInfo.h"
 #include "OMXThread.h"
 #include "BaseVideoDecoder.h"
 
@@ -23,7 +23,7 @@ public:
     std::deque<OMXPacket *> packets;
     
     bool isOpen;
-    OMXStreamInfo omxStreamInfo;
+    StreamInfo omxStreamInfo;
     double currentPTS;
     
     pthread_cond_t m_packet_cond;

@@ -37,7 +37,7 @@ void VideoDecoderTextured::resetFrameCounter()
 	renderComponent.resetFrameCounter();
 }
 
-bool VideoDecoderTextured::open(OMXStreamInfo& hints, OMXClock *clock, EGLImageKHR eglImage)
+bool VideoDecoderTextured::open(StreamInfo& hints, OMXClock *clock, EGLImageKHR eglImage)
 {
 
 

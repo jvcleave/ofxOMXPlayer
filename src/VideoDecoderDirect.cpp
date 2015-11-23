@@ -18,7 +18,7 @@ VideoDecoderDirect::~VideoDecoderDirect()
 	//ofLogVerbose(__func__) << "removed update listener";
 }
 
-bool VideoDecoderDirect::open(OMXStreamInfo& streamInfo, OMXClock *clock, bool deinterlace, bool hdmi_clock_sync)
+bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, bool deinterlace, bool hdmi_clock_sync)
 {
 	OMX_ERRORTYPE error   = OMX_ErrorNone;
 
@@ -432,8 +432,8 @@ bool VideoDecoderDirect::decode(uint8_t *pData, int iSize, double pts)
 }
 void VideoDecoderDirect::setDisplayRect(ofRectangle& rectangle)
 {
-	//display.setDisplayRect(rectangle);
-    display.cropRandom();
+	display.setDisplayRect(rectangle);
+    //display.cropRandom();
 	
 }
 

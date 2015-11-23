@@ -6,7 +6,7 @@
 #include "OMXClock.h"
 #include "Tunnel.h"
 
-#include "OMXStreamInfo.h"
+#include "StreamInfo.h"
 
 #include <IL/OMX_Video.h>
 
@@ -64,7 +64,7 @@ public:
     unsigned int getSize();
     void Reset();
     
-    void processCodec(OMXStreamInfo& hints);
+    void processCodec(StreamInfo& hints);
     static unsigned count_bits(int32_t value)
     {
         unsigned bits = 0;

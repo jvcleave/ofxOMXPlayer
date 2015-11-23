@@ -4,123 +4,123 @@ OMXClock::OMXClock()
 {
 
 
-	hasVideo   = false;
-	hasAudio   = false;
-	pauseState       = false;
+    hasVideo   = false;
+    hasAudio   = false;
+    pauseState       = false;
 
-	currentSpeed  = DVD_PLAYSPEED_NORMAL;
+    currentSpeed  = DVD_PLAYSPEED_NORMAL;
 
-	pthread_mutex_init(&m_lock, NULL);
+    pthread_mutex_init(&m_lock, NULL);
 
-	//reset();
+    //reset();
 }
 
 OMXClock::~OMXClock()
 {
     clockComponent.Deinitialize(__func__);
-	pthread_mutex_destroy(&m_lock);
+    pthread_mutex_destroy(&m_lock);
 }
 
 void OMXClock::lock()
 {
-	pthread_mutex_lock(&m_lock);
+    pthread_mutex_lock(&m_lock);
 }
 
 void OMXClock::unlock()
 {
-	pthread_mutex_unlock(&m_lock);
+    pthread_mutex_unlock(&m_lock);
 }
 
 bool OMXClock::init(bool has_video, bool has_audio)
 {
-	OMX_ERRORTYPE error = OMX_ErrorNone;
-	std::string componentName = "OMX.broadcom.clock";
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    std::string componentName = "OMX.broadcom.clock";
 
-	hasVideo = has_video;
-	hasAudio = has_audio;
+    hasVideo = has_video;
+    hasAudio = has_audio;
 
-	pauseState       = false;
+    pauseState       = false;
 
-	if(!clockComponent.init(componentName, OMX_IndexParamOtherInit))
-	{
-		return false;
-	}
+    if(!clockComponent.init(componentName, OMX_IndexParamOtherInit))
+    {
+        return false;
+    }
 
-	OMX_TIME_CONFIG_ACTIVEREFCLOCKTYPE refClock;
-	OMX_INIT_STRUCTURE(refClock);
+    OMX_TIME_CONFIG_ACTIVEREFCLOCKTYPE refClock;
+    OMX_INIT_STRUCTURE(refClock);
 
-	if(hasAudio)
-	{
-		refClock.eClock = OMX_TIME_RefClockAudio;
-	}
-	else
-	{
-		refClock.eClock = OMX_TIME_RefClockVideo;
-	}
+    if(hasAudio)
+    {
+        refClock.eClock = OMX_TIME_RefClockAudio;
+    }
+    else
+    {
+        refClock.eClock = OMX_TIME_RefClockVideo;
+    }
     
-	error = clockComponent.setConfig(OMX_IndexConfigTimeActiveRefClock, &refClock);
+    error = clockComponent.setConfig(OMX_IndexConfigTimeActiveRefClock, &refClock);
     OMX_TRACE(error);
-	if(error != OMX_ErrorNone)
-	{
-		return false;
-	}
+    if(error != OMX_ErrorNone)
+    {
+        return false;
+    }
 
-	return true;
+    return true;
 }
 
 
 Component* OMXClock::getComponent()
 {
-	if(!clockComponent.getHandle())
-	{
-		ofLogError(__func__) << "NO CLOCK YET";
-		return NULL;
-	}
+    if(!clockComponent.getHandle())
+    {
+        ofLogError(__func__) << "NO CLOCK YET";
+        return NULL;
+    }
 
-	return &clockComponent;
+    return &clockComponent;
 }
 
 bool  OMXClock::stop()
 {
-	if(clockComponent.getHandle() == NULL)
-	{
-		ofLogError(__func__) << "NO CLOCK YET";
-		return false;
-	}
+    if(clockComponent.getHandle() == NULL)
+    {
+        ofLogError(__func__) << "NO CLOCK YET";
+        return false;
+    }
 
 
-	lock();
+    lock();
 
-	//ofLogVerbose(__func__) << "START";
+    //ofLogVerbose(__func__) << "START";
 
-	OMX_ERRORTYPE error = OMX_ErrorNone;
-	OMX_TIME_CONFIG_CLOCKSTATETYPE clock;
-	OMX_INIT_STRUCTURE(clock);
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    OMX_TIME_CONFIG_CLOCKSTATETYPE clock;
+    OMX_INIT_STRUCTURE(clock);
 
-	clock.eState = OMX_TIME_ClockStateStopped;
+    clock.eState = OMX_TIME_ClockStateStopped;
 
-	error = clockComponent.setConfig(OMX_IndexConfigTimeClockState, &clock);
+    error = clockComponent.setConfig(OMX_IndexConfigTimeClockState, &clock);
     OMX_TRACE(error);
-	if(error != OMX_ErrorNone)
-	{
-		unlock();
-		return false;
-	}
+    if(error != OMX_ErrorNone)
+    {
+        unlock();
+        return false;
+    }
 
-	unlock();
+    unlock();
 
-	return true;
+    return true;
 }
 
 bool OMXClock::start(double pts)
 {
-	if(clockComponent.getHandle() == NULL)
-	{
-		ofLogError(__func__) << "NO CLOCK YET";
-		return false;
-	}
+    if(clockComponent.getHandle() == NULL)
+    {
+        ofLogError(__func__) << "NO CLOCK YET";
+        return false;
+    }
 
-	lock();
+    lock();
     
     OMX_ERRORTYPE error = clockComponent.setState(OMX_StateExecuting);
     OMX_TRACE(error);
@@ -129,319 +129,319 @@ bool OMXClock::start(double pts)
         unlock();
         return false;
     }
-	OMX_TIME_CONFIG_CLOCKSTATETYPE clock;
-	OMX_INIT_STRUCTURE(clock);
+    OMX_TIME_CONFIG_CLOCKSTATETYPE clock;
+    OMX_INIT_STRUCTURE(clock);
 
-	clock.eState = OMX_TIME_ClockStateRunning;
-	clock.nStartTime = ToOMXTime((uint64_t)pts);
+    clock.eState = OMX_TIME_ClockStateRunning;
+    clock.nStartTime = ToOMXTime((uint64_t)pts);
 
-	error = clockComponent.setConfig(OMX_IndexConfigTimeClockState, &clock);
+    error = clockComponent.setConfig(OMX_IndexConfigTimeClockState, &clock);
     OMX_TRACE(error);
-	if(error != OMX_ErrorNone)
-	{
-		unlock();
-		return false;
-	}
+    if(error != OMX_ErrorNone)
+    {
+        unlock();
+        return false;
+    }
 
-	unlock();
+    unlock();
 
-	return true;
+    return true;
 }
 
 bool OMXClock::step(int steps)
 {
-	if(clockComponent.getHandle() == NULL)
-	{
-		ofLogError(__func__) << "NO CLOCK YET";
-		return false;
-	}
+    if(clockComponent.getHandle() == NULL)
+    {
+        ofLogError(__func__) << "NO CLOCK YET";
+        return false;
+    }
 
-	lock();
+    lock();
 
-	OMX_ERRORTYPE error = OMX_ErrorNone;
-	OMX_PARAM_U32TYPE param;
-	OMX_INIT_STRUCTURE(param);
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    OMX_PARAM_U32TYPE param;
+    OMX_INIT_STRUCTURE(param);
 
-	param.nPortIndex = OMX_ALL;
-	param.nU32 = steps;
+    param.nPortIndex = OMX_ALL;
+    param.nU32 = steps;
 
-	error = clockComponent.setConfig(OMX_IndexConfigSingleStep, &param);
+    error = clockComponent.setConfig(OMX_IndexConfigSingleStep, &param);
     OMX_TRACE(error);
-	if(error != OMX_ErrorNone)
-	{
-		unlock();
-		return false;
-	}
+    if(error != OMX_ErrorNone)
+    {
+        unlock();
+        return false;
+    }
 
-	unlock();
+    unlock();
 
-	return true;
+    return true;
 }
 
 bool OMXClock::reset()
 {
-	if(clockComponent.getHandle() == NULL)
-	{
-		ofLogError(__func__) << "NO CLOCK YET";
-		return false;
-	}
+    if(clockComponent.getHandle() == NULL)
+    {
+        ofLogError(__func__) << "NO CLOCK YET";
+        return false;
+    }
 
-	lock();
+    lock();
 
-	stop();
-	start(0.0);
+    stop();
+    start(0.0);
 
-	unlock();
+    unlock();
 
-	return true;
+    return true;
 }
 
 double OMXClock::getMediaTime()
 {
-	if(clockComponent.getHandle() == NULL)
-	{
-		ofLogError(__func__) << "NO CLOCK YET";
-		return 0;
-	}
+    if(clockComponent.getHandle() == NULL)
+    {
+        ofLogError(__func__) << "NO CLOCK YET";
+        return 0;
+    }
 
-	lock();
+    lock();
 
-	OMX_ERRORTYPE error = OMX_ErrorNone;
-	double pts = 0;
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    double pts = 0;
 
-	OMX_TIME_CONFIG_TIMESTAMPTYPE timeStamp;
-	OMX_INIT_STRUCTURE(timeStamp);
-	timeStamp.nPortIndex = clockComponent.getInputPort();
+    OMX_TIME_CONFIG_TIMESTAMPTYPE timeStamp;
+    OMX_INIT_STRUCTURE(timeStamp);
+    timeStamp.nPortIndex = clockComponent.getInputPort();
 
-	error = clockComponent.getConfig(OMX_IndexConfigTimeCurrentMediaTime, &timeStamp);
+    error = clockComponent.getConfig(OMX_IndexConfigTimeCurrentMediaTime, &timeStamp);
     OMX_TRACE(error);
 
-	if(error != OMX_ErrorNone)
-	{
-		unlock();
-		return 0;
-	}
+    if(error != OMX_ErrorNone)
+    {
+        unlock();
+        return 0;
+    }
 
-	pts = (double)FromOMXTime(timeStamp.nTimestamp);
-	unlock();
+    pts = (double)FromOMXTime(timeStamp.nTimestamp);
+    unlock();
 
-	return pts;
+    return pts;
 }
 
 // Set the media time, so calls to get media time use the updated value,
 // useful after a seek so mediatime is updated immediately (rather than waiting for first decoded packet)
 bool OMXClock::setMediaTime(double pts)
 {
-	if(clockComponent.getHandle() == NULL)
-	{
-		ofLogError(__func__) << "NO CLOCK YET";
-		return false;
-	}
+    if(clockComponent.getHandle() == NULL)
+    {
+        ofLogError(__func__) << "NO CLOCK YET";
+        return false;
+    }
 
-	lock();
+    lock();
 
-	OMX_ERRORTYPE error = OMX_ErrorNone;
-	OMX_INDEXTYPE index;
-	OMX_TIME_CONFIG_TIMESTAMPTYPE timeStamp;
-	OMX_INIT_STRUCTURE(timeStamp);
-	timeStamp.nPortIndex = clockComponent.getInputPort();
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    OMX_INDEXTYPE index;
+    OMX_TIME_CONFIG_TIMESTAMPTYPE timeStamp;
+    OMX_INIT_STRUCTURE(timeStamp);
+    timeStamp.nPortIndex = clockComponent.getInputPort();
 
-	if(hasAudio)
-	{
-		index = OMX_IndexConfigTimeCurrentAudioReference;
-	}
-	else
-	{
-		index = OMX_IndexConfigTimeCurrentVideoReference;
-	}
+    if(hasAudio)
+    {
+        index = OMX_IndexConfigTimeCurrentAudioReference;
+    }
+    else
+    {
+        index = OMX_IndexConfigTimeCurrentVideoReference;
+    }
 
-	timeStamp.nTimestamp = ToOMXTime(pts);
+    timeStamp.nTimestamp = ToOMXTime(pts);
 
-	error = clockComponent.setConfig(index, &timeStamp);
+    error = clockComponent.setConfig(index, &timeStamp);
     OMX_TRACE(error);
 
-	if(error != OMX_ErrorNone)
-	{
-		unlock();
-		return false;
-	}
-	unlock();
+    if(error != OMX_ErrorNone)
+    {
+        unlock();
+        return false;
+    }
+    unlock();
 
-	return true;
+    return true;
 }
 
 bool OMXClock::pause()
 {
-	if(clockComponent.getHandle() == NULL)
-	{
-		ofLogError(__func__) << "NO CLOCK YET";
-		return false;
-	}
+    if(clockComponent.getHandle() == NULL)
+    {
+        ofLogError(__func__) << "NO CLOCK YET";
+        return false;
+    }
 
-	if(!pauseState)
-	{
-		lock();
+    if(!pauseState)
+    {
+        lock();
 
-		if (setSpeed(0, true))
-		{
-			pauseState = true;
-		}
+        if (setSpeed(0, true))
+        {
+            pauseState = true;
+        }
 
-		unlock();
-	}
-	return pauseState == true;
+        unlock();
+    }
+    return pauseState == true;
 }
 
 bool OMXClock::resume()
 {
-	if(clockComponent.getHandle() == NULL)
-	{
-		ofLogError(__func__) << "NO CLOCK YET";
-		return false;
-	}
+    if(clockComponent.getHandle() == NULL)
+    {
+        ofLogError(__func__) << "NO CLOCK YET";
+        return false;
+    }
 
-	if(pauseState)
-	{
-		lock();
+    if(pauseState)
+    {
+        lock();
 
-		if (setSpeed(currentSpeed, true))
-		{
-			pauseState = false;
-		}
+        if (setSpeed(currentSpeed, true))
+        {
+            pauseState = false;
+        }
 
-		unlock();
-	}
-	return pauseState == false;
+        unlock();
+    }
+    return pauseState == false;
 }
 
 #define TRICKPLAY(speed) (speed < 0 || speed > 1.2 * DVD_PLAYSPEED_NORMAL)
 
 bool OMXClock::setSpeed(int speed, bool doResume /* = false */)
 {
-	ofLog(OF_LOG_VERBOSE, "OMXClock::setSpeed(%d)", speed);
+    ofLog(OF_LOG_VERBOSE, "OMXClock::setSpeed(%d)", speed);
 
-	if(clockComponent.getHandle() == NULL)
-	{
-		ofLogError(__func__) << "NO CLOCK YET";
-		return false;
-	}
+    if(clockComponent.getHandle() == NULL)
+    {
+        ofLogError(__func__) << "NO CLOCK YET";
+        return false;
+    }
 
-	lock();
+    lock();
 
-	OMX_ERRORTYPE error = OMX_ErrorNone;
-	OMX_TIME_CONFIG_SCALETYPE scaleType;
-	OMX_INIT_STRUCTURE(scaleType);
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    OMX_TIME_CONFIG_SCALETYPE scaleType;
+    OMX_INIT_STRUCTURE(scaleType);
 
 
-	OMX_TIME_CONFIG_ACTIVEREFCLOCKTYPE refClock;
-	OMX_INIT_STRUCTURE(refClock);
+    OMX_TIME_CONFIG_ACTIVEREFCLOCKTYPE refClock;
+    OMX_INIT_STRUCTURE(refClock);
 
-	if(hasAudio && !TRICKPLAY(speed))
-	{
-		refClock.eClock = OMX_TIME_RefClockAudio;
-	}
-	else
-	{
-		refClock.eClock = OMX_TIME_RefClockVideo;
-	}
+    if(hasAudio && !TRICKPLAY(speed))
+    {
+        refClock.eClock = OMX_TIME_RefClockAudio;
+    }
+    else
+    {
+        refClock.eClock = OMX_TIME_RefClockVideo;
+    }
 
-	error = clockComponent.setConfig(OMX_IndexConfigTimeActiveRefClock, &refClock);
+    error = clockComponent.setConfig(OMX_IndexConfigTimeActiveRefClock, &refClock);
     OMX_TRACE(error);
 
-	if(error != OMX_ErrorNone)
-	{
-		return false;
-	}
-	if (TRICKPLAY(speed))
-	{
-		step(-1);
-	}
-	else
-	{
-		step(0);
-	}
+    if(error != OMX_ErrorNone)
+    {
+        return false;
+    }
+    if (TRICKPLAY(speed))
+    {
+        step(-1);
+    }
+    else
+    {
+        step(0);
+    }
 
-	if (0 && TRICKPLAY(speed))
-	{
-		scaleType.xScale = 0;
-	}
-	else
-	{
-		scaleType.xScale = (speed << 16) / DVD_PLAYSPEED_NORMAL;
-	}
-	error = clockComponent.setConfig(OMX_IndexConfigTimeScale, &scaleType);
+    if (0 && TRICKPLAY(speed))
+    {
+        scaleType.xScale = 0;
+    }
+    else
+    {
+        scaleType.xScale = (speed << 16) / DVD_PLAYSPEED_NORMAL;
+    }
+    error = clockComponent.setConfig(OMX_IndexConfigTimeScale, &scaleType);
     OMX_TRACE(error);
 
-	if(error != OMX_ErrorNone)
-	{
-		unlock();
-		return false;
-	}
+    if(error != OMX_ErrorNone)
+    {
+        unlock();
+        return false;
+    }
 
-	if (!doResume)
-	{
-		currentSpeed = speed;
-	}
+    if (!doResume)
+    {
+        currentSpeed = speed;
+    }
 
-	unlock();
+    unlock();
 
-	return true;
+    return true;
 }
 
 bool OMXClock::enableHDMISync()
 {
-	if(clockComponent.getHandle() == NULL)
-	{
-		ofLogError(__func__) << "NO CLOCK YET";
-		return false;
-	}
+    if(clockComponent.getHandle() == NULL)
+    {
+        ofLogError(__func__) << "NO CLOCK YET";
+        return false;
+    }
 
-	lock();
+    lock();
 
-	OMX_ERRORTYPE error = OMX_ErrorNone;
-	OMX_CONFIG_LATENCYTARGETTYPE latencyTarget;
-	OMX_INIT_STRUCTURE(latencyTarget);
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    OMX_CONFIG_LATENCYTARGETTYPE latencyTarget;
+    OMX_INIT_STRUCTURE(latencyTarget);
 
-	latencyTarget.nPortIndex = OMX_ALL;
-	latencyTarget.bEnabled = OMX_TRUE;
-	latencyTarget.nFilter = 10;
-	latencyTarget.nTarget = 0;
-	latencyTarget.nShift = 3;
-	latencyTarget.nSpeedFactor = -200;
-	latencyTarget.nInterFactor = 100;
-	latencyTarget.nAdjCap = 100;
+    latencyTarget.nPortIndex = OMX_ALL;
+    latencyTarget.bEnabled = OMX_TRUE;
+    latencyTarget.nFilter = 10;
+    latencyTarget.nTarget = 0;
+    latencyTarget.nShift = 3;
+    latencyTarget.nSpeedFactor = -200;
+    latencyTarget.nInterFactor = 100;
+    latencyTarget.nAdjCap = 100;
 
-	error = clockComponent.setConfig(OMX_IndexConfigLatencyTarget, &latencyTarget);
+    error = clockComponent.setConfig(OMX_IndexConfigLatencyTarget, &latencyTarget);
     OMX_TRACE(error);
 
-	if(error != OMX_ErrorNone)
-	{
+    if(error != OMX_ErrorNone)
+    {
         unlock();
-		return false;
-	}
+        return false;
+    }
 
-	unlock();
+    unlock();
 
-	return true;
+    return true;
 }
 
 void  OMXClock::sleep(unsigned int dwMilliSeconds)
 {
-	struct timespec req;
-	req.tv_sec = dwMilliSeconds / 1000;
-	req.tv_nsec = (dwMilliSeconds % 1000) * 1000000;
+    struct timespec req;
+    req.tv_sec = dwMilliSeconds / 1000;
+    req.tv_nsec = (dwMilliSeconds % 1000) * 1000000;
 
-	while ( nanosleep(&req, &req) == -1 && errno == EINTR && (req.tv_nsec > 0 || req.tv_sec > 0));
+    while ( nanosleep(&req, &req) == -1 && errno == EINTR && (req.tv_nsec > 0 || req.tv_sec > 0));
 }
 
 static int64_t CurrentHostCounter(void)
 {
-	struct timespec now;
-	clock_gettime(CLOCK_MONOTONIC, &now);
-	return( ((int64_t)now.tv_sec * 1000000000L) + now.tv_nsec );
+    struct timespec now;
+    clock_gettime(CLOCK_MONOTONIC, &now);
+    return( ((int64_t)now.tv_sec * 1000000000L) + now.tv_nsec );
 }
 
 int64_t OMXClock::getAbsoluteClock()
 {
-	return CurrentHostCounter();
+    return CurrentHostCounter();
 }

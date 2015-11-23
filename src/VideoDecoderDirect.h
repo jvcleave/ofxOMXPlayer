@@ -12,7 +12,7 @@ public:
   
     VideoDecoderDirect();
     ~VideoDecoderDirect();
-    bool open(OMXStreamInfo& streamInfo,
+    bool open(StreamInfo& streamInfo,
               OMXClock *clock,
               bool deinterlace = false, 
               bool hdmi_clock_sync = false);

@@ -2,7 +2,7 @@
 
 #include "ofMain.h"
 #include "Component.h"
-#include "OMXStreamInfo.h"
+#include "StreamInfo.h"
 
 
 class OMXDisplay
@@ -16,7 +16,7 @@ public:
     };
     
     
-    OMX_ERRORTYPE setup(Component& renderComponent_, OMXStreamInfo& streamInfo_, ofRectangle& displayRect_)
+    OMX_ERRORTYPE setup(Component& renderComponent_, StreamInfo& streamInfo_, ofRectangle& displayRect_)
     {
         
         float display_aspect = 1.0; 
@@ -247,7 +247,7 @@ public:
     OMX_CONFIG_DISPLAYREGIONTYPE configDisplay;
     Component renderComponent;
     ofRectangle displayRect;
-    OMXStreamInfo streamInfo;
+    StreamInfo streamInfo;
     bool doMirror;
     bool isReady;
                

@@ -35,24 +35,20 @@ VideoPlayerDirect::VideoPlayerDirect()
 {
 	doHDMISync = false;
 	nonTextureDecoder = NULL;
-
-
 }
+
 VideoPlayerDirect::~VideoPlayerDirect()
 {
-	//ofLogVerbose(__func__) << "START";
 
 	close();
 
 	pthread_cond_destroy(&m_packet_cond);
 	pthread_mutex_destroy(&m_lock);
 	pthread_mutex_destroy(&m_lock_decoder);
-	//ofLogVerbose(__func__) << "END";
 }
 
-bool VideoPlayerDirect::open(OMXStreamInfo& hints, OMXClock *av_clock, bool deinterlace, bool hdmi_clock_sync)
+bool VideoPlayerDirect::open(StreamInfo& hints, OMXClock* av_clock, bool deinterlace, bool hdmi_clock_sync)
 {
-	//ofLogVerbose(__func__) << "VideoPlayerDirect Open";
 
 	if (!av_clock)
 	{
@@ -127,33 +123,25 @@ bool VideoPlayerDirect::openDecoder()
 	}
 	
 	stringstream info;
-	info << "Video width: "	<<	omxStreamInfo.width					<< "\n";
-	info << "Video height: "	<<	omxStreamInfo.height					<< "\n";
-	info << "Video profile: "	<<	omxStreamInfo.profile					<< "\n";
-	info << "Video fps: "		<<	fps							<< "\n";
-	//ofLogVerbose(__func__) << "\n" << info;
-
-	/*ofLog(OF_LOG_VERBOSE, "Video codec %s width %d height %d profile %d fps %f\n",
-		decoder->GetDecoderName().c_str() , omxStreamInfo.width, omxStreamInfo.height, omxStreamInfo.profile, fps);*/
-
-
-
+	info << "Video width: "	<<	omxStreamInfo.width         << "\n";
+	info << "Video height: "	<<	omxStreamInfo.height    << "\n";
+	info << "Video profile: "	<<	omxStreamInfo.profile   << "\n";
+	info << "Video fps: "		<<	fps                     << "\n";
+	ofLogVerbose(__func__) << "\n" << info;
 
 	return true;
 }
 
 bool VideoPlayerDirect::close()
 {
-	//ofLogVerbose(__func__) << " START, isExiting:" << isExiting;
-	doAbort  = true;
-	doFlush   = true;
+	doAbort = true;
+	doFlush = true;
 
 	flush();
 
 	if(ThreadHandle())
 	{
 		lock();
-		//ofLogVerbose(__func__) << "WE ARE STILL THREADED";
 		pthread_cond_broadcast(&m_packet_cond);
 		unlock();
 
@@ -162,24 +150,19 @@ bool VideoPlayerDirect::close()
 	
 	if (nonTextureDecoder && !isExiting)
 	{
-		//ofLogVerbose(__func__) << "PRE DELETE nonTextureDecoder";
 		delete nonTextureDecoder;
 		nonTextureDecoder = NULL;
-		//ofLogVerbose(__func__) << "POST DELETE nonTextureDecoder";
 	}
 
-	isOpen          = false;
-	currentPTS   = DVD_NOPTS_VALUE;
-	speed         = DVD_PLAYSPEED_NORMAL;
+	isOpen      = false;
+	currentPTS  = DVD_NOPTS_VALUE;
+	speed       = DVD_PLAYSPEED_NORMAL;
 
-	//ofLogVerbose(__func__) << " END";
 	return true;
 }
 
 bool VideoPlayerDirect::validateDisplayRect(ofRectangle& rectangle)
 {
-	//ofLogVerbose(__func__) << "displayRect: " << displayRect;
-	//ofLogVerbose(__func__) << "rectangle: " << rectangle;
 	if (displayRect == rectangle) 
 	{
 		return false;

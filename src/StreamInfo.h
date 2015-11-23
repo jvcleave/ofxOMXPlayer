@@ -7,14 +7,12 @@ extern "C" {
 }
 
 
-class CDemuxStream;
-
-class OMXStreamInfo
+class StreamInfo
 {
 	public:
-		OMXStreamInfo();
+		StreamInfo();
 
-		~OMXStreamInfo();
+		~StreamInfo();
 
 		void Clear(); // clears current information
 

@@ -30,11 +30,11 @@ namespace XFILE
 		IOCTRL_CACHE_SETRATE = 4, /**< unsigned int with with speed limit for caching in bytes per second */
 	} EIoControl;
 
-	class CFile
+	class File
 	{
 		public:
-			CFile();
-			~CFile();
+			File();
+			~File();
 
 			bool open(std::string& strFileName, unsigned int flags = 0);
 			bool OpenForWrite(std::string& strFileName, bool bOverWrite);
@@ -50,7 +50,7 @@ namespace XFILE
 				return 6144 /*FFMPEG_FILE_BUFFER_SIZE*/;
 			};
 			int IoControl(EIoControl request, void* param);
-			bool IsgetIsEOF();
+			bool getIsEOF();
 			void rewindFile();
 		private:
 			unsigned int m_flags;

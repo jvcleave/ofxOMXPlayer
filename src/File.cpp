@@ -13,7 +13,7 @@ using namespace std;
 #endif
 
 //*********************************************************************************************
-CFile::CFile()
+File::File()
 {
 	fileObject = NULL;
 	m_flags = 0;
@@ -22,19 +22,19 @@ CFile::CFile()
 }
 
 //*********************************************************************************************
-CFile::~CFile()
+File::~File()
 {
 	if(fileObject && !m_bPipe)
 	{
 		fclose(fileObject);
 	}
 }
-void CFile::rewindFile()
+void File::rewindFile()
 {
 	rewind(fileObject);
 }
 //*********************************************************************************************
-bool CFile::open(std::string& strFileName, unsigned int flags)
+bool File::open(std::string& strFileName, unsigned int flags)
 {
 	m_flags = flags;
 
@@ -58,12 +58,12 @@ bool CFile::open(std::string& strFileName, unsigned int flags)
 	return true;
 }
 
-bool CFile::OpenForWrite(std::string& strFileName, bool bOverWrite)
+bool File::OpenForWrite(std::string& strFileName, bool bOverWrite)
 {
 	return false;
 }
 
-bool CFile::Exists(std::string& strFileName, bool bUseCache /* = true */)
+bool File::Exists(std::string& strFileName, bool bUseCache /* = true */)
 {
 	FILE *fp;
 
@@ -84,7 +84,7 @@ bool CFile::Exists(std::string& strFileName, bool bUseCache /* = true */)
 	return true;
 }
 
-unsigned int CFile::Read(void *lpBuf, int64_t uiBufSize)
+unsigned int File::Read(void *lpBuf, int64_t uiBufSize)
 {
 	unsigned int ret = 0;
 
@@ -99,7 +99,7 @@ unsigned int CFile::Read(void *lpBuf, int64_t uiBufSize)
 }
 
 //*********************************************************************************************
-void CFile::close()
+void File::close()
 {
 	if(fileObject && !m_bPipe)
 	{
@@ -109,24 +109,24 @@ void CFile::close()
 }
 
 //*********************************************************************************************
-int64_t CFile::Seek(int64_t iFilePosition, int iWhence)
+int64_t File::Seek(int64_t iFilePosition, int iWhence)
 {
 	if (!fileObject)
 	{
 		return -1;
 	}
 
-	return fseeko64(fileObject, iFilePosition, iWhence);;
+	return fseeko64(fileObject, iFilePosition, iWhence);
 }
 
 //*********************************************************************************************
-int64_t CFile::GetLength()
+int64_t File::GetLength()
 {
 	return m_iLength;
 }
 
 //*********************************************************************************************
-int64_t CFile::GetPosition()
+int64_t File::GetPosition()
 {
 	if (!fileObject)
 	{
@@ -137,12 +137,12 @@ int64_t CFile::GetPosition()
 }
 
 //*********************************************************************************************
-int CFile::Write(void* lpBuf, int64_t uiBufSize)
+int File::Write(void* lpBuf, int64_t uiBufSize)
 {
 	return -1;
 }
 
-int CFile::IoControl(EIoControl request, void* param)
+int File::IoControl(EIoControl request, void* param)
 {
 	if(request == IOCTRL_SEEK_POSSIBLE && fileObject)
 	{
@@ -161,7 +161,7 @@ int CFile::IoControl(EIoControl request, void* param)
 	return -1;
 }
 
-bool CFile::IsgetIsEOF()
+bool File::getIsEOF()
 {
 	if (!fileObject)
 	{
