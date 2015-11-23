@@ -1,19 +1,19 @@
 #pragma once
 
 
-#include "VideoPlayerBase.h"
-#include "VideoDecoderNonTextured.h"
+#include "BaseVideoPlayer.h"
+#include "VideoDecoderDirect.h"
 
-class VideoPlayerNonTextured : public VideoPlayerBase
+class VideoPlayerDirect : public BaseVideoPlayer
 {
 public:
-    VideoPlayerNonTextured();
-    ~VideoPlayerNonTextured();
+    VideoPlayerDirect();
+    ~VideoPlayerDirect();
     
     bool doDeinterlace;
     bool doHDMISync;
     
-    VideoDecoderNonTextured* nonTextureDecoder;
+    VideoDecoderDirect* nonTextureDecoder;
     
     bool open(OMXStreamInfo& hints, OMXClock *av_clock, bool deinterlace, bool hdmi_clock_sync);
     bool openDecoder();

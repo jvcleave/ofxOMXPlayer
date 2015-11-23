@@ -1,12 +1,12 @@
 #pragma once
 
-#include "VideoPlayerBase.h"
+#include "BaseVideoPlayer.h"
 #include "VideoDecoderTextured.h"
 
 #include <deque>
 #include <sys/types.h>
 
-class VideoPlayerTextured : public VideoPlayerBase
+class VideoPlayerTextured : public BaseVideoPlayer
 {
 public:
     VideoPlayerTextured();

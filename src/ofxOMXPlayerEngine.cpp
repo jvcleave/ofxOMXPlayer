@@ -25,8 +25,8 @@ ofxOMXPlayerEngine::ofxOMXPlayerEngine()
 	isTextureEnabled	= false;
 	doLooping			= false;
 	videoPlayer			= NULL;
-	eglPlayer			= NULL;
-	nonEglPlayer		= NULL;
+	texturedPlayer			= NULL;
+	directPlayer		= NULL;
 	audioPlayer			= NULL;
     clock               = NULL;
 
@@ -69,15 +69,15 @@ ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
 		listener = NULL;
 	}
 
-	if (eglPlayer)
+	if (texturedPlayer)
 	{
-		delete eglPlayer;
-		eglPlayer = NULL;
+		delete texturedPlayer;
+		texturedPlayer = NULL;
 	}
-	if (nonEglPlayer)
+	if (directPlayer)
 	{
-		delete nonEglPlayer;
-		nonEglPlayer = NULL;
+		delete directPlayer;
+		directPlayer = NULL;
 	}
 
 	videoPlayer = NULL;
@@ -301,9 +301,9 @@ void ofxOMXPlayerEngine::setDisplayRect(ofRectangle& rectangle)
 		return;
 	}
 	displayRect = rectangle;
-	if (nonEglPlayer) 
+	if (directPlayer) 
 	{
-		nonEglPlayer->setDisplayRect(displayRect);
+		directPlayer->setDisplayRect(displayRect);
 	}
 }
 
@@ -312,28 +312,28 @@ bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
 
 	if (isTextureEnabled)
 	{
-		if (!eglPlayer)
+		if (!texturedPlayer)
 		{
-			eglPlayer = new VideoPlayerTextured();
+			texturedPlayer = new VideoPlayerTextured();
 		}
-		didVideoOpen = eglPlayer->open(videoStreamInfo, clock, eglImage);
-		videoPlayer = (VideoPlayerBase*)eglPlayer;
+		didVideoOpen = texturedPlayer->open(videoStreamInfo, clock, eglImage);
+		videoPlayer = (BaseVideoPlayer*)texturedPlayer;
 	}
 	else
 	{
-		if (!nonEglPlayer)
+		if (!directPlayer)
 		{
-			nonEglPlayer = new VideoPlayerNonTextured();
+			directPlayer = new VideoPlayerDirect();
 		}
 		bool deinterlace = false;
 		bool hdmi_clock_sync = true;
 		
 		//initially set this
 		displayRect = omxPlayerSettings.displayRect;
-		nonEglPlayer->setDisplayRect(displayRect);
+		directPlayer->setDisplayRect(displayRect);
 		
-		didVideoOpen = nonEglPlayer->open(videoStreamInfo, clock, deinterlace, hdmi_clock_sync);
-		videoPlayer = (VideoPlayerBase*)nonEglPlayer;
+		didVideoOpen = directPlayer->open(videoStreamInfo, clock, deinterlace, hdmi_clock_sync);
+		videoPlayer = (BaseVideoPlayer*)directPlayer;
 		
 
 	}

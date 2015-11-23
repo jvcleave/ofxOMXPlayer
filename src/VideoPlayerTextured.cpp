@@ -86,7 +86,7 @@ bool VideoPlayerTextured::openDecoder()
 
 	}
 
-	decoder = (VideoDecoderBase*)eglImageDecoder;
+	decoder = (BaseVideoDecoder*)eglImageDecoder;
 
 	if(!eglImageDecoder->open(omxStreamInfo, omxClock, eglImage))
 	{

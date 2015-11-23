@@ -1,5 +1,5 @@
 
-#include "VideoPlayerBase.h"
+#include "BaseVideoPlayer.h"
 
 unsigned count_bits(int32_t value)
 {
@@ -11,7 +11,7 @@ unsigned count_bits(int32_t value)
 	return bits;
 }
 
-VideoPlayerBase::VideoPlayerBase()
+BaseVideoPlayer::BaseVideoPlayer()
 {
 	isOpen          = false;
 	omxClock      = NULL;
@@ -32,23 +32,23 @@ VideoPlayerBase::VideoPlayerBase()
 }
 
 
-double VideoPlayerBase::getCurrentPTS()
+double BaseVideoPlayer::getCurrentPTS()
 {
 	return currentPTS;
 }
 
-double VideoPlayerBase::getFPS()
+double BaseVideoPlayer::getFPS()
 {
 	return fps;
 }
 
-unsigned int VideoPlayerBase::getCached()
+unsigned int BaseVideoPlayer::getCached()
 {
 	return cachedSize;
 }
 
 
-int VideoPlayerBase::getCurrentFrame()
+int BaseVideoPlayer::getCurrentFrame()
 {
 	if (decoder) 
 	{
@@ -57,7 +57,7 @@ int VideoPlayerBase::getCurrentFrame()
 	return 0;
 }
 
-void VideoPlayerBase::resetFrameCounter()
+void BaseVideoPlayer::resetFrameCounter()
 {
 	if (decoder) 
 	{
@@ -66,12 +66,12 @@ void VideoPlayerBase::resetFrameCounter()
 }
 
 
-void VideoPlayerBase::setSpeed(int speed_)
+void BaseVideoPlayer::setSpeed(int speed_)
 {
 	speed = speed_;
 }
 
-int VideoPlayerBase::getSpeed()
+int BaseVideoPlayer::getSpeed()
 {
 	return speed;
 }
@@ -79,27 +79,27 @@ int VideoPlayerBase::getSpeed()
 
 
 
-void VideoPlayerBase::lock()
+void BaseVideoPlayer::lock()
 {
 	pthread_mutex_lock(&m_lock);
 }
 
-void VideoPlayerBase::unlock()
+void BaseVideoPlayer::unlock()
 {
 	pthread_mutex_unlock(&m_lock);
 }
 
-void VideoPlayerBase::lockDecoder()
+void BaseVideoPlayer::lockDecoder()
 {
 	pthread_mutex_lock(&m_lock_decoder);
 }
 
-void VideoPlayerBase::unlockDecoder()
+void BaseVideoPlayer::unlockDecoder()
 {
 	pthread_mutex_unlock(&m_lock_decoder);
 }
 
-bool VideoPlayerBase::decode(OMXPacket *pkt)
+bool BaseVideoPlayer::decode(OMXPacket *pkt)
 {
 	if(!pkt)
 	{
@@ -125,13 +125,13 @@ bool VideoPlayerBase::decode(OMXPacket *pkt)
 		currentPTS = pts;
 	}
 	
-	//ofLog(OF_LOG_VERBOSE, "VideoPlayerBase::Decode dts:%.0f pts:%.0f cur:%.0f, size:%d", pkt->dts, pkt->pts, currentPTS, pkt->size);
+	//ofLog(OF_LOG_VERBOSE, "BaseVideoPlayer::Decode dts:%.0f pts:%.0f cur:%.0f, size:%d", pkt->dts, pkt->pts, currentPTS, pkt->size);
 	return decoder->decode(pkt->data, pkt->size, pts);
 }
 
 
 
-void VideoPlayerBase::flush()
+void BaseVideoPlayer::flush()
 {
 
 
@@ -162,7 +162,7 @@ void VideoPlayerBase::flush()
 
 
 
-bool VideoPlayerBase::addPacket(OMXPacket *pkt)
+bool BaseVideoPlayer::addPacket(OMXPacket *pkt)
 {
 	bool ret = false;
 
@@ -192,7 +192,7 @@ bool VideoPlayerBase::addPacket(OMXPacket *pkt)
 
 
 
-void VideoPlayerBase::process()
+void BaseVideoPlayer::process()
 {
 	OMXPacket *omxPacket = NULL;
 
@@ -260,7 +260,7 @@ void VideoPlayerBase::process()
 	}
 }
 
-bool VideoPlayerBase::closeDecoder()
+bool BaseVideoPlayer::closeDecoder()
 {
 	if(decoder)
 	{
@@ -270,7 +270,7 @@ bool VideoPlayerBase::closeDecoder()
 	return true;
 }
 
-void VideoPlayerBase::submitEOS()
+void BaseVideoPlayer::submitEOS()
 {
 	if(decoder)
 	{
@@ -278,7 +278,7 @@ void VideoPlayerBase::submitEOS()
 	}
 }
 
-bool VideoPlayerBase::EOS()
+bool BaseVideoPlayer::EOS()
 {
 	bool atEndofStream = false;
 

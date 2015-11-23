@@ -1,4 +1,4 @@
-#include "VideoDecoderBase.h"
+#include "BaseVideoDecoder.h"
 
 
 
@@ -10,7 +10,7 @@
 #include <inttypes.h>
 
 
-VideoDecoderBase::VideoDecoderBase()
+BaseVideoDecoder::BaseVideoDecoder()
 {
 
 	isOpen           = false;
@@ -23,7 +23,7 @@ VideoDecoderBase::VideoDecoderBase()
 	clockComponent			= NULL;
 }
 
-VideoDecoderBase::~VideoDecoderBase()
+BaseVideoDecoder::~BaseVideoDecoder()
 {
     SingleLock lock (m_critSection);
     OMX_ERRORTYPE error = OMX_ErrorNone;
@@ -62,7 +62,7 @@ VideoDecoderBase::~VideoDecoderBase()
 }
 
 
-bool VideoDecoderBase::NaluFormatStartCodes(enum AVCodecID codec, uint8_t *in_extradata, int in_extrasize)
+bool BaseVideoDecoder::NaluFormatStartCodes(enum AVCodecID codec, uint8_t *in_extradata, int in_extrasize)
 {
 	switch(codec)
 	{
@@ -86,7 +86,7 @@ bool VideoDecoderBase::NaluFormatStartCodes(enum AVCodecID codec, uint8_t *in_ex
 
 
 
-bool VideoDecoderBase::sendDecoderConfig()
+bool BaseVideoDecoder::sendDecoderConfig()
 {
 	OMX_ERRORTYPE error   = OMX_ErrorNone;
 
@@ -128,7 +128,7 @@ bool VideoDecoderBase::sendDecoderConfig()
 
 
 
-void VideoDecoderBase::submitEOS()
+void BaseVideoDecoder::submitEOS()
 {
 	if(!isOpen)
 	{
@@ -155,7 +155,7 @@ void VideoDecoderBase::submitEOS()
 
 }
 
-bool VideoDecoderBase::EOS()
+bool BaseVideoDecoder::EOS()
 {
 	bool isEndOfStream = false;
 	if(!isOpen)
@@ -174,12 +174,12 @@ bool VideoDecoderBase::EOS()
 	}
 	if (isEndOfStream)
 	{
-		ofLogVerbose("VideoDecoderBase::EOS") << "isEndOfStream: " << isEndOfStream;
+		ofLogVerbose("BaseVideoDecoder::EOS") << "isEndOfStream: " << isEndOfStream;
 	}
 	return isEndOfStream;
 }
 
-bool VideoDecoderBase::pause()
+bool BaseVideoDecoder::pause()
 {
 	if(renderComponent.getHandle() == NULL)
 	{
@@ -199,7 +199,7 @@ bool VideoDecoderBase::pause()
 	return true;
 }
 
-bool VideoDecoderBase::resume()
+bool BaseVideoDecoder::resume()
 {
 	if(renderComponent.getHandle() == NULL)
 	{
@@ -218,7 +218,7 @@ bool VideoDecoderBase::resume()
 	return true;
 }
 
-void VideoDecoderBase::Reset()
+void BaseVideoDecoder::Reset()
 {
 	//ofLogVerbose(__func__) << " START";
 
@@ -229,7 +229,7 @@ void VideoDecoderBase::Reset()
 }
 
 
-void VideoDecoderBase::processCodec(OMXStreamInfo& hints)
+void BaseVideoDecoder::processCodec(OMXStreamInfo& hints)
 {
 	switch (hints.codec)
 	{

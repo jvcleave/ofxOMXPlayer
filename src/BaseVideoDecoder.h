@@ -13,11 +13,11 @@
 #include "OMXReader.h"
 #include "SingleLock.h"
 
-class VideoDecoderBase
+class BaseVideoDecoder
 {
 public:
-    VideoDecoderBase();
-    virtual ~VideoDecoderBase();
+    BaseVideoDecoder();
+    virtual ~BaseVideoDecoder();
     OMX_VIDEO_CODINGTYPE omxCodingType;
     
     Tunnel clockTunnel;

@@ -1,8 +1,8 @@
-#include "VideoDecoderNonTextured.h"
+#include "VideoDecoderDirect.h"
 
 
 
-VideoDecoderNonTextured::VideoDecoderNonTextured()
+VideoDecoderDirect::VideoDecoderDirect()
 {
 
 	doDeinterlace       = false;
@@ -12,13 +12,13 @@ VideoDecoderNonTextured::VideoDecoderNonTextured()
 }
 
 
-VideoDecoderNonTextured::~VideoDecoderNonTextured()
+VideoDecoderDirect::~VideoDecoderDirect()
 {
-	ofRemoveListener(ofEvents().update, this, &VideoDecoderNonTextured::onUpdate);
+	ofRemoveListener(ofEvents().update, this, &VideoDecoderDirect::onUpdate);
 	//ofLogVerbose(__func__) << "removed update listener";
 }
 
-bool VideoDecoderNonTextured::open(OMXStreamInfo& streamInfo, OMXClock *clock, bool deinterlace, bool hdmi_clock_sync)
+bool VideoDecoderDirect::open(OMXStreamInfo& streamInfo, OMXClock *clock, bool deinterlace, bool hdmi_clock_sync)
 {
 	OMX_ERRORTYPE error   = OMX_ErrorNone;
 
@@ -273,7 +273,7 @@ bool VideoDecoderNonTextured::open(OMXStreamInfo& streamInfo, OMXClock *clock, b
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
     
-	ofAddListener(ofEvents().update, this, &VideoDecoderNonTextured::onUpdate);
+	ofAddListener(ofEvents().update, this, &VideoDecoderDirect::onUpdate);
 	if(!sendDecoderConfig())
 	{
 		return false;
@@ -285,7 +285,7 @@ bool VideoDecoderNonTextured::open(OMXStreamInfo& streamInfo, OMXClock *clock, b
 	display.setup(renderComponent, streamInfo, displayRect);
 	ofLog(OF_LOG_VERBOSE,
 	      "%s::%s - decoder_component(0x%p), input_port(0x%x), output_port(0x%x) deinterlace %d hdmiclocksync %d\n",
-	      "VideoDecoderNonTextured", __func__, decoderComponent.getHandle(), decoderComponent.getInputPort(), decoderComponent.getOutputPort(),
+	      "VideoDecoderDirect", __func__, decoderComponent.getHandle(), decoderComponent.getInputPort(), decoderComponent.getOutputPort(),
 	      doDeinterlace, doHDMISync);
 
 	isFirstFrame   = true;
@@ -295,13 +295,13 @@ bool VideoDecoderNonTextured::open(OMXStreamInfo& streamInfo, OMXClock *clock, b
 	return true;
 }
 
-void VideoDecoderNonTextured::onUpdate(ofEventArgs& args)
+void VideoDecoderDirect::onUpdate(ofEventArgs& args)
 {
     //TODO: seems to cause hang on exit
     
 	//updateFrameCount();
 }
-void VideoDecoderNonTextured::updateFrameCount()
+void VideoDecoderDirect::updateFrameCount()
 {
 	if (!isOpen) {
 		return;
@@ -336,18 +336,18 @@ void VideoDecoderNonTextured::updateFrameCount()
 	}
 }
 
-int VideoDecoderNonTextured::getCurrentFrame()
+int VideoDecoderDirect::getCurrentFrame()
 {
 	return frameCounter - frameOffset;
 }
 
-void VideoDecoderNonTextured::resetFrameCounter()
+void VideoDecoderDirect::resetFrameCounter()
 {
 	frameOffset = frameCounter;
 }
 
 
-bool VideoDecoderNonTextured::decode(uint8_t *pData, int iSize, double pts)
+bool VideoDecoderDirect::decode(uint8_t *pData, int iSize, double pts)
 {
 	SingleLock lock (m_critSection);
 	OMX_ERRORTYPE error;
@@ -378,7 +378,7 @@ bool VideoDecoderNonTextured::decode(uint8_t *pData, int iSize, double pts)
 			if(doSetStartTime)
 			{
 				omxBuffer->nFlags |= OMX_BUFFERFLAG_STARTTIME;
-				ofLog(OF_LOG_VERBOSE, "VideoDecoderNonTextured::Decode VDec : setStartTime %f\n", (pts == DVD_NOPTS_VALUE ? 0.0 : pts) / DVD_TIME_BASE);
+				ofLog(OF_LOG_VERBOSE, "VideoDecoderDirect::Decode VDec : setStartTime %f\n", (pts == DVD_NOPTS_VALUE ? 0.0 : pts) / DVD_TIME_BASE);
 				doSetStartTime = false;
 			}
 			else if(pts == DVD_NOPTS_VALUE)
@@ -430,7 +430,7 @@ bool VideoDecoderNonTextured::decode(uint8_t *pData, int iSize, double pts)
 
 	return false;
 }
-void VideoDecoderNonTextured::setDisplayRect(ofRectangle& rectangle)
+void VideoDecoderDirect::setDisplayRect(ofRectangle& rectangle)
 {
 	//display.setDisplayRect(rectangle);
     display.cropRandom();

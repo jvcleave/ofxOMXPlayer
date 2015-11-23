@@ -2,9 +2,9 @@
 
 #include "ofMain.h"
 #include "ofAppEGLWindow.h"
-#include "VideoDecoderBase.h"
+#include "BaseVideoDecoder.h"
 
-class VideoDecoderTextured : public VideoDecoderBase
+class VideoDecoderTextured : public BaseVideoDecoder
 {
 public:
     VideoDecoderTextured();

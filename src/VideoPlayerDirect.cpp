@@ -21,7 +21,7 @@
 
 
 
-#include "VideoPlayerNonTextured.h"
+#include "VideoPlayerDirect.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -31,14 +31,14 @@
 #include "XMemUtils.h"
 
 
-VideoPlayerNonTextured::VideoPlayerNonTextured()
+VideoPlayerDirect::VideoPlayerDirect()
 {
 	doHDMISync = false;
 	nonTextureDecoder = NULL;
 
 
 }
-VideoPlayerNonTextured::~VideoPlayerNonTextured()
+VideoPlayerDirect::~VideoPlayerDirect()
 {
 	//ofLogVerbose(__func__) << "START";
 
@@ -50,9 +50,9 @@ VideoPlayerNonTextured::~VideoPlayerNonTextured()
 	//ofLogVerbose(__func__) << "END";
 }
 
-bool VideoPlayerNonTextured::open(OMXStreamInfo& hints, OMXClock *av_clock, bool deinterlace, bool hdmi_clock_sync)
+bool VideoPlayerDirect::open(OMXStreamInfo& hints, OMXClock *av_clock, bool deinterlace, bool hdmi_clock_sync)
 {
-	//ofLogVerbose(__func__) << "VideoPlayerNonTextured Open";
+	//ofLogVerbose(__func__) << "VideoPlayerDirect Open";
 
 	if (!av_clock)
 	{
@@ -94,7 +94,7 @@ bool VideoPlayerNonTextured::open(OMXStreamInfo& hints, OMXClock *av_clock, bool
 }
 
 
-bool VideoPlayerNonTextured::openDecoder()
+bool VideoPlayerDirect::openDecoder()
 {
 
 	if (omxStreamInfo.fpsrate && omxStreamInfo.fpsscale)
@@ -114,11 +114,11 @@ bool VideoPlayerNonTextured::openDecoder()
 
 	frameTime = (double)DVD_TIME_BASE / fps;
 
-	nonTextureDecoder = new VideoDecoderNonTextured();
+	nonTextureDecoder = new VideoDecoderDirect();
 	
 	nonTextureDecoder->setDisplayRect(displayRect);
 
-	decoder = (VideoDecoderBase*)nonTextureDecoder;
+	decoder = (BaseVideoDecoder*)nonTextureDecoder;
 	if(!nonTextureDecoder->open(omxStreamInfo, omxClock, doDeinterlace, doHDMISync))
 	{
 
@@ -142,7 +142,7 @@ bool VideoPlayerNonTextured::openDecoder()
 	return true;
 }
 
-bool VideoPlayerNonTextured::close()
+bool VideoPlayerDirect::close()
 {
 	//ofLogVerbose(__func__) << " START, isExiting:" << isExiting;
 	doAbort  = true;
@@ -157,7 +157,7 @@ bool VideoPlayerNonTextured::close()
 		pthread_cond_broadcast(&m_packet_cond);
 		unlock();
 
-		StopThread("VideoPlayerNonTextured");
+		StopThread("VideoPlayerDirect");
 	}
 	
 	if (nonTextureDecoder && !isExiting)
@@ -176,7 +176,7 @@ bool VideoPlayerNonTextured::close()
 	return true;
 }
 
-bool VideoPlayerNonTextured::validateDisplayRect(ofRectangle& rectangle)
+bool VideoPlayerDirect::validateDisplayRect(ofRectangle& rectangle)
 {
 	//ofLogVerbose(__func__) << "displayRect: " << displayRect;
 	//ofLogVerbose(__func__) << "rectangle: " << rectangle;
@@ -187,7 +187,7 @@ bool VideoPlayerNonTextured::validateDisplayRect(ofRectangle& rectangle)
 	displayRect = rectangle;
 	return true;
 }
-void VideoPlayerNonTextured::setDisplayRect(ofRectangle& rectangle)
+void VideoPlayerDirect::setDisplayRect(ofRectangle& rectangle)
 {
 	if (ThreadHandle()) 
 	{

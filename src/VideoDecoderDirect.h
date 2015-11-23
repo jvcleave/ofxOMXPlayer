@@ -2,16 +2,16 @@
 
 #include "ofMain.h"
 
-#include "VideoDecoderBase.h"
+#include "BaseVideoDecoder.h"
 #include "OMXDisplay.h"
 
 
-class VideoDecoderNonTextured : public VideoDecoderBase
+class VideoDecoderDirect : public BaseVideoDecoder
 {
 public:
   
-    VideoDecoderNonTextured();
-    ~VideoDecoderNonTextured();
+    VideoDecoderDirect();
+    ~VideoDecoderDirect();
     bool open(OMXStreamInfo& streamInfo,
               OMXClock *clock,
               bool deinterlace = false, 
