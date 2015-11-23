@@ -16,13 +16,15 @@ public:
     };
     
     
-    OMX_ERRORTYPE setup(Component& renderComponent_, StreamInfo& streamInfo_, ofRectangle& displayRect_)
+    OMX_ERRORTYPE setup(Component& renderComponent_, StreamInfo& streamInfo_)
     {
         
-        float display_aspect = 1.0; 
+        
         renderComponent = renderComponent_;
-        displayRect = displayRect_;
+        displayRect.set(0, 0, streamInfo.width, streamInfo.height);
         streamInfo = streamInfo_;
+        
+        
         OMX_INIT_STRUCTURE(configDisplay);
         configDisplay.nPortIndex = renderComponent.getInputPort();
         isReady = true;
@@ -40,38 +42,47 @@ public:
 
         }else
         {
-            float fAspect = (float)streamInfo.aspect / (float)streamInfo.width * (float)streamInfo.height;
+            float videoAspectRatio = (float)streamInfo.aspect / (float)streamInfo.width * (float)streamInfo.height;
+            float displayAspectRatio = 1.0; 
             
-            float par = 0.0f;
+            float pixelAspectRatio = 0.0f;
             if(streamInfo.aspect)
             {
-                par = fAspect/display_aspect;
+                pixelAspectRatio = videoAspectRatio/displayAspectRatio;
             }
-            //float par = streamInfo.aspect ? fAspect/display_aspect : 0.0f;
-            // only set aspect when we have a aspect and display doesn't match the aspect
-            if(par != 0.0f && fabs(par - 1.0f) > 0.01f)
-            {
-                
-                
-                AVRational aspect;
-                aspect = av_d2q(par, 100);
-                error = setPixel(aspect.num, aspect.den);
-                OMX_TRACE(error)
-                ofLog(OF_LOG_VERBOSE, "Aspect : num %d den %d aspect %f pixel aspect %f\n", aspect.num, aspect.den, streamInfo.aspect, par);
-                
-            }
+            error = setPixelAspectRatio(pixelAspectRatio);
         }
+        
         OMX_TRACE(error);
+        return error;
+        
+    }
+    
+    OMX_ERRORTYPE setPixelAspectRatio(float pixelAspectRatio)
+    {
+        OMX_ERRORTYPE error = OMX_ErrorNone;
+        
+        // only set aspect when we have a aspect and display doesn't match the aspect
+        if(pixelAspectRatio != 0.0f && fabs(pixelAspectRatio - 1.0f) > 0.01f)
+        {
+            
+            
+            AVRational aspectRatio;
+            aspectRatio = av_d2q(pixelAspectRatio, 100);
+            
+            configDisplay.set      = OMX_DISPLAY_SET_PIXEL;
+            configDisplay.pixel_x  = aspectRatio.num;
+            configDisplay.pixel_y  = aspectRatio.den;
+            error = applyConfig();
+            OMX_TRACE(error)
+            ofLog(OF_LOG_VERBOSE, "Aspect : num %d den %d aspect %f pixel aspect %f\n", aspectRatio.num, aspectRatio.den, streamInfo.aspect, pixelAspectRatio);
+            
+        }
+        
         
         return error;
     }
-    OMX_ERRORTYPE setPixel(int x, int y)
-    {
-        configDisplay.set      = OMX_DISPLAY_SET_PIXEL;
-        configDisplay.pixel_x  = x;
-        configDisplay.pixel_y  = y;
-        return applyConfig();
-    }
+    
     OMX_ERRORTYPE setDestinationRect(ofRectangle& rectangle)
     {
         configDisplay.set     = OMX_DISPLAY_SET_DEST_RECT;
@@ -89,6 +100,7 @@ public:
         configDisplay.fullscreen = (OMX_BOOL)doFullScreen;
         return applyConfig();
     }
+    
     OMX_ERRORTYPE applyConfig()
     {
         if(!isReady) return OMX_ErrorNone;
@@ -142,16 +154,12 @@ public:
         {
             return error;
         }
-
- 
-        
         configDisplay.set = OMX_DISPLAY_SET_TRANSFORM;
         configDisplay.transform  = type;
-        error = applyConfig();
         
+        error = applyConfig();
         OMX_TRACE(error);
         return error;
-        
     }
     
     
@@ -196,6 +204,7 @@ public:
                     break;
             }
         }
+        
         OMX_ERRORTYPE error = rotateDisplay(type);
         OMX_TRACE(error);
         return error;
@@ -205,7 +214,6 @@ public:
     {
         int randomRotation = ofRandom(0, 7);
         ofLogVerbose() << "randomRotation: " << randomRotation;
-        
         OMX_ERRORTYPE error = rotateDisplay((OMX_DISPLAYTRANSFORMTYPE)randomRotation);
         OMX_TRACE(error);
         return error;

@@ -104,7 +104,7 @@ bool VideoPlayerDirect::openDecoder()
 
 	if( fps > 100 || fps < 5 )
 	{
-		ofLog(OF_LOG_VERBOSE, "Invalid framerate %d, using forced 25fps and just trust timestamps\n", (int)fps);
+		ofLog(OF_LOG_VERBOSE, "Invalid framerate %d, using forced 25fps and just trust timestamps\n", (int)fps); 
 		fps = 25;
 	}
 
@@ -112,8 +112,6 @@ bool VideoPlayerDirect::openDecoder()
 
 	nonTextureDecoder = new VideoDecoderDirect();
 	
-	nonTextureDecoder->setDisplayRect(displayRect);
-
 	decoder = (BaseVideoDecoder*)nonTextureDecoder;
 	if(!nonTextureDecoder->open(omxStreamInfo, omxClock, doDeinterlace, doHDMISync))
 	{
@@ -161,29 +159,14 @@ bool VideoPlayerDirect::close()
 	return true;
 }
 
-bool VideoPlayerDirect::validateDisplayRect(ofRectangle& rectangle)
-{
-	if (displayRect == rectangle) 
-	{
-		return false;
-	}
-	displayRect = rectangle;
-	return true;
-}
 void VideoPlayerDirect::setDisplayRect(ofRectangle& rectangle)
 {
 	if (ThreadHandle()) 
 	{
 		lock();
-			if(validateDisplayRect(rectangle))
-			{
-				lockDecoder();
-					nonTextureDecoder->setDisplayRect(displayRect);
-				unlockDecoder();
-			}
+        lockDecoder();
+            nonTextureDecoder->setDisplayRect(rectangle);
+        unlockDecoder();
 		unlock();
-	}else 
-	{
-		validateDisplayRect(rectangle);
 	}
 }

@@ -29,9 +29,7 @@ public:
     Component imageFXComponent;
     Tunnel imageFXTunnel;
     bool doDeinterlace;
-    bool doHDMISync;
-    ofRectangle displayRect;
-    
+    bool doHDMISync;    
     OMXDisplay display;
     
 private:

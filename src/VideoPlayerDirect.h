@@ -18,7 +18,6 @@ public:
     bool open(StreamInfo& hints, OMXClock *av_clock, bool deinterlace, bool hdmi_clock_sync);
     bool openDecoder();
     bool close();
-    ofRectangle displayRect;
     void setDisplayRect(ofRectangle& rectangle);
-    bool validateDisplayRect(ofRectangle& rectangle);
+
 };

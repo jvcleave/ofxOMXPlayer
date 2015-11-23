@@ -226,9 +226,10 @@ bool ofxOMXPlayerEngine::setup(ofxOMXPlayerSettings& settings)
         
         if (hasVideo)
         {
-            //ofLogVerbose(__func__) << "Video streams detection PASS";
             
+            //again?
             omxReader.getHints(OMXSTREAM_VIDEO, videoStreamInfo);
+            
             videoWidth = videoStreamInfo.width;
             videoHeight = videoStreamInfo.height;
             omxPlayerSettings.videoWidth = videoStreamInfo.width;
@@ -278,12 +279,6 @@ void ofxOMXPlayerEngine::setDisplayRect(float x, float y, float w, float h)
 
 void ofxOMXPlayerEngine::setDisplayRect(ofRectangle& rectangle) 
 {
-    if (displayRect == rectangle) 
-    {
-        //ofLogVerbose(__func__) << " displayRect: " << displayRect << " rectangle: " << rectangle;
-        
-        return;
-    }
     displayRect = rectangle;
     if (directPlayer) 
     {
@@ -312,13 +307,14 @@ bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
         bool deinterlace = false;
         bool hdmi_clock_sync = true;
         
-        //initially set this
-        displayRect = omxPlayerSettings.displayRect;
-        directPlayer->setDisplayRect(displayRect);
+        
+        
         
         didVideoOpen = directPlayer->open(videoStreamInfo, clock, deinterlace, hdmi_clock_sync);
         videoPlayer = (BaseVideoPlayer*)directPlayer;
-        
+        //initially set this
+        displayRect = omxPlayerSettings.displayRect;
+        directPlayer->setDisplayRect(displayRect);
         
     }
     

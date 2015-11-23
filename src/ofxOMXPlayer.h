@@ -64,6 +64,9 @@ public:
     ofFbo           fbo;
     ofTexture       texture;
     unsigned char*  pixels;
+    
+    OMXDisplay* displayManager; 
+    
 private:
     vector<int> signals;
     bool openEngine(int startTimeInSeconds = 0);

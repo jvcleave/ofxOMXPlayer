@@ -282,7 +282,7 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, bool dein
 	isOpen           = true;
 	doSetStartTime      = true;
 	
-	display.setup(renderComponent, streamInfo, displayRect);
+	display.setup(renderComponent, streamInfo);
 	ofLog(OF_LOG_VERBOSE,
 	      "%s::%s - decoder_component(0x%p), input_port(0x%x), output_port(0x%x) deinterlace %d hdmiclocksync %d\n",
 	      "VideoDecoderDirect", __func__, decoderComponent.getHandle(), decoderComponent.getInputPort(), decoderComponent.getOutputPort(),
