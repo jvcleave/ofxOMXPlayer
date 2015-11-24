@@ -189,8 +189,8 @@ bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
         didVideoOpen = directPlayer->open(videoStreamInfo, clock, deinterlace, hdmi_clock_sync);
         videoPlayer = (BaseVideoPlayer*)directPlayer;
         //initially set this
-        displayRect = omxPlayerSettings.displayRect;
-        directPlayer->setDisplayRect(displayRect);
+        //displayRect = omxPlayerSettings.displayRect;
+        //directPlayer->setDisplayRect(displayRect);
         
     }
     
@@ -507,7 +507,10 @@ void ofxOMXPlayerEngine::play()
 #pragma mark display stuff
 void ofxOMXPlayerEngine::updateDisplay(ofRectangle& cropRectangle, ofRectangle& drawRectangle)
 {
-
+    if(directPlayer)
+    {
+        directPlayer->updateDisplay(cropRectangle, drawRectangle);
+    }
 }
 
 /*

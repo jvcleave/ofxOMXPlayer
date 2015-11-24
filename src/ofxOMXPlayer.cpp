@@ -572,7 +572,7 @@ void ofxOMXPlayer::updateFBO()
     {
         fbo.begin();
         ofClear(0, 0, 0, 0);
-        texture.draw(0, 0, texture.getWidth(), texture.getHeight());
+        texture.draw(0, 0, texture.getWidth(), texture.getHeight()); 
         fbo.end();
     }
 }
@@ -601,10 +601,9 @@ void ofxOMXPlayer::updateCurrentFrame()
 
 void ofxOMXPlayer::updateDisplaySettings()
 {
-    if (engine && engine->directPlayer)
+    if (engine)
     {
-        directPlayer->setCrop(cropRectangle); 
-        directPlayer->setDisplayRect(drawRectangle);
+        engine->updateDisplay(cropRectangle, drawRectangle);
     }
 }
 

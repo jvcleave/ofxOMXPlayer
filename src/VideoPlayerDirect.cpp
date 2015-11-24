@@ -159,13 +159,13 @@ bool VideoPlayerDirect::close()
 	return true;
 }
 
-void VideoPlayerDirect::setDisplayRect(ofRectangle& rectangle)
+void VideoPlayerDirect::updateDisplay(ofRectangle& cropRectangle, ofRectangle& drawRectangle)
 {
 	if (ThreadHandle()) 
 	{
 		lock();
         lockDecoder();
-            nonTextureDecoder->setDisplayRect(rectangle);
+            nonTextureDecoder->updateDisplay(cropRectangle, drawRectangle);
         unlockDecoder();
 		unlock();
 	}

@@ -19,7 +19,7 @@ public:
     
     bool decode(uint8_t *pData, int iSize, double pts);
   
-    void setDisplayRect(ofRectangle& rectangle);
+    void updateDisplay(ofRectangle& cropRectangle, ofRectangle& rectangle);
     void updateFrameCount();
     void onUpdate(ofEventArgs& args);
     

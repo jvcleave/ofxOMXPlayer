@@ -114,7 +114,7 @@ public:
         
         return error;
     }
-    
+   
     OMX_ERRORTYPE setDestinationRect(ofRectangle& rectangle)
     {
         configDisplay.set     = OMX_DISPLAY_SET_DEST_RECT;
@@ -288,7 +288,11 @@ public:
         return error;
     }
     
-    
+    void updateDisplay(ofRectangle& cropRectangle, ofRectangle& drawRectangle)
+    {
+        setCrop(cropRectangle);
+        setDisplayRect(drawRectangle);
+    }
     OMX_CONFIG_DISPLAYREGIONTYPE configDisplay;
     Component renderComponent;
     ofRectangle displayRect;

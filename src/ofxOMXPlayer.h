@@ -32,8 +32,11 @@ public:
     int         getTotalNumFrames();
     
     void        draw(float x, float y, float w, float h);
-    void        setDisplayRectForNonTexture(float x, float y, float width, float height);
     void        draw(float x=0, float y=0);
+    
+    //direct only
+    void        setDisplayRect(float x, float y, float width, float height);
+    void        cropVideo(ofRectangle& cropRectangle_);
     
     void        increaseVolume();
     void        decreaseVolume();
@@ -65,8 +68,7 @@ public:
     ofTexture       texture;
     unsigned char*  pixels;
     
-    
-    void cropVideo(ofRectangle& cropRectangle_);
+
     
 private:
     vector<int> signals;
