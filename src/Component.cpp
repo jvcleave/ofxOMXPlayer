@@ -112,7 +112,11 @@ void Component::unlock()
 
 OMX_ERRORTYPE Component::EmptyThisBuffer(OMX_BUFFERHEADERTYPE *omxBuffer)
 {
-    assert(!handle);
+    if(!handle) 
+{
+	ofLogError(__func__) << getName() << " NO HANDLE";
+	return OMX_ErrorNone;
+}
 
 	if(!omxBuffer)
 	{
@@ -126,7 +130,11 @@ OMX_ERRORTYPE Component::EmptyThisBuffer(OMX_BUFFERHEADERTYPE *omxBuffer)
 
 OMX_ERRORTYPE Component::FillThisBuffer(OMX_BUFFERHEADERTYPE *omxBuffer)
 {
-    assert(!handle);
+    if(!handle) 
+{
+	ofLogError(__func__) << getName() << " NO HANDLE";
+	return OMX_ErrorNone;
+}
 
 	if(!omxBuffer)
 	{
@@ -141,7 +149,11 @@ OMX_ERRORTYPE Component::FillThisBuffer(OMX_BUFFERHEADERTYPE *omxBuffer)
 
 OMX_ERRORTYPE Component::FreeOutputBuffer(OMX_BUFFERHEADERTYPE *omxBuffer)
 {
-    assert(!handle);
+    if(!handle) 
+{
+	ofLogError(__func__) << getName() << " NO HANDLE";
+	return OMX_ErrorNone;
+}
     
     if(!omxBuffer)
     {
@@ -163,7 +175,10 @@ void Component::flushAll()
 
 void Component::flushInput()
 {
-	assert(!handle);
+	if(!handle) 
+{
+	ofLogError(__func__) << getName() << " NO HANDLE";
+}
 	lock();
 
 	OMX_ERRORTYPE error = OMX_ErrorNone;
@@ -175,7 +190,10 @@ void Component::flushInput()
 
 void Component::flushOutput()
 {
-    assert(!handle);
+    if(!handle) 
+{
+	ofLogError(__func__) << getName() << " NO HANDLE";
+}
 	lock();
 
 	OMX_ERRORTYPE error = OMX_ErrorNone;
@@ -189,7 +207,10 @@ void Component::flushOutput()
 // timeout in milliseconds
 OMX_BUFFERHEADERTYPE* Component::getInputBuffer(long timeout)
 {
-	assert(!handle);
+	if(!handle) 
+{
+	ofLogError(__func__) << getName() << " NO HANDLE";
+}
     
     OMX_BUFFERHEADERTYPE *omx_input_buffer = NULL;
 
@@ -220,7 +241,10 @@ OMX_BUFFERHEADERTYPE* Component::getInputBuffer(long timeout)
 
 OMX_BUFFERHEADERTYPE* Component::getOutputBuffer()
 {
-    assert(!handle);
+    if(!handle) 
+{
+	ofLogError(__func__) << getName() << " NO HANDLE";
+}
 	OMX_BUFFERHEADERTYPE *omx_output_buffer = NULL;
 
 
@@ -239,7 +263,11 @@ OMX_ERRORTYPE Component::allocInputBuffers()
 {
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 
-	assert(!handle);
+	if(!handle) 
+{
+	ofLogError(__func__) << getName() << " NO HANDLE";
+	return OMX_ErrorNone;
+}
     
 	OMX_PARAM_PORTDEFINITIONTYPE portFormat;
 	OMX_INIT_STRUCTURE(portFormat);
@@ -292,7 +320,11 @@ OMX_ERRORTYPE Component::allocInputBuffers()
 OMX_ERRORTYPE Component::allocOutputBuffers()
 {
 	
-    assert(!handle);
+    if(!handle) 
+{
+	ofLogError(__func__) << getName() << " NO HANDLE";
+	return OMX_ErrorNone;
+}
     OMX_ERRORTYPE error = OMX_ErrorNone;
 	
 
@@ -349,7 +381,11 @@ OMX_ERRORTYPE Component::allocOutputBuffers()
 }
 OMX_ERRORTYPE Component::disableAllPorts()
 {
-    assert(!handle);
+    if(!handle) 
+{
+	ofLogError(__func__) << getName() << " NO HANDLE";
+	return OMX_ErrorNone;
+}
     
 	lock();
 
@@ -598,7 +634,11 @@ OMX_STATETYPE Component::getState()
 
 OMX_ERRORTYPE Component::setState(OMX_STATETYPE state)
 {
-    assert(!handle);
+    if(!handle) 
+{
+	ofLogError(__func__) << getName() << " NO HANDLE";
+	return OMX_ErrorNone;
+}
     
     lock();
     
@@ -847,7 +887,11 @@ bool Component::init( std::string& component_name, OMX_INDEXTYPE index)
 
 OMX_ERRORTYPE Component::freeInputBuffers()
 {
-    assert(!handle);
+    if(!handle) 
+{
+	ofLogError(__func__) << getName() << " NO HANDLE";
+	return OMX_ErrorNone;
+}
     
     OMX_ERRORTYPE error = OMX_ErrorNone;
     
@@ -887,7 +931,11 @@ OMX_ERRORTYPE Component::freeInputBuffers()
 
 OMX_ERRORTYPE Component::freeOutputBuffers()
 {
-    assert(!handle);
+    if(!handle) 
+{
+	ofLogError(__func__) << getName() << " NO HANDLE";
+	return OMX_ErrorNone;
+}
     
     OMX_ERRORTYPE error = OMX_ErrorNone;
     
