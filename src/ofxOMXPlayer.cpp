@@ -265,6 +265,11 @@ bool ofxOMXPlayer::openEngine(int startTimeInSeconds) //default 0
     {
         ofLogError(__func__) << "engine->setup FAIL";
     }
+    if(engine->directPlayer)
+    {
+        cropRectangle = &engine->directPlayer->nonTextureDecoder->display.cropRect;
+        drawRectangle = &engine->directPlayer->nonTextureDecoder->display.displayRect;
+    }
     isOpen = setupPassed;
     return setupPassed;
 
@@ -289,13 +294,6 @@ void ofxOMXPlayer::setPaused(bool doPause)
     }
 }
 
-
-
-
-void ofxOMXPlayer::cropVideo(ofRectangle& cropRectangle_)
-{
-    cropRectangle = cropRectangle_;
-}
 
 #pragma mark getters
 
@@ -531,15 +529,7 @@ void ofxOMXPlayer::saveImage(string imagePath)//default imagePath=""
 
 
 
-void ofxOMXPlayer::setDisplayRect(float x, float y, float width, float height)
-{
-    
-    ofRectangle temp(x, y, width, height);
-    if (drawRectangle != temp) 
-    {
-        drawRectangle = temp;
-    }
-}
+
 
 #pragma mark draw
 void ofxOMXPlayer::draw(float x, float y, float width, float height)
@@ -562,6 +552,36 @@ void ofxOMXPlayer::draw(float x, float y)
     
 }
 
+void ofxOMXPlayer::cropVideo(ofRectangle& cropRectangle_)
+{
+    if(*cropRectangle != cropRectangle_)
+    {
+        ofLogVerbose() << "crop changed";
+        ofLogVerbose() << *cropRectangle;
+        ofLogVerbose() << cropRectangle_;
+        
+        *cropRectangle = cropRectangle_;
+        
+        
+    }
+    
+}
+
+void ofxOMXPlayer::setDisplayRect(float x, float y, float width, float height)
+{
+    
+    ofRectangle drawRectangle_(x, y, width, height);
+    if (*drawRectangle != drawRectangle_) 
+    {
+        *drawRectangle = drawRectangle_;
+        
+        ofLogVerbose() << "drawRectangle changed";
+        ofLogVerbose() << *drawRectangle;
+        ofLogVerbose() << drawRectangle_;
+        
+        *drawRectangle = drawRectangle_;
+    }
+}
 
 #pragma mark update routines
 
@@ -603,7 +623,7 @@ void ofxOMXPlayer::updateDisplaySettings()
 {
     if (engine)
     {
-        engine->updateDisplay(cropRectangle, drawRectangle);
+        //engine->updateDisplay(cropRectangle, drawRectangle);
     }
 }
 

@@ -68,7 +68,8 @@ public:
     ofTexture       texture;
     unsigned char*  pixels;
     
-
+    ofRectangle* cropRectangle;
+    ofRectangle* drawRectangle;
     
 private:
     vector<int> signals;
@@ -106,8 +107,8 @@ private:
     int             speedMultiplier;
     
     
-    ofRectangle cropRectangle;
-    ofRectangle drawRectangle;
+    //ofRectangle cropRectangle;
+    //ofRectangle drawRectangle;
     
     void updateCurrentFrame();
     void updateFBO();

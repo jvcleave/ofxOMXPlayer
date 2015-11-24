@@ -91,14 +91,17 @@ public:
     
     //OMXThread inheritance
     void process();
-
+    
+    
+    VideoPlayerDirect* directPlayer;
+    
 private:
     
     
     OMXClock* clock;
     
     OMXPacket* packet;
-    VideoPlayerDirect* directPlayer;
+    
     VideoPlayerTextured* texturedPlayer;
     BaseVideoPlayer* videoPlayer;
     OMXAudioPlayer* audioPlayer;
