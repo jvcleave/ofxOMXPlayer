@@ -107,12 +107,8 @@ private:
     int             speedMultiplier;
     
     
-    //ofRectangle cropRectangle;
-    //ofRectangle drawRectangle;
-    
     void updateCurrentFrame();
     void updateFBO();
-    void updateDisplaySettings();
     
 };
 

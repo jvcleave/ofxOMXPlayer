@@ -430,11 +430,7 @@ bool VideoDecoderDirect::decode(uint8_t *pData, int iSize, double pts)
 
 	return false;
 }
-void VideoDecoderDirect::updateDisplay(ofRectangle& cropRectangle, ofRectangle& drawRectangle)
-{
-	display.updateDisplay(cropRectangle, drawRectangle);
-	
-}
+
 
 
 

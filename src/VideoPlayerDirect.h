@@ -18,6 +18,5 @@ public:
     bool open(StreamInfo& hints, OMXClock *av_clock, bool deinterlace, bool hdmi_clock_sync);
     bool openDecoder();
     bool close();
-    void updateDisplay(ofRectangle& cropRectangle, ofRectangle& drawRectangle);
     
 };

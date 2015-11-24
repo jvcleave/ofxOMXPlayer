@@ -504,42 +504,6 @@ void ofxOMXPlayerEngine::play()
 
 
 
-#pragma mark display stuff
-void ofxOMXPlayerEngine::updateDisplay(ofRectangle& cropRectangle, ofRectangle& drawRectangle)
-{
-    if(directPlayer)
-    {
-        directPlayer->updateDisplay(cropRectangle, drawRectangle);
-    }
-}
-
-/*
-void ofxOMXPlayerEngine::setCrop(ofRectangle& cropRectangle)
-{
-    if (directPlayer) 
-    {
-        
-    }
-}
-
-void ofxOMXPlayerEngine::setDisplayRect(float x, float y, float w, float h)
-{
-    lock();
-    ofRectangle displayArea(x, y, w, h);
-    setDisplayRect(displayArea);
-    unlock();
-}
-*/
-/*
-void ofxOMXPlayerEngine::setDisplayRect(ofRectangle& rectangle) 
-{
-    displayRect = rectangle;
-    if (directPlayer) 
-    {
-        directPlayer->setDisplayRect(displayRect);
-    }
-}
-*/
 
 #pragma mark getters
 

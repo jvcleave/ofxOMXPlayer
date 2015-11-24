@@ -41,10 +41,16 @@ void ofApp::update()
 {
     if(ofGetFrameNum() % 3 == 0)
     {
-        omxPlayer.setDisplayRect(ofRandom(ofGetScreenWidth()),
+        /*omxPlayer.setDisplayRect(ofRandom(ofGetScreenWidth()),
                                               ofRandom(ofGetScreenHeight()),
                                               ofRandom(ofGetScreenWidth()),
-                                              ofRandom(ofGetScreenHeight()));
+                                              ofRandom(ofGetScreenHeight()));*/
+        omxPlayer.setDisplayRect(0,
+                                 0,
+                                 omxPlayer.getWidth(),
+                                 omxPlayer.getHeight() );
+        ofRectangle cropArea(0, 0, ofRandom(omxPlayer.getWidth()), ofRandom(omxPlayer.getHeight()));
+        omxPlayer.cropVideo(cropArea);
     }
     
 }

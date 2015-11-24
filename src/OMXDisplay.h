@@ -16,6 +16,10 @@ public:
         OMX_INIT_STRUCTURE(configDisplay);
         ofAddListener(ofEvents().update, this, &OMXDisplay::onUpdate);
     };
+    ~OMXDisplay()
+    {
+        ofRemoveListener(ofEvents().update, this, &OMXDisplay::onUpdate);
+    }
     
     OMX_CONFIG_DISPLAYREGIONTYPE configDisplay;
     Component renderComponent;
@@ -43,10 +47,10 @@ public:
         if (displayRect.getWidth()>0)
         {
             
-            error = setFullScreen(false);
+            error = disableFullScreen();
             OMX_TRACE(error);
             
-            error = setDestinationRect(displayRect);
+            error = setDestinationRect();
             OMX_TRACE(error);
             
             
@@ -75,12 +79,8 @@ public:
             return;
         }
         
-        configDisplay.set     = OMX_DISPLAY_SET_DEST_RECT;
-        configDisplay.dest_rect.x_offset  = displayRect.x;
-        configDisplay.dest_rect.y_offset  = displayRect.y;
-        configDisplay.dest_rect.width     = displayRect.getWidth();
-        configDisplay.dest_rect.height    = displayRect.getHeight();
-        
+        setDestinationRect();
+        crop();
         OMX_ERRORTYPE error =applyConfig();
         OMX_TRACE(error); 
         
@@ -103,7 +103,8 @@ public:
         
         ofLogVerbose() << info.str();
         ofLogVerbose() << "displayRect: " << displayRect;
-        //rotateRandom();
+        ofLogVerbose() << "displayRect.getArea(): " << displayRect.getArea();
+
     }
     
     
@@ -139,8 +140,12 @@ public:
    
     OMX_ERRORTYPE setDestinationRect()
     {
-        setFullScreen(false);
-        disableAspectRatio(true);
+        if(displayRect.getArea() <= 0)
+        {
+            return OMX_ErrorNone;
+        }
+        //disableFullScreen();
+        //disableAspectRatio();
         configDisplay.set     = OMX_DISPLAY_SET_DEST_RECT;
         configDisplay.dest_rect.x_offset  = displayRect.x;
         configDisplay.dest_rect.y_offset  = displayRect.y;
@@ -175,17 +180,17 @@ public:
         return applyConfig();
     }
     
-    OMX_ERRORTYPE enableAspectRatio(bool doEnable)
+    OMX_ERRORTYPE enableAspectRatio()
     {
         configDisplay.set = OMX_DISPLAY_SET_NOASPECT;
-        configDisplay.noaspect = (OMX_BOOL)doEnable;
+        configDisplay.noaspect = OMX_FALSE;
         return applyConfig();
     }
     
-    OMX_ERRORTYPE disableAspectRatio(bool doDisable)
+    OMX_ERRORTYPE disableAspectRatio()
     {
         configDisplay.set = OMX_DISPLAY_SET_NOASPECT;
-        configDisplay.noaspect = (OMX_BOOL)doDisable;
+        configDisplay.noaspect = OMX_TRUE;
         return applyConfig();
     }
     
@@ -272,7 +277,7 @@ public:
     
     OMX_ERRORTYPE cropRandom()
     {
-        cropRect.set(0, 0, ofRandom(streamInfo.width/4, streamInfo.width), ofRandom(streamInfo.height/4, streamInfo.height);
+        cropRect.set(0, 0, ofRandom(streamInfo.width/4, streamInfo.width), ofRandom(streamInfo.height/4, streamInfo.height));
         OMX_ERRORTYPE error = crop();
 
         OMX_TRACE(error);

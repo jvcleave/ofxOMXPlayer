@@ -571,6 +571,8 @@ void ofxOMXPlayer::setDisplayRect(float x, float y, float width, float height)
 {
     
     ofRectangle drawRectangle_(x, y, width, height);
+    if(drawRectangle_.getArea() <= 0) return;
+    
     if (*drawRectangle != drawRectangle_) 
     {
         *drawRectangle = drawRectangle_;
@@ -619,13 +621,7 @@ void ofxOMXPlayer::updateCurrentFrame()
     }
 }
 
-void ofxOMXPlayer::updateDisplaySettings()
-{
-    if (engine)
-    {
-        //engine->updateDisplay(cropRectangle, drawRectangle);
-    }
-}
+
 
 
 void ofxOMXPlayer::onUpdate(ofEventArgs& args)
@@ -639,7 +635,6 @@ void ofxOMXPlayer::onUpdate(ofEventArgs& args)
     }
     updateCurrentFrame();
     updateFBO();
-    updateDisplaySettings();
 }
 
 #pragma mark pixels
