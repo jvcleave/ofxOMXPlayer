@@ -46,143 +46,7 @@ ofxOMXPlayerEngine::ofxOMXPlayerEngine()
     
 }
 
-/*OMXDisplay* ofxOMXPlayerEngine::getOMXDisplay()
-{
-    if(!directPlayer) return null;
-    return directPlayer:
-}*/
-ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
-{
-    doStop = true;
-    
-    if(ThreadHandle())
-    {
-        StopThread("ofxOMXPlayerEngine");
-    }
-    
-    bPlaying = false;
-    
-    
-    if (listener)
-    {
-        listener = NULL;
-    }
-    
-    if (texturedPlayer)
-    {
-        delete texturedPlayer;
-        texturedPlayer = NULL;
-    }
-    if (directPlayer)
-    {
-        delete directPlayer;
-        directPlayer = NULL;
-    }
-    
-    videoPlayer = NULL;
-    
-    
-    if (audioPlayer)
-    {
-        delete audioPlayer;
-        audioPlayer = NULL;
-    }
-    
-    if(packet)
-    {
-        omxReader.freePacket(packet);
-        packet = NULL;
-    }
-    
-    omxReader.close();
-    
-    delete clock;
-    clock = NULL;
-    
-}
-
-void ofxOMXPlayerEngine::startExit()
-{
-    isExiting = true;
-    
-    if (videoPlayer)
-    {
-        videoPlayer->isExiting = true;
-    }
-}
-
-void ofxOMXPlayerEngine::setNormalSpeed()
-{
-    lock();
-    speedMultiplier = 1;
-    clock->setSpeed(normalPlaySpeed);
-    omxReader.setSpeed(normalPlaySpeed);
-    unlock();
-}
-
-int ofxOMXPlayerEngine::increaseSpeed()
-{
-    
-    lock();
-    doSeek = true;
-    
-    if(speedMultiplier+1 <=4)
-    {
-        speedMultiplier++;
-        int newSpeed = normalPlaySpeed*speedMultiplier;
-        
-        clock->setSpeed(newSpeed);
-        omxReader.setSpeed(newSpeed);
-    }
-    unlock();
-    return speedMultiplier;
-}
-
-void ofxOMXPlayerEngine::rewind()
-{
-    if(speedMultiplier-1 == 0)
-    {
-        speedMultiplier = -1;
-    }
-    else
-    {
-        speedMultiplier--;
-    }
-    
-    
-    if(speedMultiplier<-8)
-    {
-        speedMultiplier = 1;
-    }
-    int newSpeed = normalPlaySpeed*speedMultiplier;
-    
-    clock->setSpeed(newSpeed);
-    omxReader.setSpeed(newSpeed);
-    
-}
-
-bool ofxOMXPlayerEngine::didReadFile(bool doSkipAvProbe)
-{
-    bool passed = false;
-    
-    unsigned long long startTime = ofGetElapsedTimeMillis();
-    
-    bool didOpenMovie = omxReader.open(moviePath.c_str(), doSkipAvProbe);
-    
-    unsigned long long endTime = ofGetElapsedTimeMillis();
-    ofLogNotice(__func__) << "didOpenMovie TOOK " << endTime-startTime << " MS";
-    
-    
-    if(didOpenMovie)
-    {
-        omxReader.getHints(OMXSTREAM_VIDEO, videoStreamInfo);
-        if(videoStreamInfo.width > 0 || videoStreamInfo.height > 0)
-        {
-            passed = true;
-        }
-    }
-    return passed;
-}
+#pragma mark startup/setup
 
 bool ofxOMXPlayerEngine::setup(ofxOMXPlayerSettings& settings)
 {
@@ -274,22 +138,29 @@ bool ofxOMXPlayerEngine::setup(ofxOMXPlayerSettings& settings)
     }
 }
 
-void ofxOMXPlayerEngine::setDisplayRect(float x, float y, float w, float h)
+bool ofxOMXPlayerEngine::didReadFile(bool doSkipAvProbe)
 {
-    lock();
-    ofRectangle displayArea(x, y, w, h);
-    setDisplayRect(displayArea);
-    unlock();
+    bool passed = false;
+    
+    unsigned long long startTime = ofGetElapsedTimeMillis();
+    
+    bool didOpenMovie = omxReader.open(moviePath.c_str(), doSkipAvProbe);
+    
+    unsigned long long endTime = ofGetElapsedTimeMillis();
+    ofLogNotice(__func__) << "didOpenMovie TOOK " << endTime-startTime << " MS";
+    
+    
+    if(didOpenMovie)
+    {
+        omxReader.getHints(OMXSTREAM_VIDEO, videoStreamInfo);
+        if(videoStreamInfo.width > 0 || videoStreamInfo.height > 0)
+        {
+            passed = true;
+        }
+    }
+    return passed;
 }
 
-void ofxOMXPlayerEngine::setDisplayRect(ofRectangle& rectangle) 
-{
-    displayRect = rectangle;
-    if (directPlayer) 
-    {
-        directPlayer->setDisplayRect(displayRect);
-    }
-}
 
 bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
 {
@@ -387,6 +258,7 @@ bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
     }
 }
 
+#pragma mark threading
 void ofxOMXPlayerEngine::process()
 {
     while (!doStop)
@@ -543,10 +415,66 @@ void ofxOMXPlayerEngine::process()
     }
 }
 
-//--------------------------------------------------------
-void ofxOMXPlayerEngine::play()
+
+#pragma mark playback commands
+
+void ofxOMXPlayerEngine::setNormalSpeed()
 {
-    //ofLogVerbose(__func__) << "TODO: not sure what to do with this - reopen the player?";
+    lock();
+    speedMultiplier = 1;
+    clock->setSpeed(normalPlaySpeed);
+    omxReader.setSpeed(normalPlaySpeed);
+    unlock();
+}
+
+int ofxOMXPlayerEngine::increaseSpeed()
+{
+    
+    lock();
+    doSeek = true;
+    
+    if(speedMultiplier+1 <=4)
+    {
+        speedMultiplier++;
+        int newSpeed = normalPlaySpeed*speedMultiplier;
+        
+        clock->setSpeed(newSpeed);
+        omxReader.setSpeed(newSpeed);
+    }
+    unlock();
+    return speedMultiplier;
+}
+
+void ofxOMXPlayerEngine::rewind()
+{
+    if(speedMultiplier-1 == 0)
+    {
+        speedMultiplier = -1;
+    }
+    else
+    {
+        speedMultiplier--;
+    }
+    
+    
+    if(speedMultiplier<-8)
+    {
+        speedMultiplier = 1;
+    }
+    int newSpeed = normalPlaySpeed*speedMultiplier;
+    
+    clock->setSpeed(newSpeed);
+    omxReader.setSpeed(newSpeed);
+    
+}
+
+void ofxOMXPlayerEngine::stepFrameForward()
+{
+    if (!isPaused())
+    {
+        setPaused(true);
+    }
+    clock->step(1);
 }
 
 void ofxOMXPlayerEngine::stop()
@@ -568,6 +496,49 @@ void ofxOMXPlayerEngine::setPaused(bool doPause)
     }
     
 }
+
+void ofxOMXPlayerEngine::play()
+{
+    //ofLogVerbose(__func__) << "TODO: not sure what to do with this - reopen the player?";
+}
+
+
+
+#pragma mark display stuff
+void ofxOMXPlayerEngine::updateDisplay(ofRectangle& cropRectangle, ofRectangle& drawRectangle)
+{
+
+}
+
+/*
+void ofxOMXPlayerEngine::setCrop(ofRectangle& cropRectangle)
+{
+    if (directPlayer) 
+    {
+        
+    }
+}
+
+void ofxOMXPlayerEngine::setDisplayRect(float x, float y, float w, float h)
+{
+    lock();
+    ofRectangle displayArea(x, y, w, h);
+    setDisplayRect(displayArea);
+    unlock();
+}
+*/
+/*
+void ofxOMXPlayerEngine::setDisplayRect(ofRectangle& rectangle) 
+{
+    displayRect = rectangle;
+    if (directPlayer) 
+    {
+        directPlayer->setDisplayRect(displayRect);
+    }
+}
+*/
+
+#pragma mark getters
 
 float ofxOMXPlayerEngine::getFPS()
 {
@@ -628,20 +599,12 @@ bool ofxOMXPlayerEngine::isPaused()
 }
 
 
-void ofxOMXPlayerEngine::stepFrameForward()
-{
-    if (!isPaused())
-    {
-        setPaused(true);
-    }
-    clock->step(1);
-}
-
-
 bool ofxOMXPlayerEngine::isPlaying()
 {
     return bPlaying;
 }
+
+#pragma mark audio
 
 void ofxOMXPlayerEngine::increaseVolume()
 {
@@ -688,6 +651,7 @@ float ofxOMXPlayerEngine::getVolume()
     return floorf(value * 100 + 0.5) / 100;
 }
 
+#pragma mark events
 
 void ofxOMXPlayerEngine::addListener(ofxOMXPlayerListener* listener_)
 {
@@ -698,6 +662,7 @@ void ofxOMXPlayerEngine::removeListener()
 {
     listener = NULL;
 }
+
 
 
 void ofxOMXPlayerEngine::onVideoLoop()
@@ -721,3 +686,68 @@ void ofxOMXPlayerEngine::onVideoEnd()
     }
     
 }
+
+#pragma mark shutdown
+
+ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
+{
+    doStop = true;
+    
+    if(ThreadHandle())
+    {
+        StopThread("ofxOMXPlayerEngine");
+    }
+    
+    bPlaying = false;
+    
+    
+    if (listener)
+    {
+        listener = NULL;
+    }
+    
+    if (texturedPlayer)
+    {
+        delete texturedPlayer;
+        texturedPlayer = NULL;
+    }
+    if (directPlayer)
+    {
+        delete directPlayer;
+        directPlayer = NULL;
+    }
+    
+    videoPlayer = NULL;
+    
+    
+    if (audioPlayer)
+    {
+        delete audioPlayer;
+        audioPlayer = NULL;
+    }
+    
+    if(packet)
+    {
+        omxReader.freePacket(packet);
+        packet = NULL;
+    }
+    
+    omxReader.close();
+    
+    delete clock;
+    clock = NULL;
+    
+}
+
+void ofxOMXPlayerEngine::startExit()
+{
+    isExiting = true;
+    
+    if (videoPlayer)
+    {
+        videoPlayer->isExiting = true;
+    }
+    
+}
+
+

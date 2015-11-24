@@ -19,5 +19,6 @@ public:
     bool openDecoder();
     bool close();
     void setDisplayRect(ofRectangle& rectangle);
-
+    void setCropRect(ofRectangle& rectangle);
+    
 };

@@ -39,25 +39,8 @@ ofxOMXPlayer::ofxOMXPlayer()
     
 }
 
-void ofxOMXPlayer::updatePixels()
-{
-    if (!isTextureEnabled())
-    {
-        return;
-    }
-    fbo.begin();
-        ofClear(0, 0, 0, 0);
-        texture.draw(0, 0);
-        //ofLogVerbose() << "updatePixels";
-        glReadPixels(0,0,videoWidth, videoHeight, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-    fbo.end();
-}
 
-unsigned char * ofxOMXPlayer::getPixels()
-{
-    return pixels;
-}
-
+#pragma mark setup
 void ofxOMXPlayer::generateEGLImage(int videoWidth_, int videoHeight_)
 {
     bool needsRegeneration = false;
@@ -191,23 +174,6 @@ void ofxOMXPlayer::generateEGLImage(int videoWidth_, int videoHeight_)
     }
 }
 
-void ofxOMXPlayer::destroyEGLImage()
-{
-
-    if (eglImage)
-    {
-        if (eglDestroyImageKHR(display, eglImage))
-        {
-            //ofLogVerbose(__func__) << "eglDestroyImageKHR PASS <---------------- :)";
-        }
-        else
-        {
-            ofLogError(__func__) << "eglDestroyImageKHR FAIL <---------------- :(";
-        }
-        eglImage = NULL;
-    }
-
-}
 
 int ofxOMXPlayer::getSpeedMultiplier()
 {
@@ -304,10 +270,7 @@ bool ofxOMXPlayer::openEngine(int startTimeInSeconds) //default 0
 
 }
 
-bool ofxOMXPlayer::getIsOpen()
-{
-    return isOpen;
-}
+
 
 
 void ofxOMXPlayer::togglePause()
@@ -324,6 +287,21 @@ void ofxOMXPlayer::setPaused(bool doPause)
     {
         return engine->setPaused(doPause);
     }
+}
+
+
+
+
+void ofxOMXPlayer::cropVideo(ofRectangle& cropRectangle_)
+{
+    cropRectangle = cropRectangle_;
+}
+
+#pragma mark getters
+
+bool ofxOMXPlayer::getIsOpen()
+{
+    return isOpen;
 }
 
 bool ofxOMXPlayer::isPaused()
@@ -344,48 +322,6 @@ bool ofxOMXPlayer::isPlaying()
     return false;
 }
 
-void ofxOMXPlayer::onUpdate(ofEventArgs& args)
-{
-    if (doRestart) 
-    {
-        ofxOMXPlayerSettings sameSettings = settings;
-        setup(sameSettings);
-        doRestart = false;
-        return;
-    }
-    if (engine)
-    {
-        int currentFrame = engine->getCurrentFrame();
-        if (prevFrame != currentFrame) 
-        {
-            hasNewFrame = true;
-            prevFrame = currentFrame;
-            if (isTextureEnabled())
-            {
-                fbo.begin();
-                    ofClear(0, 0, 0, 0);
-                    texture.draw(0, 0, texture.getWidth(), texture.getHeight());
-                fbo.end();
-            }
-            
-        }else 
-        {
-            hasNewFrame = false;
-        }
-        if (!isTextureEnabled())
-        {
-            //engine->directPlayer->getOMXDisplay()->setCrop(cropRectangle);
-        }
-        
-        
-    }else 
-    {
-        hasNewFrame = false;
-    }
-
-
-}
-
 bool ofxOMXPlayer::isFrameNew()
 {
     return hasNewFrame;
@@ -394,12 +330,6 @@ bool ofxOMXPlayer::isFrameNew()
 bool ofxOMXPlayer::isTextureEnabled()
 {
     return textureEnabled;
-}
-
-
-void ofxOMXPlayer::cropVideo(ofRectangle& cropRectangle_)
-{
-    cropRectangle = cropRectangle_;
 }
 
 int ofxOMXPlayer::getHeight()
@@ -421,27 +351,14 @@ double ofxOMXPlayer::getMediaTime()
     return 0;
 }
 
-void ofxOMXPlayer::stepFrameForward()
+float ofxOMXPlayer::getFPS()
 {
-    if (engine)
+    if(engine)
     {
-        engine->stepFrameForward();
+        return engine->getFPS();
+        
     }
-}
-
-void ofxOMXPlayer::increaseVolume()
-{
-    if (engine)
-    {
-        engine->increaseVolume();
-    }
-}
-void ofxOMXPlayer::decreaseVolume()
-{
-    if (engine)
-    {
-        engine->decreaseVolume();
-    }
+    return 0;
 }
 
 float ofxOMXPlayer::getDurationInSeconds()
@@ -451,57 +368,6 @@ float ofxOMXPlayer::getDurationInSeconds()
         return engine->getDurationInSeconds();
     }
     return 0;
-}
-
-
-void ofxOMXPlayer::setVolume(float volume)
-{
-    if (engine)
-    {
-        engine->setVolume(volume);
-    }
-}
-
-float ofxOMXPlayer::getVolume()
-{
-    if (engine)
-    {
-        return engine->getVolume();
-    }
-    return 0;
-}
-
-GLuint ofxOMXPlayer::getTextureID()
-{
-
-    return textureID;
-}
-
-
-ofTexture& ofxOMXPlayer::getTextureReference()
-{
-    if (!fbo.isAllocated())
-    {
-        ofLogError() << "NO FBO!";
-    }
-    return fbo.getTextureReference();
-    //return texture;
-}
-
-void ofxOMXPlayer::saveImage(string imagePath)//default imagePath=""
-{
-    if(!isTextureEnabled()) return;
-    if(imagePath == "")
-    {
-        imagePath = ofToDataPath(ofGetTimestampString()+".png", true);
-    }
-    updatePixels();
-    //TODO make smarter, re-allocating every time
-    ofImage image;
-    image.setFromPixels(getPixels(), getWidth(), getHeight(), OF_IMAGE_COLOR_ALPHA);
-    image.saveImage(imagePath);
-    
-    ofLogVerbose() << "SAVED IMAGE TO: " << imagePath;
 }
 
 int ofxOMXPlayer::getCurrentFrame()
@@ -531,12 +397,12 @@ int ofxOMXPlayer::getTotalNumFrames()
 
 StreamInfo ofxOMXPlayer::getVideoStreamInfo()
 {
-
+    
     StreamInfo videoInfo;
     if (engine)
     {
         videoInfo = engine->videoStreamInfo;
-
+        
     }
     else
     {
@@ -545,65 +411,23 @@ StreamInfo ofxOMXPlayer::getVideoStreamInfo()
     return videoInfo;
 }
 
-StreamInfo ofxOMXPlayer::getAudioStreamInfo()
-{
-    StreamInfo audioInfo;
-    if (engine)
-    {
-        audioInfo = engine->audioStreamInfo;
 
-    }
-    else
+
+ofTexture& ofxOMXPlayer::getTextureReference()
+{
+    if (!fbo.isAllocated())
     {
-        ofLogError(__func__) << "No engine avail - info returned is invalid";
+        ofLogError() << "NO FBO!";
     }
-    return audioInfo;
+    return fbo.getTextureReference();
 }
 
-void ofxOMXPlayer::setDisplayRectForNonTexture(float x, float y, float width, float height)
+GLuint ofxOMXPlayer::getTextureID()
 {
-    if (!engine) return;
-    if(!isTextureEnabled())
-    {
-       engine->setDisplayRect(x, y, width, height);
-    }else
-    {
-        ofLogWarning(__func__) << " does not work for texture mode";
-    }
     
+    return textureID;
 }
 
-void ofxOMXPlayer::draw(float x, float y, float width, float height)
-{
-    if (!engine) return;
-    
-    if (fbo.isAllocated())
-    {
-        fbo.draw(x, y, width, height);
-    }else
-    {
-        setDisplayRectForNonTexture(x, y, width, height);
-    }
-    
-}
-
-void ofxOMXPlayer::draw(float x, float y)
-{
-    draw(x, y, getWidth(), getHeight());
-    
-}
-
-
-
-float ofxOMXPlayer::getFPS()
-{
-    if(engine)
-    {
-        return engine->getFPS();
-        
-    }
-    return 0;
-}
 string ofxOMXPlayer::getInfo()
 {
     stringstream info;
@@ -621,11 +445,224 @@ string ofxOMXPlayer::getInfo()
     {
         info <<"\n" <<  "REMAINING FRAMES: N/A, NO TOTAL FRAMES";
     }
-
+    
     
     info <<"\n" <<  "CURRENT VOLUME: "      << getVolume();
     return info.str();
 }
+
+#pragma mark playback commands
+void ofxOMXPlayer::stepFrameForward()
+{
+    if (engine)
+    {
+        engine->stepFrameForward();
+    }
+}
+
+#pragma mark audio
+
+void ofxOMXPlayer::increaseVolume()
+{
+    if (engine)
+    {
+        engine->increaseVolume();
+    }
+}
+void ofxOMXPlayer::decreaseVolume()
+{
+    if (engine)
+    {
+        engine->decreaseVolume();
+    }
+}
+
+void ofxOMXPlayer::setVolume(float volume)
+{
+    if (engine)
+    {
+        engine->setVolume(volume);
+    }
+}
+
+float ofxOMXPlayer::getVolume()
+{
+    if (engine)
+    {
+        return engine->getVolume();
+    }
+    return 0;
+}
+
+StreamInfo ofxOMXPlayer::getAudioStreamInfo()
+{
+    StreamInfo audioInfo;
+    if (engine)
+    {
+        audioInfo = engine->audioStreamInfo;
+        
+    }
+    else
+    {
+        ofLogError(__func__) << "No engine avail - info returned is invalid";
+    }
+    return audioInfo;
+}
+
+
+
+
+#pragma mark convienience methods
+void ofxOMXPlayer::saveImage(string imagePath)//default imagePath=""
+{
+    if(!isTextureEnabled()) return;
+    if(imagePath == "")
+    {
+        imagePath = ofToDataPath(ofGetTimestampString()+".png", true);
+    }
+    updatePixels();
+    //TODO make smarter, re-allocating every time
+    ofImage image;
+    image.setFromPixels(getPixels(), getWidth(), getHeight(), OF_IMAGE_COLOR_ALPHA);
+    image.saveImage(imagePath);
+    
+    ofLogVerbose() << "SAVED IMAGE TO: " << imagePath;
+}
+
+
+
+void ofxOMXPlayer::setDisplayRect(float x, float y, float width, float height)
+{
+    
+    ofRectangle temp(x, y, width, height);
+    if (drawRectangle != temp) 
+    {
+        drawRectangle = temp;
+    }
+}
+
+#pragma mark draw
+void ofxOMXPlayer::draw(float x, float y, float width, float height)
+{
+    if (!engine) return;
+    
+    if (fbo.isAllocated())
+    {
+        fbo.draw(x, y, width, height);
+    }else
+    {
+        setDisplayRect(x, y, width, height);
+    }
+    
+}
+
+void ofxOMXPlayer::draw(float x, float y)
+{
+    draw(x, y, getWidth(), getHeight());
+    
+}
+
+
+#pragma mark update routines
+
+
+void ofxOMXPlayer::updateFBO()
+{
+    if (engine && isTextureEnabled() && isFrameNew())
+    {
+        fbo.begin();
+        ofClear(0, 0, 0, 0);
+        texture.draw(0, 0, texture.getWidth(), texture.getHeight());
+        fbo.end();
+    }
+}
+
+void ofxOMXPlayer::updateCurrentFrame()
+{
+    if (engine)
+    {
+        int currentFrame = engine->getCurrentFrame();
+        if (prevFrame != currentFrame) 
+        {
+            hasNewFrame = true;
+            prevFrame = currentFrame;
+            
+        }else 
+        {
+            hasNewFrame = false;
+        }
+        
+    }
+    else 
+    {
+        hasNewFrame = false;
+    }
+}
+
+void ofxOMXPlayer::updateDisplaySettings()
+{
+    if (engine && engine->directPlayer)
+    {
+        directPlayer->setCrop(cropRectangle); 
+        directPlayer->setDisplayRect(drawRectangle);
+    }
+}
+
+
+void ofxOMXPlayer::onUpdate(ofEventArgs& args)
+{
+    if (doRestart) 
+    {
+        ofxOMXPlayerSettings sameSettings = settings;
+        setup(sameSettings);
+        doRestart = false;
+        return;
+    }
+    updateCurrentFrame();
+    updateFBO();
+    updateDisplaySettings();
+}
+
+#pragma mark pixels
+void ofxOMXPlayer::updatePixels()
+{
+    if (!isTextureEnabled())
+    {
+        return;
+    }
+    fbo.begin();
+    ofClear(0, 0, 0, 0);
+    texture.draw(0, 0);
+    //ofLogVerbose() << "updatePixels";
+    glReadPixels(0,0,videoWidth, videoHeight, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+    fbo.end();
+}
+
+unsigned char * ofxOMXPlayer::getPixels()
+{
+    return pixels;
+}
+
+#pragma mark shutdown
+
+void ofxOMXPlayer::destroyEGLImage()
+{
+    
+    if (eglImage)
+    {
+        if (eglDestroyImageKHR(display, eglImage))
+        {
+            //ofLogVerbose(__func__) << "eglDestroyImageKHR PASS <---------------- :)";
+        }
+        else
+        {
+            ofLogError(__func__) << "eglDestroyImageKHR FAIL <---------------- :(";
+        }
+        eglImage = NULL;
+    }
+    
+}
+
 
 struct sigaction old_action;
 bool ofxOMXPlayer::doExit = false;
@@ -665,7 +702,6 @@ void ofxOMXPlayer::close()
     isOpen = false;
     
 }
-
 
 ofxOMXPlayer::~ofxOMXPlayer()
 {

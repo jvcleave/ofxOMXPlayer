@@ -107,6 +107,9 @@ private:
     ofRectangle cropRectangle;
     ofRectangle drawRectangle;
     
+    void updateCurrentFrame();
+    void updateFBO();
+    void updateDisplaySettings();
     
 };
 
