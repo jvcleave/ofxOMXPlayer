@@ -713,7 +713,7 @@ OMX_ERRORTYPE Component::setParameter(OMX_INDEXTYPE paramIndex, OMX_PTR paramStr
 OMX_ERRORTYPE Component::getParameter(OMX_INDEXTYPE paramIndex, OMX_PTR paramStruct)
 {
 	lock();
-
+    
 	OMX_ERRORTYPE error = OMX_GetParameter(handle, paramIndex, paramStruct);
     OMX_TRACE(error);
 
@@ -1055,7 +1055,7 @@ OMX_ERRORTYPE Component::EventHandlerCallback(OMX_HANDLETYPE hComponent,
         return error;
     }
 
-	Component *component = static_cast<Component*>(pAppData);
+	Component* component = static_cast<Component*>(pAppData);
     component->addEvent(event, nData1, nData2);
     bool debugEvents = false;
     

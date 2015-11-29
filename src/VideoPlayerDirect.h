@@ -9,14 +9,14 @@ class VideoPlayerDirect : public BaseVideoPlayer
 public:
     VideoPlayerDirect();
     ~VideoPlayerDirect();
+        
+    ofxOMXPlayerSettings settings;
     
-    bool doDeinterlace;
-    bool doHDMISync;
+    VideoDecoderDirect* directDecoder;
     
-    VideoDecoderDirect* nonTextureDecoder;
-    
-    bool open(StreamInfo& hints, OMXClock *av_clock, bool deinterlace, bool hdmi_clock_sync);
+    bool open(StreamInfo& hints, OMXClock *av_clock, ofxOMXPlayerSettings& settings_);
     bool openDecoder();
     bool close();
     
+    bool doUpdate;
 };

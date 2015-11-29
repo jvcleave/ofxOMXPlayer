@@ -26,6 +26,7 @@ ofxOMXPlayer::ofxOMXPlayer()
     context = NULL;
     display = NULL;
     pixels = NULL;
+    directDisplay = NULL;
     
     hasNewFrame = false;
     prevFrame = 0;
@@ -175,55 +176,6 @@ void ofxOMXPlayer::generateEGLImage(int videoWidth_, int videoHeight_)
 }
 
 
-int ofxOMXPlayer::getSpeedMultiplier()
-{
-    if(engine)
-    {
-        speedMultiplier = engine->speedMultiplier;
-    }
-    return speedMultiplier;
-}
-
-void ofxOMXPlayer::increaseSpeed()
-{
-    if(engine)
-    {
-        speedMultiplier = engine->increaseSpeed();
-    }
-}
-
-void ofxOMXPlayer::setNormalSpeed()
-{
-    if(engine)
-    {
-        engine->setNormalSpeed();
-    }
-}
-
-
-void ofxOMXPlayer::rewind()
-{
-    engine->rewind();
-}
-
-void ofxOMXPlayer::loadMovie(string videoPath)
-{
-    settings.videoPath = videoPath;
-    setup(settings);
-}
-
-void ofxOMXPlayer::restartMovie()
-{
-    doRestart = true;
-}
-
-
-void ofxOMXPlayer::seekToTimeInSeconds(int timeInSeconds)
-{
-    didSeek = true;
-    openEngine(timeInSeconds);
-}
-
 bool ofxOMXPlayer::setup(ofxOMXPlayerSettings settings)
 {
     this->settings = settings;
@@ -265,35 +217,18 @@ bool ofxOMXPlayer::openEngine(int startTimeInSeconds) //default 0
     {
         ofLogError(__func__) << "engine->setup FAIL";
     }
-    if(engine->directPlayer)
+    if(engine->directPlayer && engine->directPlayer->directDecoder)
     {
-        cropRectangle = &engine->directPlayer->nonTextureDecoder->display.cropRect;
-        drawRectangle = &engine->directPlayer->nonTextureDecoder->display.displayRect;
+        directDisplay = engine->directPlayer->directDecoder->getOMXDisplay();
+        
+        cropRectangle = &directDisplay->options.cropRectangle;
+        drawRectangle = &directDisplay->options.drawRectangle;
+        
     }
     isOpen = setupPassed;
     return setupPassed;
 
 }
-
-
-
-
-void ofxOMXPlayer::togglePause()
-{
-    if (engine)
-    {
-        engine->setPaused(!engine->isPaused());
-    }
-}
-
-void ofxOMXPlayer::setPaused(bool doPause)
-{
-    if (engine)
-    {
-        return engine->setPaused(doPause);
-    }
-}
-
 
 #pragma mark getters
 
@@ -393,19 +328,16 @@ int ofxOMXPlayer::getTotalNumFrames()
 }
 
 
-StreamInfo ofxOMXPlayer::getVideoStreamInfo()
+StreamInfo& ofxOMXPlayer::getVideoStreamInfo()
 {
     
-    StreamInfo videoInfo;
     if (engine)
     {
-        videoInfo = engine->videoStreamInfo;
+        return engine->videoStreamInfo;
         
     }
-    else
-    {
-        ofLogError(__func__) << "No engine avail - info returned is invalid";
-    }
+    StreamInfo videoInfo;
+    ofLogError(__func__) << "No engine avail - info returned is invalid";
     return videoInfo;
 }
 
@@ -450,12 +382,79 @@ string ofxOMXPlayer::getInfo()
 }
 
 #pragma mark playback commands
+
+void ofxOMXPlayer::togglePause()
+{
+    if (engine)
+    {
+        engine->setPaused(!engine->isPaused());
+    }
+}
+
+void ofxOMXPlayer::setPaused(bool doPause)
+{
+    if (engine)
+    {
+        return engine->setPaused(doPause);
+    }
+}
+
+
 void ofxOMXPlayer::stepFrameForward()
 {
     if (engine)
     {
         engine->stepFrameForward();
     }
+}
+
+int ofxOMXPlayer::getSpeedMultiplier()
+{
+    if(engine)
+    {
+        speedMultiplier = engine->speedMultiplier;
+    }
+    return speedMultiplier;
+}
+
+void ofxOMXPlayer::increaseSpeed()
+{
+    if(engine)
+    {
+        speedMultiplier = engine->increaseSpeed();
+    }
+}
+
+void ofxOMXPlayer::setNormalSpeed()
+{
+    if(engine)
+    {
+        engine->setNormalSpeed();
+    }
+}
+
+
+void ofxOMXPlayer::rewind()
+{
+    engine->rewind();
+}
+
+void ofxOMXPlayer::loadMovie(string videoPath)
+{
+    settings.videoPath = videoPath;
+    setup(settings);
+}
+
+void ofxOMXPlayer::restartMovie()
+{
+    doRestart = true;
+}
+
+
+void ofxOMXPlayer::seekToTimeInSeconds(int timeInSeconds)
+{
+    didSeek = true;
+    openEngine(timeInSeconds);
 }
 
 #pragma mark audio
@@ -492,18 +491,16 @@ float ofxOMXPlayer::getVolume()
     return 0;
 }
 
-StreamInfo ofxOMXPlayer::getAudioStreamInfo()
+StreamInfo& ofxOMXPlayer::getAudioStreamInfo()
 {
-    StreamInfo audioInfo;
+    
     if (engine)
     {
-        audioInfo = engine->audioStreamInfo;
-        
+        return engine->audioStreamInfo;
     }
-    else
-    {
-        ofLogError(__func__) << "No engine avail - info returned is invalid";
-    }
+    
+    StreamInfo audioInfo;
+    ofLogError(__func__) << "No engine avail - info returned is invalid";
     return audioInfo;
 }
 
@@ -552,37 +549,78 @@ void ofxOMXPlayer::draw(float x, float y)
     
 }
 
+#pragma mark direct only options
+
 void ofxOMXPlayer::cropVideo(ofRectangle& cropRectangle_)
 {
     if(*cropRectangle != cropRectangle_)
-    {
-        ofLogVerbose() << "crop changed";
-        ofLogVerbose() << *cropRectangle;
-        ofLogVerbose() << cropRectangle_;
-        
+    {        
         *cropRectangle = cropRectangle_;
-        
-        
     }
     
+}
+
+void ofxOMXPlayer::cropVideo(float x, float y, float width, float height)
+{
+    ofRectangle cropTemp(x, y, width, height);
+    cropVideo(cropTemp);
+}
+
+void ofxOMXPlayer::rotateVideo(int degrees)
+{
+    if(directDisplay)
+    {
+        directDisplay->rotateDisplay(degrees);
+    }
+}
+
+void ofxOMXPlayer::setMirror(bool doMirror)
+{
+    if(directDisplay)
+    {
+        directDisplay->options.doMirror = doMirror;
+    }
+}
+
+void ofxOMXPlayer::setFullScreen(bool doFullScreen)
+{
+    if(directDisplay)
+    {
+        directDisplay->options.doFullScreen = doFullScreen;
+        
+    }
+}
+
+void ofxOMXPlayer::setAlpha(int alpha)
+{
+    if(directDisplay)
+    {
+        if(alpha >=0 && alpha<=255)
+        {
+            directDisplay->options.alpha = alpha;
+        }
+        
+    }
+}
+
+
+void ofxOMXPlayer::setDisplayRect(ofRectangle& temp)
+{
+    
+    if(temp.getArea() <= 0) return;
+    
+    if (*drawRectangle != temp) 
+    {        
+        *drawRectangle = temp;
+    }
 }
 
 void ofxOMXPlayer::setDisplayRect(float x, float y, float width, float height)
 {
     
-    ofRectangle drawRectangle_(x, y, width, height);
-    if(drawRectangle_.getArea() <= 0) return;
-    
-    if (*drawRectangle != drawRectangle_) 
-    {
-        *drawRectangle = drawRectangle_;
-        
-        ofLogVerbose() << "drawRectangle changed";
-        ofLogVerbose() << *drawRectangle;
-        ofLogVerbose() << drawRectangle_;
-        
-        *drawRectangle = drawRectangle_;
-    }
+    ofRectangle temp(x, y, width, height);
+    setDisplayRect(temp);
+   
 }
 
 #pragma mark update routines
@@ -664,11 +702,7 @@ void ofxOMXPlayer::destroyEGLImage()
     
     if (eglImage)
     {
-        if (eglDestroyImageKHR(display, eglImage))
-        {
-            //ofLogVerbose(__func__) << "eglDestroyImageKHR PASS <---------------- :)";
-        }
-        else
+        if (!eglDestroyImageKHR(display, eglImage))
         {
             ofLogError(__func__) << "eglDestroyImageKHR FAIL <---------------- :(";
         }
@@ -690,9 +724,6 @@ void ofxOMXPlayer::close()
         return;
     }
     
-    
-    
-    
     ofRemoveListener(ofEvents().update, this, &ofxOMXPlayer::onUpdateDuringExit);
     
     
@@ -713,6 +744,15 @@ void ofxOMXPlayer::close()
         engine = NULL;
     }
     
+    destroyEGLImage();
+    if (pixels)
+    {
+        delete[] pixels;
+        pixels = NULL;
+    }
+    drawRectangle = NULL;
+    cropRectangle = NULL;
+    directDisplay = NULL;
     isOpen = false;
     
 }
@@ -735,17 +775,15 @@ void ofxOMXPlayer::onUpdateDuringExit(ofEventArgs& args)
         ofLogVerbose(__func__) << " EXITING VIA SIGNAL";
         if(engine)
         {
+            if(engine->directPlayer && engine->directPlayer->directDecoder)
+            {
+                engine->directPlayer->directDecoder->doUpdate = false;
+                engine->directPlayer->directDecoder->display.isReady = false;
+            }
             engine->startExit();
         }
         close();
         ofxOMXPlayer::doExit = false;
-        
-        destroyEGLImage();
-        if (pixels)
-        {
-            delete[] pixels;
-            pixels = NULL;
-        }
         OMXInitializer::getInstance().deinit();
         ofExit();
     }
@@ -753,10 +791,7 @@ void ofxOMXPlayer::onUpdateDuringExit(ofEventArgs& args)
 
 void ofxOMXPlayer::addExitHandler()
 {
-    
-    
- 
-    
+
     for (size_t i=0; i<signals.size(); i++)
     {
         int SIGNAL_TO_BLOCK = signals[i];

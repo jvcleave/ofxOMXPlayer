@@ -180,18 +180,9 @@ bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
         {
             directPlayer = new VideoPlayerDirect();
         }
-        bool deinterlace = false;
-        bool hdmi_clock_sync = true;
-        
-        
-        
-        
-        didVideoOpen = directPlayer->open(videoStreamInfo, clock, deinterlace, hdmi_clock_sync);
+ 
+        didVideoOpen = directPlayer->open(videoStreamInfo, clock, omxPlayerSettings);
         videoPlayer = (BaseVideoPlayer*)directPlayer;
-        //initially set this
-        //displayRect = omxPlayerSettings.displayRect;
-        //directPlayer->setDisplayRect(displayRect);
-        
     }
     
     bPlaying = didVideoOpen;

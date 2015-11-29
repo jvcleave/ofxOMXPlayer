@@ -94,6 +94,7 @@ public:
     
     
     VideoPlayerDirect* directPlayer;
+    VideoPlayerTextured* texturedPlayer;
     
 private:
     
@@ -102,7 +103,7 @@ private:
     
     OMXPacket* packet;
     
-    VideoPlayerTextured* texturedPlayer;
+    
     BaseVideoPlayer* videoPlayer;
     OMXAudioPlayer* audioPlayer;
     ofxOMXPlayerListener* listener;

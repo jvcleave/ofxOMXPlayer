@@ -9,16 +9,17 @@ VideoDecoderDirect::VideoDecoderDirect()
 	doHDMISync   = false;
 	frameCounter = 0;
 	frameOffset = 0;
+    doUpdate = false;
 }
 
 
 VideoDecoderDirect::~VideoDecoderDirect()
 {
 	ofRemoveListener(ofEvents().update, this, &VideoDecoderDirect::onUpdate);
-	//ofLogVerbose(__func__) << "removed update listener";
+	ofLogVerbose(__func__) << "removed update listener";
 }
 
-bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, bool deinterlace, bool hdmi_clock_sync)
+bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPlayerSettings& settings_)
 {
 	OMX_ERRORTYPE error   = OMX_ErrorNone;
 
@@ -27,7 +28,9 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, bool dein
 	videoWidth  = streamInfo.width;
 	videoHeight = streamInfo.height;
 
-	doHDMISync = hdmi_clock_sync;
+    settings = settings_;
+	doHDMISync = settings.directDisplayOptions.doHDMISync;
+    
 
 	if(!videoWidth || !videoHeight)
 	{
@@ -43,7 +46,7 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, bool dein
 
 	processCodec(streamInfo);
 
-	if(deinterlace)
+	if(settings.directDisplayOptions.doDeinterlace)
 	{
 		ofLog(OF_LOG_VERBOSE, "enable deinterlace\n");
 		doDeinterlace = true;
@@ -273,7 +276,8 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, bool dein
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
     
-	ofAddListener(ofEvents().update, this, &VideoDecoderDirect::onUpdate);
+   
+    
 	if(!sendDecoderConfig())
 	{
 		return false;
@@ -282,14 +286,16 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, bool dein
 	isOpen           = true;
 	doSetStartTime      = true;
 	
-	display.setup(renderComponent, streamInfo);
+	display.setup(renderComponent, streamInfo, settings);
 	ofLog(OF_LOG_VERBOSE,
 	      "%s::%s - decoder_component(0x%p), input_port(0x%x), output_port(0x%x) deinterlace %d hdmiclocksync %d\n",
 	      "VideoDecoderDirect", __func__, decoderComponent.getHandle(), decoderComponent.getInputPort(), decoderComponent.getOutputPort(),
 	      doDeinterlace, doHDMISync);
 
 	isFirstFrame   = true;
-
+    doUpdate = true;
+    ofAddListener(ofEvents().update, this, &VideoDecoderDirect::onUpdate);
+    
 	// start from assuming all recent frames had valid pts
 	validHistoryPTS = ~0;
 	return true;
@@ -298,8 +304,8 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, bool dein
 void VideoDecoderDirect::onUpdate(ofEventArgs& args)
 {
     //TODO: seems to cause hang on exit
-    
-	//updateFrameCount();
+    if(!doUpdate) return;
+	updateFrameCount();
 }
 void VideoDecoderDirect::updateFrameCount()
 {

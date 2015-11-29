@@ -34,9 +34,7 @@ public:
     void        draw(float x, float y, float w, float h);
     void        draw(float x=0, float y=0);
     
-    //direct only
-    void        setDisplayRect(float x, float y, float width, float height);
-    void        cropVideo(ofRectangle& cropRectangle_);
+
     
     void        increaseVolume();
     void        decreaseVolume();
@@ -58,8 +56,8 @@ public:
     void        updatePixels();
     unsigned char*   getPixels();
     
-    StreamInfo  getVideoStreamInfo();
-    StreamInfo  getAudioStreamInfo();
+    StreamInfo&  getVideoStreamInfo();
+    StreamInfo&  getAudioStreamInfo();
     
     string      getInfo();
     void        close();
@@ -68,6 +66,16 @@ public:
     ofTexture       texture;
     unsigned char*  pixels;
     
+    
+    //direct only
+    void        setDisplayRect(float x, float y, float width, float height);
+    void        setDisplayRect(ofRectangle&);
+    void        cropVideo(ofRectangle&);
+    void        cropVideo(float x, float y, float width, float height);
+    void        rotateVideo(int degrees);
+    void        setMirror(bool);
+    void        setAlpha(int alpha);
+    void        setFullScreen(bool);
     ofRectangle* cropRectangle;
     ofRectangle* drawRectangle;
     
@@ -110,5 +118,6 @@ private:
     void updateCurrentFrame();
     void updateFBO();
     
+    OMXDisplay* directDisplay;
 };
 

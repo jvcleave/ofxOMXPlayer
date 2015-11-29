@@ -17,7 +17,7 @@ public:
     bool close();
     
     ofxOMXPlayerSettings settings;
-    VideoDecoderTextured* eglImageDecoder;
+    VideoDecoderTextured* textureDecoder;
     EGLImageKHR eglImage;
 };
 

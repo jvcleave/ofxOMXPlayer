@@ -14,8 +14,7 @@ public:
     ~VideoDecoderDirect();
     bool open(StreamInfo& streamInfo,
               OMXClock *clock,
-              bool deinterlace = false, 
-              bool hdmi_clock_sync = false);
+              ofxOMXPlayerSettings& settings_);
     
     bool decode(uint8_t *pData, int iSize, double pts);
   
@@ -35,7 +34,8 @@ public:
     {
         return &display;
     }
-    
+    ofxOMXPlayerSettings settings;
+    bool doUpdate;
 private:
     int frameCounter;
     int frameOffset;

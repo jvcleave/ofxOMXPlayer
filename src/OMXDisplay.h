@@ -5,54 +5,68 @@
 #include "StreamInfo.h"
 
 
+
 class OMXDisplay
 {
 public:
     
+    OMX_CONFIG_DISPLAYREGIONTYPE omxConfig;
+    Component renderComponent;
+    StreamInfo streamInfo;
+    DirectDisplayOptions options;
+    ofxOMXPlayerSettings playerSettings;
+    bool isReady;
+    bool previousMirror;
+    int previousRotationDegrees;
     OMXDisplay()
     {
-        doMirror = false;
+
         isReady = false;
-        OMX_INIT_STRUCTURE(configDisplay);
+        previousRotationDegrees = 0;
+        OMX_INIT_STRUCTURE(omxConfig);
         ofAddListener(ofEvents().update, this, &OMXDisplay::onUpdate);
     };
+    
     ~OMXDisplay()
     {
         ofRemoveListener(ofEvents().update, this, &OMXDisplay::onUpdate);
     }
     
-    OMX_CONFIG_DISPLAYREGIONTYPE configDisplay;
-    Component renderComponent;
-    ofRectangle displayRect;
-    ofRectangle cropRect;
-    StreamInfo streamInfo;
-    bool doMirror;
-    bool isReady;
     
-    OMX_ERRORTYPE setup(Component& renderComponent_, StreamInfo& streamInfo_)
+    DirectDisplayOptions& getConfig()
+    {
+        return options;
+    }
+    
+    OMX_ERRORTYPE setup(Component& renderComponent_, StreamInfo& streamInfo_, ofxOMXPlayerSettings& playerSettings_)
     {
         
         
         renderComponent = renderComponent_;
-        displayRect.set(0, 0, streamInfo.width, streamInfo.height);
-        cropRect = displayRect;
         streamInfo = streamInfo_;
+        playerSettings = playerSettings_;
+        options = playerSettings.directDisplayOptions;
+        
+        previousMirror = options.doMirror;        
+        if(options.drawRectangle.getArea()==0)
+        {
+           options.drawRectangle.set(0, 0, streamInfo.width, streamInfo.height); 
+        }
+
+        
+        omxConfig.nPortIndex = renderComponent.getInputPort();
         
         
+    
         
-        configDisplay.nPortIndex = renderComponent.getInputPort();
         isReady = true;
         
         OMX_ERRORTYPE error = OMX_ErrorNone;
-        if (displayRect.getWidth()>0)
+        if (options.drawRectangle.getWidth()>0)
         {
             
-            error = disableFullScreen();
+            error = applyConfig(); 
             OMX_TRACE(error);
-            
-            error = setDestinationRect();
-            OMX_TRACE(error);
-            
             
         }else
         {
@@ -79,35 +93,80 @@ public:
             return;
         }
         
-        setDestinationRect();
-        crop();
+        if(previousMirror != options.doMirror)
+        {
+            rotateDisplay(previousRotationDegrees);
+            previousMirror = options.doMirror;
+        }
+        
         OMX_ERRORTYPE error =applyConfig();
         OMX_TRACE(error); 
-        
+
+#ifdef DEBUG_VIDEO_DISPLAY
         stringstream info;
-        info << "fullscreen: " << configDisplay.fullscreen << endl; 
-        info << "noaspect: " << configDisplay.noaspect << endl;
-        info << "src_rect x: " << configDisplay.src_rect.x_offset << endl;  
-        info << "src_rect y: " << configDisplay.src_rect.y_offset << endl;  
-        info << "src_rect width: " << configDisplay.src_rect.width << endl;    
-        info << "src_rect height: " << configDisplay.src_rect.height << endl;    
+        info << "fullscreen: " << omxConfig.fullscreen << endl; 
+        info << "noaspect: " << omxConfig.noaspect << endl;
+        info << "src_rect x: " << omxConfig.src_rect.x_offset << endl;  
+        info << "src_rect y: " << omxConfig.src_rect.y_offset << endl;  
+        info << "src_rect width: " << omxConfig.src_rect.width << endl;    
+        info << "src_rect height: " << omxConfig.src_rect.height << endl;    
         
-        info << "dest_rect x: " << configDisplay.dest_rect.x_offset << endl; 
-        info << "dest_rect y: " << configDisplay.dest_rect.y_offset << endl; 
-        info << "dest_rect width: " << configDisplay.dest_rect.width << endl;    
-        info << "dest_rect height: " << configDisplay.dest_rect.height << endl;
+        info << "dest_rect x: " << omxConfig.dest_rect.x_offset << endl; 
+        info << "dest_rect y: " << omxConfig.dest_rect.y_offset << endl; 
+        info << "dest_rect width: " << omxConfig.dest_rect.width << endl;    
+        info << "dest_rect height: " << omxConfig.dest_rect.height << endl;
         
-        info << "pixel_x: " << configDisplay.pixel_x << endl;
-        info << "pixel_y: " << configDisplay.pixel_y << endl;
-        info << "transform: " << configDisplay.transform << endl;
+        info << "pixel_x: " << omxConfig.pixel_x << endl;
+        info << "pixel_y: " << omxConfig.pixel_y << endl; 
+        info << "transform: " << omxConfig.transform << endl;
+        
+        
+        info << "pixel_x: " << omxConfig.pixel_x << endl;
+        info << "pixel_y: " << omxConfig.pixel_y << endl; 
+        info << "transform: " << omxConfig.transform << endl;
+        
+        info << "layer: " << omxConfig.layer << endl;
+        info << "alpha: " << omxConfig.alpha << endl;
+        
+        info << "copyprotect_required: " << omxConfig.copyprotect_required << endl;
+        info << "wfc_context_width: " << omxConfig.wfc_context_width << endl;
+        info << "wfc_context_height: " << omxConfig.wfc_context_height << endl;
+        
+    
         
         ofLogVerbose() << info.str();
-        ofLogVerbose() << "displayRect: " << displayRect;
-        ofLogVerbose() << "displayRect.getArea(): " << displayRect.getArea();
-
+        ofLogVerbose() << "options.drawRectangle: " << options.drawRectangle;
+        ofLogVerbose() << "options.drawRectangle.getArea(): " << options.drawRectangle.getArea();
+#endif
+        
     }
     
-    
+    OMX_ERRORTYPE applyConfig()
+    {
+        omxConfig.set = (OMX_DISPLAYSETTYPE)(OMX_DISPLAY_SET_DEST_RECT| OMX_DISPLAY_SET_SRC_RECT | OMX_DISPLAY_SET_FULLSCREEN | OMX_DISPLAY_SET_NOASPECT | OMX_DISPLAY_SET_TRANSFORM | OMX_DISPLAY_SET_ALPHA | OMX_DISPLAY_SET_PIXEL);
+        
+        omxConfig.dest_rect.x_offset  = options.drawRectangle.x;
+        omxConfig.dest_rect.y_offset  = options.drawRectangle.y;
+        omxConfig.dest_rect.width     = options.drawRectangle.getWidth();
+        omxConfig.dest_rect.height    = options.drawRectangle.getHeight();
+        
+        omxConfig.src_rect.x_offset  = options.cropRectangle.x;
+        omxConfig.src_rect.y_offset  = options.cropRectangle.y;
+        omxConfig.src_rect.width     = options.cropRectangle.getWidth();
+        omxConfig.src_rect.height    = options.cropRectangle.getHeight();
+        
+        omxConfig.fullscreen = (OMX_BOOL)options.doFullScreen;
+        omxConfig.noaspect   = (OMX_BOOL)options.noAspectRatio;    
+        omxConfig.transform  = (OMX_DISPLAYTRANSFORMTYPE)options.rotationIndex;
+        //int alpha = (ofGetFrameNum() % 255); 
+        omxConfig.alpha  = options.alpha;
+        omxConfig.pixel_x  = options.pixelAspectX;
+        omxConfig.pixel_y  = options.pixelAspectY;
+        
+        //return OMX_ErrorNone;
+        return renderComponent.setConfig(OMX_IndexConfigDisplayRegion, &omxConfig);
+    }
+
  
     
    
@@ -123,11 +182,11 @@ public:
             
             
             AVRational aspectRatio;
-            aspectRatio = av_d2q(pixelAspectRatio, 100);
+            aspectRatio = av_d2q(pixelAspectRatio, 100); 
             
-            configDisplay.set      = OMX_DISPLAY_SET_PIXEL;
-            configDisplay.pixel_x  = aspectRatio.num;
-            configDisplay.pixel_y  = aspectRatio.den;
+            options.pixelAspectX = aspectRatio.num;
+            options.pixelAspectY = aspectRatio.den;
+
             error = applyConfig();
             OMX_TRACE(error)
             ofLog(OF_LOG_VERBOSE, "Aspect : num %d den %d aspect %f pixel aspect %f\n", aspectRatio.num, aspectRatio.den, streamInfo.aspect, pixelAspectRatio);
@@ -138,83 +197,12 @@ public:
         return error;
     }
    
-    OMX_ERRORTYPE setDestinationRect()
-    {
-        if(displayRect.getArea() <= 0)
-        {
-            return OMX_ErrorNone;
-        }
-        //disableFullScreen();
-        //disableAspectRatio();
-        configDisplay.set     = OMX_DISPLAY_SET_DEST_RECT;
-        configDisplay.dest_rect.x_offset  = displayRect.x;
-        configDisplay.dest_rect.y_offset  = displayRect.y;
-        configDisplay.dest_rect.width     = displayRect.getWidth();
-        configDisplay.dest_rect.height    = displayRect.getHeight();
-        
-        return applyConfig();
-    }
-    
-    OMX_ERRORTYPE enableFullScreen()
-    {
-        configDisplay.set     = OMX_DISPLAY_SET_FULLSCREEN;
-        configDisplay.fullscreen = OMX_TRUE;
-        return applyConfig();
-    }
-    
-    OMX_ERRORTYPE disableFullScreen()
-    {
-        configDisplay.set     = OMX_DISPLAY_SET_FULLSCREEN;
-        configDisplay.fullscreen = OMX_FALSE;
-        return applyConfig();
-    }
-
-    
-    OMX_ERRORTYPE crop()
-    {
-        configDisplay.set = OMX_DISPLAY_SET_SRC_RECT;
-        configDisplay.src_rect.x_offset  = cropRect.x;
-        configDisplay.src_rect.y_offset  = cropRect.y;
-        configDisplay.src_rect.width     = cropRect.getWidth();
-        configDisplay.src_rect.height    = cropRect.getHeight();
-        return applyConfig();
-    }
-    
-    OMX_ERRORTYPE enableAspectRatio()
-    {
-        configDisplay.set = OMX_DISPLAY_SET_NOASPECT;
-        configDisplay.noaspect = OMX_FALSE;
-        return applyConfig();
-    }
-    
-    OMX_ERRORTYPE disableAspectRatio()
-    {
-        configDisplay.set = OMX_DISPLAY_SET_NOASPECT;
-        configDisplay.noaspect = OMX_TRUE;
-        return applyConfig();
-    }
-    
-    OMX_ERRORTYPE applyConfig()
-    {
-        if(!isReady) return OMX_ErrorNone;
-        
-        return renderComponent.setConfig(OMX_IndexConfigDisplayRegion, &configDisplay);
-    }
-    
     
     OMX_ERRORTYPE rotateDisplay(OMX_DISPLAYTRANSFORMTYPE type)
     {
-        OMX_ERRORTYPE error = OMX_ErrorNone;
-        if (!isReady) 
-        {
-            return error;
-        }
-        configDisplay.set = OMX_DISPLAY_SET_TRANSFORM;
-        configDisplay.transform  = type;
-        
-        error = applyConfig();
-        OMX_TRACE(error);
-        return error;
+
+        options.rotationIndex = (int)type;
+        return applyConfig();
     }
     
     
@@ -235,7 +223,7 @@ public:
             type = OMX_DISPLAY_ROT270;
         }
         
-        if(doMirror)
+        if(options.doMirror)
         {
             switch (type) 
             {
@@ -259,29 +247,21 @@ public:
                     break;
             }
         }
-        
-        OMX_ERRORTYPE error = rotateDisplay(type);
-        OMX_TRACE(error);
-        return error;
+        previousRotationDegrees = degreesClockWise;
+        return rotateDisplay(type);
     }
     
     OMX_ERRORTYPE rotateRandom()
     {
         int randomRotation = ofRandom(0, 7);
-        ofLogVerbose() << "randomRotation: " << randomRotation;
-        OMX_ERRORTYPE error = rotateDisplay((OMX_DISPLAYTRANSFORMTYPE)randomRotation);
-        OMX_TRACE(error);
-        return error;
+        return rotateDisplay((OMX_DISPLAYTRANSFORMTYPE)randomRotation);
     }
 
     
     OMX_ERRORTYPE cropRandom()
     {
-        cropRect.set(0, 0, ofRandom(streamInfo.width/4, streamInfo.width), ofRandom(streamInfo.height/4, streamInfo.height));
-        OMX_ERRORTYPE error = crop();
-
-        OMX_TRACE(error);
-        return error;
+        options.cropRectangle.set(0, 0, ofRandom(streamInfo.width/4, streamInfo.width), ofRandom(streamInfo.height/4, streamInfo.height));
+        return applyConfig();
     }
 
     

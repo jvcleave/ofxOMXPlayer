@@ -10,7 +10,7 @@
 
 VideoPlayerTextured::VideoPlayerTextured()
 {
-	eglImageDecoder = NULL;
+	textureDecoder = NULL;
 }
 
 VideoPlayerTextured::~VideoPlayerTextured()
@@ -80,15 +80,15 @@ bool VideoPlayerTextured::openDecoder()
 
 	frameTime = (double)DVD_TIME_BASE / fps;
 
-	if (!eglImageDecoder)
+	if (!textureDecoder)
 	{
-		eglImageDecoder = new VideoDecoderTextured();
+		textureDecoder = new VideoDecoderTextured();
 
 	}
 
-	decoder = (BaseVideoDecoder*)eglImageDecoder;
+	decoder = (BaseVideoDecoder*)textureDecoder;
 
-	if(!eglImageDecoder->open(omxStreamInfo, omxClock, eglImage))
+	if(!textureDecoder->open(omxStreamInfo, omxClock, eglImage))
 	{
 		closeDecoder();
 		return false;
@@ -99,11 +99,7 @@ bool VideoPlayerTextured::openDecoder()
 	info << "Video height: "	<<	omxStreamInfo.height					<< "\n";
 	info << "Video profile: "	<<	omxStreamInfo.profile					<< "\n";
 	info << "Video fps: "		<<	fps							<< "\n";
-	//ofLogVerbose(__func__) << "\n" << info.str();
-
-
-	/*ofLog(OF_LOG_VERBOSE, "Video codec %s width %d height %d profile %d fps %f\n",
-		  decoder->GetDecoderName().c_str() , omxStreamInfo.width, omxStreamInfo.height, omxStreamInfo.profile, fps);*/
+	ofLogVerbose(__func__) << "\n" << info.str();
 
 
 	return true;
@@ -111,13 +107,11 @@ bool VideoPlayerTextured::openDecoder()
 
 bool VideoPlayerTextured::close()
 {
-	//ofLogVerbose(__func__) << " START, isExiting:" << isExiting;
 	doAbort  = true;
 	doFlush   = true;
 	
 	flush();
 	
-
 	if(ThreadHandle())
 	{
 		lock();
@@ -128,19 +122,15 @@ bool VideoPlayerTextured::close()
 		StopThread("VideoPlayerTextured");
 	}
 
-	if (eglImageDecoder)
+	if (textureDecoder)
 	{
-		//ofLogVerbose(__func__) << "PRE DELETE eglImageDecoder";
-		delete eglImageDecoder;
-		eglImageDecoder = NULL;
-		//ofLogVerbose(__func__) << "POST DELETE eglImageDecoder";
+		delete textureDecoder;
+		textureDecoder = NULL;
 	};
-
 
 	isOpen          = false;
 	currentPTS   = DVD_NOPTS_VALUE;
 	speed         = DVD_PLAYSPEED_NORMAL;
 
-	//ofLogVerbose(__func__) << " END";
 	return true;
 }
