@@ -24,10 +24,14 @@ void ofApp::setup()
 				 We have the option to pass in a rectangle
 				 to be used for a non-textured player to use (as opposed to the default full screen)
 				 */
-				settings.displayRect.width = 400;
-				settings.displayRect.height = 300;
-				settings.displayRect.x = 40+(400*i);
-				settings.displayRect.y = 200;
+                
+                settings.directDisplayOptions.drawRectangle.x = 40+(400*i);
+                settings.directDisplayOptions.drawRectangle.y = 200;
+                
+				settings.directDisplayOptions.drawRectangle.width = 400;
+				settings.directDisplayOptions.drawRectangle.height = 300;
+				
+				
 			}
 			
 			ofxOMXPlayer* player = new ofxOMXPlayer();
@@ -60,7 +64,7 @@ void ofApp::draw(){
 		if (player->isPlaying()) 
 		{
 			ofPushMatrix();
-				ofTranslate(player->settings.displayRect.x, 0, 0);
+				ofTranslate(player->drawRectangle->x, 0, 0);
 				ofDrawBitmapStringHighlight(player->getInfo(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
 			ofPopMatrix();
 		}		

@@ -506,13 +506,13 @@ bool OMXAudioDecoder::deinit()
     bool didDeinit = false;
 
     didDeinit = renderComponent.Deinitialize(__func__);
-    if(!didDeinit); ofLogError(__func__) << "didDeinit failed on renderComponent";
+    if(!didDeinit) ofLogError(__func__) << "didDeinit failed on renderComponent";
     
     didDeinit = mixerComponent.Deinitialize(__func__);
-     if(!didDeinit); ofLogError(__func__) << "didDeinit failed on mixerComponent";
+     if(!didDeinit) ofLogError(__func__) << "didDeinit failed on mixerComponent";
     
     didDeinit = decoderComponent.Deinitialize(__func__);
-    if(!didDeinit); ofLogError(__func__) << "didDeinit failed on decoderComponent";
+    if(!didDeinit) ofLogError(__func__) << "didDeinit failed on decoderComponent";
 
 
     isInitialized = false;

@@ -62,9 +62,8 @@ public:
     void addListener(ofxOMXPlayerListener* listener_);
     void removeListener();
     
-    //OMXThread inheritance
-    void process();
-    
+
+     
     StreamInfo videoStreamInfo;
     StreamInfo audioStreamInfo;
     
@@ -87,14 +86,24 @@ public:
     
     float getFPS();
     
+    
+    void updateDisplay(ofRectangle& cropRectangle, ofRectangle& drawRectangle);
+    
+    //OMXThread inheritance
+    void process();
+    
+    
+    VideoPlayerDirect* directPlayer;
+    VideoPlayerTextured* texturedPlayer;
+    
 private:
     
     
     OMXClock* clock;
     
     OMXPacket* packet;
-    VideoPlayerDirect* directPlayer;
-    VideoPlayerTextured* texturedPlayer;
+    
+    
     BaseVideoPlayer* videoPlayer;
     OMXAudioPlayer* audioPlayer;
     ofxOMXPlayerListener* listener;

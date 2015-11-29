@@ -26,6 +26,7 @@ ofxOMXPlayer::ofxOMXPlayer()
     context = NULL;
     display = NULL;
     pixels = NULL;
+    directDisplay = NULL;
     
     hasNewFrame = false;
     prevFrame = 0;
@@ -39,25 +40,8 @@ ofxOMXPlayer::ofxOMXPlayer()
     
 }
 
-void ofxOMXPlayer::updatePixels()
-{
-    if (!isTextureEnabled())
-    {
-        return;
-    }
-    fbo.begin();
-        ofClear(0, 0, 0, 0);
-        texture.draw(0, 0);
-        //ofLogVerbose() << "updatePixels";
-        glReadPixels(0,0,videoWidth, videoHeight, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-    fbo.end();
-}
 
-unsigned char * ofxOMXPlayer::getPixels()
-{
-    return pixels;
-}
-
+#pragma mark setup
 void ofxOMXPlayer::generateEGLImage(int videoWidth_, int videoHeight_)
 {
     bool needsRegeneration = false;
@@ -191,22 +175,237 @@ void ofxOMXPlayer::generateEGLImage(int videoWidth_, int videoHeight_)
     }
 }
 
-void ofxOMXPlayer::destroyEGLImage()
-{
 
-    if (eglImage)
+bool ofxOMXPlayer::setup(ofxOMXPlayerSettings settings)
+{
+    this->settings = settings;
+    addExitHandler();
+    return openEngine();
+}
+
+
+bool ofxOMXPlayer::openEngine(int startTimeInSeconds) //default 0
+{
+    if (engine)
     {
-        if (eglDestroyImageKHR(display, eglImage))
+        delete engine;
+        engine = NULL;
+    }
+    
+    engine = new ofxOMXPlayerEngine();
+    bool setupPassed = engine->setup(settings);
+    
+    if (setupPassed)
+    {
+        settings = engine->omxPlayerSettings;
+
+        if (settings.enableTexture)
         {
-            //ofLogVerbose(__func__) << "eglDestroyImageKHR PASS <---------------- :)";
+            textureEnabled = settings.enableTexture;
+            generateEGLImage(settings.videoWidth, settings.videoHeight);
+            engine->eglImage = eglImage;
         }
         else
         {
-            ofLogError(__func__) << "eglDestroyImageKHR FAIL <---------------- :(";
+            videoWidth  = settings.videoWidth;
+            videoHeight = settings.videoHeight;
         }
-        eglImage = NULL;
-    }
 
+        engine->openPlayer(startTimeInSeconds);
+    }
+    else
+    {
+        ofLogError(__func__) << "engine->setup FAIL";
+    }
+    if(engine->directPlayer && engine->directPlayer->directDecoder)
+    {
+        directDisplay = engine->directPlayer->directDecoder->getOMXDisplay();
+        
+        cropRectangle = &directDisplay->options.cropRectangle;
+        drawRectangle = &directDisplay->options.drawRectangle;
+        
+    }
+    isOpen = setupPassed;
+    return setupPassed;
+
+}
+
+#pragma mark getters
+
+bool ofxOMXPlayer::getIsOpen()
+{
+    return isOpen;
+}
+
+bool ofxOMXPlayer::isPaused()
+{
+    if (engine)
+    {
+        return engine->isPaused();
+    }
+    return false;
+}
+
+bool ofxOMXPlayer::isPlaying()
+{
+    if (engine)
+    {
+        return engine->isPlaying();
+    }
+    return false;
+}
+
+bool ofxOMXPlayer::isFrameNew()
+{
+    return hasNewFrame;
+}
+
+bool ofxOMXPlayer::isTextureEnabled()
+{
+    return textureEnabled;
+}
+
+int ofxOMXPlayer::getHeight()
+{
+    return videoHeight;
+}
+
+int ofxOMXPlayer::getWidth()
+{
+    return videoWidth;
+}
+
+double ofxOMXPlayer::getMediaTime()
+{
+    if (engine)
+    {
+        return engine->getMediaTime();
+    }
+    return 0;
+}
+
+float ofxOMXPlayer::getFPS()
+{
+    if(engine)
+    {
+        return engine->getFPS();
+        
+    }
+    return 0;
+}
+
+float ofxOMXPlayer::getDurationInSeconds()
+{
+    if (engine)
+    {
+        return engine->getDurationInSeconds();
+    }
+    return 0;
+}
+
+int ofxOMXPlayer::getCurrentFrame()
+{
+    if (engine)
+    {
+        if(didSeek && !didWarnAboutInaccurateCurrentFrame)
+        {
+            ofLogWarning(__func__) << "UNLESS YOU HAVE A 1:1 KEYFRAME:FRAME RATIO CURRENT FRAME NUMBER WILL LIKELY BE INACCURATE AFTER SEEKING";
+            
+            didWarnAboutInaccurateCurrentFrame = true;
+        }
+        return engine->getCurrentFrame();
+    }
+    return 0;
+}
+
+int ofxOMXPlayer::getTotalNumFrames()
+{
+    if (engine)
+    {
+        return engine->getTotalNumFrames();
+    }
+    return 0;
+}
+
+
+StreamInfo& ofxOMXPlayer::getVideoStreamInfo()
+{
+    
+    if (engine)
+    {
+        return engine->videoStreamInfo;
+        
+    }
+    StreamInfo videoInfo;
+    ofLogError(__func__) << "No engine avail - info returned is invalid";
+    return videoInfo;
+}
+
+
+
+ofTexture& ofxOMXPlayer::getTextureReference()
+{
+    if (!fbo.isAllocated())
+    {
+        ofLogError() << "NO FBO!";
+    }
+    return fbo.getTextureReference();
+}
+
+GLuint ofxOMXPlayer::getTextureID()
+{
+    
+    return textureID;
+}
+
+string ofxOMXPlayer::getInfo()
+{
+    stringstream info;
+    info <<"\n" <<  "APP FPS: "+ ofToString(ofGetFrameRate());
+    info <<"\n" <<  "MEDIA TIME: "          << getMediaTime();
+    info <<"\n" <<  "DIMENSIONS: "          << getWidth()<<"x"<<getHeight();
+    info <<"\n" <<  "FPS: "                 << getFPS();
+    info <<"\n" <<  "DURATION IN SECS: "    << getDurationInSeconds();
+    info <<"\n" <<  "TOTAL FRAMES: "        << getTotalNumFrames();
+    info <<"\n" <<  "CURRENT FRAME: "       << getCurrentFrame();
+    if (getTotalNumFrames() > 0) 
+    {
+        info <<"\n" <<  "REMAINING FRAMES: "    << getTotalNumFrames() - getCurrentFrame();
+    }else 
+    {
+        info <<"\n" <<  "REMAINING FRAMES: N/A, NO TOTAL FRAMES";
+    }
+    
+    
+    info <<"\n" <<  "CURRENT VOLUME: "      << getVolume();
+    return info.str();
+}
+
+#pragma mark playback commands
+
+void ofxOMXPlayer::togglePause()
+{
+    if (engine)
+    {
+        engine->setPaused(!engine->isPaused());
+    }
+}
+
+void ofxOMXPlayer::setPaused(bool doPause)
+{
+    if (engine)
+    {
+        return engine->setPaused(doPause);
+    }
+}
+
+
+void ofxOMXPlayer::stepFrameForward()
+{
+    if (engine)
+    {
+        engine->stepFrameForward();
+    }
 }
 
 int ofxOMXPlayer::getSpeedMultiplier()
@@ -258,165 +457,7 @@ void ofxOMXPlayer::seekToTimeInSeconds(int timeInSeconds)
     openEngine(timeInSeconds);
 }
 
-bool ofxOMXPlayer::setup(ofxOMXPlayerSettings settings)
-{
-    this->settings = settings;
-    addExitHandler();
-    return openEngine();
-}
-
-
-bool ofxOMXPlayer::openEngine(int startTimeInSeconds) //default 0
-{
-    if (engine)
-    {
-        delete engine;
-        engine = NULL;
-    }
-    
-    engine = new ofxOMXPlayerEngine();
-    bool setupPassed = engine->setup(settings);
-    
-    if (setupPassed)
-    {
-        settings = engine->omxPlayerSettings;
-
-        if (settings.enableTexture)
-        {
-            textureEnabled = settings.enableTexture;
-            generateEGLImage(settings.videoWidth, settings.videoHeight);
-            engine->eglImage = eglImage;
-        }
-        else
-        {
-            videoWidth  = settings.videoWidth;
-            videoHeight = settings.videoHeight;
-        }
-
-        engine->openPlayer(startTimeInSeconds);
-    }
-    else
-    {
-        ofLogError(__func__) << "engine->setup FAIL";
-    }
-    isOpen = setupPassed;
-    return setupPassed;
-
-}
-
-bool ofxOMXPlayer::getIsOpen()
-{
-    return isOpen;
-}
-
-
-void ofxOMXPlayer::togglePause()
-{
-    if (engine)
-    {
-        engine->setPaused(!engine->isPaused());
-    }
-}
-
-void ofxOMXPlayer::setPaused(bool doPause)
-{
-    if (engine)
-    {
-        return engine->setPaused(doPause);
-    }
-}
-
-bool ofxOMXPlayer::isPaused()
-{
-    if (engine)
-    {
-        return engine->isPaused();
-    }
-    return false;
-}
-
-bool ofxOMXPlayer::isPlaying()
-{
-    if (engine)
-    {
-        return engine->isPlaying();
-    }
-    return false;
-}
-
-void ofxOMXPlayer::onUpdate(ofEventArgs& args)
-{
-    if (doRestart) 
-    {
-        ofxOMXPlayerSettings sameSettings = settings;
-        setup(sameSettings);
-        doRestart = false;
-        return;
-    }
-    if (engine)
-    {
-        int currentFrame = engine->getCurrentFrame();
-        if (prevFrame != currentFrame) 
-        {
-            hasNewFrame = true;
-            prevFrame = currentFrame;
-            if (isTextureEnabled())
-            {
-                fbo.begin();
-                    ofClear(0, 0, 0, 0);
-                    texture.draw(0, 0, texture.getWidth(), texture.getHeight());
-                fbo.end();
-            }
-            
-        }else 
-        {
-            hasNewFrame = false;
-        }
-
-    }else 
-    {
-        hasNewFrame = false;
-    }
-
-
-}
-
-bool ofxOMXPlayer::isFrameNew()
-{
-    return hasNewFrame;
-}
-
-bool ofxOMXPlayer::isTextureEnabled()
-{
-    return textureEnabled;
-}
-
-int ofxOMXPlayer::getHeight()
-{
-    return videoHeight;
-}
-
-int ofxOMXPlayer::getWidth()
-{
-    return videoWidth;
-}
-
-double ofxOMXPlayer::getMediaTime()
-{
-    if (engine)
-    {
-        return engine->getMediaTime();
-    }
-    return 0;
-}
-
-void ofxOMXPlayer::stepFrameForward()
-{
-    if (engine)
-    {
-        engine->stepFrameForward();
-    }
-}
+#pragma mark audio
 
 void ofxOMXPlayer::increaseVolume()
 {
@@ -432,16 +473,6 @@ void ofxOMXPlayer::decreaseVolume()
         engine->decreaseVolume();
     }
 }
-
-float ofxOMXPlayer::getDurationInSeconds()
-{
-    if (engine)
-    {
-        return engine->getDurationInSeconds();
-    }
-    return 0;
-}
-
 
 void ofxOMXPlayer::setVolume(float volume)
 {
@@ -460,23 +491,23 @@ float ofxOMXPlayer::getVolume()
     return 0;
 }
 
-GLuint ofxOMXPlayer::getTextureID()
+StreamInfo& ofxOMXPlayer::getAudioStreamInfo()
 {
-
-    return textureID;
-}
-
-
-ofTexture& ofxOMXPlayer::getTextureReference()
-{
-    if (!fbo.isAllocated())
+    
+    if (engine)
     {
-        ofLogError() << "NO FBO!";
+        return engine->audioStreamInfo;
     }
-    return fbo.getTextureReference();
-    //return texture;
+    
+    StreamInfo audioInfo;
+    ofLogError(__func__) << "No engine avail - info returned is invalid";
+    return audioInfo;
 }
 
+
+
+
+#pragma mark convienience methods
 void ofxOMXPlayer::saveImage(string imagePath)//default imagePath=""
 {
     if(!isTextureEnabled()) return;
@@ -493,75 +524,11 @@ void ofxOMXPlayer::saveImage(string imagePath)//default imagePath=""
     ofLogVerbose() << "SAVED IMAGE TO: " << imagePath;
 }
 
-int ofxOMXPlayer::getCurrentFrame()
-{
-    if (engine)
-    {
-        if(didSeek && !didWarnAboutInaccurateCurrentFrame)
-        {
-            ofLogWarning(__func__) << "UNLESS YOU HAVE A 1:1 KEYFRAME:FRAME RATIO CURRENT FRAME NUMBER WILL LIKELY BE INACCURATE AFTER SEEKING";
-            
-            didWarnAboutInaccurateCurrentFrame = true;
-        }
-        return engine->getCurrentFrame();
-    }
-    return 0;
-}
-
-int ofxOMXPlayer::getTotalNumFrames()
-{
-    if (engine)
-    {
-        return engine->getTotalNumFrames();
-    }
-    return 0;
-}
 
 
-StreamInfo ofxOMXPlayer::getVideoStreamInfo()
-{
 
-    StreamInfo videoInfo;
-    if (engine)
-    {
-        videoInfo = engine->videoStreamInfo;
 
-    }
-    else
-    {
-        ofLogError(__func__) << "No engine avail - info returned is invalid";
-    }
-    return videoInfo;
-}
-
-StreamInfo ofxOMXPlayer::getAudioStreamInfo()
-{
-    StreamInfo audioInfo;
-    if (engine)
-    {
-        audioInfo = engine->audioStreamInfo;
-
-    }
-    else
-    {
-        ofLogError(__func__) << "No engine avail - info returned is invalid";
-    }
-    return audioInfo;
-}
-
-void ofxOMXPlayer::setDisplayRectForNonTexture(float x, float y, float width, float height)
-{
-    if (!engine) return;
-    if(!isTextureEnabled())
-    {
-       engine->setDisplayRect(x, y, width, height);
-    }else
-    {
-        ofLogWarning(__func__) << " does not work for texture mode";
-    }
-    
-}
-
+#pragma mark draw
 void ofxOMXPlayer::draw(float x, float y, float width, float height)
 {
     if (!engine) return;
@@ -571,7 +538,7 @@ void ofxOMXPlayer::draw(float x, float y, float width, float height)
         fbo.draw(x, y, width, height);
     }else
     {
-        setDisplayRectForNonTexture(x, y, width, height);
+        setDisplayRect(x, y, width, height);
     }
     
 }
@@ -582,39 +549,168 @@ void ofxOMXPlayer::draw(float x, float y)
     
 }
 
+#pragma mark direct only options
 
-
-float ofxOMXPlayer::getFPS()
+void ofxOMXPlayer::cropVideo(ofRectangle& cropRectangle_)
 {
-    if(engine)
+    if(*cropRectangle != cropRectangle_)
+    {        
+        *cropRectangle = cropRectangle_;
+    }
+    
+}
+
+void ofxOMXPlayer::cropVideo(float x, float y, float width, float height)
+{
+    ofRectangle cropTemp(x, y, width, height);
+    cropVideo(cropTemp);
+}
+
+void ofxOMXPlayer::rotateVideo(int degrees)
+{
+    if(directDisplay)
     {
-        return engine->getFPS();
+        directDisplay->rotateDisplay(degrees);
+    }
+}
+
+void ofxOMXPlayer::setMirror(bool doMirror)
+{
+    if(directDisplay)
+    {
+        directDisplay->options.doMirror = doMirror;
+    }
+}
+
+void ofxOMXPlayer::setFullScreen(bool doFullScreen)
+{
+    if(directDisplay)
+    {
+        directDisplay->options.doFullScreen = doFullScreen;
         
     }
-    return 0;
 }
-string ofxOMXPlayer::getInfo()
-{
-    stringstream info;
-    info <<"\n" <<  "APP FPS: "+ ofToString(ofGetFrameRate());
-    info <<"\n" <<  "MEDIA TIME: "          << getMediaTime();
-    info <<"\n" <<  "DIMENSIONS: "          << getWidth()<<"x"<<getHeight();
-    info <<"\n" <<  "FPS: "                 << getFPS();
-    info <<"\n" <<  "DURATION IN SECS: "    << getDurationInSeconds();
-    info <<"\n" <<  "TOTAL FRAMES: "        << getTotalNumFrames();
-    info <<"\n" <<  "CURRENT FRAME: "       << getCurrentFrame();
-    if (getTotalNumFrames() > 0) 
-    {
-        info <<"\n" <<  "REMAINING FRAMES: "    << getTotalNumFrames() - getCurrentFrame();
-    }else 
-    {
-        info <<"\n" <<  "REMAINING FRAMES: N/A, NO TOTAL FRAMES";
-    }
 
-    
-    info <<"\n" <<  "CURRENT VOLUME: "      << getVolume();
-    return info.str();
+void ofxOMXPlayer::setAlpha(int alpha)
+{
+    if(directDisplay)
+    {
+        if(alpha >=0 && alpha<=255)
+        {
+            directDisplay->options.alpha = alpha;
+        }
+        
+    }
 }
+
+
+void ofxOMXPlayer::setDisplayRect(ofRectangle& temp)
+{
+    
+    if(temp.getArea() <= 0) return;
+    
+    if (*drawRectangle != temp) 
+    {        
+        *drawRectangle = temp;
+    }
+}
+
+void ofxOMXPlayer::setDisplayRect(float x, float y, float width, float height)
+{
+    
+    ofRectangle temp(x, y, width, height);
+    setDisplayRect(temp);
+   
+}
+
+#pragma mark update routines
+
+
+void ofxOMXPlayer::updateFBO()
+{
+    if (engine && isTextureEnabled() && isFrameNew())
+    {
+        fbo.begin();
+        ofClear(0, 0, 0, 0);
+        texture.draw(0, 0, texture.getWidth(), texture.getHeight()); 
+        fbo.end();
+    }
+}
+
+void ofxOMXPlayer::updateCurrentFrame()
+{
+    if (engine)
+    {
+        int currentFrame = engine->getCurrentFrame();
+        if (prevFrame != currentFrame) 
+        {
+            hasNewFrame = true;
+            prevFrame = currentFrame;
+            
+        }else 
+        {
+            hasNewFrame = false;
+        }
+        
+    }
+    else 
+    {
+        hasNewFrame = false;
+    }
+}
+
+
+
+
+void ofxOMXPlayer::onUpdate(ofEventArgs& args)
+{
+    if (doRestart) 
+    {
+        ofxOMXPlayerSettings sameSettings = settings;
+        setup(sameSettings);
+        doRestart = false;
+        return;
+    }
+    updateCurrentFrame();
+    updateFBO();
+}
+
+#pragma mark pixels
+void ofxOMXPlayer::updatePixels()
+{
+    if (!isTextureEnabled())
+    {
+        return;
+    }
+    fbo.begin();
+    ofClear(0, 0, 0, 0);
+    texture.draw(0, 0);
+    //ofLogVerbose() << "updatePixels";
+    glReadPixels(0,0,videoWidth, videoHeight, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+    fbo.end();
+}
+
+unsigned char * ofxOMXPlayer::getPixels()
+{
+    return pixels;
+}
+
+#pragma mark shutdown
+
+void ofxOMXPlayer::destroyEGLImage()
+{
+    
+    if (eglImage)
+    {
+        if (!eglDestroyImageKHR(display, eglImage))
+        {
+            ofLogError(__func__) << "eglDestroyImageKHR FAIL <---------------- :(";
+        }
+        eglImage = NULL;
+    }
+    
+}
+
 
 struct sigaction old_action;
 bool ofxOMXPlayer::doExit = false;
@@ -627,9 +723,6 @@ void ofxOMXPlayer::close()
     {
         return;
     }
-    
-    
-    
     
     ofRemoveListener(ofEvents().update, this, &ofxOMXPlayer::onUpdateDuringExit);
     
@@ -651,10 +744,18 @@ void ofxOMXPlayer::close()
         engine = NULL;
     }
     
+    destroyEGLImage();
+    if (pixels)
+    {
+        delete[] pixels;
+        pixels = NULL;
+    }
+    drawRectangle = NULL;
+    cropRectangle = NULL;
+    directDisplay = NULL;
     isOpen = false;
     
 }
-
 
 ofxOMXPlayer::~ofxOMXPlayer()
 {
@@ -674,17 +775,15 @@ void ofxOMXPlayer::onUpdateDuringExit(ofEventArgs& args)
         ofLogVerbose(__func__) << " EXITING VIA SIGNAL";
         if(engine)
         {
+            if(engine->directPlayer && engine->directPlayer->directDecoder)
+            {
+                engine->directPlayer->directDecoder->doUpdate = false;
+                engine->directPlayer->directDecoder->display.isReady = false;
+            }
             engine->startExit();
         }
         close();
         ofxOMXPlayer::doExit = false;
-        
-        destroyEGLImage();
-        if (pixels)
-        {
-            delete[] pixels;
-            pixels = NULL;
-        }
         OMXInitializer::getInstance().deinit();
         ofExit();
     }
@@ -692,10 +791,7 @@ void ofxOMXPlayer::onUpdateDuringExit(ofEventArgs& args)
 
 void ofxOMXPlayer::addExitHandler()
 {
-    
-    
- 
-    
+
     for (size_t i=0; i<signals.size(); i++)
     {
         int SIGNAL_TO_BLOCK = signals[i];

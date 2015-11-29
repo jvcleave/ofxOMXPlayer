@@ -231,7 +231,7 @@ public:
     map<OMX_CAMERADISABLEALGORITHMTYPE, string> algorithmTypes;
     vector<string>& getAlgorithmNames()
     {
-        return algorithmNames;
+        return algorithmNames; 
     }
     
     
@@ -272,13 +272,35 @@ public:
         return omxErrors[name];
     }
     
-    
-    map<OMX_STATETYPE, string>omxStateNames;
-    map<EGLint, string> eglErrors;
-    
     vector<string> commandNames;
     map<string, OMX_COMMANDTYPE> commands;
     map<OMX_COMMANDTYPE, string> commandTypes;
+    string getOMXCommand(OMX_COMMANDTYPE type)
+    {
+        return commandTypes[type];
+    }
+    
+    OMX_COMMANDTYPE getOMXCommand(string name)
+    {
+        return commands[name];
+    }
+    
+    vector<string> omxStateNames;
+    map<string, OMX_STATETYPE> omxStates;
+    map<OMX_STATETYPE, string> omxStateTypes;
+    string getOMXState(OMX_STATETYPE type)
+    {
+        return omxStateTypes[type];
+    }
+    
+    OMX_STATETYPE getOMXState(string name)
+    {
+        return omxStates[name];
+    }
+    
+    
+    
+    map<EGLint, string> eglErrors;
     
 private:	
     OMX_Maps()
@@ -523,11 +545,13 @@ private:
         
         
         
-        omxStateNames[OMX_StateInvalid] = "OMX_StateInvalid";
-        omxStateNames[OMX_StateLoaded] = "OMX_StateLoaded";
-        omxStateNames[OMX_StateIdle] = "OMX_StateIdle";
-        omxStateNames[OMX_StateExecuting] = "OMX_StateExecuting";
-        omxStateNames[OMX_StatePause] = "OMX_StatePause";
+        omxStateTypes[OMX_StateInvalid] = "OMX_StateInvalid";
+        omxStateTypes[OMX_StateLoaded] = "OMX_StateLoaded";
+        omxStateTypes[OMX_StateIdle] = "OMX_StateIdle";
+        omxStateTypes[OMX_StateExecuting] = "OMX_StateExecuting";
+        omxStateTypes[OMX_StatePause] = "OMX_StatePause";
+        
+        collectNames<OMX_STATETYPE>(omxStates, omxStateNames, omxStateTypes);
         
         omxErrorTypes[OMX_ErrorNone] =  "OMX_ErrorNone";
         omxErrorTypes[OMX_ErrorInsufficientResources] =  "OMX_ErrorInsufficientResources";
@@ -705,92 +729,7 @@ private:
 #define DVD_PLAYSPEED_PAUSE       0       // frame stepping
 #define DVD_PLAYSPEED_NORMAL      1000
 
-extern inline  
-string omxErrorToString(OMX_ERRORTYPE error)
-{
-    return OMX_Maps::getInstance().getOMXError(error);
-}
-
-
-#define OMX_LOG_LEVEL_DEV 1
-#define OMX_LOG_LEVEL_ERROR_ONLY 2
-#define OMX_LOG_LEVEL_VERBOSE 3
-#define OMX_LOG_LEVEL_SILENT 9
-
-#ifndef OMX_LOG_LEVEL
-#define OMX_LOG_LEVEL OMX_LOG_LEVEL_ERROR_ONLY
-#endif
-
-extern inline  
-void logOMXError(OMX_ERRORTYPE error, string comments="", string functionName="", int lineNumber=0)
-{
-    string commentLine = " ";
-    if(!comments.empty())
-    {
-        commentLine = " " + comments + " ";
-    }
-    
-    switch(OMX_LOG_LEVEL)
-    {
-        case OMX_LOG_LEVEL_DEV:
-        {
-            if(error != OMX_ErrorNone)
-            {
-                ofLogError(functionName) << lineNumber << commentLine << omxErrorToString(error);
-            }else
-            {
-                ofLogVerbose(functionName) << lineNumber << commentLine << omxErrorToString(error);
-            }
-            break;
-        }
-        case OMX_LOG_LEVEL_ERROR_ONLY:
-        {
-            
-            if(error != OMX_ErrorNone)
-            {
-                ofLogError(functionName) << lineNumber << commentLine << omxErrorToString(error);
-            }
-            break;
-        }
-        case OMX_LOG_LEVEL_VERBOSE:
-        {
-            ofLogError(functionName)  << commentLine << omxErrorToString(error);
-            break;
-        }
-        default:
-        {
-            break;
-        }
-    }
-    
-}
-
-
-
-#define OMX_TRACE_1_ARGS(error)                      logOMXError(error, "", __func__, __LINE__);
-#define OMX_TRACE_2_ARGS(error, comments)            logOMXError(error, comments, __func__, __LINE__);
-#define OMX_TRACE_3_ARGS(error, comments, whatever)  logOMXError(error, comments, __func__, __LINE__);
-
-#define GET_OMX_TRACE_4TH_ARG(arg1, arg2, arg3, arg4, ...) arg4
-#define OMX_TRACE_MACRO_CHOOSER(...) GET_OMX_TRACE_4TH_ARG(__VA_ARGS__, OMX_TRACE_3_ARGS, OMX_TRACE_2_ARGS, OMX_TRACE_1_ARGS, )
-
-#define ENABLE_OMX_TRACE 1
-
-#if defined (ENABLE_OMX_TRACE)
-//#warning enabling OMX_TRACE
-#define OMX_TRACE(...) OMX_TRACE_MACRO_CHOOSER(__VA_ARGS__)(__VA_ARGS__)
-#else
-#warning  disabling OMX_TRACE
-#define OMX_TRACE(...)
-#endif
-
-/*
-#define DEBUG_AUDIO
-#define DEBUG_EVENTS
-#define DEBUG_STATES
-#define DEBUG_COMMANDS
-#define DEBUG_PORTS
-*/
+#include "DEBUG_CONFIG.h"
 
 //#warning  disabling -Wunused-but-set-variable -Wunused-variable
 //#pragma GCC diagnostic ignored "-Wunused-but-set-variable"

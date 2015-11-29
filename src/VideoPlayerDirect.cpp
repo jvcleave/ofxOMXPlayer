@@ -33,8 +33,7 @@
 
 VideoPlayerDirect::VideoPlayerDirect()
 {
-	doHDMISync = false;
-	nonTextureDecoder = NULL;
+	directDecoder = NULL;
 }
 
 VideoPlayerDirect::~VideoPlayerDirect()
@@ -47,7 +46,7 @@ VideoPlayerDirect::~VideoPlayerDirect()
 	pthread_mutex_destroy(&m_lock_decoder);
 }
 
-bool VideoPlayerDirect::open(StreamInfo& hints, OMXClock* av_clock, bool deinterlace, bool hdmi_clock_sync)
+bool VideoPlayerDirect::open(StreamInfo& hints, OMXClock* av_clock, ofxOMXPlayerSettings& settings_)
 {
 
 	if (!av_clock)
@@ -59,18 +58,18 @@ bool VideoPlayerDirect::open(StreamInfo& hints, OMXClock* av_clock, bool deinter
 	{
 		close();
 	}
-
+    
+    
+    settings = settings_;
 
 	omxStreamInfo       = hints;
 	omxClock    = av_clock;
 	fps         = 25.0f;
 	frameTime   = 0;
-	doDeinterlace = deinterlace;
 	currentPTS = DVD_NOPTS_VALUE;
 	doAbort      = false;
 	doFlush       = false;
 	cachedSize = 0;
-	doHDMISync = hdmi_clock_sync;
 	speed       = DVD_PLAYSPEED_NORMAL;
 	
 
@@ -104,18 +103,16 @@ bool VideoPlayerDirect::openDecoder()
 
 	if( fps > 100 || fps < 5 )
 	{
-		ofLog(OF_LOG_VERBOSE, "Invalid framerate %d, using forced 25fps and just trust timestamps\n", (int)fps);
+		ofLog(OF_LOG_VERBOSE, "Invalid framerate %d, using forced 25fps and just trust timestamps\n", (int)fps); 
 		fps = 25;
 	}
 
 	frameTime = (double)DVD_TIME_BASE / fps;
 
-	nonTextureDecoder = new VideoDecoderDirect();
+	directDecoder = new VideoDecoderDirect();
 	
-	nonTextureDecoder->setDisplayRect(displayRect);
-
-	decoder = (BaseVideoDecoder*)nonTextureDecoder;
-	if(!nonTextureDecoder->open(omxStreamInfo, omxClock, doDeinterlace, doHDMISync))
+	decoder = (BaseVideoDecoder*)directDecoder;
+	if(!directDecoder->open(omxStreamInfo, omxClock, settings))
 	{
 
 		closeDecoder();
@@ -148,10 +145,10 @@ bool VideoPlayerDirect::close()
 		StopThread("VideoPlayerDirect");
 	}
 	
-	if (nonTextureDecoder && !isExiting)
+	if (directDecoder && !isExiting)
 	{
-		delete nonTextureDecoder;
-		nonTextureDecoder = NULL;
+		delete directDecoder;
+		directDecoder = NULL;
 	}
 
 	isOpen      = false;
@@ -161,29 +158,3 @@ bool VideoPlayerDirect::close()
 	return true;
 }
 
-bool VideoPlayerDirect::validateDisplayRect(ofRectangle& rectangle)
-{
-	if (displayRect == rectangle) 
-	{
-		return false;
-	}
-	displayRect = rectangle;
-	return true;
-}
-void VideoPlayerDirect::setDisplayRect(ofRectangle& rectangle)
-{
-	if (ThreadHandle()) 
-	{
-		lock();
-			if(validateDisplayRect(rectangle))
-			{
-				lockDecoder();
-					nonTextureDecoder->setDisplayRect(displayRect);
-				unlockDecoder();
-			}
-		unlock();
-	}else 
-	{
-		validateDisplayRect(rectangle);
-	}
-}
