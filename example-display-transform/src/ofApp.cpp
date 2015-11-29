@@ -41,10 +41,10 @@ void ofApp::update()
 {
     if(ofGetFrameNum() % 3 == 0)
     {
-        omxPlayer.setDisplayRectForNonTexture(ofRandom(ofGetScreenWidth()),
-                                              ofRandom(ofGetScreenHeight()),
-                                              ofRandom(ofGetScreenWidth()),
-                                              ofRandom(ofGetScreenHeight()));
+        omxPlayer.setDisplayRect(ofRandom(ofGetScreenWidth()),
+                                 ofRandom(ofGetScreenHeight()),
+                                 ofRandom(ofGetScreenWidth()),
+                                 ofRandom(ofGetScreenHeight()));
     }
     
 }

@@ -37,10 +37,14 @@ void ofApp::setup()
 		 We have the option to pass in a rectangle
 		 to be used for a non-textured player to use (as opposed to the default full screen)
 		 */
-		settings.displayRect.width = 400;
-		settings.displayRect.height = 300;
-		settings.displayRect.x = 440;
-		settings.displayRect.y = 200;
+        
+        ofRectangle drawRectangle;
+		drawRectangle.width = 400;
+		drawRectangle.height = 300;
+		drawRectangle.x = 440;
+		drawRectangle.y = 200;
+        
+        settings.directDisplayOptions.drawRectangle = drawRectangle;
 	}
 	
 	

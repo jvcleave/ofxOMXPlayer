@@ -3,7 +3,7 @@
 #include "ofMain.h"
 #include "Component.h"
 #include "StreamInfo.h"
-
+#include "ofxOMXPlayerSettings.h"
 
 
 class OMXDisplay
