@@ -21,9 +21,9 @@ public:
         doMirror = false;
         rotationIndex = 0;
         rotationDegrees =0; 
-        doFullScreen = false;
         pixelAspectX = 0;
         pixelAspectY = 0;
+        doForceFill = false;
     };
     
     //decoder related
@@ -40,6 +40,7 @@ public:
     int alpha;
     int pixelAspectX; 
     int pixelAspectY;
+    bool doForceFill;
 };
 
 class ofxOMXPlayerSettings

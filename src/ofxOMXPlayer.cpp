@@ -591,6 +591,17 @@ void ofxOMXPlayer::setFullScreen(bool doFullScreen)
     }
 }
 
+void ofxOMXPlayer::setForceFill(bool doForceFill)
+{
+    if(directDisplay)
+    {
+        directDisplay->options.doForceFill = doForceFill;
+        
+    }
+}
+
+
+
 void ofxOMXPlayer::setAlpha(int alpha)
 {
     if(directDisplay)

@@ -11,6 +11,7 @@ class OMXDisplay
 public:
     
     OMX_CONFIG_DISPLAYREGIONTYPE omxConfig;
+    OMX_CONFIG_DISPLAYREGIONTYPE omxConfigDefaults;
     Component renderComponent;
     StreamInfo streamInfo;
     DirectDisplayOptions options;
@@ -24,6 +25,7 @@ public:
         isReady = false;
         previousRotationDegrees = 0;
         OMX_INIT_STRUCTURE(omxConfig);
+        omxConfigDefaults = omxConfig;
         ofAddListener(ofEvents().update, this, &OMXDisplay::onUpdate);
     };
     
@@ -125,6 +127,8 @@ public:
         info << "pixel_y: " << omxConfig.pixel_y << endl; 
         info << "transform: " << omxConfig.transform << endl;
         
+        info << "mode: " << omxConfig.mode << endl;
+        
         info << "layer: " << omxConfig.layer << endl;
         info << "alpha: " << omxConfig.alpha << endl;
         
@@ -143,7 +147,7 @@ public:
     
     OMX_ERRORTYPE applyConfig()
     {
-        omxConfig.set = (OMX_DISPLAYSETTYPE)(OMX_DISPLAY_SET_DEST_RECT| OMX_DISPLAY_SET_SRC_RECT | OMX_DISPLAY_SET_FULLSCREEN | OMX_DISPLAY_SET_NOASPECT | OMX_DISPLAY_SET_TRANSFORM | OMX_DISPLAY_SET_ALPHA | OMX_DISPLAY_SET_PIXEL);
+        omxConfig.set = (OMX_DISPLAYSETTYPE)(OMX_DISPLAY_SET_DEST_RECT| OMX_DISPLAY_SET_SRC_RECT | OMX_DISPLAY_SET_FULLSCREEN | OMX_DISPLAY_SET_NOASPECT | OMX_DISPLAY_SET_TRANSFORM | OMX_DISPLAY_SET_ALPHA | OMX_DISPLAY_SET_PIXEL | OMX_DISPLAY_SET_MODE);
         
         omxConfig.dest_rect.x_offset  = options.drawRectangle.x;
         omxConfig.dest_rect.y_offset  = options.drawRectangle.y;
@@ -162,7 +166,15 @@ public:
         omxConfig.alpha  = options.alpha;
         omxConfig.pixel_x  = options.pixelAspectX;
         omxConfig.pixel_y  = options.pixelAspectY;
-        
+        if(options.doForceFill)
+        {
+            omxConfig.mode  = OMX_DISPLAY_MODE_FILL;  
+        }else
+        {
+            omxConfig.mode = omxConfigDefaults.mode;
+        }
+        //omxConfig.mode  = OMX_DISPLAY_MODE_FILL;
+        //omxConfig.mode  = (OMX_DISPLAYMODETYPE)ofRandom(0, 5);
         //return OMX_ErrorNone;
         return renderComponent.setConfig(OMX_IndexConfigDisplayRegion, &omxConfig);
     }
