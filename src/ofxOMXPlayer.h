@@ -76,6 +76,7 @@ public:
     void        setMirror(bool);
     void        setAlpha(int alpha);
     void        setFullScreen(bool);
+    void        setForceFill(bool);
     ofRectangle* cropRectangle;
     ofRectangle* drawRectangle;
     
