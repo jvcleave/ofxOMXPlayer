@@ -25,21 +25,7 @@ void ofApp::setup()
 		
 	string videoPath = ofToDataPath("../../../video/Timecoded_Big_bunny_1.mov", true);
 	
-    
-    ofDirectory currentVideoDirectory(ofToDataPath("/home/pi/videos/current", true));
-    if (currentVideoDirectory.exists())
-    {
-        currentVideoDirectory.listDir();
-        currentVideoDirectory.sort();
-        vector<ofFile> files = currentVideoDirectory.getFiles();
-        if (files.size()>0)
-        {
-           videoPath = files[0].path();
-        }		
-    }
-    
-	
-	settings.videoPath = videoPath;
+    settings.videoPath = videoPath;
     settings.useHDMIForAudio = true;	//default true
     settings.enableLooping = true;		//default true
     settings.enableTexture = false;		//default true
@@ -63,6 +49,12 @@ bool forceFill = false;
 bool doDisplayInCropArea = true;
 void ofApp::update()
 {
+    if (omxPlayer.isTextureEnabled()) 
+    {
+        ofLogError() << "this example only works correctly in direct mode";
+        return;
+    }
+    
     if (doReset) 
     {
         doReset = false;
@@ -72,7 +64,7 @@ void ofApp::update()
         forceFill = false;
         doRotation = false;
         doDisplayInCropArea = true;
-        omxPlayer.setDisplayRect(0, 0, omxPlayer.getWidth(), omxPlayer.getHeight());
+        omxPlayer.draw(0, 0, omxPlayer.getWidth(), omxPlayer.getHeight());
         omxPlayer.cropVideo(0, 0, omxPlayer.getWidth(), omxPlayer.getHeight()); 
         omxPlayer.setAlpha(255);
         omxPlayer.rotateVideo(0);
@@ -88,17 +80,17 @@ void ofApp::update()
         if (doDisplayInCropArea) 
         {
             //display where the cropping was done
-            omxPlayer.setDisplayRect(grids[gridCounter]);
+            omxPlayer.draw(grids[gridCounter]);
         }else
         {
             if(!forceFill)
             {
                 //display at top left
-                omxPlayer.setDisplayRect(0, 0, grids[gridCounter].width, grids[gridCounter].height); 
+                omxPlayer.draw(0, 0, grids[gridCounter].width, grids[gridCounter].height); 
             }else
             {
                 //fill whole screen
-                omxPlayer.setDisplayRect(0, 0, ofGetWidth(), ofGetHeight()); 
+                omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight()); 
             }
             
         }
@@ -139,15 +131,16 @@ void ofApp::draw()
 {
     
     
+    
     ofPushStyle();
     ofNoFill();
     ofSetColor(ofColor::black);
     for(int i=0; i<grids.size(); i++)
     {   
-        
         ofDrawRectangle(grids[i]);
     }
     ofPopStyle();
+    
 }
 
 

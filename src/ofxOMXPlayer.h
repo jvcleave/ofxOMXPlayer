@@ -33,7 +33,7 @@ public:
     
     void        draw(float x, float y, float w, float h);
     void        draw(float x=0, float y=0);
-    
+    void        draw(ofRectangle&);
 
     
     void        increaseVolume();
@@ -79,6 +79,8 @@ public:
     void        setForceFill(bool);
     ofRectangle* cropRectangle;
     ofRectangle* drawRectangle;
+    
+    static string getRandomVideo(string folder);
     
 private:
     vector<int> signals;

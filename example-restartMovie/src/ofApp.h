@@ -14,7 +14,12 @@ class ofApp : public ofBaseApp, public KeyListener{
 		void keyPressed(int key);	
 		ofxOMXPlayer omxPlayer;
 	
-	void onCharacterReceived(KeyListenerEventData& e);
+    
+    void onCharacterReceived(KeyListenerEventData& e)
+    {
+        keyPressed((int)e.character);
+    };
+    
 	TerminalListener consoleListener;
 };
 

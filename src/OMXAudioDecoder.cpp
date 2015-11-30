@@ -111,7 +111,6 @@ OMXAudioDecoder::OMXAudioDecoder()
     m_BitsPerSample = 0;
     clockComponent = NULL;
     omxClock = NULL;
-    hasExternalClock = false;
     doSetStartTime = false;
     sampleSize = 0;
     isFirstFrame = true;
@@ -354,23 +353,6 @@ bool OMXAudioDecoder::init(string device,
     {
          return false;
     }
-
-    /*
-    if(omxClock == NULL)
-    {
-        hasExternalClock = false;
-
-        omxClock = new OMXClock();
-
-        if(!omxClock->init(false, true))
-        {
-            delete omxClock;
-            omxClock = NULL;
-            ofLog(OF_LOG_ERROR, "OMXAudioDecoder::init error creating av clock");
-             return false;
-        }
-    }
-    */
     
     clockComponent = omxClock->getComponent();
 
@@ -383,14 +365,12 @@ bool OMXAudioDecoder::init(string device,
          return false;
     }
 
-    if(!hasExternalClock)
+    //TODO: sketchy
+    error = clockComponent->setState(OMX_StateExecuting);
+    OMX_TRACE(error);
+    if (error != OMX_ErrorNone)
     {
-        error = clockComponent->setState(OMX_StateExecuting);
-        OMX_TRACE(error);
-        if (error != OMX_ErrorNone)
-        {
-             return false;
-        }
+        return false;
     }
 
 
@@ -487,10 +467,12 @@ bool OMXAudioDecoder::deinit()
         return true;
     }
 
-    if(!hasExternalClock && omxClock != NULL)
+    //TODO stop here?
+    if(omxClock)
     {
-        omxClock->stop();
+        //omxClock->stop();
     }
+    
     
     OMX_ERRORTYPE error = OMX_ErrorNone;
     
@@ -520,11 +502,11 @@ bool OMXAudioDecoder::deinit()
     bufferLength   = 0;
 
     
-    if(!hasExternalClock && omxClock != NULL)
+    if(omxClock != NULL)
     {
-        delete omxClock;
+        
+        //delete omxClock;
         omxClock  = NULL;
-        hasExternalClock = false;
     }
     
     clockComponent = NULL;
@@ -945,11 +927,11 @@ bool OMXAudioDecoder::setClock(OMXClock *clock)
 {
     if(omxClock != NULL)
     {
-         return false;
+        ofLogError(__func__) << "NULL CLOCK PASSED";
+        return false;
     }
 
     omxClock = clock;
-    hasExternalClock = true;
     return true;
 }
 

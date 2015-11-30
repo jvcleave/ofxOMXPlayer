@@ -38,7 +38,7 @@ public:
     void setVolume(float volume); // 0..1
     float getVolume();
     
-    void setPaused(bool doPause);
+    bool setPaused(bool doPause);
     
     int getCurrentFrame();
     int getTotalNumFrames();

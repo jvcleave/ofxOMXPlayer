@@ -387,7 +387,7 @@ void ofxOMXPlayer::togglePause()
 {
     if (engine)
     {
-        engine->setPaused(!engine->isPaused());
+        setPaused(!engine->isPaused());
     }
 }
 
@@ -395,7 +395,8 @@ void ofxOMXPlayer::setPaused(bool doPause)
 {
     if (engine)
     {
-        return engine->setPaused(doPause);
+        bool result = engine->setPaused(doPause);
+        ofLogVerbose(__func__) << "result: " << result;
     }
 }
 
@@ -524,7 +525,40 @@ void ofxOMXPlayer::saveImage(string imagePath)//default imagePath=""
     ofLogVerbose() << "SAVED IMAGE TO: " << imagePath;
 }
 
-
+string ofxOMXPlayer::getRandomVideo(string path)
+{
+    string videoPath = "";
+    
+    ofDirectory currentVideoDirectory(ofToDataPath(path, true));
+    if (currentVideoDirectory.exists())
+    {
+        currentVideoDirectory.listDir();
+        currentVideoDirectory.sort();
+        vector<ofFile> files = currentVideoDirectory.getFiles();
+        if (files.size()>0)
+        {
+            if (files.size()==1)
+            {
+                videoPath = files[0].path();
+            }else
+            {
+                int randomIndex = ofRandom(files.size());
+                videoPath = files[randomIndex].path(); 
+            }
+           
+        }
+        
+    }else
+    {
+        ofLogError(__func__) << "NO FILES FOUND AT" << currentVideoDirectory.path();
+    }
+    
+    if(videoPath.empty())
+    {
+        ofLogWarning(__func__) << "returning empty string";
+    }
+    return videoPath;
+}
 
 
 
@@ -546,6 +580,12 @@ void ofxOMXPlayer::draw(float x, float y, float width, float height)
 void ofxOMXPlayer::draw(float x, float y)
 {
     draw(x, y, getWidth(), getHeight());
+    
+}
+
+void ofxOMXPlayer::draw(ofRectangle& drawRect)
+{
+    draw(drawRect.x, drawRect.y, drawRect.getWidth(), drawRect.getHeight());
     
 }
 

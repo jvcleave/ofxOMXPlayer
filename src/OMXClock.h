@@ -23,6 +23,7 @@ protected:
     bool              hasVideo;
     bool              hasAudio;
     int               currentSpeed;
+    int               previousSpeed;
     pthread_mutex_t   m_lock;
 private:
     Component clockComponent;
@@ -30,7 +31,9 @@ public:
     OMXClock();
     ~OMXClock();
     void lock();
+    void lock(string caller);
     void unlock();
+    void unlock(string caller);
     bool init(bool has_video, bool has_audio);
     void deinit();
     bool isPaused()

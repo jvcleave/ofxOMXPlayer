@@ -159,8 +159,8 @@ class OMXAudioDecoder
 		unsigned int  m_BitsPerSample;
 		Component*    clockComponent;
 		OMXClock*     omxClock;
-		bool          hasExternalClock;
-		bool          doSetStartTime;
+
+        bool          doSetStartTime;
 		int           sampleSize;
 		bool          isFirstFrame;
 		int           sampleRate;

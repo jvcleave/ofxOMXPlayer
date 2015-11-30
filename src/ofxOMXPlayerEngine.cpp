@@ -473,19 +473,25 @@ void ofxOMXPlayerEngine::stop()
     setPaused(true);
 }
 
-void ofxOMXPlayerEngine::setPaused(bool doPause)
+bool ofxOMXPlayerEngine::setPaused(bool doPause)
 {
+    
+    bool result = false;
+    lock();
     if(doPause)
     {
         
-        clock->pause();
+        result =  clock->pause();
     }
     else
     {
         
-        clock->resume();
+        result =  clock->resume();
     }
     
+    ofLogVerbose(__func__) << "result: " << result;
+    unlock();
+    return result;
 }
 
 void ofxOMXPlayerEngine::play()

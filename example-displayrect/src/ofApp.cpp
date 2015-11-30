@@ -14,24 +14,10 @@ void ofApp::setup()
 		
 	string videoPath = ofToDataPath("../../../video/Timecoded_Big_bunny_1.mov", true);
 	
-    
-    ofDirectory currentVideoDirectory(ofToDataPath("/home/pi/videos/current", true));
-    if (currentVideoDirectory.exists())
-    {
-        currentVideoDirectory.listDir();
-        currentVideoDirectory.sort();
-        vector<ofFile> files = currentVideoDirectory.getFiles();
-        if (files.size()>0)
-        {
-           videoPath = files[0].path();
-        }		
-    }
-    
-	
 	settings.videoPath = videoPath;
     settings.useHDMIForAudio = true;	//default true
     settings.enableLooping = true;		//default true
-    settings.enableTexture = false;		//default true
+    settings.enableTexture = true;		//default true
     omxPlayer.setup(settings);
 	
 }
@@ -39,25 +25,18 @@ void ofApp::setup()
 
 void ofApp::update()
 {
-    if(ofGetFrameNum() % 3 == 0)
-    {
-        /*omxPlayer.setDisplayRect(ofRandom(ofGetScreenWidth()),
-                                              ofRandom(ofGetScreenHeight()),
-                                              ofRandom(ofGetScreenWidth()),
-                                              ofRandom(ofGetScreenHeight()));*/
-        omxPlayer.setDisplayRect(0,
-                                 0,
-                                 omxPlayer.getWidth(),
-                                 omxPlayer.getHeight() );
-        ofRectangle cropArea(0, 0, ofRandom(omxPlayer.getWidth()), ofRandom(omxPlayer.getHeight()));
-        omxPlayer.cropVideo(cropArea);
-    }
+
     
 }
 
 void ofApp::draw()
 {
     ofBackgroundGradient(ofColor::red, ofColor::black);
+    int randomPos = ofRandom(0, ofGetWidth()/2);
+    omxPlayer.draw(randomPos,
+                   randomPos,
+                   omxPlayer.getWidth(),
+                   omxPlayer.getHeight() );
 	ofDrawBitmapStringHighlight(omxPlayer.getInfo(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
 }
 

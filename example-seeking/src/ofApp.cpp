@@ -5,26 +5,18 @@
 void ofApp::setup()
 {
     doSeek = false;
-	string videoPath = ofToDataPath("../../../video/Timecoded_Big_bunny_1.mov", true);
 
-	
-	ofDirectory currentVideoDirectory(ofToDataPath("/home/pi/videos/current", true));
-	if (currentVideoDirectory.exists()) 
-	{
-		currentVideoDirectory.listDir();
-		currentVideoDirectory.sort();
-		vector<ofFile> files = currentVideoDirectory.getFiles();
-		if (files.size()>0) 
-		{
-			videoPath = files[0].path();
-		}		
-	}
+    string videoPath = ofxOMXPlayer::getRandomVideo("/home/pi/videos/current");
+    if (videoPath.empty()) 
+    {
+        videoPath = ofToDataPath("../../../video/Timecoded_Big_bunny_1.mov", true);
+    }
 		
 	//Somewhat like ofFboSettings we may have a lot of options so this is the current model
 	ofxOMXPlayerSettings settings;
 	settings.videoPath = videoPath;
 	settings.useHDMIForAudio	= true;		//default true
-	settings.enableTexture		= true;		//default true
+	settings.enableTexture		= false;    //default true
 	settings.enableLooping		= true;		//default true
 	settings.enableAudio		= true;		//default true, save resources by disabling
 	//settings.doFlipTexture = true;		//default false

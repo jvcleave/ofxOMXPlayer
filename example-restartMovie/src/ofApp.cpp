@@ -1,5 +1,7 @@
 #include "ofApp.h"
 
+bool doRestart = false;
+bool doPause = false;
 //--------------------------------------------------------------
 void ofApp::setup()
 {
@@ -47,6 +49,8 @@ void ofApp::setup()
 	omxPlayer.setup(settings);
 	
 	consoleListener.setup(this);
+   
+    
 }
 
 
@@ -55,7 +59,17 @@ void ofApp::setup()
 void ofApp::update()
 {
 	
-	
+    if (doRestart) 
+    {
+        doRestart = false;
+        omxPlayer.restartMovie();
+        return;
+    }
+    if (doPause) 
+    {
+        doPause = false;
+        omxPlayer.togglePause();
+    }
 }
 
 
@@ -78,15 +92,13 @@ void ofApp::keyPressed(int key)
     ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
 	if (key == 'p') 
 	{
-		omxPlayer.setPaused(!omxPlayer.isPaused());
+        doPause = !doPause;
 	}
 	if (key == 'r') 
 	{
-		omxPlayer.restartMovie();
+        doRestart = true;
+		
 	}
 }
 
-void ofApp::onCharacterReceived(KeyListenerEventData& e)
-{
-	keyPressed((int)e.character);
-}
+
