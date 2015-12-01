@@ -1,4 +1,6 @@
-STATUS: PERPETUAL DEVELOPMENT   
+STATUS: PERPETUAL DEVELOPMENT
+Use [Releases] (https://github.com/jvcleave/ofxOMXPlayer/releases) unless you are contributing or looking for bleeding edge (requires blood). Releases contain tested versions that work for specific versions of openFrameworks.
+
 CURRENT KNOWN MAJOR ISSUES:   
 Videos with and audio track (even silent) work best and allow more accurate looping/frame tracking
 
@@ -12,9 +14,10 @@ openFrameworks version 0.8 or higher http://www.openframeworks.cc/setup/raspberr
 USAGE:   
 (NEW) Clone into openFrameworks/addons
 
-There 2 modes of Playback, textured or non-textured. 
+There 2 modes of Playback, Direct (aka Non-textured) or Textured. 
 
-Non-Textured:   
+Direct:
+ - Renders directly to the screen, no texture access or pixels. This is most similar to what you will see in omxplayer
  - By default is played fullscreen video
  - OF is still able to run other processes in the background. 
  - 1080p video playback is typically good
@@ -59,20 +62,16 @@ example-shader:
 Use of shaders, fbos and video
 
 example-multiple-players:   
-EXPERIMENTAL: shows some of the more "alpha" features
  - Multiple players
  - Usage of a display area to play non-textured video non-fullscreen
+
+There may be other examples in Master branch but the above are most likely to remain
 
 COMPRESSION RECOMMENDATIONS:   
  - Use MPEGStreamclip (http://www.squared5.com/)
  - H.264
  - Quality 50%
  - PCM Audio (more compatible with HDMI)
-
-TODO:   
- - Implement better Seeking
- - General cleanup (many properties are public)
- - Possibly have it extend ofBaseVideoPlayer
 
 CREDITS:   
 Majority of the code is based off of 
