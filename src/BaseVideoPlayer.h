@@ -18,7 +18,7 @@ class BaseVideoPlayer: public OMXThread
 {
 public:
     BaseVideoPlayer();
-    
+    virtual ~BaseVideoPlayer();
     BaseVideoDecoder* decoder;
     std::deque<OMXPacket *> packets;
     
@@ -44,7 +44,7 @@ public:
     void setSpeed(int speed);
     int getSpeed();
     
-    virtual bool close() = 0;
+    virtual void close() = 0;
     bool decode(OMXPacket *pkt);
     void process();
     void flush();
@@ -70,9 +70,7 @@ public:
     
     uint32_t validHistoryPTS;
     bool doFlush_requested;
-    
-    bool isExiting;
-    
+        
     int getCurrentFrame();
     void resetFrameCounter();
 };

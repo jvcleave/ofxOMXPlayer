@@ -15,7 +15,7 @@ void ofApp::setup()
     doSeek = false;
     doIncreaseSpeed = false;
     doSetNormalSpeed = false;
-    doStep = false;
+    doFrameStep = false;
     
     
     
@@ -62,9 +62,9 @@ void ofApp::update()
         omxPlayer.setNormalSpeed();
     }
     
-    if(doStep)
+    if(doFrameStep)
     {
-        doStep = false;
+        doFrameStep = false;
         omxPlayer.stepFrameForward();
     }
     
@@ -82,10 +82,11 @@ void ofApp::draw()
     info << endl;
     info << "COMMANDS" << endl;
     info << "PRESS p TO PAUSE" << endl;
-    info << "PRESS s TO STEP FRAME" << endl;
+    info << "PRESS f TO STEP FRAME" << endl;
     info << "PRESS r TO RESTART" << endl;
     info << "PRESS i TO INCREASE SPEED" << endl;
     info << "PRESS n FOR NORMAL SPEED" << endl;
+    info << "PRESS s FOR RANDOM SEEK" << endl;
 	ofDrawBitmapStringHighlight(info.str(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
 }
 
@@ -116,9 +117,14 @@ void ofApp::keyPressed  (int key){
             doSetNormalSpeed = true;
             break;
         }
+        case 'f':
+        {
+            doFrameStep = true;
+            break;
+        }
         case 's':
         {
-            doStep = true;
+            doSeek = true;
             break;
         }
 		default:

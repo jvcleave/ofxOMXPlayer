@@ -23,13 +23,6 @@
 
 #include "VideoPlayerDirect.h"
 
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/time.h>
-
-
-#include "XMemUtils.h"
-
 
 VideoPlayerDirect::VideoPlayerDirect()
 {
@@ -38,12 +31,7 @@ VideoPlayerDirect::VideoPlayerDirect()
 
 VideoPlayerDirect::~VideoPlayerDirect()
 {
-
-	close();
-
-	pthread_cond_destroy(&m_packet_cond);
-	pthread_mutex_destroy(&m_lock);
-	pthread_mutex_destroy(&m_lock_decoder);
+    close();
 }
 
 bool VideoPlayerDirect::open(StreamInfo& hints, OMXClock* av_clock, ofxOMXPlayerSettings& settings_)
@@ -62,15 +50,15 @@ bool VideoPlayerDirect::open(StreamInfo& hints, OMXClock* av_clock, ofxOMXPlayer
     
     settings = settings_;
 
-	omxStreamInfo       = hints;
-	omxClock    = av_clock;
-	fps         = 25.0f;
-	frameTime   = 0;
-	currentPTS = DVD_NOPTS_VALUE;
-	doAbort      = false;
-	doFlush       = false;
-	cachedSize = 0;
-	speed       = DVD_PLAYSPEED_NORMAL;
+	omxStreamInfo   = hints;
+	omxClock        = av_clock;
+	fps             = 25.0f;
+	frameTime       = 0;
+	currentPTS      = DVD_NOPTS_VALUE;
+	doAbort         = false;
+	doFlush         = false;
+	cachedSize      = 0;
+	speed           = DVD_PLAYSPEED_NORMAL;
 	
 
 	timeStampAdjustment = omxClock->getAbsoluteClock();
@@ -115,7 +103,9 @@ bool VideoPlayerDirect::openDecoder()
 	if(!directDecoder->open(omxStreamInfo, omxClock, settings))
 	{
 
-		closeDecoder();
+        delete directDecoder;
+        directDecoder = NULL;
+        decoder = NULL;
 		return false;
 	}
 	
@@ -129,7 +119,7 @@ bool VideoPlayerDirect::openDecoder()
 	return true;
 }
 
-bool VideoPlayerDirect::close()
+void VideoPlayerDirect::close()
 {
 	doAbort = true;
 	doFlush = true;
@@ -145,16 +135,14 @@ bool VideoPlayerDirect::close()
 		StopThread("VideoPlayerDirect");
 	}
 	
-	if (directDecoder && !isExiting)
+	if (directDecoder)
 	{
 		delete directDecoder;
 		directDecoder = NULL;
 	}
-
-	isOpen      = false;
+    decoder     = NULL;
+    isOpen      = false;
 	currentPTS  = DVD_NOPTS_VALUE;
 	speed       = DVD_PLAYSPEED_NORMAL;
-
-	return true;
 }
 

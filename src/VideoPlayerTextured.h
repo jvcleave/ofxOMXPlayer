@@ -14,7 +14,7 @@ public:
     
     bool open(StreamInfo& hints, OMXClock *av_clock, EGLImageKHR eglImage);
     bool openDecoder();
-    bool close();
+    void close();
     
     ofxOMXPlayerSettings settings;
     VideoDecoderTextured* textureDecoder;

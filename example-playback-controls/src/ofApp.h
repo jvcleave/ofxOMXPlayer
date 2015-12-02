@@ -33,7 +33,7 @@ public:
     bool doSeek;
     bool doIncreaseSpeed;
     bool doSetNormalSpeed;
-    bool doStep;
+    bool doFrameStep;
 
 };
 

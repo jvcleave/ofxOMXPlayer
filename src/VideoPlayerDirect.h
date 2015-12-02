@@ -16,7 +16,7 @@ public:
     
     bool open(StreamInfo& hints, OMXClock *av_clock, ofxOMXPlayerSettings& settings_);
     bool openDecoder();
-    bool close();
+    void close();
     
     bool doUpdate;
 };

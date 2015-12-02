@@ -28,9 +28,18 @@ BaseVideoPlayer::BaseVideoPlayer()
 	pthread_mutex_init(&m_lock_decoder, NULL);
 	validHistoryPTS = 0;
 	doFlush_requested = false;
-	isExiting = false;
 }
 
+BaseVideoPlayer::~BaseVideoPlayer()
+{
+    
+    pthread_cond_destroy(&m_packet_cond);
+    pthread_mutex_destroy(&m_lock);
+    pthread_mutex_destroy(&m_lock_decoder);
+    
+    omxClock      = NULL;
+    decoder       = NULL;
+}
 
 double BaseVideoPlayer::getCurrentPTS()
 {
@@ -112,14 +121,7 @@ bool BaseVideoPlayer::decode(OMXPacket *pkt)
 	{
 		pts = pkt->dts;
 	}
-	
-#if 0
-	if (pts != DVD_NOPTS_VALUE)
-	{
-		pts += m_iVideoDelay;
-	}
-#endif
-    
+	    
 	if(pts != DVD_NOPTS_VALUE)
 	{
 		currentPTS = pts;

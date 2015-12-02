@@ -775,6 +775,15 @@ void ofxOMXPlayer::close()
         return;
     }
     
+    if(engine)
+    {
+        if(engine->directPlayer && engine->directPlayer->directDecoder)
+        {
+            engine->directPlayer->directDecoder->doUpdate = false;
+            engine->directPlayer->directDecoder->display.isReady = false;
+        }
+    }
+    
     ofRemoveListener(ofEvents().update, this, &ofxOMXPlayer::onUpdateDuringExit);
     
     
@@ -824,15 +833,7 @@ void ofxOMXPlayer::onUpdateDuringExit(ofEventArgs& args)
     if (ofxOMXPlayer::doExit)
     {
         ofLogVerbose(__func__) << " EXITING VIA SIGNAL";
-        if(engine)
-        {
-            if(engine->directPlayer && engine->directPlayer->directDecoder)
-            {
-                engine->directPlayer->directDecoder->doUpdate = false;
-                engine->directPlayer->directDecoder->display.isReady = false;
-            }
-            engine->startExit();
-        }
+        
         close();
         ofxOMXPlayer::doExit = false;
         OMXInitializer::getInstance().deinit();

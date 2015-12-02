@@ -39,7 +39,6 @@ ofxOMXPlayerEngine::ofxOMXPlayerEngine()
     normalPlaySpeed = 1000;
     speedMultiplier = 1;
     doSeek = false;
-    isExiting = false;
     
     eglImage = NULL;
     
@@ -700,17 +699,6 @@ ofxOMXPlayerEngine::~ofxOMXPlayerEngine()
     
     delete clock;
     clock = NULL;
-    
-}
-
-void ofxOMXPlayerEngine::startExit()
-{
-    isExiting = true;
-    
-    if (videoPlayer)
-    {
-        videoPlayer->isExiting = true;
-    }
     
 }
 

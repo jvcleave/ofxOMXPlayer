@@ -13,11 +13,11 @@ VideoPlayerTextured::VideoPlayerTextured()
 	textureDecoder = NULL;
 }
 
+
 VideoPlayerTextured::~VideoPlayerTextured()
 {
-	close();
+    close();
 }
-
 
 bool VideoPlayerTextured::open(StreamInfo& hints, OMXClock *av_clock, EGLImageKHR eglImage)
 {
@@ -90,22 +90,24 @@ bool VideoPlayerTextured::openDecoder()
 
 	if(!textureDecoder->open(omxStreamInfo, omxClock, eglImage))
 	{
-		closeDecoder();
+        delete textureDecoder;
+        textureDecoder = NULL;
+        decoder = NULL;
 		return false;
 	}
 
 	stringstream info;
-	info << "Video width: "	<<	omxStreamInfo.width					<< "\n";
-	info << "Video height: "	<<	omxStreamInfo.height					<< "\n";
-	info << "Video profile: "	<<	omxStreamInfo.profile					<< "\n";
-	info << "Video fps: "		<<	fps							<< "\n";
+	info << "Video width: "     <<	omxStreamInfo.width     << "\n";
+	info << "Video height: "    <<	omxStreamInfo.height    << "\n";
+	info << "Video profile: "   <<	omxStreamInfo.profile   << "\n";
+	info << "Video fps: "		<<	fps                     << "\n";
 	ofLogVerbose(__func__) << "\n" << info.str();
 
 
 	return true;
 }
 
-bool VideoPlayerTextured::close()
+void VideoPlayerTextured::close()
 {
 	doAbort  = true;
 	doFlush   = true;
@@ -115,8 +117,7 @@ bool VideoPlayerTextured::close()
 	if(ThreadHandle())
 	{
 		lock();
-		//ofLogVerbose(__func__) << "WE ARE STILL THREADED";
-		pthread_cond_broadcast(&m_packet_cond);
+            pthread_cond_broadcast(&m_packet_cond);
 		unlock();
 
 		StopThread("VideoPlayerTextured");
@@ -128,9 +129,8 @@ bool VideoPlayerTextured::close()
 		textureDecoder = NULL;
 	};
 
-	isOpen          = false;
-	currentPTS   = DVD_NOPTS_VALUE;
-	speed         = DVD_PLAYSPEED_NORMAL;
+	isOpen      = false;
+	currentPTS  = DVD_NOPTS_VALUE;
+	speed       = DVD_PLAYSPEED_NORMAL;
 
-	return true;
 }

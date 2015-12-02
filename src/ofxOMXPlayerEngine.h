@@ -75,8 +75,6 @@ public:
     int speedMultiplier;
     
     bool doSeek;
-    bool isExiting;
-    void startExit();
     
     bool openPlayer(int startTimeInSeconds=0);
     
