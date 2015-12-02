@@ -44,15 +44,14 @@ public:
     void setSpeed(int speed);
     int getSpeed();
     
-    virtual void close() = 0;
+   
     bool decode(OMXPacket *pkt);
     void process();
     void flush();
     
     bool addPacket(OMXPacket *pkt);
     
-    virtual bool openDecoder() =0;
-    
+
     bool closeDecoder();
     double getCurrentPTS();
     double getFPS();
@@ -73,4 +72,8 @@ public:
         
     int getCurrentFrame();
     void resetFrameCounter();
+    
+    
+    virtual bool openDecoder() =0;
+    virtual void close() = 0;
 };

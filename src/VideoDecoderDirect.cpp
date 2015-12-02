@@ -23,8 +23,6 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
 {
 	OMX_ERRORTYPE error   = OMX_ErrorNone;
 
-	omxCodingType            = OMX_VIDEO_CodingUnused;
-
 	videoWidth  = streamInfo.width;
 	videoHeight = streamInfo.height;
 
@@ -146,7 +144,7 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
     if(error != OMX_ErrorNone) return false;
 
 	portParam.nPortIndex = decoderComponent.getInputPort();
-	int videoBuffers = 60;
+	int videoBuffers = 32;
 	portParam.nBufferCountActual = videoBuffers;
 
 	portParam.format.video.nFrameWidth  = videoWidth;
@@ -287,10 +285,6 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
 	doSetStartTime      = true;
 	
 	display.setup(&renderComponent, streamInfo, settings);
-	ofLog(OF_LOG_VERBOSE,
-	      "%s::%s - decoder_component(0x%p), input_port(0x%x), output_port(0x%x) deinterlace %d hdmiclocksync %d\n",
-	      "VideoDecoderDirect", __func__, decoderComponent.getHandle(), decoderComponent.getInputPort(), decoderComponent.getOutputPort(),
-	      doDeinterlace, doHDMISync);
 
 	isFirstFrame   = true;
     doUpdate = true;

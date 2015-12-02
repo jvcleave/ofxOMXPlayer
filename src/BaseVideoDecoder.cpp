@@ -13,14 +13,16 @@
 BaseVideoDecoder::BaseVideoDecoder()
 {
 
-	isOpen           = false;
-	doPause             = false;
-	doSetStartTime      = true;
-	extraData         = NULL;
-	extraSize         = 0;
-	isFirstFrame       = true;
-	omxClock			= NULL;
-	clockComponent			= NULL;
+	isOpen          = false;
+	doPause         = false;
+	doSetStartTime  = true;
+	extraData       = NULL;
+	extraSize       = 0;
+	isFirstFrame    = true;
+	omxClock        = NULL;
+	clockComponent  = NULL;
+    omxCodingType   = OMX_VIDEO_CodingUnused;
+
 }
 
 BaseVideoDecoder::~BaseVideoDecoder()
@@ -53,11 +55,11 @@ BaseVideoDecoder::~BaseVideoDecoder()
     {
         free(extraData);
     }
-    extraData = NULL;
-
-    omxClock          = NULL;
-    clockComponent = NULL;
-    isOpen       = false;
+    
+    extraData       = NULL;
+    omxClock        = NULL;
+    clockComponent  = NULL;
+    isOpen          = false;
 
 }
 
@@ -253,11 +255,10 @@ bool BaseVideoDecoder::EOS()
 			isEndOfStream =  true;
 
 		}
-		//return renderComponent.EOS();
-	}
+    }
 	if (isEndOfStream)
 	{
-		ofLogVerbose("BaseVideoDecoder::EOS") << "isEndOfStream: " << isEndOfStream;
+		ofLogVerbose(__func__) << "isEndOfStream: " << isEndOfStream;
 	}
 	return isEndOfStream;
 }

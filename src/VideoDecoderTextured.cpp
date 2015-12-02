@@ -39,14 +39,10 @@ void VideoDecoderTextured::resetFrameCounter()
 
 bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock *clock, EGLImageKHR eglImage)
 {
-
-
 	OMX_ERRORTYPE error   = OMX_ErrorNone;
 
 	videoWidth  = streamInfo.width;
 	videoHeight = streamInfo.height;
-
-
 
 	if(!videoWidth || !videoHeight)
 	{
@@ -96,9 +92,18 @@ bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock *clock, EGLImag
 		return false;
 	}
 
-	decoderTunnel.init(&decoderComponent,		decoderComponent.getOutputPort(),		&schedulerComponent,	schedulerComponent.getInputPort());
-	schedulerTunnel.init(	&schedulerComponent,		schedulerComponent.getOutputPort(),		&renderComponent,	renderComponent.getInputPort());
-	clockTunnel.init(	clockComponent,		clockComponent->getInputPort() + 1,	&schedulerComponent,	schedulerComponent.getOutputPort() + 1);
+	decoderTunnel.init(&decoderComponent,		
+                       decoderComponent.getOutputPort(),
+                       &schedulerComponent,	
+                       schedulerComponent.getInputPort());
+	schedulerTunnel.init(&schedulerComponent,
+                         schedulerComponent.getOutputPort(),
+                         &renderComponent,
+                         renderComponent.getInputPort());
+	clockTunnel.init(clockComponent,
+                     clockComponent->getInputPort() + 1,
+                     &schedulerComponent,
+                     schedulerComponent.getOutputPort() + 1);
 
 
 	error = decoderComponent.setState(OMX_StateIdle);
@@ -216,14 +221,6 @@ bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock *clock, EGLImag
     if(error != OMX_ErrorNone) return false;
 
 
-	OMX_PARAM_PORTDEFINITIONTYPE portParamRenderInput;
-	OMX_INIT_STRUCTURE(portParamRenderInput);
-	portParamRenderInput.nPortIndex = renderComponent.getInputPort();
-
-	error = renderComponent.getParameter(OMX_IndexParamPortDefinition, &portParamRenderInput);
-    OMX_TRACE(error);
-    if(error != OMX_ErrorNone) return false;
-
 	OMX_PARAM_PORTDEFINITIONTYPE portParamRenderOutput;
 	OMX_INIT_STRUCTURE(portParamRenderOutput);
 	portParamRenderOutput.nPortIndex = renderComponent.getOutputPort();
@@ -243,7 +240,6 @@ bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock *clock, EGLImag
     if(error != OMX_ErrorNone) return false;
 	
 
-	//ofLogVerbose(__func__) << "renderComponent.getOutputPort(): " << renderComponent.getOutputPort();
 	renderComponent.enablePort(renderComponent.getOutputPort());
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
@@ -277,11 +273,6 @@ bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock *clock, EGLImag
 
 	isOpen           = true;
 	doSetStartTime      = true;
-
-
-	ofLog(OF_LOG_VERBOSE,
-	      "%s::%s - decoder_component: 0x%p, input_port: 0x%x, output_port: 0x%x \n",
-	      "VideoDecoderTextured", __func__, decoderComponent.getHandle(), decoderComponent.getInputPort(), decoderComponent.getOutputPort());
 
 	isFirstFrame   = true;
 	// start from assuming all recent frames had valid pts
