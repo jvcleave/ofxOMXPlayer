@@ -12,13 +12,8 @@ public:
   
     VideoDecoderDirect();
     ~VideoDecoderDirect();
-    bool open(StreamInfo& streamInfo,
-              OMXClock *clock,
-              ofxOMXPlayerSettings& settings_);
-    
-    bool decode(uint8_t *pData, int iSize, double pts);
-  
-    void updateDisplay(ofRectangle& cropRectangle, ofRectangle& rectangle);
+    bool open(StreamInfo&, OMXClock*, ofxOMXPlayerSettings&);
+      
     void updateFrameCount();
     void onUpdate(ofEventArgs& args);
     

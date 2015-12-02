@@ -24,7 +24,8 @@ void ofApp::setup()
 	settings.videoPath = videoPath;
     settings.useHDMIForAudio = true;	//default true
     settings.enableLooping = true;		//default true
-    settings.enableTexture = false;		//default true
+    settings.enableTexture = (ofGetUnixTime() % 2 == 0);		//default true
+    //settings.enableTexture = false;		//default true
     omxPlayer.setup(settings);
 	
 }

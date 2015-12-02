@@ -126,6 +126,89 @@ bool BaseVideoDecoder::sendDecoderConfig()
 	return true;
 }
 
+bool BaseVideoDecoder::decode(uint8_t *pData, int iSize, double pts)
+{
+    SingleLock lock (m_critSection);
+    OMX_ERRORTYPE error;
+    
+    if(!isOpen )
+    {
+        return true;
+    }
+    
+    unsigned int demuxer_bytes = (unsigned int)iSize;
+    uint8_t *demuxer_content = pData;
+    
+    if (demuxer_content && demuxer_bytes > 0)
+    {
+        while(demuxer_bytes)
+        {
+            // 500ms timeout
+            OMX_BUFFERHEADERTYPE *omxBuffer = decoderComponent.getInputBuffer(500);
+            if(omxBuffer == NULL)
+            {
+                ofLogError(__func__) << "Decode timeout";
+                return false;
+            }
+            
+            omxBuffer->nFlags = 0;
+            omxBuffer->nOffset = 0;
+            
+            if(doSetStartTime)
+            {
+                omxBuffer->nFlags |= OMX_BUFFERFLAG_STARTTIME;
+                ofLog(OF_LOG_VERBOSE, "VideoDecoderDirect::Decode VDec : setStartTime %f\n", (pts == DVD_NOPTS_VALUE ? 0.0 : pts) / DVD_TIME_BASE);
+                doSetStartTime = false;
+            }
+            else if(pts == DVD_NOPTS_VALUE)
+            {
+                omxBuffer->nFlags |= OMX_BUFFERFLAG_TIME_UNKNOWN;
+            }
+            
+            omxBuffer->nTimeStamp = ToOMXTime((uint64_t)(pts == DVD_NOPTS_VALUE) ? 0 : pts);
+            omxBuffer->nFilledLen = (demuxer_bytes > omxBuffer->nAllocLen) ? omxBuffer->nAllocLen : demuxer_bytes;
+            memcpy(omxBuffer->pBuffer, demuxer_content, omxBuffer->nFilledLen);
+            
+            demuxer_bytes -= omxBuffer->nFilledLen;
+            demuxer_content += omxBuffer->nFilledLen;
+            
+            if(demuxer_bytes == 0)
+            {
+                //ofLogVerbose(__func__) << "OMX_BUFFERFLAG_ENDOFFRAME";
+                omxBuffer->nFlags |= OMX_BUFFERFLAG_ENDOFFRAME;
+            }
+            
+            int nRetry = 0;
+            while(true)
+            {
+                error = decoderComponent.EmptyThisBuffer(omxBuffer);
+                OMX_TRACE(error);
+                if (error == OMX_ErrorNone)
+                {
+                    //ofLog(OF_LOG_VERBOSE, "VideD:  pts:%.0f size:%d)\n", pts, iSize);
+                    
+                    break;
+                }
+                else
+                {
+                    ofLogError(__func__) << "OMX_EmptyThisBuffer() FAIL: ";
+                    nRetry++;
+                }
+                if(nRetry == 5)
+                {
+                    ofLogError(__func__) << "OMX_EmptyThisBuffer() FAILED 5 TIMES";
+                    return false;
+                }
+                
+            }
+            
+        }
+        
+        return true;
+    }
+    
+    return false;
+}
 
 
 void BaseVideoDecoder::submitEOS()

@@ -48,7 +48,7 @@ public:
     
     
     
-    virtual bool decode(uint8_t *pData, int iSize, double pts)=0;
+    bool decode(uint8_t *pData, int iSize, double pts);
     
     
     void submitEOS();

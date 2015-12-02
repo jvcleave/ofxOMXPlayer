@@ -86,9 +86,7 @@ public:
     
     float getFPS();
     
-    
-    void updateDisplay(ofRectangle& cropRectangle, ofRectangle& drawRectangle);
-    
+        
     //OMXThread inheritance
     void process();
     

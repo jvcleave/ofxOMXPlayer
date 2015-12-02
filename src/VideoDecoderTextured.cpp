@@ -37,14 +37,14 @@ void VideoDecoderTextured::resetFrameCounter()
 	renderComponent.resetFrameCounter();
 }
 
-bool VideoDecoderTextured::open(StreamInfo& hints, OMXClock *clock, EGLImageKHR eglImage)
+bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock *clock, EGLImageKHR eglImage)
 {
 
 
 	OMX_ERRORTYPE error   = OMX_ErrorNone;
 
-	videoWidth  = hints.width;
-	videoHeight = hints.height;
+	videoWidth  = streamInfo.width;
+	videoHeight = streamInfo.height;
 
 
 
@@ -53,14 +53,14 @@ bool VideoDecoderTextured::open(StreamInfo& hints, OMXClock *clock, EGLImageKHR 
 		return false;
 	}
 
-	if(hints.extrasize > 0 && hints.extradata != NULL)
+	if(streamInfo.extrasize > 0 && streamInfo.extradata != NULL)
 	{
-		extraSize = hints.extrasize;
+		extraSize = streamInfo.extrasize;
 		extraData = (uint8_t *)malloc(extraSize);
-		memcpy(extraData, hints.extradata, hints.extrasize);
+		memcpy(extraData, streamInfo.extradata, streamInfo.extrasize);
 	}
 
-	processCodec(hints);
+	processCodec(streamInfo);
 
 
 	std::string componentName = "OMX.broadcom.video_decode";
@@ -113,9 +113,9 @@ bool VideoDecoderTextured::open(StreamInfo& hints, OMXClock *clock, EGLImageKHR 
 	formatType.nPortIndex = decoderComponent.getInputPort();
 	formatType.eCompressionFormat = omxCodingType;
 
-	if (hints.fpsscale > 0 && hints.fpsrate > 0)
+	if (streamInfo.fpsscale > 0 && streamInfo.fpsrate > 0)
 	{
-		formatType.xFramerate = (long long)(1<<16)*hints.fpsrate / hints.fpsscale;
+		formatType.xFramerate = (long long)(1<<16)*streamInfo.fpsrate / streamInfo.fpsscale;
 	}
 	else
 	{
@@ -164,7 +164,7 @@ bool VideoDecoderTextured::open(StreamInfo& hints, OMXClock *clock, EGLImageKHR 
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
-	if(NaluFormatStartCodes(hints.codec, extraData, extraSize))
+	if(NaluFormatStartCodes(streamInfo.codec, extraData, extraSize))
 	{
 		OMX_NALSTREAMFORMATTYPE nalStreamFormat;
 		OMX_INIT_STRUCTURE(nalStreamFormat);
@@ -287,84 +287,5 @@ bool VideoDecoderTextured::open(StreamInfo& hints, OMXClock *clock, EGLImageKHR 
 	// start from assuming all recent frames had valid pts
 	validHistoryPTS = ~0;
 	return true;
-}
-
-bool VideoDecoderTextured::decode(uint8_t *pData, int iSize, double pts)
-{
-	SingleLock lock (m_critSection);
-	OMX_ERRORTYPE error;
-
-	if(!isOpen )
-	{
-		return true;
-	}
-
-	unsigned int demuxer_bytes = (unsigned int)iSize;
-	uint8_t *demuxer_content = pData;
-
-	if (demuxer_content && demuxer_bytes > 0)
-	{
-		while(demuxer_bytes)
-		{
-			// 500ms timeout
-			OMX_BUFFERHEADERTYPE *omxBuffer = decoderComponent.getInputBuffer(500);
-			if(omxBuffer == NULL)
-			{
-                ofLogVerbose(__func__) << "timeout";
-				return false;
-			}
-
-			omxBuffer->nFlags = 0;
-			omxBuffer->nOffset = 0;
-
-			if(doSetStartTime)
-			{
-				omxBuffer->nFlags |= OMX_BUFFERFLAG_STARTTIME;
-				ofLog(OF_LOG_VERBOSE, "%s : setStartTime %f\n", __func__, (pts == DVD_NOPTS_VALUE ? 0.0 : pts) / DVD_TIME_BASE);
-				doSetStartTime = false;
-			}
-			else if(pts == DVD_NOPTS_VALUE)
-			{
-				omxBuffer->nFlags |= OMX_BUFFERFLAG_TIME_UNKNOWN;
-			}
-
-			omxBuffer->nTimeStamp = ToOMXTime((uint64_t)(pts == DVD_NOPTS_VALUE) ? 0 : pts);
-			omxBuffer->nFilledLen = (demuxer_bytes > omxBuffer->nAllocLen) ? omxBuffer->nAllocLen : demuxer_bytes;
-			memcpy(omxBuffer->pBuffer, demuxer_content, omxBuffer->nFilledLen);
-
-			demuxer_bytes -= omxBuffer->nFilledLen;
-			demuxer_content += omxBuffer->nFilledLen;
-
-			if(demuxer_bytes == 0)
-			{
-				omxBuffer->nFlags |= OMX_BUFFERFLAG_ENDOFFRAME;
-			}
-
-			int nRetry = 0;
-			while(true)
-			{
-				error = decoderComponent.EmptyThisBuffer(omxBuffer);
-                OMX_TRACE(error);
-				if (error == OMX_ErrorNone)
-				{
-					//ofLog(OF_LOG_VERBOSE, "VideD:  pts:%.0f size:%d)\n", pts, iSize);
-					break;
-				}
-				else
-				{
-					ofLogError(__func__) << "OMX_EmptyThisBuffer() FAIL";
-					nRetry++;
-				}
-				if(nRetry == 5)
-				{
-					ofLogError(__func__) << "OMX_EmptyThisBuffer() FAILED 5 TIMES";
-					return false;
-				}
-			}
-		}
-
-		return true;
-	}
-	return false;
 }
 
