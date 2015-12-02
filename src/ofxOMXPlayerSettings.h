@@ -15,7 +15,7 @@ public:
         noAspectRatio=false;
         doMirror=false;
         rotationIndex=0;
-        doDeinterlace = false;
+        
         doHDMISync = true;
         alpha = 255;
         doMirror = false;
@@ -27,7 +27,7 @@ public:
     };
     
     //decoder related
-    bool doDeinterlace;
+    
     bool doHDMISync;
     
     ofRectangle drawRectangle;
@@ -59,10 +59,11 @@ public:
         initialVolume = 0.5;
         videoWidth  = 0;
         videoHeight = 0;
-
+        doFilters = true;
         
 
     }
+    bool doFilters;
     string videoPath;
     int videoWidth;
     int videoHeight;

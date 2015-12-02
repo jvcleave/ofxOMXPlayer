@@ -76,4 +76,5 @@ public:
     
     virtual bool openDecoder() =0;
     virtual void close() = 0;
+
 };

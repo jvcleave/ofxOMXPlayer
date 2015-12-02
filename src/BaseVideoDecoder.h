@@ -12,6 +12,9 @@
 
 #include "OMXReader.h"
 #include "SingleLock.h"
+#include "FilterManager.h"
+
+
 
 class BaseVideoDecoder
 {
@@ -19,6 +22,8 @@ public:
     BaseVideoDecoder();
     virtual ~BaseVideoDecoder();
     OMX_VIDEO_CODINGTYPE omxCodingType;
+    
+    FilterManager filterManager;
     
     Tunnel clockTunnel;
     Tunnel schedulerTunnel;
@@ -78,6 +83,9 @@ public:
     
     virtual int getCurrentFrame() = 0;
     virtual void resetFrameCounter() = 0;
+    
+    
+    bool doFilters;
     CriticalSection  m_critSection;
 };
 

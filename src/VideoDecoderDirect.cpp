@@ -5,7 +5,6 @@
 VideoDecoderDirect::VideoDecoderDirect()
 {
 
-	doDeinterlace       = false;
 	doHDMISync   = false;
 	frameCounter = 0;
 	frameOffset = 0;
@@ -44,14 +43,14 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
 
 	processCodec(streamInfo);
 
-	if(settings.directDisplayOptions.doDeinterlace)
+	if(settings.doFilters)
 	{
 		ofLog(OF_LOG_VERBOSE, "enable deinterlace\n");
-		doDeinterlace = true;
+		doFilters = true;
 	}
 	else
 	{
-		doDeinterlace = false;
+		doFilters = false;
 	}
 
 	std::string componentName = "OMX.broadcom.video_decode";
@@ -72,15 +71,17 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
 		return false;
 	}
 
-	if(doDeinterlace)
+	if(doFilters)
 	{
 		componentName = "OMX.broadcom.image_fx";
 		if(!imageFXComponent.init(componentName, OMX_IndexParamImageInit))
 		{
 			return false;
 		}
+        filterManager.setup(&imageFXComponent);
 	}
-
+    
+    
 	if(clock == NULL)
 	{
 		return false;
@@ -95,8 +96,8 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
 		clockComponent = NULL;
 		return false;
 	}
-
-	if(doDeinterlace)
+    
+	if(doFilters)
 	{
 		decoderTunnel.init(&decoderComponent, decoderComponent.getOutputPort(), &imageFXComponent, imageFXComponent.getInputPort());
 		imageFXTunnel.init(&imageFXComponent, imageFXComponent.getOutputPort(), &schedulerComponent, schedulerComponent.getInputPort());
@@ -161,8 +162,8 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
 	error = decoderComponent.setParameter(OMX_IndexParamBrcmVideoDecodeErrorConcealment, &concanParam);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
-
-	if (doDeinterlace)
+#if 0
+	if (doFilters)
 	{
 		// the deinterlace component requires 3 additional video buffers in addition to the DPB (this is normally 2).
 		OMX_PARAM_U32TYPE extra_buffers;
@@ -173,7 +174,7 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
         OMX_TRACE(error);
         if(error != OMX_ErrorNone) return false;
 	}
-
+#endif
 	// broadcom omx entension:
 	// When enabled, the timestamp fifo mode will change the way incoming timestamps are associated with output images.
 	// In this mode the incoming timestamps get used without re-ordering on output images.
@@ -232,17 +233,11 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
-	if(doDeinterlace)
+	if(doFilters)
 	{
-		OMX_CONFIG_IMAGEFILTERPARAMSTYPE image_filter;
-		OMX_INIT_STRUCTURE(image_filter);
-
-		image_filter.nPortIndex = imageFXComponent.getOutputPort();
-		image_filter.nNumParams = 1;
-		image_filter.nParams[0] = 3;
-		image_filter.eImageFilter = OMX_ImageFilterDeInterlaceAdvanced;
-
-		error = imageFXComponent.setConfig(OMX_IndexConfigCommonImageFilterParameters, &image_filter);
+	
+        
+        filterManager.setFilter(OMX_ImageFilterOilPaint);
         OMX_TRACE(error);
         if(error != OMX_ErrorNone) return false;
 
@@ -254,8 +249,8 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
         OMX_TRACE(error);
         if(error != OMX_ErrorNone) return false;
 
-		imageFXComponent.disablePort(imageFXComponent.getInputPort());
-		imageFXComponent.disablePort(imageFXComponent.getOutputPort());
+		//imageFXComponent.disablePort(imageFXComponent.getInputPort());
+		//imageFXComponent.disablePort(imageFXComponent.getOutputPort());
 
 	}
 
