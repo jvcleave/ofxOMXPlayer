@@ -1,4 +1,4 @@
-STATUS: PERPETUAL DEVELOPMENT
+STATUS: PERPETUAL DEVELOPMENT    
 Use [Releases] (https://github.com/jvcleave/ofxOMXPlayer/releases) unless you are contributing or looking for bleeding edge (requires blood). Releases contain tested versions that work for specific versions of openFrameworks.
 
 CURRENT KNOWN MAJOR ISSUES:   
