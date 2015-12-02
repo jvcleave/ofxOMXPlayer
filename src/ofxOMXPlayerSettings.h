@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "OMX_Maps.h"
 #include "ofxOMXPlayerListener.h"
 
 
@@ -59,11 +60,12 @@ public:
         initialVolume = 0.5;
         videoWidth  = 0;
         videoHeight = 0;
-        doFilters = true;
-        
+        enableFilters = false;
+        filter = OMX_ImageFilterNone;
 
     }
-    bool doFilters;
+    bool enableFilters;
+    OMX_IMAGEFILTERTYPE filter;
     string videoPath;
     int videoWidth;
     int videoHeight;

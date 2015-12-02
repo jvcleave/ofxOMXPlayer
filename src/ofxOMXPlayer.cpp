@@ -674,6 +674,16 @@ void ofxOMXPlayer::setDisplayRect(float x, float y, float width, float height)
    
 }
 
+
+ void ofxOMXPlayer::applyFilter(OMX_IMAGEFILTERTYPE filter)
+{
+    if(engine && engine->videoPlayer)
+    {
+        engine->videoPlayer->applyFilter(filter);
+    }
+}
+
+
 #pragma mark update routines
 
 

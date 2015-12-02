@@ -20,8 +20,7 @@ public:
     int getCurrentFrame();
     void resetFrameCounter();
     
-    Component imageFXComponent;
-    Tunnel imageFXTunnel;
+
     bool doDeinterlace;
     bool doHDMISync;    
     OMXDisplay display;

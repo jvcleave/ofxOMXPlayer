@@ -24,14 +24,19 @@ public:
     OMX_VIDEO_CODINGTYPE omxCodingType;
     
     FilterManager filterManager;
+    bool doFilters;
+   
     
     Tunnel clockTunnel;
     Tunnel schedulerTunnel;
     Tunnel decoderTunnel;
+    Tunnel imageFXTunnel;
     
     Component decoderComponent;
     Component renderComponent;
     Component schedulerComponent;
+    Component imageFXComponent;
+    
     
     Component* clockComponent;
     OMXClock* omxClock;
@@ -85,7 +90,8 @@ public:
     virtual void resetFrameCounter() = 0;
     
     
-    bool doFilters;
+ 
+    
     CriticalSection  m_critSection;
 };
 

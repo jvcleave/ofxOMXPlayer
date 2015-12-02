@@ -43,9 +43,8 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
 
 	processCodec(streamInfo);
 
-	if(settings.doFilters)
+	if(settings.enableFilters)
 	{
-		ofLog(OF_LOG_VERBOSE, "enable deinterlace\n");
 		doFilters = true;
 	}
 	else
@@ -237,7 +236,7 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
 	{
 	
         
-        filterManager.setFilter(OMX_ImageFilterOilPaint);
+        filterManager.setFilter(settings.filter);
         OMX_TRACE(error);
         if(error != OMX_ErrorNone) return false;
 
@@ -248,9 +247,6 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
 		error = imageFXComponent.setState(OMX_StateExecuting);
         OMX_TRACE(error);
         if(error != OMX_ErrorNone) return false;
-
-		//imageFXComponent.disablePort(imageFXComponent.getInputPort());
-		//imageFXComponent.disablePort(imageFXComponent.getOutputPort());
 
 	}
 

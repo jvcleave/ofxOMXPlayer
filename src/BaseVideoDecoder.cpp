@@ -21,7 +21,7 @@ BaseVideoDecoder::BaseVideoDecoder()
 	isFirstFrame    = true;
 	omxClock        = NULL;
 	clockComponent  = NULL;
-    doFilters = false;
+    doFilters       = false; 
     omxCodingType   = OMX_VIDEO_CodingUnused;
 
 }

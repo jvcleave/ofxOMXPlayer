@@ -44,7 +44,7 @@ public:
     void setSpeed(int speed);
     int getSpeed();
     
-   
+    void applyFilter(OMX_IMAGEFILTERTYPE filter);
     bool decode(OMXPacket *pkt);
     void process();
     void flush();
