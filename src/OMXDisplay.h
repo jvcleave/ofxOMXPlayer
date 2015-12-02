@@ -12,7 +12,7 @@ public:
     
     OMX_CONFIG_DISPLAYREGIONTYPE omxConfig;
     OMX_CONFIG_DISPLAYREGIONTYPE omxConfigDefaults;
-    Component renderComponent;
+    Component* renderComponent;
     StreamInfo streamInfo;
     DirectDisplayOptions options;
     ofxOMXPlayerSettings playerSettings;
@@ -40,7 +40,7 @@ public:
         return options;
     }
     
-    OMX_ERRORTYPE setup(Component& renderComponent_, StreamInfo& streamInfo_, ofxOMXPlayerSettings& playerSettings_)
+    OMX_ERRORTYPE setup(Component* renderComponent_, StreamInfo& streamInfo_, ofxOMXPlayerSettings& playerSettings_)
     {
         
         
@@ -56,7 +56,7 @@ public:
         }
 
         
-        omxConfig.nPortIndex = renderComponent.getInputPort();
+        omxConfig.nPortIndex = renderComponent->getInputPort();
         
         
     
@@ -176,7 +176,7 @@ public:
         //omxConfig.mode  = OMX_DISPLAY_MODE_FILL;
         //omxConfig.mode  = (OMX_DISPLAYMODETYPE)ofRandom(0, 5);
         //return OMX_ErrorNone;
-        return renderComponent.setConfig(OMX_IndexConfigDisplayRegion, &omxConfig);
+        return renderComponent->setConfig(OMX_IndexConfigDisplayRegion, &omxConfig);
     }
 
  
