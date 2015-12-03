@@ -29,7 +29,7 @@ public:
     pthread_cond_t m_packet_cond;
     //pthread_cond_t m_picture_cond;
     pthread_mutex_t m_lock;
-    pthread_mutex_t m_lock_decoder;
+    pthread_mutex_t m_lock_decoder; 
     
     OMXClock* omxClock;
     float fps;
@@ -76,5 +76,7 @@ public:
     
     virtual bool openDecoder() =0;
     virtual void close() = 0;
+    
+    ofxOMXPlayerSettings settings;
 
 };

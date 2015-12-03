@@ -37,10 +37,15 @@ void VideoDecoderTextured::resetFrameCounter()
 	renderComponent.resetFrameCounter();
 }
 
-bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock *clock, EGLImageKHR eglImage)
+bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock* clock, ofxOMXPlayerSettings& settings_, EGLImageKHR eglImage)
 {
 	OMX_ERRORTYPE error   = OMX_ErrorNone;
 
+    settings = settings_;
+    doFilters = settings.enableFilters;
+    omxClock = clock;
+    clockComponent = omxClock->getComponent();
+    
 	videoWidth  = streamInfo.width;
 	videoHeight = streamInfo.height;
 
@@ -76,36 +81,45 @@ bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock *clock, EGLImag
 	{
 		return false;
 	}
-
-	if(clock == NULL)
-	{
-		return false;
-	}
-
-	omxClock = clock;
-	clockComponent = omxClock->getComponent();
-
-	if(clockComponent->getHandle() == NULL)
-	{
-		omxClock = NULL;
-		clockComponent = NULL;
-		return false;
-	}
-
-	decoderTunnel.init(&decoderComponent,		
-                       decoderComponent.getOutputPort(),
-                       &schedulerComponent,	
-                       schedulerComponent.getInputPort());
-	schedulerTunnel.init(&schedulerComponent,
+    
+    if(doFilters)
+    {
+        componentName = "OMX.broadcom.image_fx";
+        if(!imageFXComponent.init(componentName, OMX_IndexParamImageInit))
+        {
+            return false;
+        }
+        
+        
+        decoderTunnel.init(&decoderComponent, 
+                           decoderComponent.getOutputPort(), 
+                           &imageFXComponent, 
+                           imageFXComponent.getInputPort());
+        
+        imageFXTunnel.init(&imageFXComponent, 
+                           imageFXComponent.getOutputPort(), 
+                           &schedulerComponent, 
+                           schedulerComponent.getInputPort());
+    }
+    else
+    {
+        decoderTunnel.init(&decoderComponent, 
+                           decoderComponent.getOutputPort(), 
+                           &schedulerComponent, 
+                           schedulerComponent.getInputPort());
+    }
+    
+    schedulerTunnel.init(&schedulerComponent,
                          schedulerComponent.getOutputPort(),
                          &renderComponent,
                          renderComponent.getInputPort());
-	clockTunnel.init(clockComponent,
+    
+    clockTunnel.init(clockComponent,
                      clockComponent->getInputPort() + 1,
                      &schedulerComponent,
                      schedulerComponent.getOutputPort() + 1);
 
-
+    
 	error = decoderComponent.setState(OMX_StateIdle);
 	if (error != OMX_ErrorNone)
 	{
@@ -211,7 +225,34 @@ bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock *clock, EGLImag
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
-
+    
+    if(doFilters)
+    {
+        ofLogVerbose() << "imageFXTunnelState 1: " << OMX_Maps::getInstance().getOMXState(imageFXComponent.getState()) << "!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+        
+        error = imageFXComponent.allocInputBuffers();
+        OMX_TRACE(error);
+        if(error != OMX_ErrorNone) return false;
+        
+        error = imageFXTunnel.Establish(false);
+        OMX_TRACE(error);
+        if(error != OMX_ErrorNone) return false;
+        
+        
+        ofLogVerbose() << "imageFXTunnelState 2: " << OMX_Maps::getInstance().getOMXState(imageFXComponent.getState()) << "!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+        
+        
+        error = imageFXComponent.setState(OMX_StateExecuting);
+        OMX_TRACE(error);
+        if(error != OMX_ErrorNone) return false;
+        
+        filterManager.setup(&imageFXComponent);
+        filterManager.setFilter(settings.filter);
+        OMX_TRACE(error);
+        if(error != OMX_ErrorNone) return false;
+        
+    }
+    
 	error = schedulerTunnel.Establish(false);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;

@@ -90,7 +90,8 @@ public:
     virtual void resetFrameCounter() = 0;
     
     
- 
+    ofxOMXPlayerSettings settings;
+
     
     CriticalSection  m_critSection;
 };

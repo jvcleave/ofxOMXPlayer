@@ -76,7 +76,7 @@ public:
     void flushInput();
     void flushOutput();
     
-    OMX_BUFFERHEADERTYPE* getInputBuffer(long timeout=400);
+    OMX_BUFFERHEADERTYPE* getInputBuffer(long timeout=200);
     OMX_BUFFERHEADERTYPE* getOutputBuffer();
     
     OMX_ERRORTYPE allocInputBuffers();
@@ -133,15 +133,15 @@ private:
     std::vector<OMX_BUFFERHEADERTYPE*> outputBuffers;
     sem_t         m_omx_fill_buffer_done;
     
-    bool          doExit;
-    pthread_cond_t    m_input_buffer_cond;
-    pthread_cond_t    m_output_buffer_cond;
-    pthread_cond_t    m_omx_event_cond;
-    bool          m_eos;
-    bool          doFlushInput;
-    bool          doFlushOutput;
-    void              lock();
-    void              unlock();
+    bool            doExit;
+    pthread_cond_t  m_input_buffer_cond;
+    pthread_cond_t  m_output_buffer_cond;
+    pthread_cond_t  m_omx_event_cond;
+    bool            m_eos;
+    bool            doFlushInput;
+    bool            doFlushOutput;
+    void            lock();
+    void            unlock();
     
     int frameCounter;
     int frameOffset;

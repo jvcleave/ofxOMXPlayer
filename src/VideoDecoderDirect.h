@@ -28,7 +28,6 @@ public:
     {
         return &display;
     }
-    ofxOMXPlayerSettings settings;
     bool doUpdate;
 private:
     int frameCounter;

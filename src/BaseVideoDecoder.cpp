@@ -36,8 +36,15 @@ BaseVideoDecoder::~BaseVideoDecoder()
     error = decoderTunnel.Deestablish();
     OMX_TRACE(error);
     
+    if(doFilters)
+    {
+        error = imageFXTunnel.Deestablish();
+        OMX_TRACE(error);
+    }
+    
     error = schedulerTunnel.Deestablish();
     OMX_TRACE(error);
+    
     
     bool didDeinit = false;
     
@@ -48,10 +55,15 @@ BaseVideoDecoder::~BaseVideoDecoder()
     didDeinit = decoderComponent.Deinitialize(__func__); 
     if(!didDeinit) ofLogError(__func__) << "didDeinit failed on decoderComponent";
 
-    
+    if(doFilters)
+    {
+        didDeinit = imageFXComponent.Deinitialize(__func__); 
+        if(!didDeinit) ofLogError(__func__) << "didDeinit failed on imageFXComponent";
+    }
     didDeinit = renderComponent.Deinitialize(__func__); 
     if(!didDeinit) ofLogError(__func__) << "didDeinit failed on renderComponent";
 
+    
     if(extraData)
     {
         free(extraData);
@@ -181,6 +193,21 @@ bool BaseVideoDecoder::decode(uint8_t *pData, int iSize, double pts)
                 omxBuffer->nFlags |= OMX_BUFFERFLAG_ENDOFFRAME;
             }
             
+            error = decoderComponent.EmptyThisBuffer(omxBuffer);
+            OMX_TRACE(error);
+            if (error != OMX_ErrorNone)
+            {
+                decoderComponent.EmptyBufferDoneCallback(decoderComponent.getHandle(), &decoderComponent, omxBuffer);
+                return false;
+            }
+            //CLog::Log(LOGINFO, "VideD: dts:%.0f pts:%.0f size:%d)\n", dts, pts, iSize);
+            
+           // error = decoderComponent.waitForEvent(OMX_EventPortSettingsChanged, 0);
+            //OMX_TRACE(error);
+            //error = decoderComponent.waitForEvent(OMX_EventParamOrConfigChanged, 0);
+           // OMX_TRACE(error);
+      
+#if 0
             int nRetry = 0;
             while(true)
             {
@@ -204,6 +231,7 @@ bool BaseVideoDecoder::decode(uint8_t *pData, int iSize, double pts)
                 }
                 
             }
+#endif
             
         }
         
