@@ -77,6 +77,7 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
 		{
 			return false;
 		}
+        
         filterManager.setup(&imageFXComponent);
 	}
     
@@ -144,7 +145,7 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
     if(error != OMX_ErrorNone) return false;
 
 	portParam.nPortIndex = decoderComponent.getInputPort();
-	int videoBuffers = 32;
+	int videoBuffers = 60;
 	portParam.nBufferCountActual = videoBuffers;
 
 	portParam.format.video.nFrameWidth  = videoWidth;
@@ -154,6 +155,7 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
+#if 0   
 	OMX_PARAM_BRCMVIDEODECODEERRORCONCEALMENTTYPE concanParam;
 	OMX_INIT_STRUCTURE(concanParam);
 	concanParam.bStartWithValidFrame = OMX_FALSE;
@@ -161,6 +163,7 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
 	error = decoderComponent.setParameter(OMX_IndexParamBrcmVideoDecodeErrorConcealment, &concanParam);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
+#endif
 #if 0
 	if (doFilters)
 	{
@@ -218,11 +221,12 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
         if(error != OMX_ErrorNone) return false;
 	}
 
-	// Alloc buffers for the omx input port.
+   // Alloc buffers for the omx input port.
 	error = decoderComponent.allocInputBuffers();
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
+    
 	error = decoderTunnel.Establish(false);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
@@ -232,19 +236,33 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
+
 	if(doFilters)
 	{
-	
-        
-        filterManager.setFilter(settings.filter);
+        ofLogVerbose() << "imageFXTunnelState 1: " << OMX_Maps::getInstance().getOMXState(imageFXComponent.getState()) << "!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+ 
+        error = imageFXComponent.allocInputBuffers();
         OMX_TRACE(error);
         if(error != OMX_ErrorNone) return false;
-
+        
+ #if 0       
+        error = imageFXComponent.allocOutputBuffers();
+        OMX_TRACE(error);
+        if(error != OMX_ErrorNone) return false;
+#endif        
 		error = imageFXTunnel.Establish(false);
         OMX_TRACE(error);
         if(error != OMX_ErrorNone) return false;
-
+        
+        
+        ofLogVerbose() << "imageFXTunnelState 2: " << OMX_Maps::getInstance().getOMXState(imageFXComponent.getState()) << "!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+        
+        
 		error = imageFXComponent.setState(OMX_StateExecuting);
+        OMX_TRACE(error);
+        if(error != OMX_ErrorNone) return false;
+        
+        filterManager.setFilter(settings.filter);
         OMX_TRACE(error);
         if(error != OMX_ErrorNone) return false;
 

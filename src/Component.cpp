@@ -214,6 +214,15 @@ OMX_BUFFERHEADERTYPE* Component::getInputBuffer(long timeout)
     
     OMX_BUFFERHEADERTYPE *omx_input_buffer = NULL;
 
+    pthread_mutex_lock(&m_omx_input_mutex);
+    if(!inputBuffersAvailable.empty())
+    {
+        omx_input_buffer = inputBuffersAvailable.front();
+        inputBuffersAvailable.pop();
+    }
+    pthread_mutex_unlock(&m_omx_input_mutex);
+    return omx_input_buffer;
+    
 	pthread_mutex_lock(&m_omx_input_mutex);
 	struct timespec endtime;
 	clock_gettime(CLOCK_REALTIME, &endtime);
@@ -297,7 +306,9 @@ OMX_ERRORTYPE Component::allocInputBuffers()
 	{
 		return error;
 	}
-
+    ofLogVerbose(__func__) << "portFormat.nBufferCountActual: " << portFormat.nBufferCountActual;
+    ofLogVerbose(__func__) << "nBufferSize: " << portFormat.nBufferSize;
+    
 	for (size_t i = 0; i < portFormat.nBufferCountActual; i++)
 	{
 		OMX_BUFFERHEADERTYPE *buffer = NULL;
@@ -340,7 +351,7 @@ OMX_ERRORTYPE Component::allocOutputBuffers()
 	}
 
     setState(OMX_StateIdle);
-    setState(OMX_StateLoaded);
+    //setState(OMX_StateLoaded);
     //setState(OMX_StateIdle);
     
 	/*if(getState() != OMX_StateIdle)

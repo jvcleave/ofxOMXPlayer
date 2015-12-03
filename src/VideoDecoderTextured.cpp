@@ -220,7 +220,7 @@ bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock *clock, EGLImag
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
-
+#if 0
 	OMX_PARAM_PORTDEFINITIONTYPE portParamRenderOutput;
 	OMX_INIT_STRUCTURE(portParamRenderOutput);
 	portParamRenderOutput.nPortIndex = renderComponent.getOutputPort();
@@ -228,7 +228,8 @@ bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock *clock, EGLImag
 	error = renderComponent.getParameter(OMX_IndexParamPortDefinition, &portParamRenderOutput);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
-	
+#endif
+    
 	// Alloc buffers for the renderComponent input port.
 	error = renderComponent.allocInputBuffers();
     OMX_TRACE(error);

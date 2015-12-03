@@ -33,7 +33,8 @@ void ofApp::update()
     if(doChangeFilter)
     {
         doChangeFilter = false;
-        omxPlayer.applyFilter(filterCollection.getNextFilter());
+        OMX_IMAGEFILTERTYPE filter = filterCollection.getNextFilter();
+        omxPlayer.applyFilter(filter);
     }
 }
 
