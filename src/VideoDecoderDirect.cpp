@@ -161,19 +161,18 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
-#if 0
+
 	if (doFilters)
 	{
-		// the deinterlace component requires 3 additional video buffers in addition to the DPB (this is normally 2).
 		OMX_PARAM_U32TYPE extra_buffers;
 		OMX_INIT_STRUCTURE(extra_buffers);
-		extra_buffers.nU32 = 3;
+		extra_buffers.nU32 = 5;
 
 		error = decoderComponent.setParameter(OMX_IndexParamBrcmExtraBuffers, &extra_buffers);
         OMX_TRACE(error);
         if(error != OMX_ErrorNone) return false;
 	}
-#endif
+
 	// broadcom omx entension:
 	// When enabled, the timestamp fifo mode will change the way incoming timestamps are associated with output images.
 	// In this mode the incoming timestamps get used without re-ordering on output images.
@@ -236,18 +235,19 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
 
 	if(doFilters)
 	{
-        ofLogVerbose() << "imageFXTunnelState 1: " << OMX_Maps::getInstance().getOMXState(imageFXComponent.getState()) << "!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+        ofLogVerbose() << "imageFXTunnelState 1: " << getOMXStateString(imageFXComponent.getState()) << "!!!!!!!!!!!!!!!!!!!!!!!!!!!";
  
+        /*
         error = imageFXComponent.allocInputBuffers();
         OMX_TRACE(error);
         if(error != OMX_ErrorNone) return false;
-          
+         */ 
 		error = imageFXTunnel.Establish(false);
         OMX_TRACE(error);
         if(error != OMX_ErrorNone) return false;
         
         
-        ofLogVerbose() << "imageFXTunnelState 2: " << OMX_Maps::getInstance().getOMXState(imageFXComponent.getState()) << "!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+        ofLogVerbose() << "imageFXTunnelState 2: " << getOMXStateString(imageFXComponent.getState()) << "!!!!!!!!!!!!!!!!!!!!!!!!!!!";
         
         
 		error = imageFXComponent.setState(OMX_StateExecuting);

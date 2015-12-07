@@ -25,7 +25,7 @@ public:
 	{
         currentFilterName = "None";
         currentFilterIndex = 0;
-        currentFilter = OMX_Maps::getInstance().getImageFilter(currentFilterName);
+        currentFilter = getImageFilter(currentFilterName);
 	}
 	
 	void setup(string initialFilterName = "None")
@@ -44,7 +44,7 @@ public:
             }
         }
         currentFilterName = filterName;
-        currentFilter = OMX_Maps::getInstance().getImageFilter(currentFilterName);
+        currentFilter = getImageFilter(currentFilterName);
         ofLogVerbose() << "currentFilterName: " << currentFilterName;
 		return currentFilter;
 	}

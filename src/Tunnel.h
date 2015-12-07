@@ -14,6 +14,8 @@ public:
     OMX_ERRORTYPE Establish(bool portSettingsChanged);
     string sourceComponentName;
     string destinationComponentName;
+    void            lock();
+    void            unlock();
 private:
     bool isEstablished;
     pthread_mutex_t   m_lock;
@@ -22,6 +24,5 @@ private:
     Component*      destinationComponent;
     unsigned int    sourcePort;
     unsigned int    destinationPort;
-    void            lock();
-    void            unlock();
+
 };

@@ -87,17 +87,29 @@ OMX_ERRORTYPE Tunnel::Deestablish()
         error = sourceComponent->waitForEvent(OMX_EventPortSettingsChanged);
         OMX_TRACE(error);
     }
+
     error = sourceComponent->disableAllPorts();
     OMX_TRACE(error, debugString);
     
     error = destinationComponent->disableAllPorts();
     OMX_TRACE(error, debugString);
+ 
+#if 0    
+    error = sourceComponent->disablePort(sourcePort);
+    OMX_TRACE(error);
+    
+    error = destinationComponent->disablePort(destinationPort);
+    OMX_TRACE(error, debugString);
+#endif       
+    
     
     error = OMX_SetupTunnel(destinationComponent->getHandle(), destinationPort, NULL, 0);
     OMX_TRACE(error, debugString);
     
     error = OMX_SetupTunnel(sourceComponent->getHandle(), sourcePort, NULL, 0);
     OMX_TRACE(error, debugString);
+    
+
     
     unlock();
     isEstablished = false;

@@ -38,6 +38,7 @@ public:
         return componentName;
     };
     
+    OMX_ERRORTYPE enableAllPorts();
     OMX_ERRORTYPE disableAllPorts();
     void          removeEvent(OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2);
     OMX_ERRORTYPE addEvent(OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2);

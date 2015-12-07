@@ -28,40 +28,58 @@ BaseVideoDecoder::BaseVideoDecoder()
 
 BaseVideoDecoder::~BaseVideoDecoder()
 {
+/*
+
+                               ->clock 
+    decoder->imageFX->scheduler
+                               ->renderer
+*/   
     SingleLock lock (m_critSection);
-    OMX_ERRORTYPE error = OMX_ErrorNone;
+    OMX_ERRORTYPE error = OMX_ErrorNone; 
+    
+    //scheduler->clock
     error = clockTunnel.Deestablish();
     OMX_TRACE(error);
     
-    error = decoderTunnel.Deestablish();
+    //scheduler->renderer
+    error = schedulerTunnel.Deestablish();
     OMX_TRACE(error);
     
+    ofLogVerbose() << "doFilters: " << doFilters;
     if(doFilters)
     {
+        //imagefx->scheduler
         error = imageFXTunnel.Deestablish();
         OMX_TRACE(error);
     }
     
-    error = schedulerTunnel.Deestablish();
+    
+    
+    //decoder->scheduler or decoder->imagefx(dofilters) 
+    error = decoderTunnel.Deestablish();
     OMX_TRACE(error);
     
-    
+ 
+#if 0   
     bool didDeinit = false;
+    
+    didDeinit = renderComponent.Deinitialize(__func__); 
+    if(!didDeinit) ofLogError(__func__) << "didDeinit failed on renderComponent";
     
     didDeinit = schedulerComponent.Deinitialize(__func__); 
     if(!didDeinit) ofLogError(__func__) << "didDeinit failed on schedulerComponent";
-
-    
-    didDeinit = decoderComponent.Deinitialize(__func__); 
-    if(!didDeinit) ofLogError(__func__) << "didDeinit failed on decoderComponent";
 
     if(doFilters)
     {
         didDeinit = imageFXComponent.Deinitialize(__func__); 
         if(!didDeinit) ofLogError(__func__) << "didDeinit failed on imageFXComponent";
     }
-    didDeinit = renderComponent.Deinitialize(__func__); 
-    if(!didDeinit) ofLogError(__func__) << "didDeinit failed on renderComponent";
+    
+    didDeinit = decoderComponent.Deinitialize(__func__); 
+    if(!didDeinit) ofLogError(__func__) << "didDeinit failed on decoderComponent";
+#endif
+    
+  
 
     
     if(extraData)
@@ -192,7 +210,7 @@ bool BaseVideoDecoder::decode(uint8_t *pData, int iSize, double pts)
                 //ofLogVerbose(__func__) << "OMX_BUFFERFLAG_ENDOFFRAME";
                 omxBuffer->nFlags |= OMX_BUFFERFLAG_ENDOFFRAME;
             }
-            
+#if 0            
             error = decoderComponent.EmptyThisBuffer(omxBuffer);
             OMX_TRACE(error);
             if (error != OMX_ErrorNone)
@@ -206,8 +224,8 @@ bool BaseVideoDecoder::decode(uint8_t *pData, int iSize, double pts)
             //OMX_TRACE(error);
             //error = decoderComponent.waitForEvent(OMX_EventParamOrConfigChanged, 0);
            // OMX_TRACE(error);
-      
-#if 0
+#endif      
+
             int nRetry = 0;
             while(true)
             {
@@ -231,7 +249,7 @@ bool BaseVideoDecoder::decode(uint8_t *pData, int iSize, double pts)
                 }
                 
             }
-#endif
+
             
         }
         

@@ -87,14 +87,13 @@ int BaseVideoPlayer::getSpeed()
 
 void BaseVideoPlayer::applyFilter(OMX_IMAGEFILTERTYPE filter)
 {
-    lock();
-    lockDecoder();
-    decoder->filterManager.setFilter(filter);
-    //decoder->imageFXTunnel.flush();
-    //decoder->decoderTunnel.flush();
-    //decoder->schedulerTunnel.flush();
-    unlockDecoder();
-    unlock();
+    
+    
+    //lock();
+    //lockDecoder();
+        decoder->filterManager.setFilter(filter);
+    //unlockDecoder();
+    //unlock();
 }
 
 

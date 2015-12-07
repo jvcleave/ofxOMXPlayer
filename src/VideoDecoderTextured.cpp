@@ -90,7 +90,52 @@ bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock* clock, ofxOMXP
             return false;
         }
         
+        OMX_PARAM_U32TYPE extra_buffers;
+        OMX_INIT_STRUCTURE(extra_buffers);
+        extra_buffers.nU32 = 5;
         
+        error = decoderComponent.setParameter(OMX_IndexParamBrcmExtraBuffers, &extra_buffers);
+        OMX_TRACE(error);
+
+        
+        OMX_PARAM_PORTDEFINITIONTYPE portFormat;
+        OMX_INIT_STRUCTURE(portFormat);
+        
+        portFormat.nPortIndex = imageFXComponent.getOutputPort();
+        error = imageFXComponent.getParameter(OMX_IndexParamPortDefinition, &portFormat);
+        OMX_TRACE(error);
+        ofLogVerbose() << "nBufferCountActual: " << portFormat.nBufferCountActual;
+        ofLogVerbose() << "nBufferCountMin: " << portFormat.nBufferCountMin;
+        
+        ofLogVerbose() << "nBufferSize: " << portFormat.nBufferSize;
+        switch (portFormat.eDomain) 
+        {
+            case OMX_PortDomainAudio:
+            {
+                ofLogVerbose() << "audio";
+                break;
+            }
+            case OMX_PortDomainVideo:
+            {
+                ofLogVerbose() << "video";
+                break;
+            }
+            case OMX_PortDomainImage:
+            {
+                ofLogVerbose() << "image";
+                break;
+            }
+            case OMX_PortDomainOther:
+            {
+                ofLogVerbose() << "other";
+                break;
+            }                
+        }
+        
+        //portFormat.eDomain = OMX_PortDomainVideo;
+        error = imageFXComponent.setParameter(OMX_IndexParamPortDefinition, &portFormat);
+        OMX_TRACE(error);
+     
         decoderTunnel.init(&decoderComponent, 
                            decoderComponent.getOutputPort(), 
                            &imageFXComponent, 
@@ -150,6 +195,8 @@ bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock* clock, ofxOMXP
 	}
 	
 
+
+    
 	OMX_PARAM_PORTDEFINITIONTYPE portParam;
 	OMX_INIT_STRUCTURE(portParam);
 	portParam.nPortIndex = decoderComponent.getInputPort();
@@ -158,8 +205,8 @@ bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock* clock, ofxOMXP
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
-	int numVideoBuffers = 32; //20 is minimum - can get up to 80
-	portParam.nBufferCountActual = numVideoBuffers;
+	//int numVideoBuffers = 20; //20 is minimum - can get up to 80
+	//portParam.nBufferCountActual = numVideoBuffers;
 
 	portParam.format.video.nFrameWidth  = videoWidth;
 	portParam.format.video.nFrameHeight = videoHeight;
@@ -210,11 +257,12 @@ bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock* clock, ofxOMXP
     if(error != OMX_ErrorNone) return false;
 
 
-	// Alloc buffers for the omx intput port.
-	error = decoderComponent.allocInputBuffers();
+
+
+    // Alloc buffers for the omx intput port.
+    error = decoderComponent.allocInputBuffers();
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
-
 
 
 	error = decoderTunnel.Establish(false);
@@ -228,19 +276,10 @@ bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock* clock, ofxOMXP
     
     if(doFilters)
     {
-        ofLogVerbose() << "imageFXTunnelState 1: " << OMX_Maps::getInstance().getOMXState(imageFXComponent.getState()) << "!!!!!!!!!!!!!!!!!!!!!!!!!!!";
-        
-        error = imageFXComponent.allocInputBuffers();
-        OMX_TRACE(error);
-        if(error != OMX_ErrorNone) return false;
-        
+                
         error = imageFXTunnel.Establish(false);
         OMX_TRACE(error);
         if(error != OMX_ErrorNone) return false;
-        
-        
-        ofLogVerbose() << "imageFXTunnelState 2: " << OMX_Maps::getInstance().getOMXState(imageFXComponent.getState()) << "!!!!!!!!!!!!!!!!!!!!!!!!!!!";
-        
         
         error = imageFXComponent.setState(OMX_StateExecuting);
         OMX_TRACE(error);
@@ -261,15 +300,6 @@ bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock* clock, ofxOMXP
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
-#if 0
-	OMX_PARAM_PORTDEFINITIONTYPE portParamRenderOutput;
-	OMX_INIT_STRUCTURE(portParamRenderOutput);
-	portParamRenderOutput.nPortIndex = renderComponent.getOutputPort();
-
-	error = renderComponent.getParameter(OMX_IndexParamPortDefinition, &portParamRenderOutput);
-    OMX_TRACE(error);
-    if(error != OMX_ErrorNone) return false;
-#endif
     
 	// Alloc buffers for the renderComponent input port.
 	error = renderComponent.allocInputBuffers();
