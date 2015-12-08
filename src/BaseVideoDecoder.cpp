@@ -26,7 +26,11 @@ BaseVideoDecoder::BaseVideoDecoder()
 
 }
 
-BaseVideoDecoder::~BaseVideoDecoder()
+#define STRINGIZE(x) STRINGIZE2(x)
+#define STRINGIZE2(x) #x
+#define LINE_STRING STRINGIZE(__LINE__)
+
+BaseVideoDecoder::~BaseVideoDecoder() 
 {
 /*
 
@@ -37,26 +41,26 @@ BaseVideoDecoder::~BaseVideoDecoder()
     SingleLock lock (m_critSection);
     OMX_ERRORTYPE error = OMX_ErrorNone; 
     
-    //scheduler->clock
-    error = clockTunnel.Deestablish();
+    //scheduler->clock 
+    error = clockTunnel.Deestablish(LINE_STRING);
     OMX_TRACE(error);
     
     //scheduler->renderer
-    error = schedulerTunnel.Deestablish();
+    error = schedulerTunnel.Deestablish(LINE_STRING);
     OMX_TRACE(error);
     
     ofLogVerbose() << "doFilters: " << doFilters;
     if(doFilters)
     {
         //imagefx->scheduler
-        error = imageFXTunnel.Deestablish();
-        OMX_TRACE(error);
+        //error = imageFXTunnel.Deestablish(LINE_STRING); 
+        //OMX_TRACE(error);
     }
     
     
     
     //decoder->scheduler or decoder->imagefx(dofilters) 
-    error = decoderTunnel.Deestablish();
+    error = decoderTunnel.Deestablish(LINE_STRING);
     OMX_TRACE(error);
     
     

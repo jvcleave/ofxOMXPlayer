@@ -68,7 +68,8 @@ OMX_ERRORTYPE Tunnel::flush()
 
 OMX_ERRORTYPE Tunnel::Deestablish(string caller)
 {
-    
+    string debugString = sourceComponent->getName() + " : " + destinationComponent->getName();
+    ofLogVerbose(__func__)<< " caller: " << caller << " components: " << debugString;
     if (!isEstablished)
     {
         return OMX_ErrorNone;
@@ -81,7 +82,6 @@ OMX_ERRORTYPE Tunnel::Deestablish(string caller)
     
     lock();
     OMX_ERRORTYPE error = OMX_ErrorNone;
-    string debugString = sourceComponent->getName() + " : " + destinationComponent->getName();
     if(havePortSettingsChanged)
     {
         error = sourceComponent->waitForEvent(OMX_EventPortSettingsChanged);
