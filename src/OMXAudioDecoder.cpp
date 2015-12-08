@@ -484,7 +484,7 @@ bool OMXAudioDecoder::deinit()
     error = decoderTunnel.Deestablish();
     OMX_TRACE(error);
 
-
+#if 0
     bool didDeinit = false;
 
     didDeinit = renderComponent.Deinitialize(__func__);
@@ -495,7 +495,7 @@ bool OMXAudioDecoder::deinit()
     
     didDeinit = decoderComponent.Deinitialize(__func__);
     if(!didDeinit) ofLogError(__func__) << "didDeinit failed on decoderComponent";
-
+#endif
 
     isInitialized = false;
     bytesPerSecond = 0;

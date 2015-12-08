@@ -50,12 +50,32 @@ Component::Component()
 
 Component::~Component()
 {
+    
+    ofLogVerbose(__func__) << getName();
+    
+#if 1
     if(handle)
     {
-       Deinitialize(__func__); 
+        for (size_t i = 0; i < inputBuffers.size(); i++)
+        {
+            OMX_ERRORTYPE error = OMX_FreeBuffer(handle, inputPort, inputBuffers[i]);
+            OMX_TRACE(error);
+        }
+        handle = NULL;
     }
-	
+ 
+    
 
+    inputBuffers.clear();
+    
+    //error =  waitForCommand(OMX_CommandPortDisable, inputPort);
+    //OMX_TRACE(error);
+    
+    while (!inputBuffersAvailable.empty())
+    {
+        inputBuffersAvailable.pop();
+    }
+#endif  
 	pthread_mutex_destroy(&m_omx_input_mutex);
 	pthread_mutex_destroy(&m_omx_output_mutex);
 	pthread_mutex_destroy(&event_mutex);
@@ -727,15 +747,8 @@ OMX_ERRORTYPE Component::setState(OMX_STATETYPE state)
     
     if(error == OMX_ErrorInsufficientResources)
     {
-        ofLogVerbose(__func__) << getName() << " state requested " << getOMXStateString(state)  << " END OMX_ErrorInsufficientResources";
-        //ofLogVerbose() << "FORCING HANDLE DELETE ON " << getName();
+        ofLogError(__func__) << getName() << " state requested " << getOMXStateString(state)  << " END OMX_ErrorInsufficientResources";
         unlock();
-        /*OMX_ERRORTYPE forceError = OMX_FreeHandle(handle);
-        OMX_TRACE(forceError);
-        handle = NULL;
-        pthread_cond_broadcast(&m_output_buffer_cond);
-        pthread_cond_broadcast(&m_input_buffer_cond);
-        pthread_cond_broadcast(&m_omx_event_cond);*/
         return error;
     }
     if (error != OMX_ErrorNone)
@@ -934,7 +947,6 @@ bool Component::init( std::string& component_name, OMX_INDEXTYPE index)
 	if (error != OMX_ErrorNone)
 	{
         ofLogError(__func__) << componentName << " FAIL ";
-		Deinitialize(__func__);
 		return false;
 	}
     
@@ -970,10 +982,10 @@ bool Component::init( std::string& component_name, OMX_INDEXTYPE index)
 OMX_ERRORTYPE Component::freeInputBuffers()
 {
     if(!handle) 
-{
-	ofLogError(__func__) << getName() << " NO HANDLE";
-	return OMX_ErrorNone;
-}
+    {
+        ofLogError(__func__) << getName() << " NO HANDLE";
+        return OMX_ErrorNone;
+    }
     
     OMX_ERRORTYPE error = OMX_ErrorNone;
     
@@ -1053,7 +1065,7 @@ OMX_ERRORTYPE Component::freeOutputBuffers()
     return error;
 }
 
-
+#if 0
 bool Component::Deinitialize(string caller)
 {
     ofLogVerbose(__func__) << componentName << " by caller: " << caller;
@@ -1120,6 +1132,7 @@ bool Component::Deinitialize(string caller)
 
 	return true;
 }
+#endif
 
 //All events callback
 OMX_ERRORTYPE Component::EventHandlerCallback(OMX_HANDLETYPE hComponent,

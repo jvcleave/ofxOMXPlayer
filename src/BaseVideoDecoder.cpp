@@ -59,25 +59,18 @@ BaseVideoDecoder::~BaseVideoDecoder()
     error = decoderTunnel.Deestablish();
     OMX_TRACE(error);
     
- 
-#if 0   
-    bool didDeinit = false;
     
-    didDeinit = renderComponent.Deinitialize(__func__); 
-    if(!didDeinit) ofLogError(__func__) << "didDeinit failed on renderComponent";
     
-    didDeinit = schedulerComponent.Deinitialize(__func__); 
-    if(!didDeinit) ofLogError(__func__) << "didDeinit failed on schedulerComponent";
-
-    if(doFilters)
+    if (doFilters)
     {
-        didDeinit = imageFXComponent.Deinitialize(__func__); 
-        if(!didDeinit) ofLogError(__func__) << "didDeinit failed on imageFXComponent";
+        OMX_PARAM_U32TYPE extra_buffers;
+        OMX_INIT_STRUCTURE(extra_buffers);
+        extra_buffers.nU32 = -2;
+        
+        error = decoderComponent.setParameter(OMX_IndexParamBrcmExtraBuffers, &extra_buffers);
+        OMX_TRACE(error);
     }
     
-    didDeinit = decoderComponent.Deinitialize(__func__); 
-    if(!didDeinit) ofLogError(__func__) << "didDeinit failed on decoderComponent";
-#endif
     
   
 

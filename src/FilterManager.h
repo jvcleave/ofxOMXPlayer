@@ -32,7 +32,7 @@ public:
     }
     void setFilter(OMX_IMAGEFILTERTYPE imageFilter_)
     {
-        if(numTimes+1 > 4)
+        if(numTimes+1 > 40)
         {
             ofLogError() << "cannot be set more than 4 times";
             return;

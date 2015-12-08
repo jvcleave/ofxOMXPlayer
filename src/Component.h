@@ -56,7 +56,7 @@ public:
     OMX_ERRORTYPE useEGLImage(OMX_BUFFERHEADERTYPE**, OMX_U32, OMX_PTR, void*);
     
     bool init(string&, OMX_INDEXTYPE);
-    bool Deinitialize(string caller="UNDEFINED");
+    //bool Deinitialize(string caller="UNDEFINED");
     
     // Decoder delegate callback routines.
     static OMX_ERRORTYPE EventHandlerCallback(OMX_HANDLETYPE, OMX_PTR, OMX_EVENTTYPE, OMX_U32, OMX_U32, OMX_PTR);

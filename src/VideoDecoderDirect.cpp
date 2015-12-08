@@ -143,8 +143,6 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
     if(error != OMX_ErrorNone) return false;
 
 	portParam.nPortIndex = decoderComponent.getInputPort();
-	int videoBuffers = 60;
-	portParam.nBufferCountActual = videoBuffers;
 
 	portParam.format.video.nFrameWidth  = videoWidth;
 	portParam.format.video.nFrameHeight = videoHeight;
@@ -218,7 +216,7 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
 	}
 
    // Alloc buffers for the omx input port.
-	error = decoderComponent.allocInputBuffers();
+	error = decoderComponent.allocInputBuffers(); 
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
@@ -234,21 +232,10 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
 
 
 	if(doFilters)
-	{
-        ofLogVerbose() << "imageFXTunnelState 1: " << getOMXStateString(imageFXComponent.getState()) << "!!!!!!!!!!!!!!!!!!!!!!!!!!!";
- 
-        /*
-        error = imageFXComponent.allocInputBuffers();
-        OMX_TRACE(error);
-        if(error != OMX_ErrorNone) return false;
-         */ 
+	{ 
 		error = imageFXTunnel.Establish(false);
         OMX_TRACE(error);
         if(error != OMX_ErrorNone) return false;
-        
-        
-        ofLogVerbose() << "imageFXTunnelState 2: " << getOMXStateString(imageFXComponent.getState()) << "!!!!!!!!!!!!!!!!!!!!!!!!!!!";
-        
         
 		error = imageFXComponent.setState(OMX_StateExecuting);
         OMX_TRACE(error);

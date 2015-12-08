@@ -66,7 +66,7 @@ OMX_ERRORTYPE Tunnel::flush()
     return OMX_ErrorNone;
 }
 
-OMX_ERRORTYPE Tunnel::Deestablish()
+OMX_ERRORTYPE Tunnel::Deestablish(string caller)
 {
     
     if (!isEstablished)
