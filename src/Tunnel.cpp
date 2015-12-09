@@ -22,7 +22,7 @@ Tunnel::~Tunnel()
 {
     if(isEstablished)
     {
-        Deestablish();
+        Deestablish(__func__);
     }
     
     pthread_mutex_destroy(&m_lock);
@@ -40,6 +40,24 @@ void Tunnel::unlock()
 
 void Tunnel::init(Component *src_component, unsigned int src_port, Component *destination, unsigned int dst_port)
 {
+    
+    Component sourceNullSink;
+    Component destinationNullSink;
+    
+    std::string componentName = "OMX.broadcom.null_sink";
+    if(!sourceNullSink.init(componentName, OMX_IndexParamOtherInit))
+    {
+        ofLogError() << "sourceNullSink FAIL";
+        
+        return;
+    }
+    
+    if(!destinationNullSink.init(componentName, OMX_IndexParamOtherInit))
+    {
+        ofLogError() << "destinationNullSink FAIL";
+        return;
+    }
+    
     
     sourceComponent  = src_component;
     sourcePort    = src_port;
@@ -88,26 +106,64 @@ OMX_ERRORTYPE Tunnel::Deestablish(string caller)
         OMX_TRACE(error);
     }
 
+    destinationComponent->setState(OMX_StatePause);
+    destinationComponent->setState(OMX_StateIdle);
+    destinationComponent->setState(OMX_StateLoaded);
+    
+    sourceComponent->setState(OMX_StatePause);
+    sourceComponent->setState(OMX_StateIdle);
+    sourceComponent->setState(OMX_StateLoaded);
+ 
+#if 0 
     error = sourceComponent->disableAllPorts();
     OMX_TRACE(error, debugString);
     
     error = destinationComponent->disableAllPorts();
     OMX_TRACE(error, debugString);
- 
-#if 0    
+#endif 
+   
     error = sourceComponent->disablePort(sourcePort);
     OMX_TRACE(error);
     
     error = destinationComponent->disablePort(destinationPort);
     OMX_TRACE(error, debugString);
-#endif       
+      
     
     
-    error = OMX_SetupTunnel(destinationComponent->getHandle(), destinationPort, NULL, 0);
+    
+
+    
+    error = OMX_SetupTunnel(destinationComponent->getHandle(), destinationPort, destinationNullSink.getHandle(), destinationNullSink.getInputPort());
     OMX_TRACE(error, debugString);
+    if(error == OMX_ErrorNone)
+    {
+        ofLogVerbose(__func__) << destinationComponent->getName() << " TUNNELED TO NULL SUCCESS";
+    }else
+    {
+         ofLogVerbose(__func__) << destinationComponent->getName() << " TUNNELED TO NULL FAIL";
+        if(error == OMX_ErrorIncorrectStateOperation)
+        {
+            ofLogVerbose(__func__) << getOMXStateString(destinationComponent->getState());
+
+        }
+    }
     
-    error = OMX_SetupTunnel(sourceComponent->getHandle(), sourcePort, NULL, 0);
+    error = OMX_SetupTunnel(sourceComponent->getHandle(), sourcePort, sourceNullSink.getHandle(), sourceNullSink.getInputPort());
     OMX_TRACE(error, debugString);
+    if(error == OMX_ErrorNone)
+    {
+        ofLogVerbose(__func__) << sourceComponent->getName() << " TUNNELED TO NULL SUCCESS";
+    }else
+    {
+        ofLogVerbose(__func__) << sourceComponent->getName() << " TUNNELED TO NULL FAIL";
+        if(error == OMX_ErrorIncorrectStateOperation)
+        {
+            ofLogVerbose(__func__) << getOMXStateString(sourceComponent->getState());
+            
+        }
+    }
+    
+    
     
 
     

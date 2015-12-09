@@ -24,5 +24,8 @@ private:
     Component*      destinationComponent;
     unsigned int    sourcePort;
     unsigned int    destinationPort;
+    
+    Component sourceNullSink;
+    Component destinationNullSink;
 
 };

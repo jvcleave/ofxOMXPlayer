@@ -25,10 +25,11 @@ BaseVideoDecoder::BaseVideoDecoder()
     omxCodingType   = OMX_VIDEO_CodingUnused;
 
 }
+#define NUMBER_TO_STRING(x) #x
+#define STRINGIZE(x) NUMBER_TO_STRING(x)
 
-#define STRINGIZE(x) STRINGIZE2(x)
-#define STRINGIZE2(x) #x
 #define LINE_STRING STRINGIZE(__LINE__)
+#define FUNCTION_LINE ofToString(__func__)+ofToString(LINE_STRING)
 
 BaseVideoDecoder::~BaseVideoDecoder() 
 {
@@ -42,25 +43,25 @@ BaseVideoDecoder::~BaseVideoDecoder()
     OMX_ERRORTYPE error = OMX_ErrorNone; 
     
     //scheduler->clock 
-    error = clockTunnel.Deestablish(LINE_STRING);
+    error = clockTunnel.Deestablish(FUNCTION_LINE);
     OMX_TRACE(error);
     
     //scheduler->renderer
-    error = schedulerTunnel.Deestablish(LINE_STRING);
+    error = schedulerTunnel.Deestablish(FUNCTION_LINE);
     OMX_TRACE(error);
     
     ofLogVerbose() << "doFilters: " << doFilters;
     if(doFilters)
     {
         //imagefx->scheduler
-        //error = imageFXTunnel.Deestablish(LINE_STRING); 
+        //error = imageFXTunnel.Deestablish(FUNCTION_LINE); 
         //OMX_TRACE(error);
     }
     
     
     
     //decoder->scheduler or decoder->imagefx(dofilters) 
-    error = decoderTunnel.Deestablish(LINE_STRING);
+    error = decoderTunnel.Deestablish(FUNCTION_LINE);
     OMX_TRACE(error);
     
     

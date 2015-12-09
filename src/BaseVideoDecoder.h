@@ -26,12 +26,6 @@ public:
     FilterManager filterManager;
     bool doFilters;
    
-    
-    Tunnel clockTunnel;
-    Tunnel schedulerTunnel;
-    Tunnel decoderTunnel;
-    Tunnel imageFXTunnel;
-    
     Component decoderComponent;
     Component renderComponent;
     Component schedulerComponent;
@@ -40,6 +34,11 @@ public:
     
     Component* clockComponent;
     OMXClock* omxClock;
+    
+    Tunnel clockTunnel;
+    Tunnel schedulerTunnel;
+    Tunnel decoderTunnel;
+    Tunnel imageFXTunnel;
     
     bool isOpen;
     
