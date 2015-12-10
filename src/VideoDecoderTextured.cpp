@@ -274,9 +274,12 @@ bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock* clock, ofxOMXP
     if(error != OMX_ErrorNone) return false;
 
     
+    
     if(doFilters)
     {
-                
+        
+        decoderComponent.doFreeHandle = false;
+        
         error = imageFXTunnel.Establish(false);
         OMX_TRACE(error);
         if(error != OMX_ErrorNone) return false;
@@ -334,7 +337,7 @@ bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock* clock, ofxOMXP
 	}
 
 
-	renderComponent.setFillBufferDoneHandler(&VideoDecoderTextured::onFillBufferDone);
+	renderComponent.CustomFillBufferDoneHandler = &VideoDecoderTextured::onFillBufferDone;
 	error = renderComponent.setState(OMX_StateExecuting);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;

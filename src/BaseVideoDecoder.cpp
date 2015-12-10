@@ -157,7 +157,7 @@ bool BaseVideoDecoder::sendDecoderConfig()
 	return true;
 }
 
-bool BaseVideoDecoder::decode(uint8_t *pData, int iSize, double pts)
+bool BaseVideoDecoder::decode(uint8_t* demuxer_content, int iSize, double pts)
 {
     SingleLock lock (m_critSection);
     OMX_ERRORTYPE error;
@@ -168,7 +168,6 @@ bool BaseVideoDecoder::decode(uint8_t *pData, int iSize, double pts)
     }
     
     unsigned int demuxer_bytes = (unsigned int)iSize;
-    uint8_t *demuxer_content = pData;
     
     if (demuxer_content && demuxer_bytes > 0)
     {

@@ -431,6 +431,8 @@ private:
         omxStateTypes[OMX_StateIdle] = "OMX_StateIdle";
         omxStateTypes[OMX_StateExecuting] = "OMX_StateExecuting";
         omxStateTypes[OMX_StatePause] = "OMX_StatePause";
+        omxStateTypes[OMX_StateWaitForResources] = "OMX_StateWaitForResources";
+        
         
         collectNames<OMX_STATETYPE>(omxStates, omxStateNames, omxStateTypes);
         

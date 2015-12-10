@@ -25,7 +25,5 @@ private:
     unsigned int    sourcePort;
     unsigned int    destinationPort;
     
-    Component sourceNullSink;
-    Component destinationNullSink;
 
 };

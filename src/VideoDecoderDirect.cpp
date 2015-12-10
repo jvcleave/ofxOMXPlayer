@@ -74,6 +74,8 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
 
     if(doFilters)
     {
+        decoderComponent.doFreeHandle = false;
+
         componentName = "OMX.broadcom.image_fx";
         if(!imageFXComponent.init(componentName, OMX_IndexParamImageInit))
         {

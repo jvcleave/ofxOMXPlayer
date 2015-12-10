@@ -40,25 +40,7 @@ void Tunnel::unlock()
 
 void Tunnel::init(Component *src_component, unsigned int src_port, Component *destination, unsigned int dst_port)
 {
-    
-    Component sourceNullSink;
-    Component destinationNullSink;
-    
-    std::string componentName = "OMX.broadcom.null_sink";
-    if(!sourceNullSink.init(componentName, OMX_IndexParamOtherInit))
-    {
-        ofLogError() << "sourceNullSink FAIL";
-        
-        return;
-    }
-    
-    if(!destinationNullSink.init(componentName, OMX_IndexParamOtherInit))
-    {
-        ofLogError() << "destinationNullSink FAIL";
-        return;
-    }
-    
-    
+
     sourceComponent  = src_component;
     sourcePort    = src_port;
     destinationComponent  = destination;
@@ -84,6 +66,7 @@ OMX_ERRORTYPE Tunnel::flush()
     return OMX_ErrorNone;
 }
 
+
 OMX_ERRORTYPE Tunnel::Deestablish(string caller)
 {
     string debugString = sourceComponent->getName() + " : " + destinationComponent->getName();
@@ -106,21 +89,19 @@ OMX_ERRORTYPE Tunnel::Deestablish(string caller)
         OMX_TRACE(error);
     }
 
-    destinationComponent->setState(OMX_StatePause);
-    destinationComponent->setState(OMX_StateIdle);
-    destinationComponent->setState(OMX_StateLoaded);
     
-    sourceComponent->setState(OMX_StatePause);
-    sourceComponent->setState(OMX_StateIdle);
-    sourceComponent->setState(OMX_StateLoaded);
- 
+    bool didTearDownTunnel = sourceComponent->tunnelToNull(sourcePort);
+    didTearDownTunnel = destinationComponent->tunnelToNull(destinationPort);
+
+
+    
 #if 0 
     error = sourceComponent->disableAllPorts();
     OMX_TRACE(error, debugString);
     
     error = destinationComponent->disableAllPorts();
     OMX_TRACE(error, debugString);
-#endif 
+
    
     error = sourceComponent->disablePort(sourcePort);
     OMX_TRACE(error);
@@ -129,11 +110,12 @@ OMX_ERRORTYPE Tunnel::Deestablish(string caller)
     OMX_TRACE(error, debugString);
       
     
-    
+    sourceComponent->setToStateLoaded();
+    destinationComponent->setToStateLoaded();
     
 
     
-    error = OMX_SetupTunnel(destinationComponent->getHandle(), destinationPort, destinationNullSink.getHandle(), destinationNullSink.getInputPort());
+    error = OMX_SetupTunnel(destinationComponent->getHandle(), destinationPort, NULL, 0);
     OMX_TRACE(error, debugString);
     if(error == OMX_ErrorNone)
     {
@@ -148,7 +130,7 @@ OMX_ERRORTYPE Tunnel::Deestablish(string caller)
         }
     }
     
-    error = OMX_SetupTunnel(sourceComponent->getHandle(), sourcePort, sourceNullSink.getHandle(), sourceNullSink.getInputPort());
+    error = OMX_SetupTunnel(sourceComponent->getHandle(), sourcePort, NULL, 0);
     OMX_TRACE(error, debugString);
     if(error == OMX_ErrorNone)
     {
@@ -163,7 +145,7 @@ OMX_ERRORTYPE Tunnel::Deestablish(string caller)
         }
     }
     
-    
+ #endif    
     
 
     
