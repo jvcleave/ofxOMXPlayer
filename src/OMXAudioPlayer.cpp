@@ -216,8 +216,9 @@ bool OMXAudioPlayer::decode(OMXPacket *pkt)
         omxStreamInfo = pkt->hints;
 
         
-        ofLogError(__func__) << "CRASHING HERE" << __LINE__;
-        _Exit(0);
+        ofLogError(__func__) << "AUDIO ERROR " << __LINE__ << " omxStreamInfo: " << omxStreamInfo.toString();
+        hasErrors = true;
+        return false;
         
     }
     
@@ -320,10 +321,20 @@ void OMXAudioPlayer::process()
             omxPacket = NULL;
             doFlush = false;
         }
-        else if(omxPacket && decode(omxPacket))
+        else         
         {
-            OMXReader::freePacket(omxPacket);
-            omxPacket = NULL;
+            if(omxPacket)
+            {
+                if (!decode(omxPacket)) 
+                {
+                    //doStop = true;
+                    doAbort = true;
+                }
+                OMXReader::freePacket(omxPacket);
+                omxPacket = NULL;
+            }
+            
+            
         }
         unlockDecoder();
     }
