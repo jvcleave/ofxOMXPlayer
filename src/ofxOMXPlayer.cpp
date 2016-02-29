@@ -35,7 +35,7 @@ ofxOMXPlayer::ofxOMXPlayer()
     didSeek = false;
     speedMultiplier = 1;
     didWarnAboutInaccurateCurrentFrame =false;
-    
+    decoderHandle = NULL;
     ofAddListener(ofEvents().update, this, &ofxOMXPlayer::onUpdate);
     
 }
@@ -224,6 +224,11 @@ bool ofxOMXPlayer::openEngine(int startTimeInSeconds) //default 0
         cropRectangle = &directDisplay->options.cropRectangle;
         drawRectangle = &directDisplay->options.drawRectangle;
         
+    }
+    if(settings.enableFilters)
+    {
+        
+        decoderHandle = engine->videoPlayer->decoder->decoderComponent.getHandle();
     }
     isOpen = setupPassed;
     return setupPassed;
@@ -846,6 +851,12 @@ void ofxOMXPlayer::onUpdateDuringExit(ofEventArgs& args)
         
         close();
         ofxOMXPlayer::doExit = false;
+        if(decoderHandle)
+        {
+            OMX_ERRORTYPE error = OMX_FreeHandle(decoderHandle);
+            OMX_TRACE(error);
+            decoderHandle = NULL;
+        }
         OMXInitializer::getInstance().deinit();
         ofExit();
     }

@@ -124,5 +124,6 @@ private:
     void updateFBO();
     
     OMXDisplay* directDisplay;
+    OMX_HANDLETYPE decoderHandle;
 };
 

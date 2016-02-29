@@ -63,28 +63,64 @@ Component::~Component()
         }
        
     }
- 
-    //if(componentName != "OMX.broadcom.video_decode")
-    //{
-    if (doFreeHandle) 
-    {
-        error = OMX_FreeHandle(handle);
-        OMX_TRACE(error); 
-        ofLogVerbose(__func__) << componentName << " FREED";
-    }
-
-    //}
-    
-    handle = NULL;
-    inputBuffers.clear();
-    
-    //error =  waitForCommand(OMX_CommandPortDisable, inputPort);
-    //OMX_TRACE(error);
     
     while (!inputBuffersAvailable.empty())
     {
         inputBuffersAvailable.pop();
     }
+    inputBuffers.clear();
+    
+    //if(componentName != "OMX.broadcom.video_decode")
+    //{
+        
+    if (doFreeHandle) 
+    {
+        
+        error = OMX_FreeHandle(handle);
+        OMX_TRACE(error); 
+        ofLogVerbose(__func__) << componentName << " FREED";
+    }else
+    {
+        stringstream info;
+        
+        OMX_STATETYPE currentState;
+        OMX_GetState(handle, &currentState);
+        
+        
+        OMX_PARAM_U32TYPE extra_buffers;
+        OMX_INIT_STRUCTURE(extra_buffers);
+        
+        error = getParameter(OMX_IndexParamBrcmExtraBuffers, &extra_buffers);
+        OMX_TRACE(error);
+        info << "currentState: " << getOMXStateString(currentState) << endl;
+        info << "PRE extra_buffers.nU32: " << (int)extra_buffers.nU32 << endl;
+       
+        extra_buffers.nU32 = 0;
+        error = setParameter(OMX_IndexParamBrcmExtraBuffers, &extra_buffers);
+        OMX_TRACE(error);
+        
+        error = getParameter(OMX_IndexParamBrcmExtraBuffers, &extra_buffers);
+        info << "POST extra_buffers.nU32: " << (int)extra_buffers.nU32 << endl;
+        
+        flushAll();
+        
+        disableAllPorts();
+        ofLogVerbose(__func__) << info.str();
+        //error = OMX_FreeHandle(handle);
+        //OMX_TRACE(error); 
+        //ofLogVerbose(__func__) << info.str() << " " << componentName << " FREED";
+
+    }
+
+    //}
+    
+    handle = NULL;
+    
+    
+    //error =  waitForCommand(OMX_CommandPortDisable, inputPort);
+    //OMX_TRACE(error);
+    
+  
  
 	pthread_mutex_destroy(&m_omx_input_mutex);
 	pthread_mutex_destroy(&m_omx_output_mutex);
@@ -442,24 +478,8 @@ OMX_ERRORTYPE Component::enableAllPorts()
             uint32_t j;
             for(j=0; j<ports.nPorts; j++)
             {
-                OMX_PARAM_PORTDEFINITIONTYPE portFormat;
-                OMX_INIT_STRUCTURE(portFormat);
-                portFormat.nPortIndex = ports.nStartPortNumber+j;
-                
-                error = OMX_GetParameter(handle, OMX_IndexParamPortDefinition, &portFormat);
-                if(error != OMX_ErrorNone)
-                {
-                    if(portFormat.bEnabled == OMX_TRUE)
-                    {
-                        continue;
-                    }
-                }
-                
                 error = OMX_SendCommand(handle, OMX_CommandPortEnable, ports.nStartPortNumber+j, NULL);
-                if(error != OMX_ErrorNone)
-                {
-                    //ofLogError(__func__) << componentName << " OMX_SendCommand OMX_CommandPortDisable FAIL: " << printOMXError(error);
-                }
+                OMX_TRACE(error);
             }
         }
     }

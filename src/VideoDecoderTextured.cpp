@@ -92,7 +92,7 @@ bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock* clock, ofxOMXP
         
         OMX_PARAM_U32TYPE extra_buffers;
         OMX_INIT_STRUCTURE(extra_buffers);
-        extra_buffers.nU32 = 5;
+        extra_buffers.nU32 = (OMX_U32)5;
         
         error = decoderComponent.setParameter(OMX_IndexParamBrcmExtraBuffers, &extra_buffers);
         OMX_TRACE(error);
@@ -257,7 +257,20 @@ bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock* clock, ofxOMXP
     if(error != OMX_ErrorNone) return false;
 
 
-
+    
+    
+    if(doFilters)
+    {
+        OMX_PARAM_BRCMDISABLEPROPRIETARYTUNNELSTYPE propTunnels;
+        OMX_INIT_STRUCTURE(propTunnels);
+        propTunnels.nPortIndex = decoderComponent.getOutputPort();
+        error = decoderComponent.getParameter(OMX_IndexParamBrcmDisableProprietaryTunnels, &propTunnels);
+        OMX_TRACE(error);
+        propTunnels.bUseBuffers = OMX_TRUE;
+        error = decoderComponent.setParameter(OMX_IndexParamBrcmDisableProprietaryTunnels, &propTunnels);
+        OMX_TRACE(error);
+        //ofLogVerbose() << "propTunnels.bUseBuffers: " << propTunnels.bUseBuffers;
+    }
 
     // Alloc buffers for the omx intput port.
     error = decoderComponent.allocInputBuffers();
@@ -278,7 +291,7 @@ bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock* clock, ofxOMXP
     if(doFilters)
     {
         
-        decoderComponent.doFreeHandle = false;
+        //decoderComponent.doFreeHandle = false;
         
         error = imageFXTunnel.Establish(false);
         OMX_TRACE(error);
