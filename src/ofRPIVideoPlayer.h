@@ -31,6 +31,7 @@ public:
     void enablePixels();
     void disablePixels();
     bool pixelsEnabled() { return doPixels; };
+    void setPaused(bool doPause);
 protected:
     ofPixels pixels;
     ofPixelFormat pixelFormat;

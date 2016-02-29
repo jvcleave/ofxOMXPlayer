@@ -65,6 +65,11 @@ void ofRPIVideoPlayer::stop()
     //omxPlayer.stop();
 }
 
+void ofRPIVideoPlayer::setPaused(bool doPause)
+{
+    omxPlayer.setPaused(doPause);
+}
+
 ofTexture* ofRPIVideoPlayer::getTexturePtr()
 {
     return &omxPlayer.texture;
