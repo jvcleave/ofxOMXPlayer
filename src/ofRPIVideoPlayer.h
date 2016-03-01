@@ -1,6 +1,6 @@
 #include "ofMain.h"
 #include "ofxOMXPlayer.h"
-
+#include "ofBaseTypes.h"
 
 class ofRPIVideoPlayer: public ofBaseVideoPlayer
 {
@@ -24,6 +24,7 @@ public:
     void close();
     bool setPixelFormat(ofPixelFormat pixelFormat);
     ofPixelFormat getPixelFormat() const;
+    void setLoopState(ofLoopType state);
     
     ofxOMXPlayer omxPlayer;
     void draw(float x, float y, float w, float h);
@@ -32,6 +33,8 @@ public:
     void disablePixels();
     bool pixelsEnabled() { return doPixels; };
     void setPaused(bool doPause);
+    int getCurrentFrame() /*const*/;
+    int getTotalNumFrames() /*const*/;
 protected:
     ofPixels pixels;
     ofPixelFormat pixelFormat;

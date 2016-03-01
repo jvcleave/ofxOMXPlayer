@@ -70,6 +70,16 @@ void ofRPIVideoPlayer::setPaused(bool doPause)
     omxPlayer.setPaused(doPause);
 }
 
+int ofRPIVideoPlayer::getCurrentFrame() /*const*/
+{
+    return omxPlayer.getCurrentFrame();
+}
+
+int ofRPIVideoPlayer::getTotalNumFrames() /*const*/
+{
+    return omxPlayer.getTotalNumFrames();
+}
+
 ofTexture* ofRPIVideoPlayer::getTexturePtr()
 {
     return &omxPlayer.texture;
@@ -173,8 +183,7 @@ ofPixelFormat ofRPIVideoPlayer::getPixelFormat() const
     return pixelFormat;
 }
 
-
-
-
-
-
+void ofRPIVideoPlayer::setLoopState(ofLoopType state)
+{
+    omxPlayer.setLoopState(state);
+}

@@ -52,6 +52,8 @@ public:
     void        restartMovie();
     void        seekToTimeInSeconds(int timeInSeconds);
     
+    void 	setLoopState(ofLoopType state);
+
     void        saveImage(string imagePath="");
     void        updatePixels();
     unsigned char*   getPixels();

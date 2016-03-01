@@ -458,6 +458,12 @@ void ofxOMXPlayer::seekToTimeInSeconds(int timeInSeconds)
     openEngine(timeInSeconds);
 }
 
+void ofxOMXPlayer::setLoopState(ofLoopType state)
+{
+    settings.enableLooping = (state == OF_LOOP_NORMAL); // OF_LOOP_PALINDROME isn't supported
+    setup(settings);
+}
+
 #pragma mark audio
 
 void ofxOMXPlayer::increaseVolume()
