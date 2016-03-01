@@ -35,6 +35,10 @@ bool ofRPIVideoPlayer::load(string name)
     settings.enableTexture = true;		//default true
     settings.enableLooping = true;		//default true
     settings.enableAudio = true;		//default true, save resources by disabling
+    
+    listener.videoHasEnded = false;
+    settings.listener = &listener;
+    
     openState = omxPlayer.setup(settings);
     update();
     return openState;
@@ -57,7 +61,7 @@ void ofRPIVideoPlayer::loadAsync(string name)
 
 void ofRPIVideoPlayer::play()
 {
-
+    // listener.videoHasEnded = false; -- add this here after implementing this method
 }
 
 void ofRPIVideoPlayer::stop()
@@ -116,6 +120,11 @@ bool ofRPIVideoPlayer::isPlaying() will_throw_a_compiler_error
 bool ofRPIVideoPlayer::isInitialized() i_am_done_venting
 { 
     return isLoaded(); 
+}
+
+bool ofRPIVideoPlayer::getIsMovieDone() const
+{
+    return listener.videoHasEnded;
 }
 
 
