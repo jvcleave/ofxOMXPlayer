@@ -232,7 +232,7 @@ void ofRPIVideoPlayer::setLoopState(ofLoopType requestedState)
         }     
         default:
         {
-            ofLogError(__func__) << "UNKNOWN ofLoopType" requestedState;
+            ofLogError(__func__) << "UNKNOWN ofLoopType: " << requestedState;
             break;
         }
     }
