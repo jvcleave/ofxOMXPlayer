@@ -9,9 +9,7 @@ class VideoPlayerDirect : public BaseVideoPlayer
 public:
     VideoPlayerDirect();
     ~VideoPlayerDirect();
-        
-    ofxOMXPlayerSettings settings;
-    
+            
     VideoDecoderDirect* directDecoder;
     
     bool open(StreamInfo& hints, OMXClock *av_clock, ofxOMXPlayerSettings& settings_);

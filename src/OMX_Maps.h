@@ -47,15 +47,7 @@ public:
     {
         return imageFilterNames;
     }
-    string getImageFilter(OMX_IMAGEFILTERTYPE type)
-    {
-        return imageFilterTypes[type];
-    }
-    
-    OMX_IMAGEFILTERTYPE getImageFilter(string name)
-    {
-        return imageFilters[name];
-    }
+
     
     
     vector<string> whiteBalanceNames;
@@ -65,16 +57,7 @@ public:
     {
         return whiteBalanceNames;
     }
-    
-    string getWhiteBalance(OMX_WHITEBALCONTROLTYPE type)
-    {
-        return whiteBalanceTypes[type];
-    }
-    
-    OMX_WHITEBALCONTROLTYPE getWhiteBalance(string name)
-    {
-        return whiteBalance[name];
-    }
+   
     
     vector<string> focusNames;
     map<string, OMX_IMAGE_FOCUSCONTROLTYPE> focusControls;
@@ -85,16 +68,7 @@ public:
         return focusNames;
     }
     
-    string getFocus(OMX_IMAGE_FOCUSCONTROLTYPE type)
-    {
-        return focusControlTypes[type];
-    }
-    
-    OMX_IMAGE_FOCUSCONTROLTYPE getFocus(string name)
-    {
-        return focusControls[name];
-    }
-    
+
     
     
     
@@ -105,16 +79,7 @@ public:
     {
         return meteringNames;
     }
-    string getMetering(OMX_METERINGTYPE type)
-    {
-        return meteringTypes[type];
-    }
-    
-    OMX_METERINGTYPE getMetering(string name)
-    {
-        return metering[name];
-    }
-    
+
     
     
     vector<string> exposurePresetNames;
@@ -129,30 +94,12 @@ public:
     {
         return exposurePresetNames;
     }
-    string getExposurePreset(OMX_EXPOSURECONTROLTYPE type)
-    {
-        return exposurePresetTypes[type];
-    }
-    
-    OMX_EXPOSURECONTROLTYPE getExposurePreset(string name)
-    {
-        return exposurePresets[name];
-    }
-    
+
     vector<string> mirrorNames;
     map<string, OMX_MIRRORTYPE> mirrors;
     map<OMX_MIRRORTYPE, string> mirrorTypes;
     
-    string getMirror(OMX_MIRRORTYPE type)
-    {
-        return mirrorTypes[type];
-    }
-    
-    OMX_MIRRORTYPE getMirror(string name)
-    {
-        return mirrors[name];
-    }
-    
+
     
     vector<string> imageCodingNames;
     map<string, OMX_IMAGE_CODINGTYPE> imageCoding;
@@ -162,16 +109,7 @@ public:
         return imageCodingNames;
     }
     
-    string getImageCoding(OMX_IMAGE_CODINGTYPE type)
-    {
-        return imageCodingTypes[type];
-    }
-    
-    OMX_IMAGE_CODINGTYPE getImageCoding(string name)
-    {
-        return imageCoding[name];
-    }
-    
+
     vector<string> videoCodingNames;
     map<string, OMX_VIDEO_CODINGTYPE> videoCoding;
     map<OMX_VIDEO_CODINGTYPE, string> videoCodingTypes;
@@ -180,15 +118,7 @@ public:
         return videoCodingNames;
     }
     
-    string getVideoCoding(OMX_VIDEO_CODINGTYPE type)
-    {
-        return videoCodingTypes[type];
-    }
-    
-    OMX_VIDEO_CODINGTYPE getVideoCoding(string name)
-    {
-        return videoCoding[name];
-    }
+
     
     vector<string> colorFormatNames;
     map<string, OMX_COLOR_FORMATTYPE> colorFormats;
@@ -197,16 +127,7 @@ public:
     {
         return colorFormatNames;
     }
-    string getColorFormat(OMX_COLOR_FORMATTYPE type)
-    {
-        return colorFormatTypes[type];
-    }
-    
-    OMX_COLOR_FORMATTYPE getColorFormat(string name)
-    {
-        return colorFormats[name];
-    }
-    
+
     
     vector<string> workingColorFormatNames;
     map<string, OMX_COLOR_FORMATTYPE> workingColorFormats;
@@ -215,16 +136,7 @@ public:
     {
         return workingColorFormatNames;
     }
-    string getWorkingColorFormat(OMX_COLOR_FORMATTYPE type)
-    {
-        return workingColorFormatTypes[type];
-    }
-    
-    OMX_COLOR_FORMATTYPE getWorkingColorFormat(string name)
-    {
-        return workingColorFormats[name];
-    }
-    
+
     
     vector<string> algorithmNames;
     map<string, OMX_CAMERADISABLEALGORITHMTYPE> algorithms;
@@ -243,16 +155,7 @@ public:
         return eventNames;
     }
     
-    string getEvent(OMX_EVENTTYPE type)
-    {
-        return eventTypes[type];
-    }
-    
-    OMX_EVENTTYPE getEvent(string name)
-    {
-        return events[name];
-    }
-    
+
     
     vector<string> omxErrorNames;
     map<string, OMX_ERRORTYPE> omxErrors;
@@ -262,41 +165,19 @@ public:
         return omxErrorNames;
     }
     
-    string getOMXError(OMX_ERRORTYPE type)
-    {
-        return omxErrorTypes[type];
-    }
-    
-    OMX_ERRORTYPE getOMXError(string name)
-    {
-        return omxErrors[name];
-    }
+
     
     vector<string> commandNames;
     map<string, OMX_COMMANDTYPE> commands;
     map<OMX_COMMANDTYPE, string> commandTypes;
-    string getOMXCommand(OMX_COMMANDTYPE type)
-    {
-        return commandTypes[type];
-    }
-    
-    OMX_COMMANDTYPE getOMXCommand(string name)
-    {
-        return commands[name];
-    }
+
     
     vector<string> omxStateNames;
     map<string, OMX_STATETYPE> omxStates;
     map<OMX_STATETYPE, string> omxStateTypes;
-    string getOMXState(OMX_STATETYPE type)
-    {
-        return omxStateTypes[type];
-    }
+
     
-    OMX_STATETYPE getOMXState(string name)
-    {
-        return omxStates[name];
-    }
+
     
     
     
@@ -550,6 +431,8 @@ private:
         omxStateTypes[OMX_StateIdle] = "OMX_StateIdle";
         omxStateTypes[OMX_StateExecuting] = "OMX_StateExecuting";
         omxStateTypes[OMX_StatePause] = "OMX_StatePause";
+        omxStateTypes[OMX_StateWaitForResources] = "OMX_StateWaitForResources";
+        
         
         collectNames<OMX_STATETYPE>(omxStates, omxStateNames, omxStateTypes);
         
@@ -729,12 +612,208 @@ private:
 #define DVD_PLAYSPEED_PAUSE       0       // frame stepping
 #define DVD_PLAYSPEED_NORMAL      1000
 
-#include "DEBUG_CONFIG.h"
 
 //#warning  disabling -Wunused-but-set-variable -Wunused-variable
 //#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 //#pragma GCC diagnostic ignored "-Wunused-variable"
 
+
+#pragma GCC diagnostic ignored "-Wunused-function"
+
+static
+string getOMXStateString(OMX_STATETYPE type)
+{
+    return OMX_Maps::getInstance().omxStateTypes[type];
+};
+
+static
+OMX_STATETYPE getOMXState(string name)
+{
+    return OMX_Maps::getInstance().omxStates[name];
+};
+
+static
+string getWhiteBalanceString(OMX_WHITEBALCONTROLTYPE type)
+{
+    return OMX_Maps::getInstance().whiteBalanceTypes[type];
+};
+
+
+static
+OMX_WHITEBALCONTROLTYPE getWhiteBalance(string name)
+{
+    return OMX_Maps::getInstance().whiteBalance[name];
+};
+
+
+static
+string getImageFilterString(OMX_IMAGEFILTERTYPE type)
+{
+    return OMX_Maps::getInstance().imageFilterTypes[type];
+};
+
+
+static
+OMX_IMAGEFILTERTYPE getImageFilter(string name)
+{
+    return OMX_Maps::getInstance().imageFilters[name];
+};
+
+
+static
+string getFocusString(OMX_IMAGE_FOCUSCONTROLTYPE type)
+{
+    return OMX_Maps::getInstance().focusControlTypes[type];
+};
+
+
+static
+OMX_IMAGE_FOCUSCONTROLTYPE getFocus(string name)
+{
+    return OMX_Maps::getInstance().focusControls[name];
+};
+
+
+static
+string getMeteringString(OMX_METERINGTYPE type)
+{
+    return OMX_Maps::getInstance().meteringTypes[type];
+};
+
+
+static
+OMX_METERINGTYPE getMetering(string name)
+{
+    return OMX_Maps::getInstance().metering[name];
+};
+
+
+static
+string getExposurePresetString(OMX_EXPOSURECONTROLTYPE type)
+{
+    return OMX_Maps::getInstance().exposurePresetTypes[type];
+};
+
+
+static
+OMX_EXPOSURECONTROLTYPE getExposurePreset(string name)
+{
+    return OMX_Maps::getInstance().exposurePresets[name];
+};
+
+
+static
+string getMirrorString(OMX_MIRRORTYPE type)
+{
+    return OMX_Maps::getInstance().mirrorTypes[type];
+};
+
+
+static
+OMX_MIRRORTYPE getMirror(string name)
+{
+    return OMX_Maps::getInstance().mirrors[name];
+};
+
+
+static
+string getImageCodingString(OMX_IMAGE_CODINGTYPE type)
+{
+    return OMX_Maps::getInstance().imageCodingTypes[type];
+};
+
+
+static
+OMX_IMAGE_CODINGTYPE getImageCoding(string name)
+{
+    return OMX_Maps::getInstance().imageCoding[name];
+};
+
+
+static
+string getVideoCodingString(OMX_VIDEO_CODINGTYPE type)
+{
+    return OMX_Maps::getInstance().videoCodingTypes[type];
+};
+
+
+static
+OMX_VIDEO_CODINGTYPE getVideoCoding(string name)
+{
+    return OMX_Maps::getInstance().videoCoding[name];
+};
+
+
+static
+string getColorFormatString(OMX_COLOR_FORMATTYPE type)
+{
+    return OMX_Maps::getInstance().colorFormatTypes[type];
+};
+
+
+static
+OMX_COLOR_FORMATTYPE getColorFormat(string name)
+{
+    return OMX_Maps::getInstance().colorFormats[name];
+};
+
+
+static
+string getWorkingColorFormatString(OMX_COLOR_FORMATTYPE type)
+{
+    return OMX_Maps::getInstance().workingColorFormatTypes[type];
+};
+
+
+static
+OMX_COLOR_FORMATTYPE getWorkingColorFormat(string name)
+{
+    return OMX_Maps::getInstance().workingColorFormats[name];
+};
+
+
+static
+string getEventString(OMX_EVENTTYPE type)
+{
+    return OMX_Maps::getInstance().eventTypes[type];
+};
+
+
+static
+OMX_EVENTTYPE getEvent(string name)
+{
+    return OMX_Maps::getInstance().events[name];
+};
+
+
+static
+string getOMXErrorString(OMX_ERRORTYPE type)
+{
+    return OMX_Maps::getInstance().omxErrorTypes[type];
+};
+
+
+static
+OMX_ERRORTYPE getOMXError(string name)
+{
+    return OMX_Maps::getInstance().omxErrors[name];
+};
+
+
+static
+string getOMXCommandString(OMX_COMMANDTYPE type)
+{
+    return OMX_Maps::getInstance().commandTypes[type];
+};
+
+
+static
+OMX_COMMANDTYPE getOMXCommand(string name)
+{
+    return OMX_Maps::getInstance().commands[name];
+};
+
+#include "DEBUG_CONFIG.h"
 
 
 

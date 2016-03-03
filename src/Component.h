@@ -38,7 +38,8 @@ public:
         return componentName;
     };
     
-    OMX_ERRORTYPE disableAllPorts();
+    OMX_ERRORTYPE enableAllPorts();
+    void disableAllPorts();
     void          removeEvent(OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2);
     OMX_ERRORTYPE addEvent(OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2);
     OMX_ERRORTYPE waitForEvent(OMX_EVENTTYPE event, long timeout = 20);
@@ -55,7 +56,7 @@ public:
     OMX_ERRORTYPE useEGLImage(OMX_BUFFERHEADERTYPE**, OMX_U32, OMX_PTR, void*);
     
     bool init(string&, OMX_INDEXTYPE);
-    bool Deinitialize(string caller="UNDEFINED");
+    //bool Deinitialize(string caller="UNDEFINED");
     
     // Decoder delegate callback routines.
     static OMX_ERRORTYPE EventHandlerCallback(OMX_HANDLETYPE, OMX_PTR, OMX_EVENTTYPE, OMX_U32, OMX_U32, OMX_PTR);
@@ -89,22 +90,22 @@ public:
         return m_eos;
     };
     void setEOS(bool isEndOfStream);
-    void setFillBufferDoneHandler(OMX_ERRORTYPE (*p)(OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*))
-    {
-        CustomFillBufferDoneHandler = p;
-    };
-    void setEmptyBufferDoneHandler(OMX_ERRORTYPE (*p)(OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*))
-    {
-        CustomEmptyBufferDoneHandler = p;
-    };
     
     //additional event handlers
     OMX_ERRORTYPE (*CustomFillBufferDoneHandler)(OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*);
     OMX_ERRORTYPE (*CustomEmptyBufferDoneHandler)(OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*);
     
+    
+    
+    bool setToStateLoaded();
+    bool setToStateIdle();
+    bool tunnelToNull(int port);
+    
     int getCurrentFrame();
     void resetFrameCounter();
     void incrementFrameCounter();
+    
+    bool doFreeHandle;
     
 private:
     OMX_HANDLETYPE handle;
@@ -133,15 +134,15 @@ private:
     std::vector<OMX_BUFFERHEADERTYPE*> outputBuffers;
     sem_t         m_omx_fill_buffer_done;
     
-    bool          doExit;
-    pthread_cond_t    m_input_buffer_cond;
-    pthread_cond_t    m_output_buffer_cond;
-    pthread_cond_t    m_omx_event_cond;
-    bool          m_eos;
-    bool          doFlushInput;
-    bool          doFlushOutput;
-    void              lock();
-    void              unlock();
+    bool            doExit;
+    pthread_cond_t  m_input_buffer_cond;
+    pthread_cond_t  m_output_buffer_cond;
+    pthread_cond_t  m_omx_event_cond;
+    bool            m_eos;
+    bool            doFlushInput;
+    bool            doFlushOutput;
+    void            lock();
+    void            unlock();
     
     int frameCounter;
     int frameOffset;

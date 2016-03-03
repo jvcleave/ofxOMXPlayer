@@ -219,7 +219,6 @@ bool OMXAudioPlayer::decode(OMXPacket *pkt)
         ofLogError(__func__) << "AUDIO ERROR " << __LINE__ << " omxStreamInfo: " << omxStreamInfo.toString();
         hasErrors = true;
         return false;
-        
     }
     
 #if 1
@@ -327,14 +326,13 @@ void OMXAudioPlayer::process()
             {
                 if (!decode(omxPacket)) 
                 {
-                    //doStop = true;
+                    doStop = true;
                     doAbort = true;
                 }
                 OMXReader::freePacket(omxPacket);
                 omxPacket = NULL;
             }
-            
-            
+
         }
         unlockDecoder();
     }

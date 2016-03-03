@@ -29,7 +29,7 @@ public:
     pthread_cond_t m_packet_cond;
     //pthread_cond_t m_picture_cond;
     pthread_mutex_t m_lock;
-    pthread_mutex_t m_lock_decoder;
+    pthread_mutex_t m_lock_decoder; 
     
     OMXClock* omxClock;
     float fps;
@@ -44,15 +44,14 @@ public:
     void setSpeed(int speed);
     int getSpeed();
     
-    virtual void close() = 0;
+    void applyFilter(OMX_IMAGEFILTERTYPE filter);
     bool decode(OMXPacket *pkt);
     void process();
     void flush();
     
     bool addPacket(OMXPacket *pkt);
     
-    virtual bool openDecoder() =0;
-    
+
     bool closeDecoder();
     double getCurrentPTS();
     double getFPS();
@@ -73,4 +72,11 @@ public:
         
     int getCurrentFrame();
     void resetFrameCounter();
+    
+    
+    virtual bool openDecoder() =0;
+    virtual void close() = 0;
+    
+    ofxOMXPlayerSettings settings;
+
 };

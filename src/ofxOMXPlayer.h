@@ -68,6 +68,8 @@ public:
     unsigned char*  pixels;
     
     
+    void applyFilter(OMX_IMAGEFILTERTYPE filter);
+    
     //direct only
     void        setDisplayRect(float x, float y, float width, float height);
     void        setDisplayRect(ofRectangle&);
@@ -133,5 +135,6 @@ private:
     StreamInfo audioInfo;
     StreamInfo videoInfo;
     
+    OMX_HANDLETYPE decoderHandle;
 };
 

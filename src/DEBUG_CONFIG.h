@@ -1,9 +1,3 @@
-extern inline  
-string omxErrorToString(OMX_ERRORTYPE error)
-{
-    return OMX_Maps::getInstance().getOMXError(error);
-}
-
 
 #define OMX_LOG_LEVEL_DEV 1
 #define OMX_LOG_LEVEL_ERROR_ONLY 2
@@ -29,10 +23,10 @@ void logOMXError(OMX_ERRORTYPE error, string comments="", string functionName=""
         {
             if(error != OMX_ErrorNone)
             {
-                ofLogError(functionName) << lineNumber << commentLine << omxErrorToString(error);
+                ofLogError(functionName) << lineNumber << commentLine << getOMXErrorString(error);
             }else
             {
-                ofLogVerbose(functionName) << lineNumber << commentLine << omxErrorToString(error);
+                ofLogVerbose(functionName) << lineNumber << commentLine << getOMXErrorString(error);
             }
             break;
         }
@@ -41,13 +35,13 @@ void logOMXError(OMX_ERRORTYPE error, string comments="", string functionName=""
             
             if(error != OMX_ErrorNone)
             {
-                ofLogError(functionName) << lineNumber << commentLine << omxErrorToString(error);
+                ofLogError(functionName) << lineNumber << commentLine << getOMXErrorString(error);
             }
             break;
         }
         case OMX_LOG_LEVEL_VERBOSE:
         {
-            ofLogError(functionName)  << commentLine << omxErrorToString(error);
+            ofLogError(functionName)  << commentLine << getOMXErrorString(error);
             break;
         }
         default:
