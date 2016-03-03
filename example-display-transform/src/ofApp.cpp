@@ -127,6 +127,7 @@ void ofApp::update()
     }    
 }
 
+bool hasPrintedInfo = false;
 void ofApp::draw()
 {
     
@@ -140,6 +141,31 @@ void ofApp::draw()
         ofDrawRectangle(grids[i]);
     }
     ofPopStyle();
+    
+    stringstream info;
+    info << "PRESS x TO RESET" << endl;
+    info << "PRESS c TO CROP" << endl;
+    info << "PRESS C TO DISPLAY IN CROP AREA" << endl;
+    info << "PRESS f TO FORCE FILL" << endl;
+    info << "PRESS a FOR ALPHA" << endl;
+    info << "PRESS r TO TOGGLE ROTATION" << endl;
+    info << "PRESS m TO TOGGLE MIRROR " << endl;
+    if(omxPlayer.isTextureEnabled())
+    {
+        info.str("");
+        info << "this example only works correctly in direct mode" << endl;
+        info << omxPlayer.getInfo() << endl;
+    }else
+    {
+        if(!hasPrintedInfo)
+        {
+            info << omxPlayer.getInfo() << endl;
+            ofLogVerbose() << info.str();
+            hasPrintedInfo = true;
+        } 
+    }
+    ofDrawBitmapStringHighlight(info.str(), 60, 20, ofColor::black, ofColor::yellow);
+
     
 }
 

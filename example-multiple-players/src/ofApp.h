@@ -13,8 +13,7 @@ class ofApp : public ofBaseApp{
 		void keyPressed(int key);
 	
 	
-	vector<ofxOMXPlayer*> omxPlayers; 
-
+	map<int, ofxOMXPlayer*> omxPlayers; 
 
 };
 
