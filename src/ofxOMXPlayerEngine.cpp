@@ -137,6 +137,22 @@ bool ofxOMXPlayerEngine::setup(ofxOMXPlayerSettings& settings)
     }
 }
 
+
+void ofxOMXPlayerEngine::enableLooping()
+{
+    lock();
+        doLooping = true;
+    unlock();
+}
+
+void ofxOMXPlayerEngine::disableLooping()
+{
+    lock();
+        doLooping = false;
+    unlock();
+}
+
+
 bool ofxOMXPlayerEngine::didReadFile(bool doSkipAvProbe)
 {
     bool passed = false;

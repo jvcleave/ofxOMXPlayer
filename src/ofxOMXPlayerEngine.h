@@ -92,6 +92,8 @@ public:
     VideoPlayerDirect* directPlayer;
     VideoPlayerTextured* texturedPlayer;
     
+    void enableLooping();
+    void disableLooping();
 private:
     
     

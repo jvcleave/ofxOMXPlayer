@@ -4,27 +4,8 @@
 
 #include "ofxOMXPlayerListener.h"
 
-class ofRPIVideoPlayer: public ofBaseVideoPlayer
+class ofRPIVideoPlayer: public ofBaseVideoPlayer, public ofxOMXPlayerListener
 {
-    class _InnerListener : public ofxOMXPlayerListener
-    {
-        public:
-            bool videoHasEnded;
-
-            _InnerListener() : videoHasEnded(false) { }
-
-            virtual void onVideoEnd(ofxOMXPlayerListenerEventData& e)
-            {
-                videoHasEnded = true;
-            }
-
-            virtual void onVideoLoop(ofxOMXPlayerListenerEventData& e)
-            {
-            }
-
-    };
-
-    _InnerListener listener;
 
 public:
     ofRPIVideoPlayer();
@@ -44,7 +25,7 @@ public:
     ofPixels& getPixels();
     void update();
     bool isFrameNew() const;
-    void close();
+    void close(); 
     bool setPixelFormat(ofPixelFormat pixelFormat);
     ofPixelFormat getPixelFormat() const;
     void setLoopState(ofLoopType state);
@@ -56,8 +37,8 @@ public:
     void disablePixels();
     bool pixelsEnabled() { return doPixels; };
     void setPaused(bool doPause);
-    int getCurrentFrame() /*const*/;
-    int getTotalNumFrames() /*const*/;
+    int getCurrentFrame();
+    int getTotalNumFrames();
 protected:
     ofPixels pixels;
     ofPixelFormat pixelFormat;
@@ -68,5 +49,10 @@ protected:
     bool isPlayingState;
     bool hasNewFrame;
     bool doPixels;
+    bool videoHasEnded;
+    void onVideoEnd(ofxOMXPlayerListenerEventData& e);
+    void onVideoLoop(ofxOMXPlayerListenerEventData& e);
+    ofxOMXPlayerSettings settings;
+    bool openOMXPlayer();
 };
 

@@ -52,7 +52,6 @@ public:
     void        restartMovie();
     void        seekToTimeInSeconds(int timeInSeconds);
     
-    void 	setLoopState(ofLoopType state);
 
     void        saveImage(string imagePath="");
     void        updatePixels();
@@ -83,6 +82,10 @@ public:
     ofRectangle* drawRectangle;
     
     static string getRandomVideo(string folder);
+    
+    
+    void enableLooping();
+    void disableLooping();
     
 private:
     vector<int> signals;
