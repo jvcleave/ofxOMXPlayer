@@ -91,7 +91,14 @@ public:
     
     VideoPlayerDirect* directPlayer;
     VideoPlayerTextured* texturedPlayer;
+    BaseVideoPlayer* videoPlayer;
     
+    void enableLooping();
+    void disableLooping();
+    bool isLoopingEnabled()
+    {
+        return doLooping;
+    }
 private:
     
     
@@ -100,7 +107,7 @@ private:
     OMXPacket* packet;
     
     
-    BaseVideoPlayer* videoPlayer;
+    
     OMXAudioPlayer* audioPlayer;
     ofxOMXPlayerListener* listener;
     OMXReader omxReader;

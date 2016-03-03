@@ -10,7 +10,7 @@ public:
     VideoDecoderTextured();
     ~VideoDecoderTextured(){};
     
-    bool open(StreamInfo&, OMXClock*, EGLImageKHR);
+    bool open(StreamInfo&, OMXClock*, ofxOMXPlayerSettings&, EGLImageKHR);
         
     int getCurrentFrame();
     void resetFrameCounter();

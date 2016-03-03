@@ -1,9 +1,12 @@
 #include "ofMain.h"
 #include "ofxOMXPlayer.h"
+#include "ofBaseTypes.h"
 
+#include "ofxOMXPlayerListener.h"
 
-class ofRPIVideoPlayer: public ofBaseVideoPlayer
+class ofRPIVideoPlayer: public ofBaseVideoPlayer, public ofxOMXPlayerListener
 {
+
 public:
     ofRPIVideoPlayer();
     bool load(string name);
@@ -17,13 +20,15 @@ public:
     bool isLoaded() const;
     bool isPlaying() const;
     bool isInitialized() const;
+    bool getIsMovieDone() const;
     const ofPixels& getPixels() const;
     ofPixels& getPixels();
     void update();
     bool isFrameNew() const;
-    void close();
+    void close(); 
     bool setPixelFormat(ofPixelFormat pixelFormat);
     ofPixelFormat getPixelFormat() const;
+    void setLoopState(ofLoopType state);
     
     ofxOMXPlayer omxPlayer;
     void draw(float x, float y, float w, float h);
@@ -31,6 +36,9 @@ public:
     void enablePixels();
     void disablePixels();
     bool pixelsEnabled() { return doPixels; };
+    void setPaused(bool doPause);
+    int getCurrentFrame();
+    int getTotalNumFrames();
 protected:
     ofPixels pixels;
     ofPixelFormat pixelFormat;
@@ -41,5 +49,10 @@ protected:
     bool isPlayingState;
     bool hasNewFrame;
     bool doPixels;
+    bool videoHasEnded;
+    void onVideoEnd(ofxOMXPlayerListenerEventData&);
+    void onVideoLoop(ofxOMXPlayerListenerEventData&);
+    ofxOMXPlayerSettings settings;
+    bool openOMXPlayer(ofxOMXPlayerSettings);
 };
 

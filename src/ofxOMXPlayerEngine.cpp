@@ -137,6 +137,22 @@ bool ofxOMXPlayerEngine::setup(ofxOMXPlayerSettings& settings)
     }
 }
 
+
+void ofxOMXPlayerEngine::enableLooping()
+{
+    lock();
+        doLooping = true;
+    unlock();
+}
+
+void ofxOMXPlayerEngine::disableLooping()
+{
+    lock();
+        doLooping = false;
+    unlock();
+}
+
+
 bool ofxOMXPlayerEngine::didReadFile(bool doSkipAvProbe)
 {
     bool passed = false;
@@ -170,7 +186,7 @@ bool ofxOMXPlayerEngine::openPlayer(int startTimeInSeconds)
         {
             texturedPlayer = new VideoPlayerTextured();
         }
-        didVideoOpen = texturedPlayer->open(videoStreamInfo, clock, eglImage);
+        didVideoOpen = texturedPlayer->open(videoStreamInfo, clock, omxPlayerSettings, eglImage);
         videoPlayer = (BaseVideoPlayer*)texturedPlayer;
     }
     else

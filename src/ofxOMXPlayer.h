@@ -52,6 +52,7 @@ public:
     void        restartMovie();
     void        seekToTimeInSeconds(int timeInSeconds);
     
+
     void        saveImage(string imagePath="");
     void        updatePixels();
     unsigned char*   getPixels();
@@ -67,6 +68,8 @@ public:
     unsigned char*  pixels;
     
     
+    void applyFilter(OMX_IMAGEFILTERTYPE filter);
+    
     //direct only
     void        setDisplayRect(float x, float y, float width, float height);
     void        setDisplayRect(ofRectangle&);
@@ -81,6 +84,11 @@ public:
     ofRectangle* drawRectangle;
     
     static string getRandomVideo(string folder);
+    
+    
+    void enableLooping();
+    void disableLooping();
+    bool isLoopingEnabled();
     
 private:
     vector<int> signals;
@@ -122,5 +130,11 @@ private:
     void updateFBO();
     
     OMXDisplay* directDisplay;
+    
+    //just placeholders if no engine
+    StreamInfo audioInfo;
+    StreamInfo videoInfo;
+    
+    OMX_HANDLETYPE decoderHandle;
 };
 

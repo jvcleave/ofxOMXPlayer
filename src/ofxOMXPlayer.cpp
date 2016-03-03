@@ -35,7 +35,7 @@ ofxOMXPlayer::ofxOMXPlayer()
     didSeek = false;
     speedMultiplier = 1;
     didWarnAboutInaccurateCurrentFrame =false;
-    
+    decoderHandle = NULL;
     ofAddListener(ofEvents().update, this, &ofxOMXPlayer::onUpdate);
     
 }
@@ -225,6 +225,11 @@ bool ofxOMXPlayer::openEngine(int startTimeInSeconds) //default 0
         drawRectangle = &directDisplay->options.drawRectangle;
         
     }
+    if(settings.enableFilters)
+    {
+        
+        decoderHandle = engine->videoPlayer->decoder->decoderComponent.getHandle();
+    }
     isOpen = setupPassed;
     return setupPassed;
 
@@ -334,9 +339,8 @@ StreamInfo& ofxOMXPlayer::getVideoStreamInfo()
     if (engine)
     {
         return engine->videoStreamInfo;
-        
     }
-    StreamInfo videoInfo;
+   
     ofLogError(__func__) << "No engine avail - info returned is invalid";
     return videoInfo;
 }
@@ -379,6 +383,33 @@ string ofxOMXPlayer::getInfo()
     
     info <<"\n" <<  "CURRENT VOLUME: "      << getVolume();
     return info.str();
+}
+
+#pragma mark LOOPING
+
+void ofxOMXPlayer::enableLooping()
+{
+    if (engine)
+    {
+        engine->enableLooping();
+    }
+}
+void ofxOMXPlayer::disableLooping()
+{
+    if (engine)
+    {
+        engine->disableLooping();
+    }
+}
+
+bool ofxOMXPlayer::isLoopingEnabled()
+{
+    bool result = false;
+    if (engine)
+    {
+       result =  engine->isLoopingEnabled();
+    }
+    return result;
 }
 
 #pragma mark playback commands
@@ -458,6 +489,7 @@ void ofxOMXPlayer::seekToTimeInSeconds(int timeInSeconds)
     openEngine(timeInSeconds);
 }
 
+
 #pragma mark audio
 
 void ofxOMXPlayer::increaseVolume()
@@ -500,7 +532,6 @@ StreamInfo& ofxOMXPlayer::getAudioStreamInfo()
         return engine->audioStreamInfo;
     }
     
-    StreamInfo audioInfo;
     ofLogError(__func__) << "No engine avail - info returned is invalid";
     return audioInfo;
 }
@@ -674,6 +705,16 @@ void ofxOMXPlayer::setDisplayRect(float x, float y, float width, float height)
    
 }
 
+
+ void ofxOMXPlayer::applyFilter(OMX_IMAGEFILTERTYPE filter)
+{
+    if(engine && engine->videoPlayer)
+    {
+        engine->videoPlayer->applyFilter(filter);
+    }
+}
+
+
 #pragma mark update routines
 
 
@@ -836,6 +877,12 @@ void ofxOMXPlayer::onUpdateDuringExit(ofEventArgs& args)
         
         close();
         ofxOMXPlayer::doExit = false;
+        if(decoderHandle)
+        {
+            OMX_ERRORTYPE error = OMX_FreeHandle(decoderHandle);
+            OMX_TRACE(error);
+            decoderHandle = NULL;
+        }
         OMXInitializer::getInstance().deinit();
         ofExit();
     }

@@ -13,51 +13,82 @@
 BaseVideoDecoder::BaseVideoDecoder()
 {
 
-	isOpen           = false;
-	doPause             = false;
-	doSetStartTime      = true;
-	extraData         = NULL;
-	extraSize         = 0;
-	isFirstFrame       = true;
-	omxClock			= NULL;
-	clockComponent			= NULL;
+	isOpen          = false;
+	doPause         = false;
+	doSetStartTime  = true;
+	extraData       = NULL;
+	extraSize       = 0;
+	isFirstFrame    = true;
+	omxClock        = NULL;
+	clockComponent  = NULL;
+    doFilters       = false; 
+    omxCodingType   = OMX_VIDEO_CodingUnused;
+
 }
+#define NUMBER_TO_STRING(x) #x
+#define STRINGIZE(x) NUMBER_TO_STRING(x)
 
-BaseVideoDecoder::~BaseVideoDecoder()
+#define LINE_STRING STRINGIZE(__LINE__)
+#define FUNCTION_LINE ofToString(__func__)+ofToString(LINE_STRING)
+
+BaseVideoDecoder::~BaseVideoDecoder() 
 {
+/*
+
+                               ->clock 
+    decoder->imageFX->scheduler
+                               ->renderer
+*/   
     SingleLock lock (m_critSection);
-    OMX_ERRORTYPE error = OMX_ErrorNone;
-    error = clockTunnel.Deestablish();
+    OMX_ERRORTYPE error = OMX_ErrorNone; 
+    
+    //scheduler->clock 
+    error = clockTunnel.Deestablish(FUNCTION_LINE);
     OMX_TRACE(error);
     
-    error = decoderTunnel.Deestablish();
+    //scheduler->renderer
+    error = schedulerTunnel.Deestablish(FUNCTION_LINE);
     OMX_TRACE(error);
     
-    error = schedulerTunnel.Deestablish();
+    ofLogVerbose() << "doFilters: " << doFilters;
+    if(doFilters)
+    {
+        //imagefx->scheduler
+        //error = imageFXTunnel.Deestablish(FUNCTION_LINE); 
+        //OMX_TRACE(error);
+    }
+    
+    
+    
+    //decoder->scheduler or decoder->imagefx(dofilters) 
+    error = decoderTunnel.Deestablish(FUNCTION_LINE);
     OMX_TRACE(error);
     
-    bool didDeinit = false;
     
-    didDeinit = schedulerComponent.Deinitialize(__func__); 
-    if(!didDeinit) ofLogError(__func__) << "didDeinit failed on schedulerComponent";
+    
+    if (doFilters)
+    {
+        OMX_PARAM_U32TYPE extra_buffers;
+        OMX_INIT_STRUCTURE(extra_buffers);
+        extra_buffers.nU32 = -2;
+        
+        error = decoderComponent.setParameter(OMX_IndexParamBrcmExtraBuffers, &extra_buffers);
+        OMX_TRACE(error);
+    }
+    
+    
+  
 
     
-    didDeinit = decoderComponent.Deinitialize(__func__); 
-    if(!didDeinit) ofLogError(__func__) << "didDeinit failed on decoderComponent";
-
-    
-    didDeinit = renderComponent.Deinitialize(__func__); 
-    if(!didDeinit) ofLogError(__func__) << "didDeinit failed on renderComponent";
-
     if(extraData)
     {
         free(extraData);
     }
-    extraData = NULL;
-
-    omxClock          = NULL;
-    clockComponent = NULL;
-    isOpen       = false;
+    
+    extraData       = NULL;
+    omxClock        = NULL;
+    clockComponent  = NULL;
+    isOpen          = false;
 
 }
 
@@ -126,7 +157,7 @@ bool BaseVideoDecoder::sendDecoderConfig()
 	return true;
 }
 
-bool BaseVideoDecoder::decode(uint8_t *pData, int iSize, double pts)
+bool BaseVideoDecoder::decode(uint8_t* demuxer_content, int iSize, double pts)
 {
     SingleLock lock (m_critSection);
     OMX_ERRORTYPE error;
@@ -137,7 +168,6 @@ bool BaseVideoDecoder::decode(uint8_t *pData, int iSize, double pts)
     }
     
     unsigned int demuxer_bytes = (unsigned int)iSize;
-    uint8_t *demuxer_content = pData;
     
     if (demuxer_content && demuxer_bytes > 0)
     {
@@ -177,7 +207,22 @@ bool BaseVideoDecoder::decode(uint8_t *pData, int iSize, double pts)
                 //ofLogVerbose(__func__) << "OMX_BUFFERFLAG_ENDOFFRAME";
                 omxBuffer->nFlags |= OMX_BUFFERFLAG_ENDOFFRAME;
             }
+#if 0            
+            error = decoderComponent.EmptyThisBuffer(omxBuffer);
+            OMX_TRACE(error);
+            if (error != OMX_ErrorNone)
+            {
+                decoderComponent.EmptyBufferDoneCallback(decoderComponent.getHandle(), &decoderComponent, omxBuffer);
+                return false;
+            }
+            //CLog::Log(LOGINFO, "VideD: dts:%.0f pts:%.0f size:%d)\n", dts, pts, iSize);
             
+           // error = decoderComponent.waitForEvent(OMX_EventPortSettingsChanged, 0);
+            //OMX_TRACE(error);
+            //error = decoderComponent.waitForEvent(OMX_EventParamOrConfigChanged, 0);
+           // OMX_TRACE(error);
+#endif      
+
             int nRetry = 0;
             while(true)
             {
@@ -201,6 +246,7 @@ bool BaseVideoDecoder::decode(uint8_t *pData, int iSize, double pts)
                 }
                 
             }
+
             
         }
         
@@ -253,11 +299,10 @@ bool BaseVideoDecoder::EOS()
 			isEndOfStream =  true;
 
 		}
-		//return renderComponent.EOS();
-	}
+    }
 	if (isEndOfStream)
 	{
-		ofLogVerbose("BaseVideoDecoder::EOS") << "isEndOfStream: " << isEndOfStream;
+		ofLogVerbose(__func__) << "isEndOfStream: " << isEndOfStream;
 	}
 	return isEndOfStream;
 }

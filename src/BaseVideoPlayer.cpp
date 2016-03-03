@@ -85,6 +85,16 @@ int BaseVideoPlayer::getSpeed()
 	return speed;
 }
 
+void BaseVideoPlayer::applyFilter(OMX_IMAGEFILTERTYPE filter)
+{
+    
+    
+    //lock();
+    //lockDecoder();
+        decoder->filterManager.setFilter(filter);
+    //unlockDecoder();
+    //unlock();
+}
 
 
 

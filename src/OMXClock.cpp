@@ -17,7 +17,7 @@ OMXClock::OMXClock()
 
 OMXClock::~OMXClock()
 {
-    clockComponent.Deinitialize(__func__);
+    //clockComponent.Deinitialize(__func__);
     pthread_mutex_destroy(&m_lock);
 }
 

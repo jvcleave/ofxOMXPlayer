@@ -37,16 +37,17 @@ void VideoDecoderTextured::resetFrameCounter()
 	renderComponent.resetFrameCounter();
 }
 
-bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock *clock, EGLImageKHR eglImage)
+bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock* clock, ofxOMXPlayerSettings& settings_, EGLImageKHR eglImage)
 {
-
-
 	OMX_ERRORTYPE error   = OMX_ErrorNone;
 
+    settings = settings_;
+    doFilters = settings.enableFilters;
+    omxClock = clock;
+    clockComponent = omxClock->getComponent();
+    
 	videoWidth  = streamInfo.width;
 	videoHeight = streamInfo.height;
-
-
 
 	if(!videoWidth || !videoHeight)
 	{
@@ -80,27 +81,90 @@ bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock *clock, EGLImag
 	{
 		return false;
 	}
+    
+    if(doFilters)
+    {
+        componentName = "OMX.broadcom.image_fx";
+        if(!imageFXComponent.init(componentName, OMX_IndexParamImageInit))
+        {
+            return false;
+        }
+        
+        OMX_PARAM_U32TYPE extra_buffers;
+        OMX_INIT_STRUCTURE(extra_buffers);
+        extra_buffers.nU32 = (OMX_U32)5;
+        
+        error = decoderComponent.setParameter(OMX_IndexParamBrcmExtraBuffers, &extra_buffers);
+        OMX_TRACE(error);
 
-	if(clock == NULL)
-	{
-		return false;
-	}
+        
+        OMX_PARAM_PORTDEFINITIONTYPE portFormat;
+        OMX_INIT_STRUCTURE(portFormat);
+        
+        portFormat.nPortIndex = imageFXComponent.getOutputPort();
+        error = imageFXComponent.getParameter(OMX_IndexParamPortDefinition, &portFormat);
+        OMX_TRACE(error);
+        ofLogVerbose() << "nBufferCountActual: " << portFormat.nBufferCountActual;
+        ofLogVerbose() << "nBufferCountMin: " << portFormat.nBufferCountMin;
+        
+        ofLogVerbose() << "nBufferSize: " << portFormat.nBufferSize;
+        switch (portFormat.eDomain) 
+        {
+            case OMX_PortDomainAudio:
+            {
+                ofLogVerbose() << "audio";
+                break;
+            }
+            case OMX_PortDomainVideo:
+            {
+                ofLogVerbose() << "video";
+                break;
+            }
+            case OMX_PortDomainImage:
+            {
+                ofLogVerbose() << "image";
+                break;
+            }
+            case OMX_PortDomainOther:
+            {
+                ofLogVerbose() << "other";
+                break;
+            }                
+        }
+        
+        //portFormat.eDomain = OMX_PortDomainVideo;
+        error = imageFXComponent.setParameter(OMX_IndexParamPortDefinition, &portFormat);
+        OMX_TRACE(error);
+     
+        decoderTunnel.init(&decoderComponent, 
+                           decoderComponent.getOutputPort(), 
+                           &imageFXComponent, 
+                           imageFXComponent.getInputPort());
+        
+        imageFXTunnel.init(&imageFXComponent, 
+                           imageFXComponent.getOutputPort(), 
+                           &schedulerComponent, 
+                           schedulerComponent.getInputPort());
+    }
+    else
+    {
+        decoderTunnel.init(&decoderComponent, 
+                           decoderComponent.getOutputPort(), 
+                           &schedulerComponent, 
+                           schedulerComponent.getInputPort());
+    }
+    
+    schedulerTunnel.init(&schedulerComponent,
+                         schedulerComponent.getOutputPort(),
+                         &renderComponent,
+                         renderComponent.getInputPort());
+    
+    clockTunnel.init(clockComponent,
+                     clockComponent->getInputPort() + 1,
+                     &schedulerComponent,
+                     schedulerComponent.getOutputPort() + 1);
 
-	omxClock = clock;
-	clockComponent = omxClock->getComponent();
-
-	if(clockComponent->getHandle() == NULL)
-	{
-		omxClock = NULL;
-		clockComponent = NULL;
-		return false;
-	}
-
-	decoderTunnel.init(&decoderComponent,		decoderComponent.getOutputPort(),		&schedulerComponent,	schedulerComponent.getInputPort());
-	schedulerTunnel.init(	&schedulerComponent,		schedulerComponent.getOutputPort(),		&renderComponent,	renderComponent.getInputPort());
-	clockTunnel.init(	clockComponent,		clockComponent->getInputPort() + 1,	&schedulerComponent,	schedulerComponent.getOutputPort() + 1);
-
-
+    
 	error = decoderComponent.setState(OMX_StateIdle);
 	if (error != OMX_ErrorNone)
 	{
@@ -131,6 +195,8 @@ bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock *clock, EGLImag
 	}
 	
 
+
+    
 	OMX_PARAM_PORTDEFINITIONTYPE portParam;
 	OMX_INIT_STRUCTURE(portParam);
 	portParam.nPortIndex = decoderComponent.getInputPort();
@@ -139,8 +205,8 @@ bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock *clock, EGLImag
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
-	int numVideoBuffers = 32; //20 is minimum - can get up to 80
-	portParam.nBufferCountActual = numVideoBuffers;
+	//int numVideoBuffers = 20; //20 is minimum - can get up to 80
+	//portParam.nBufferCountActual = numVideoBuffers;
 
 	portParam.format.video.nFrameWidth  = videoWidth;
 	portParam.format.video.nFrameHeight = videoHeight;
@@ -191,11 +257,25 @@ bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock *clock, EGLImag
     if(error != OMX_ErrorNone) return false;
 
 
-	// Alloc buffers for the omx intput port.
-	error = decoderComponent.allocInputBuffers();
+    
+    
+    if(doFilters)
+    {
+        OMX_PARAM_BRCMDISABLEPROPRIETARYTUNNELSTYPE propTunnels;
+        OMX_INIT_STRUCTURE(propTunnels);
+        propTunnels.nPortIndex = decoderComponent.getOutputPort();
+        error = decoderComponent.getParameter(OMX_IndexParamBrcmDisableProprietaryTunnels, &propTunnels);
+        OMX_TRACE(error);
+        propTunnels.bUseBuffers = OMX_TRUE;
+        error = decoderComponent.setParameter(OMX_IndexParamBrcmDisableProprietaryTunnels, &propTunnels);
+        OMX_TRACE(error);
+        //ofLogVerbose() << "propTunnels.bUseBuffers: " << propTunnels.bUseBuffers;
+    }
+
+    // Alloc buffers for the omx intput port.
+    error = decoderComponent.allocInputBuffers();
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
-
 
 
 	error = decoderTunnel.Establish(false);
@@ -206,7 +286,28 @@ bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock *clock, EGLImag
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
-
+    
+    
+    if(doFilters)
+    {
+        
+        //decoderComponent.doFreeHandle = false;
+        
+        error = imageFXTunnel.Establish(false);
+        OMX_TRACE(error);
+        if(error != OMX_ErrorNone) return false;
+        
+        error = imageFXComponent.setState(OMX_StateExecuting);
+        OMX_TRACE(error);
+        if(error != OMX_ErrorNone) return false;
+        
+        filterManager.setup(&imageFXComponent);
+        filterManager.setFilter(settings.filter);
+        OMX_TRACE(error);
+        if(error != OMX_ErrorNone) return false;
+        
+    }
+    
 	error = schedulerTunnel.Establish(false);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
@@ -215,23 +316,7 @@ bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock *clock, EGLImag
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
-
-	OMX_PARAM_PORTDEFINITIONTYPE portParamRenderInput;
-	OMX_INIT_STRUCTURE(portParamRenderInput);
-	portParamRenderInput.nPortIndex = renderComponent.getInputPort();
-
-	error = renderComponent.getParameter(OMX_IndexParamPortDefinition, &portParamRenderInput);
-    OMX_TRACE(error);
-    if(error != OMX_ErrorNone) return false;
-
-	OMX_PARAM_PORTDEFINITIONTYPE portParamRenderOutput;
-	OMX_INIT_STRUCTURE(portParamRenderOutput);
-	portParamRenderOutput.nPortIndex = renderComponent.getOutputPort();
-
-	error = renderComponent.getParameter(OMX_IndexParamPortDefinition, &portParamRenderOutput);
-    OMX_TRACE(error);
-    if(error != OMX_ErrorNone) return false;
-	
+    
 	// Alloc buffers for the renderComponent input port.
 	error = renderComponent.allocInputBuffers();
     OMX_TRACE(error);
@@ -243,7 +328,6 @@ bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock *clock, EGLImag
     if(error != OMX_ErrorNone) return false;
 	
 
-	//ofLogVerbose(__func__) << "renderComponent.getOutputPort(): " << renderComponent.getOutputPort();
 	renderComponent.enablePort(renderComponent.getOutputPort());
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
@@ -266,7 +350,7 @@ bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock *clock, EGLImag
 	}
 
 
-	renderComponent.setFillBufferDoneHandler(&VideoDecoderTextured::onFillBufferDone);
+	renderComponent.CustomFillBufferDoneHandler = &VideoDecoderTextured::onFillBufferDone;
 	error = renderComponent.setState(OMX_StateExecuting);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
@@ -277,11 +361,6 @@ bool VideoDecoderTextured::open(StreamInfo& streamInfo, OMXClock *clock, EGLImag
 
 	isOpen           = true;
 	doSetStartTime      = true;
-
-
-	ofLog(OF_LOG_VERBOSE,
-	      "%s::%s - decoder_component: 0x%p, input_port: 0x%x, output_port: 0x%x \n",
-	      "VideoDecoderTextured", __func__, decoderComponent.getHandle(), decoderComponent.getInputPort(), decoderComponent.getOutputPort());
 
 	isFirstFrame   = true;
 	// start from assuming all recent frames had valid pts

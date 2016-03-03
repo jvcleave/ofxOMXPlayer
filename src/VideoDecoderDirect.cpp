@@ -5,7 +5,6 @@
 VideoDecoderDirect::VideoDecoderDirect()
 {
 
-	doDeinterlace       = false;
 	doHDMISync   = false;
 	frameCounter = 0;
 	frameOffset = 0;
@@ -23,12 +22,12 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
 {
 	OMX_ERRORTYPE error   = OMX_ErrorNone;
 
-	omxCodingType            = OMX_VIDEO_CodingUnused;
-
 	videoWidth  = streamInfo.width;
 	videoHeight = streamInfo.height;
 
     settings = settings_;
+    omxClock = clock;
+    clockComponent = omxClock->getComponent();
 	doHDMISync = settings.directDisplayOptions.doHDMISync;
     
 
@@ -46,14 +45,13 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
 
 	processCodec(streamInfo);
 
-	if(settings.directDisplayOptions.doDeinterlace)
+	if(settings.enableFilters)
 	{
-		ofLog(OF_LOG_VERBOSE, "enable deinterlace\n");
-		doDeinterlace = true;
+		doFilters = true;
 	}
 	else
 	{
-		doDeinterlace = false;
+		doFilters = false;
 	}
 
 	std::string componentName = "OMX.broadcom.video_decode";
@@ -74,43 +72,44 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
 		return false;
 	}
 
-	if(doDeinterlace)
-	{
-		componentName = "OMX.broadcom.image_fx";
-		if(!imageFXComponent.init(componentName, OMX_IndexParamImageInit))
-		{
-			return false;
-		}
-	}
+    if(doFilters)
+    {
+        decoderComponent.doFreeHandle = false;
 
-	if(clock == NULL)
-	{
-		return false;
-	}
+        componentName = "OMX.broadcom.image_fx";
+        if(!imageFXComponent.init(componentName, OMX_IndexParamImageInit))
+        {
+            return false;
+        }
+        
+        decoderTunnel.init(&decoderComponent, 
+                           decoderComponent.getOutputPort(), 
+                           &imageFXComponent, 
+                           imageFXComponent.getInputPort());
+        
+        imageFXTunnel.init(&imageFXComponent, 
+                           imageFXComponent.getOutputPort(), 
+                           &schedulerComponent, 
+                           schedulerComponent.getInputPort());
+    }
+    else
+    {
+        decoderTunnel.init(&decoderComponent, 
+                           decoderComponent.getOutputPort(), 
+                           &schedulerComponent, 
+                           schedulerComponent.getInputPort());
+    }
 
-	omxClock = clock;
-	clockComponent = omxClock->getComponent();
-
-	if(clockComponent->getHandle() == NULL)
-	{
-		omxClock = NULL;
-		clockComponent = NULL;
-		return false;
-	}
-
-	if(doDeinterlace)
-	{
-		decoderTunnel.init(&decoderComponent, decoderComponent.getOutputPort(), &imageFXComponent, imageFXComponent.getInputPort());
-		imageFXTunnel.init(&imageFXComponent, imageFXComponent.getOutputPort(), &schedulerComponent, schedulerComponent.getInputPort());
-	}
-	else
-	{
-		decoderTunnel.init(&decoderComponent, decoderComponent.getOutputPort(), &schedulerComponent, schedulerComponent.getInputPort());
-	}
-
-	schedulerTunnel.init(&schedulerComponent, schedulerComponent.getOutputPort(), &renderComponent, renderComponent.getInputPort());
-	clockTunnel.init(clockComponent, clockComponent->getInputPort() + 1, &schedulerComponent, schedulerComponent.getOutputPort() + 1);
-
+    schedulerTunnel.init(&schedulerComponent,
+                         schedulerComponent.getOutputPort(),
+                         &renderComponent,
+                         renderComponent.getInputPort());
+    
+    clockTunnel.init(clockComponent,
+                     clockComponent->getInputPort() + 1,
+                     &schedulerComponent,
+                     schedulerComponent.getOutputPort() + 1);
+    
 	error = clockTunnel.Establish(false);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
@@ -146,8 +145,6 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
     if(error != OMX_ErrorNone) return false;
 
 	portParam.nPortIndex = decoderComponent.getInputPort();
-	int videoBuffers = 60;
-	portParam.nBufferCountActual = videoBuffers;
 
 	portParam.format.video.nFrameWidth  = videoWidth;
 	portParam.format.video.nFrameHeight = videoHeight;
@@ -164,12 +161,12 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
-	if (doDeinterlace)
+
+	if (doFilters)
 	{
-		// the deinterlace component requires 3 additional video buffers in addition to the DPB (this is normally 2).
 		OMX_PARAM_U32TYPE extra_buffers;
 		OMX_INIT_STRUCTURE(extra_buffers);
-		extra_buffers.nU32 = 3;
+		extra_buffers.nU32 = 5;
 
 		error = decoderComponent.setParameter(OMX_IndexParamBrcmExtraBuffers, &extra_buffers);
         OMX_TRACE(error);
@@ -220,11 +217,12 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
         if(error != OMX_ErrorNone) return false;
 	}
 
-	// Alloc buffers for the omx input port.
-	error = decoderComponent.allocInputBuffers();
+   // Alloc buffers for the omx input port.
+	error = decoderComponent.allocInputBuffers(); 
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
+    
 	error = decoderTunnel.Establish(false);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
@@ -234,30 +232,21 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
 
-	if(doDeinterlace)
-	{
-		OMX_CONFIG_IMAGEFILTERPARAMSTYPE image_filter;
-		OMX_INIT_STRUCTURE(image_filter);
 
-		image_filter.nPortIndex = imageFXComponent.getOutputPort();
-		image_filter.nNumParams = 1;
-		image_filter.nParams[0] = 3;
-		image_filter.eImageFilter = OMX_ImageFilterDeInterlaceAdvanced;
-
-		error = imageFXComponent.setConfig(OMX_IndexConfigCommonImageFilterParameters, &image_filter);
-        OMX_TRACE(error);
-        if(error != OMX_ErrorNone) return false;
-
+	if(doFilters)
+	{ 
 		error = imageFXTunnel.Establish(false);
         OMX_TRACE(error);
         if(error != OMX_ErrorNone) return false;
-
+        
 		error = imageFXComponent.setState(OMX_StateExecuting);
         OMX_TRACE(error);
         if(error != OMX_ErrorNone) return false;
-
-		imageFXComponent.disablePort(imageFXComponent.getInputPort());
-		imageFXComponent.disablePort(imageFXComponent.getOutputPort());
+        
+        filterManager.setup(&imageFXComponent);
+        filterManager.setFilter(settings.filter);
+        OMX_TRACE(error);
+        if(error != OMX_ErrorNone) return false;
 
 	}
 
@@ -287,10 +276,6 @@ bool VideoDecoderDirect::open(StreamInfo& streamInfo, OMXClock *clock, ofxOMXPla
 	doSetStartTime      = true;
 	
 	display.setup(&renderComponent, streamInfo, settings);
-	ofLog(OF_LOG_VERBOSE,
-	      "%s::%s - decoder_component(0x%p), input_port(0x%x), output_port(0x%x) deinterlace %d hdmiclocksync %d\n",
-	      "VideoDecoderDirect", __func__, decoderComponent.getHandle(), decoderComponent.getInputPort(), decoderComponent.getOutputPort(),
-	      doDeinterlace, doHDMISync);
 
 	isFirstFrame   = true;
     doUpdate = true;

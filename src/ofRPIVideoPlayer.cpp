@@ -8,12 +8,16 @@
 
 #include "ofRPIVideoPlayer.h"
 
-#define what_is_the_point const
-#define the_complier_will_disregard_this_anyway const
-#define i_am_done_venting const
-#define i_have_to_update_variables_in_update const
-#define because_setting_them_when_asked_for const
-#define will_throw_a_compiler_error const
+
+void ofRPIVideoPlayer::onVideoEnd(ofxOMXPlayerListenerEventData& e)
+{
+    videoHasEnded = true;
+}
+
+void ofRPIVideoPlayer::onVideoLoop(ofxOMXPlayerListenerEventData& e)
+{
+}
+
 
 ofRPIVideoPlayer::ofRPIVideoPlayer()
 {
@@ -25,16 +29,29 @@ ofRPIVideoPlayer::ofRPIVideoPlayer()
     hasNewFrame = true;
     openState = false;
     doPixels = false;
+    videoHasEnded = false;
 }
 
 bool ofRPIVideoPlayer::load(string name)
 {
-    ofxOMXPlayerSettings settings;
+    
     settings.videoPath = name;
     settings.useHDMIForAudio = true;	//default true
     settings.enableTexture = true;		//default true
     settings.enableLooping = true;		//default true
     settings.enableAudio = true;		//default true, save resources by disabling
+    
+    
+    settings.listener = this;
+    bool result = openOMXPlayer(settings);
+    return result;
+    
+    
+}
+
+bool ofRPIVideoPlayer::openOMXPlayer(ofxOMXPlayerSettings settings_)
+{
+    settings = settings_;
     openState = omxPlayer.setup(settings);
     update();
     return openState;
@@ -57,7 +74,7 @@ void ofRPIVideoPlayer::loadAsync(string name)
 
 void ofRPIVideoPlayer::play()
 {
-
+    videoHasEnded = false;
 }
 
 void ofRPIVideoPlayer::stop()
@@ -65,42 +82,62 @@ void ofRPIVideoPlayer::stop()
     //omxPlayer.stop();
 }
 
+void ofRPIVideoPlayer::setPaused(bool doPause)
+{
+    omxPlayer.setPaused(doPause);
+}
+
+int ofRPIVideoPlayer::getCurrentFrame() 
+{
+    return omxPlayer.getCurrentFrame();
+}
+
+int ofRPIVideoPlayer::getTotalNumFrames()
+{
+    return omxPlayer.getTotalNumFrames();
+}
+
 ofTexture* ofRPIVideoPlayer::getTexturePtr()
 {
     return &omxPlayer.texture;
 } 
 
-float ofRPIVideoPlayer::getWidth() what_is_the_point
+float ofRPIVideoPlayer::getWidth() const
 {
     
     return videoWidth;
 }
 
-float ofRPIVideoPlayer::getHeight() the_complier_will_disregard_this_anyway
+float ofRPIVideoPlayer::getHeight() const
 {
     return videoHeight;
 }
 
-bool ofRPIVideoPlayer::isPaused() i_have_to_update_variables_in_update
+bool ofRPIVideoPlayer::isPaused() const
 {
     
     return pauseState;
 }
 
-bool ofRPIVideoPlayer::isLoaded() because_setting_them_when_asked_for
+bool ofRPIVideoPlayer::isLoaded() const
 {
     
     return openState;
 }
 
-bool ofRPIVideoPlayer::isPlaying() will_throw_a_compiler_error
+bool ofRPIVideoPlayer::isPlaying() const
 {
     return isPlayingState;
 }
 
-bool ofRPIVideoPlayer::isInitialized() i_am_done_venting
+bool ofRPIVideoPlayer::isInitialized() const
 { 
     return isLoaded(); 
+}
+
+bool ofRPIVideoPlayer::getIsMovieDone() const
+{
+    return videoHasEnded;
 }
 
 
@@ -168,8 +205,19 @@ ofPixelFormat ofRPIVideoPlayer::getPixelFormat() const
     return pixelFormat;
 }
 
-
-
-
-
-
+void ofRPIVideoPlayer::setLoopState(ofLoopType requestedState)
+{
+    bool currentState = omxPlayer.isLoopingEnabled();
+    
+    if(currentState != requestedState)
+    {
+        if(requestedState == OF_LOOP_NORMAL)
+        {
+            omxPlayer.enableLooping();
+        }
+        else
+        {
+            omxPlayer.disableLooping();
+        }
+    }
+}
