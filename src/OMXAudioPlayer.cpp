@@ -320,19 +320,10 @@ void OMXAudioPlayer::process()
             omxPacket = NULL;
             doFlush = false;
         }
-        else         
+        else if(omxPacket && decode(omxPacket))
         {
-            if(omxPacket)
-            {
-                if (!decode(omxPacket)) 
-                {
-                    doStop = true;
-                    doAbort = true;
-                }
-                OMXReader::freePacket(omxPacket);
-                omxPacket = NULL;
-            }
-
+            OMXReader::freePacket(omxPacket);
+            omxPacket = NULL;
         }
         unlockDecoder();
     }
