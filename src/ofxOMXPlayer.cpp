@@ -334,9 +334,8 @@ StreamInfo& ofxOMXPlayer::getVideoStreamInfo()
     if (engine)
     {
         return engine->videoStreamInfo;
-        
     }
-    StreamInfo videoInfo;
+   
     ofLogError(__func__) << "No engine avail - info returned is invalid";
     return videoInfo;
 }
@@ -379,6 +378,33 @@ string ofxOMXPlayer::getInfo()
     
     info <<"\n" <<  "CURRENT VOLUME: "      << getVolume();
     return info.str();
+}
+
+#pragma mark LOOPING
+
+void ofxOMXPlayer::enableLooping()
+{
+    if (engine)
+    {
+        engine->enableLooping();
+    }
+}
+void ofxOMXPlayer::disableLooping()
+{
+    if (engine)
+    {
+        engine->disableLooping();
+    }
+}
+
+bool ofxOMXPlayer::isLoopingEnabled()
+{
+    bool result = false;
+    if (engine)
+    {
+       result =  engine->isLoopingEnabled();
+    }
+    return result;
 }
 
 #pragma mark playback commands
@@ -501,7 +527,6 @@ StreamInfo& ofxOMXPlayer::getAudioStreamInfo()
         return engine->audioStreamInfo;
     }
     
-    StreamInfo audioInfo;
     ofLogError(__func__) << "No engine avail - info returned is invalid";
     return audioInfo;
 }

@@ -94,6 +94,10 @@ public:
     
     void enableLooping();
     void disableLooping();
+    bool isLoopingEnabled()
+    {
+        return doLooping;
+    }
 private:
     
     

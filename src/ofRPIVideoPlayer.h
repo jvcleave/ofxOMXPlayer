@@ -50,9 +50,9 @@ protected:
     bool hasNewFrame;
     bool doPixels;
     bool videoHasEnded;
-    void onVideoEnd(ofxOMXPlayerListenerEventData& e);
-    void onVideoLoop(ofxOMXPlayerListenerEventData& e);
+    void onVideoEnd(ofxOMXPlayerListenerEventData&);
+    void onVideoLoop(ofxOMXPlayerListenerEventData&);
     ofxOMXPlayerSettings settings;
-    bool openOMXPlayer();
+    bool openOMXPlayer(ofxOMXPlayerSettings);
 };
 

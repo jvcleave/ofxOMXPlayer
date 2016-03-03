@@ -86,6 +86,7 @@ public:
     
     void enableLooping();
     void disableLooping();
+    bool isLoopingEnabled();
     
 private:
     vector<int> signals;
@@ -127,5 +128,10 @@ private:
     void updateFBO();
     
     OMXDisplay* directDisplay;
+    
+    //just placeholders if no engine
+    StreamInfo audioInfo;
+    StreamInfo videoInfo;
+    
 };
 

@@ -207,17 +207,17 @@ ofPixelFormat ofRPIVideoPlayer::getPixelFormat() const
 
 void ofRPIVideoPlayer::setLoopState(ofLoopType requestedState)
 {
-    bool currentState = settings.enableLooping;
+    bool currentState = omxPlayer.isLoopingEnabled();
     
     if(currentState != requestedState)
     {
         if(requestedState == OF_LOOP_NORMAL)
         {
-            settings.enableLooping = true; 
+            omxPlayer.enableLooping();
         }
         else
         {
-            settings.enableLooping = false;
+            omxPlayer.disableLooping();
         }
     }
 }
