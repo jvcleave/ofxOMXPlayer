@@ -114,7 +114,7 @@ bool VideoPlayerDirect::openDecoder()
 	info << "Video height: "	<<	omxStreamInfo.height    << "\n";
 	info << "Video profile: "	<<	omxStreamInfo.profile   << "\n";
 	info << "Video fps: "		<<	fps                     << "\n";
-	ofLogVerbose(__func__) << "\n" << info;
+	ofLogVerbose(__func__) << "\n" << info.str();
 
 	return true;
 }
