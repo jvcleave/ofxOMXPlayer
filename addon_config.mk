@@ -21,26 +21,22 @@ meta:
 	ADDON_TAGS = "raspberry pi, video player"
 	ADDON_URL = https://github.com/jvcleave/ofxOMXPlayer
 
-common:
-	# dependencies with other addons, a list of them separated by spaces 
-	# or use += in several lines
-	# ADDON_DEPENDENCIES =
-	
-	OFXOMXPLAYER_ROOT = $(OF_ROOT)/addons/ofxOMXPlayer
-	
-	# include search paths, this will be usually parsed from the file system
-	# but if the addon or addon libraries need special search paths they can be
-	# specified here separated by spaces or one per line using +=
-	ADDON_INCLUDES = $(OFXOMXPLAYER_ROOT)/src $(OFXOMXPLAYER_ROOT)/libs/ffmpeg/include 
+linuxarmv6l:
+	FFMPEG_LIB_VERSION = linuxarmv6l
 		
-	# any special flag that should be passed to the compiler when using this
-	# addon
-	ADDON_CFLAGS = -I$(OFXOMXPLAYER_ROOT)/src -I$(OFXOMXPLAYER_ROOT)/libs/ffmpeg/include -fPIC -U_FORTIFY_SOURCE -Wall -ftree-vectorize -ftree-vectorize -Wno-deprecated-declarations -Wno-sign-compare -Wno-unknown-pragmas
-
-	# any special flag that should be passed to the linker when using this
-	# addon, also used for system libraries with -lname
+linuxarmv7l:
+	FFMPEG_LIB_VERSION = linuxarmv7l
 	
-	FFMPEG_LIBS = $(OFXOMXPLAYER_ROOT)/libs/ffmpeg/lib
+common:
+	OFXOMXPLAYER_ROOT = $(OF_ROOT)/addons/ofxOMXPlayer
+	FFMPEG_ROOT = $(OFXOMXPLAYER_ROOT)/libs/$(FFMPEG_LIB_VERSION)/ffmpeg
+	ADDON_INCLUDES = $(OFXOMXPLAYER_ROOT)/src $(FFMPEG_ROOT)/include 
+	
+	ADDON_CFLAGS = -I$(OFXOMXPLAYER_ROOT)/src
+	ADDON_CFLAGS += -I$(FFMPEG_ROOT)include
+	ADDON_CFLAGS += -fPIC -U_FORTIFY_SOURCE -Wall -ftree-vectorize -ftree-vectorize -Wno-deprecated-declarations -Wno-sign-compare -Wno-unknown-pragmas
+
+	FFMPEG_LIBS = $(FFMPEG_ROOT)/lib
 	FORMAT_STATIC=$(FFMPEG_LIBS)/libavformat.a
 	CODEC_STATIC=$(FFMPEG_LIBS)/libavcodec.a
 	SCALE_STATIC=$(FFMPEG_LIBS)/libswscale.a
@@ -53,26 +49,3 @@ common:
 	RESAMPLE_STATIC=$(FFMPEG_LIBS)/libswresample.a
 
 	ADDON_LDFLAGS=-L$(FFMPEG_LIBS) $(FORMAT_STATIC) $(CODEC_STATIC) $(SCALE_STATIC) $(UTIL_STATIC) $(RESAMPLE_STATIC) $(FILTER_STATIC) -lm -lbz2 -lsmbclient -lssh 
-	
-	
-	# linux only, any library that should be included in the project using
-	# pkg-config
-	# ADDON_PKG_CONFIG_LIBRARIES =
-	
-	# osx/iOS only, any framework that should be included in the project
-	# ADDON_FRAMEWORKS =
-	
-	# source files, these will be usually parsed from the file system looking
-	# in the src folders in libs and the root of the addon. if your addon needs
-	# to include files in different places or a different set of files per platform
-	# they can be specified here
-	# ADDON_SOURCES =
-	
-	# some addons need resources to be copied to the bin/data folder of the project
-	# specify here any files that need to be copied, you can use wildcards like * and ?
-	# ADDON_DATA = 
-	
-	# when parsing the file system looking for libraries exclude this for all or
-	# a specific platform
-	#ADDON_LIBS_EXCLUDE = $(OFXOMXPLAYER_ROOT)/libs/ffmpeg/include%
-	
