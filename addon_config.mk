@@ -33,7 +33,7 @@ common:
 	ADDON_INCLUDES = $(OFXOMXPLAYER_ROOT)/src $(FFMPEG_ROOT)/include 
 	
 	ADDON_CFLAGS = -I$(OFXOMXPLAYER_ROOT)/src
-	ADDON_CFLAGS += -I$(FFMPEG_ROOT)include
+	ADDON_CFLAGS += -I$(FFMPEG_ROOT)/include
 	ADDON_CFLAGS += -fPIC -U_FORTIFY_SOURCE -Wall -ftree-vectorize -ftree-vectorize -Wno-deprecated-declarations -Wno-sign-compare -Wno-unknown-pragmas
 
 	FFMPEG_LIBS = $(FFMPEG_ROOT)/lib
