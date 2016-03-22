@@ -52,7 +52,7 @@ common:
 	DEVICE_STATIC=$(FFMPEG_LIBS)/libavdevice.a
 	RESAMPLE_STATIC=$(FFMPEG_LIBS)/libswresample.a
 
-	ADDON_LDFLAGS=-L$(FFMPEG_LIBS) $(FORMAT_STATIC) $(CODEC_STATIC) $(SCALE_STATIC) $(UTIL_STATIC) $(RESAMPLE_STATIC) $(FILTER_STATIC) -lm
+	ADDON_LDFLAGS=-L$(FFMPEG_LIBS) $(FORMAT_STATIC) $(CODEC_STATIC) $(SCALE_STATIC) $(UTIL_STATIC) $(RESAMPLE_STATIC) $(FILTER_STATIC) -lm -lbz2 -lsmbclient -lssh 
 	
 	
 	# linux only, any library that should be included in the project using

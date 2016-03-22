@@ -97,7 +97,7 @@ bool BaseVideoDecoder::NaluFormatStartCodes(enum AVCodecID codec, uint8_t *in_ex
 {
 	switch(codec)
 	{
-		case CODEC_ID_H264:
+		case AV_CODEC_ID_H264:
 		{
 			if (in_extrasize < 7 || in_extradata == NULL)
 			{
@@ -361,7 +361,7 @@ void BaseVideoDecoder::processCodec(StreamInfo& hints)
 {
 	switch (hints.codec)
 	{
-		case CODEC_ID_H264:
+		case AV_CODEC_ID_H264:
 		{
 			switch(hints.profile)
 			{
@@ -389,47 +389,47 @@ void BaseVideoDecoder::processCodec(StreamInfo& hints)
 			}
 		}
 		break;
-		case CODEC_ID_MPEG4:
+		case AV_CODEC_ID_MPEG4:
 			// (role name) video_decoder.mpeg4
 			// MPEG-4, DivX 4/5 and Xvid compatible
 			omxCodingType = OMX_VIDEO_CodingMPEG4;
 			break;
-		case CODEC_ID_MPEG1VIDEO:
-		case CODEC_ID_MPEG2VIDEO:
+		case AV_CODEC_ID_MPEG1VIDEO:
+		case AV_CODEC_ID_MPEG2VIDEO:
 			// (role name) video_decoder.mpeg2
 			// MPEG-2
 			omxCodingType = OMX_VIDEO_CodingMPEG2;
 			break;
-		case CODEC_ID_H263:
+		case AV_CODEC_ID_H263:
 			// (role name) video_decoder.mpeg4
 			// MPEG-4, DivX 4/5 and Xvid compatible
 			omxCodingType = OMX_VIDEO_CodingMPEG4;
 			break;
-		case CODEC_ID_VP6:
-		case CODEC_ID_VP6F:
-		case CODEC_ID_VP6A:
+		case AV_CODEC_ID_VP6:
+		case AV_CODEC_ID_VP6F:
+		case AV_CODEC_ID_VP6A:
 			// (role name) video_decoder.vp6
 			// VP6
 			omxCodingType = OMX_VIDEO_CodingVP6;
 			break;
-		case CODEC_ID_VP8:
+		case AV_CODEC_ID_VP8:
 			// (role name) video_decoder.vp8
 			// VP8
 			omxCodingType = OMX_VIDEO_CodingVP8;
 			break;
-		case CODEC_ID_THEORA:
+		case AV_CODEC_ID_THEORA:
 			// (role name) video_decoder.theora
 			// theora
 			omxCodingType = OMX_VIDEO_CodingTheora;
 			break;
-		case CODEC_ID_MJPEG:
-		case CODEC_ID_MJPEGB:
+		case AV_CODEC_ID_MJPEG:
+		case AV_CODEC_ID_MJPEGB:
 			// (role name) video_decoder.mjpg
 			// mjpg
 			omxCodingType = OMX_VIDEO_CodingMJPEG;
 			break;
-		case CODEC_ID_VC1:
-		case CODEC_ID_WMV3:
+		case AV_CODEC_ID_VC1:
+		case AV_CODEC_ID_WMV3:
 			// (role name) video_decoder.vc1
 			// VC-1, WMV9
 			omxCodingType = OMX_VIDEO_CodingWMV;

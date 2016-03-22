@@ -196,8 +196,8 @@ bool OMXAudioPlayer::decode(OMXPacket *pkt)
     unsigned int old_bitrate = omxStreamInfo.bitrate;
     unsigned int new_bitrate = pkt->hints.bitrate;
 
-    /* only check bitrate changes on CODEC_ID_DTS, CODEC_ID_AC3, CODEC_ID_EAC3 */
-    if(omxStreamInfo.codec != CODEC_ID_DTS && omxStreamInfo.codec != CODEC_ID_AC3 && omxStreamInfo.codec != CODEC_ID_EAC3)
+    /* only check bitrate changes on AV_CODEC_ID_DTS, AV_CODEC_ID_AC3, AV_CODEC_ID_EAC3 */
+    if(omxStreamInfo.codec != AV_CODEC_ID_DTS && omxStreamInfo.codec != AV_CODEC_ID_AC3 && omxStreamInfo.codec != AV_CODEC_ID_EAC3)
     {
         new_bitrate = old_bitrate = 0;
     }

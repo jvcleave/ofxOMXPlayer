@@ -631,7 +631,7 @@ void OMXReader::addStream(int id)
     AVStream *pStream = avFormatContext->streams[id];
     // discard PNG stream as we don't support it, and it stops mp3 files playing with album art
     if (pStream->codec->codec_type == AVMEDIA_TYPE_VIDEO && 
-        (pStream->codec->codec_id == CODEC_ID_PNG))
+        (pStream->codec->codec_id == AV_CODEC_ID_PNG))
         return;
     
     switch (pStream->codec->codec_type)
@@ -836,7 +836,7 @@ bool OMXReader::getHints(AVStream *stream, StreamInfo *hints)
             hints->aspect = av_q2d(stream->codec->sample_aspect_ratio) * stream->codec->width / stream->codec->height;
         else
             hints->aspect = 0.0f;
-        if (isAVI && stream->codec->codec_id == CODEC_ID_H264)
+        if (isAVI && stream->codec->codec_id == AV_CODEC_ID_H264)
             hints->ptsinvalid = true;
     }
     
@@ -1124,7 +1124,7 @@ std::string OMXReader::getStreamCodecName(AVStream *stream)
     
 #ifdef FF_PROFILE_DTS_HD_MA
     /* use profile to determine the DTS type */
-    if (stream->codec->codec_id == CODEC_ID_DTS)
+    if (stream->codec->codec_id == AV_CODEC_ID_DTS)
     {
         if (stream->codec->profile == FF_PROFILE_DTS_HD_MA)
             strStreamName = "dtshd_ma";
@@ -1228,8 +1228,8 @@ std::string OMXReader::getStreamType(OMXStreamType type, unsigned int index)
     {
         if(omxStreams[i].type == type &&  omxStreams[i].index == index)
         {
-            if (omxStreams[i].hints.codec == CODEC_ID_AC3) strcpy(sInfo, "AC3 ");
-            else if (omxStreams[i].hints.codec == CODEC_ID_DTS)
+            if (omxStreams[i].hints.codec == AV_CODEC_ID_AC3) strcpy(sInfo, "AC3 ");
+            else if (omxStreams[i].hints.codec == AV_CODEC_ID_DTS)
             {
 #ifdef FF_PROFILE_DTS_HD_MA
                 if (omxStreams[i].hints.profile == FF_PROFILE_DTS_HD_MA)
@@ -1240,7 +1240,7 @@ std::string OMXReader::getStreamType(OMXStreamType type, unsigned int index)
 #endif
                     strcpy(sInfo, "DTS ");
             }
-            else if (omxStreams[i].hints.codec == CODEC_ID_MP2) strcpy(sInfo, "MP2 ");
+            else if (omxStreams[i].hints.codec == AV_CODEC_ID_MP2) strcpy(sInfo, "MP2 ");
             else strcpy(sInfo, "");
             
             if (omxStreams[i].hints.channels == 1) strcat(sInfo, "Mono");
