@@ -31,7 +31,7 @@ ofxOMXPlayer::ofxOMXPlayer()
     hasNewFrame = false;
     prevFrame = 0;
     doRestart = false;
-    
+    doToggle = false;
     didSeek = false;
     speedMultiplier = 1;
     didWarnAboutInaccurateCurrentFrame =false;
@@ -787,9 +787,10 @@ void ofxOMXPlayer::onUpdate(ofEventArgs& args)
     if (doRestart) 
     {
         ofxOMXPlayerSettings currentSettings = getSettings();
-        if(!doToggle)
+        if(doToggle)
         {
             currentSettings.enableTexture = !currentSettings.enableTexture;
+            doToggle = false;
         }
         setup(currentSettings);
         doRestart = false;
