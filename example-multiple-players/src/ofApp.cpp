@@ -36,7 +36,7 @@ void ofApp::setup()
 			
 			ofxOMXPlayer* player = new ofxOMXPlayer();
 			player->setup(settings);
-			omxPlayers.push_back(player);
+			omxPlayers[i] = player;
 		}
     }else{
         ofLogError() << "currentVideoDirectory: " << currentVideoDirectory.path() << " MISSING";
