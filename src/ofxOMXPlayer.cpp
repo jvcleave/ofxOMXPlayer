@@ -186,6 +186,7 @@ bool ofxOMXPlayer::setup(ofxOMXPlayerSettings settings)
 void ofxOMXPlayer::toggleMode()
 {
     doToggle = true;
+    doRestart = true;
 }
 
 bool ofxOMXPlayer::openEngine(int startTimeInSeconds) //default 0
@@ -785,14 +786,14 @@ void ofxOMXPlayer::onUpdate(ofEventArgs& args)
 {
     if (doRestart) 
     {
-        ofxOMXPlayerSettings sameSettings = getSettings();
+        ofxOMXPlayerSettings currentSettings = getSettings();
         if(!doToggle)
         {
-            setup(sameSettings);
-            doRestart = false;
-            return; 
+            currentSettings.enableTexture = !currentSettings.enableTexture;
         }
-       
+        setup(currentSettings);
+        doRestart = false;
+        return; 
        
     }
     updateCurrentFrame();
