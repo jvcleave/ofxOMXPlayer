@@ -434,9 +434,23 @@ void ofxOMXPlayer::setPaused(bool doPause)
 
 void ofxOMXPlayer::stepFrameForward()
 {
+    stepFrame(1);
+}
+
+void ofxOMXPlayer::stepFrame(int step)
+{
     if (engine)
     {
-        engine->stepFrameForward();
+        engine->stepFrame(step);
+    }
+}
+
+
+void ofxOMXPlayer::scrubForward(int step)//default 1
+{
+    if (engine)
+    {
+        engine->scrubForward(step);
     }
 }
 

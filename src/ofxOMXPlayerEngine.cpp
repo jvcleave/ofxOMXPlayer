@@ -474,13 +474,28 @@ void ofxOMXPlayerEngine::rewind()
     
 }
 
-void ofxOMXPlayerEngine::stepFrameForward()
+void ofxOMXPlayerEngine::scrubForward(int step)
 {
     if (!isPaused())
     {
         setPaused(true);
     }
-    clock->step(1);
+    clock->step(step);
+    setPaused(false);
+}
+
+void ofxOMXPlayerEngine::stepFrameForward()
+{
+    stepFrame(1);
+}
+
+void ofxOMXPlayerEngine::stepFrame(int step)
+{
+    if (!isPaused())
+    {
+        setPaused(true);
+    }
+    clock->step(step);
 }
 
 void ofxOMXPlayerEngine::stop()

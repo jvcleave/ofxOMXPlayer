@@ -44,7 +44,8 @@ public:
     void        setPaused(bool doPause);
     void        togglePause();
     void        stepFrameForward();
-    
+    void        stepFrame(int);
+    void        scrubForward(int step=1);
     void        increaseSpeed();
     int         getSpeedMultiplier();
     void        setNormalSpeed();
