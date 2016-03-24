@@ -480,8 +480,21 @@ void ofxOMXPlayerEngine::scrubForward(int step)
     {
         setPaused(true);
     }
-    clock->step(step);
-    setPaused(false);
+    if (step > 1) 
+    {
+        int count = step;
+        while (count > 0) 
+        {
+            clock->step(1);
+            count--;
+        }
+        setPaused(false);
+    }else
+    {
+        clock->step(1);
+        setPaused(false);
+    }
+    
 }
 
 void ofxOMXPlayerEngine::stepFrameForward()
@@ -495,7 +508,18 @@ void ofxOMXPlayerEngine::stepFrame(int step)
     {
         setPaused(true);
     }
-    clock->step(step);
+    if (step > 1) 
+    {
+        int count = step;
+        while (count > 0) 
+        {
+            clock->step(1);
+            count--;
+        }
+    }else
+    {
+        clock->step(1);
+    }
 }
 
 void ofxOMXPlayerEngine::stop()

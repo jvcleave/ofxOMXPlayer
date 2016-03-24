@@ -183,6 +183,10 @@ bool ofxOMXPlayer::setup(ofxOMXPlayerSettings settings)
     return openEngine();
 }
 
+void ofxOMXPlayer::toggleMode()
+{
+    doToggle = true;
+}
 
 bool ofxOMXPlayer::openEngine(int startTimeInSeconds) //default 0
 {
@@ -236,6 +240,15 @@ bool ofxOMXPlayer::openEngine(int startTimeInSeconds) //default 0
 }
 
 #pragma mark getters
+
+ofxOMXPlayerSettings ofxOMXPlayer::getSettings()
+{
+    if(engine)
+    {
+        return engine->omxPlayerSettings;
+    }
+    return settings;
+}
 
 bool ofxOMXPlayer::getIsOpen()
 {
@@ -772,10 +785,15 @@ void ofxOMXPlayer::onUpdate(ofEventArgs& args)
 {
     if (doRestart) 
     {
-        ofxOMXPlayerSettings sameSettings = settings;
-        setup(sameSettings);
-        doRestart = false;
-        return;
+        ofxOMXPlayerSettings sameSettings = getSettings();
+        if(!doToggle)
+        {
+            setup(sameSettings);
+            doRestart = false;
+            return; 
+        }
+       
+       
     }
     updateCurrentFrame();
     updateFBO();

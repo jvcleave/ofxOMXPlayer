@@ -12,7 +12,7 @@ public:
     ofxOMXPlayer();
     ~ofxOMXPlayer();
     bool setup(ofxOMXPlayerSettings settings);
-    ofxOMXPlayerSettings    settings;
+    ofxOMXPlayerSettings getSettings();
     
     void        loadMovie(string videoPath);
     bool        isPaused();
@@ -118,7 +118,7 @@ private:
     int             prevFrame;
     
     bool            doRestart;
-    
+    bool            doToggle;
     bool            textureEnabled;
     
     bool            didSeek;
@@ -137,5 +137,6 @@ private:
     StreamInfo videoInfo;
     
     OMX_HANDLETYPE decoderHandle;
+    ofxOMXPlayerSettings    settings;
 };
 
