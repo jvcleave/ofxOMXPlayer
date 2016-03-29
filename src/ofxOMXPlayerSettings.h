@@ -6,11 +6,11 @@
 
 
 
-class DirectDisplayOptions
+class PlayerDirectDisplayOptions
 {
 public:
     
-    DirectDisplayOptions()
+    PlayerDirectDisplayOptions()
     {
         doFullScreen=false;
         noAspectRatio=false;
@@ -77,7 +77,7 @@ public:
     bool enableLooping;
     ofxOMXPlayerListener* listener;
 
-    DirectDisplayOptions directDisplayOptions;
+    PlayerDirectDisplayOptions directDisplayOptions;
     /*
      To use HDMI Audio you may need to add the below line to /boot/config.txt and reboot
 

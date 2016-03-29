@@ -37,7 +37,7 @@ public:
             ofLogError() << "cannot be set more than 4 times";
             return;
         }
-        ofLogVerbose(__func__) << "imageFilter_: " << getImageFilterString(imageFilter_);
+        ofLogVerbose(__func__) << "imageFilter_: " << GetImageFilterString(imageFilter_);
         OMX_ERRORTYPE error   = OMX_ErrorNone;
         
         

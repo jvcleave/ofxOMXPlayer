@@ -35,7 +35,7 @@ common:
 	
 	ADDON_CFLAGS = -I$(OFXOMXPLAYER_ROOT)/src
 	ADDON_CFLAGS += -I$(FFMPEG_ROOT)/include
-	ADDON_CFLAGS += -fPIC -U_FORTIFY_SOURCE -Wall -ftree-vectorize -ftree-vectorize -Wno-deprecated-declarations -Wno-sign-compare -Wno-unknown-pragmas
+	ADDON_CFLAGS += -fPIC -U_FORTIFY_SOURCE -Wall -ftree-vectorize -ftree-vectorize -Wno-deprecated-declarations -Wno-sign-compare -Wno-unknown-pragmas -Wno-unused-function -Wno-unused-but-set-variable
 
 	FFMPEG_LIBS = $(FFMPEG_ROOT)/lib
 	FORMAT_STATIC=$(FFMPEG_LIBS)/libavformat.a
