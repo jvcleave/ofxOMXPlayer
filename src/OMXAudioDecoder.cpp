@@ -136,7 +136,7 @@ bool OMXAudioDecoder::init(string device,
                     bool boostOnDownmix)
 {
 
-    setCodingType(CODEC_ID_PCM_S16LE);
+    setCodingType(AV_CODEC_ID_PCM_S16LE);
     if(hints.extrasize > 0 && hints.extradata != NULL)
     {
         extraSize = hints.extrasize;
@@ -939,12 +939,12 @@ void OMXAudioDecoder::setCodingType(AVCodecID codec)
 {
     switch(codec)
     {
-        case CODEC_ID_DTS:
+        case AV_CODEC_ID_DTS:
             //ofLogVerbose(__func__) << "OMX_AUDIO_CodingDTS";
             m_eEncoding = OMX_AUDIO_CodingDTS;
             break;
-        case CODEC_ID_AC3:
-        case CODEC_ID_EAC3:
+        case AV_CODEC_ID_AC3:
+        case AV_CODEC_ID_EAC3:
             //ofLogVerbose(__func__) << "OMX_AUDIO_CodingDDP";
             m_eEncoding = OMX_AUDIO_CodingDDP;
             break;

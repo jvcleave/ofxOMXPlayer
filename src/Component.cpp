@@ -92,7 +92,7 @@ Component::~Component()
         
         error = getParameter(OMX_IndexParamBrcmExtraBuffers, &extra_buffers);
         OMX_TRACE(error);
-        info << "currentState: " << getOMXStateString(currentState) << endl;
+        info << "currentState: " << GetOMXStateString(currentState) << endl;
         info << "PRE extra_buffers.nU32: " << (int)extra_buffers.nU32 << endl;
        
         extra_buffers.nU32 = 0;
@@ -571,7 +571,7 @@ OMX_ERRORTYPE Component::addEvent(OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 
 OMX_ERRORTYPE Component::waitForEvent(OMX_EVENTTYPE eventType, long timeout)
 {
 #ifdef DEBUG_EVENTS
-    ofLogVerbose(__func__) << "\n" << componentName << "\n" << "eventType: " << getEventString(eventType) << "\n";
+    ofLogVerbose(__func__) << "\n" << componentName << "\n" << "eventType: " << GetEventString(eventType) << "\n";
 #endif
 
 	pthread_mutex_lock(&event_mutex);
@@ -609,7 +609,7 @@ OMX_ERRORTYPE Component::waitForEvent(OMX_EVENTTYPE eventType, long timeout)
                         stringstream finishedInfo;
                         finishedInfo << componentName << "\n";
                         finishedInfo << "RECEIVED EVENT, REMOVING" << "\n";
-                        finishedInfo << "event.eEvent: " << getEventString(event.eEvent) << "\n";
+                        finishedInfo << "event.eEvent: " << GetEventString(event.eEvent) << "\n";
                         finishedInfo << "event.nData1: " << event.nData1 << "\n";
                         finishedInfo << "event.nData2: " << event.nData2 << "\n";
                         ofLogVerbose(__func__) << finishedInfo.str();
@@ -625,7 +625,7 @@ OMX_ERRORTYPE Component::waitForEvent(OMX_EVENTTYPE eventType, long timeout)
         int retcode = pthread_cond_timedwait(&m_omx_event_cond, &event_mutex, &endtime);
         if (retcode != 0)
         {
-            ofLogError(__func__) << componentName << " waitForEvent Event: " << getEventString(eventType) << " TIMED OUT at: " << timeout;
+            ofLogError(__func__) << componentName << " waitForEvent Event: " << GetEventString(eventType) << " TIMED OUT at: " << timeout;
             pthread_mutex_unlock(&event_mutex);
             return OMX_ErrorMax;
         }
@@ -639,7 +639,7 @@ OMX_ERRORTYPE Component::waitForEvent(OMX_EVENTTYPE eventType, long timeout)
 OMX_ERRORTYPE Component::waitForCommand(OMX_COMMANDTYPE command, OMX_U32 nData2, long timeout) //timeout default = 2000
 {
 #ifdef DEBUG_COMMANDS
-    ofLogVerbose(__func__) << "\n" << componentName << " command " << getOMXCommandString(command) << "\n"; 
+    ofLogVerbose(__func__) << "\n" << componentName << " command " << GetOMXCommandString(command) << "\n"; 
 #endif    
 	pthread_mutex_lock(&event_mutex);
 	struct timespec endtime;
@@ -665,7 +665,7 @@ OMX_ERRORTYPE Component::waitForCommand(OMX_COMMANDTYPE command, OMX_U32 nData2,
                 //Throw error
                 if(event.eEvent == OMX_EventError)
                 {     
-                    ofLogVerbose(__func__) << "\n" << componentName << " command " << getOMXCommandString(command) << "\n"; 
+                    ofLogVerbose(__func__) << "\n" << componentName << " command " << GetOMXCommandString(command) << "\n"; 
                     OMX_TRACE((OMX_ERRORTYPE)event.nData1);
                     omxEvents.erase(it);
                     pthread_mutex_unlock(&event_mutex);
@@ -689,8 +689,8 @@ OMX_ERRORTYPE Component::waitForCommand(OMX_COMMANDTYPE command, OMX_U32 nData2,
 		{
             stringstream ss;
             ss << componentName << " TIMEOUT" << endl;
-            ss << getEventString(eEvent) << endl;
-            ss << getOMXCommandString(command) << endl;
+            ss << GetEventString(eEvent) << endl;
+            ss << GetOMXCommandString(command) << endl;
             ss << nData2 << endl;
             ofLogError(__func__) << ss.str();
             
@@ -839,18 +839,18 @@ OMX_ERRORTYPE Component::setState(OMX_STATETYPE state)
     }
     
     lock();
-    ofLogVerbose(__func__) << getName() << " state requested " << getOMXStateString(state)  << " BEGIN";
+    ofLogVerbose(__func__) << getName() << " state requested " << GetOMXStateString(state)  << " BEGIN";
     OMX_ERRORTYPE error = OMX_ErrorNone;
     OMX_STATETYPE state_actual;
     error = OMX_GetState(handle, &state_actual);
     OMX_TRACE(error);
     
-    //ofLogVerbose(__func__) << getName() << " state requested " << getOMXStateString(state) << " state_actual: " << getOMXStateString(state_actual);
+    //ofLogVerbose(__func__) << getName() << " state requested " << GetOMXStateString(state) << " state_actual: " << GetOMXStateString(state_actual);
     
     
     if(state == state_actual)
     {
-        ofLogVerbose(__func__) << getName() << " state requested " << getOMXStateString(state)  << " END SAME STATE";
+        ofLogVerbose(__func__) << getName() << " state requested " << GetOMXStateString(state)  << " END SAME STATE";
         unlock();
         return OMX_ErrorNone;
     }
@@ -888,16 +888,16 @@ OMX_ERRORTYPE Component::setState(OMX_STATETYPE state)
         if(currentState != state)
         {
             result = "MIXED";
-            ofLogVerbose(__func__) << getOMXStateString(state) << " IS NOT " << getOMXStateString(currentState);
+            ofLogVerbose(__func__) << GetOMXStateString(state) << " IS NOT " << GetOMXStateString(currentState);
 
         }
     }
     stringstream info;
     info << endl;
     info << getName() << endl;
-    info << "currentState: " <<  getOMXStateString(currentState) << endl;
-    info << "requestedState: " <<  getOMXStateString(state) << endl;
-    info << "error: " <<  getOMXErrorString(error) << endl;
+    info << "currentState: " <<  GetOMXStateString(currentState) << endl;
+    info << "requestedState: " <<  GetOMXStateString(state) << endl;
+    info << "error: " <<  GetOMXErrorString(error) << endl;
     ofLogVerbose(__func__) << info.str() << " END BLOCK " << result << endl;    
 #endif   
     unlock();
@@ -1277,7 +1277,7 @@ OMX_ERRORTYPE Component::EventHandlerCallback(OMX_HANDLETYPE hComponent,
     bool resourceError = false;
     if(event == OMX_EventError)
     {
-        ofLogVerbose(__func__) << component->getName() << " error: " << getOMXErrorString((OMX_ERRORTYPE) nData1);
+        ofLogVerbose(__func__) << component->getName() << " error: " << GetOMXErrorString((OMX_ERRORTYPE) nData1);
         //OMX_TRACE((OMX_ERRORTYPE) nData1);
         switch((OMX_S32)nData1)
         {

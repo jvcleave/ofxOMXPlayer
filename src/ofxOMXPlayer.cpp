@@ -31,7 +31,7 @@ ofxOMXPlayer::ofxOMXPlayer()
     hasNewFrame = false;
     prevFrame = 0;
     doRestart = false;
-    
+    doToggle = false;
     didSeek = false;
     speedMultiplier = 1;
     didWarnAboutInaccurateCurrentFrame =false;
@@ -183,6 +183,11 @@ bool ofxOMXPlayer::setup(ofxOMXPlayerSettings settings)
     return openEngine();
 }
 
+void ofxOMXPlayer::toggleMode()
+{
+    doToggle = true;
+    doRestart = true;
+}
 
 bool ofxOMXPlayer::openEngine(int startTimeInSeconds) //default 0
 {
@@ -236,6 +241,15 @@ bool ofxOMXPlayer::openEngine(int startTimeInSeconds) //default 0
 }
 
 #pragma mark getters
+
+ofxOMXPlayerSettings ofxOMXPlayer::getSettings()
+{
+    if(engine)
+    {
+        return engine->omxPlayerSettings;
+    }
+    return settings;
+}
 
 bool ofxOMXPlayer::getIsOpen()
 {
@@ -434,9 +448,23 @@ void ofxOMXPlayer::setPaused(bool doPause)
 
 void ofxOMXPlayer::stepFrameForward()
 {
+    stepFrame(1);
+}
+
+void ofxOMXPlayer::stepFrame(int step)
+{
     if (engine)
     {
-        engine->stepFrameForward();
+        engine->stepFrame(step);
+    }
+}
+
+
+void ofxOMXPlayer::scrubForward(int step)//default 1
+{
+    if (engine)
+    {
+        engine->scrubForward(step);
     }
 }
 
@@ -758,10 +786,16 @@ void ofxOMXPlayer::onUpdate(ofEventArgs& args)
 {
     if (doRestart) 
     {
-        ofxOMXPlayerSettings sameSettings = settings;
-        setup(sameSettings);
+        ofxOMXPlayerSettings currentSettings = getSettings();
+        if(doToggle)
+        {
+            currentSettings.enableTexture = !currentSettings.enableTexture;
+            doToggle = false;
+        }
+        setup(currentSettings);
         doRestart = false;
-        return;
+        return; 
+       
     }
     updateCurrentFrame();
     updateFBO();

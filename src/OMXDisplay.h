@@ -14,7 +14,7 @@ public:
     OMX_CONFIG_DISPLAYREGIONTYPE omxConfigDefaults;
     Component* renderComponent;
     StreamInfo streamInfo;
-    DirectDisplayOptions options;
+    PlayerDirectDisplayOptions options;
     ofxOMXPlayerSettings playerSettings;
     bool isReady;
     bool previousMirror;
@@ -35,7 +35,7 @@ public:
     }
     
     
-    DirectDisplayOptions& getConfig()
+    PlayerDirectDisplayOptions& getConfig()
     {
         return options;
     }

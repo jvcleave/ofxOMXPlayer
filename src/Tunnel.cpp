@@ -125,7 +125,7 @@ OMX_ERRORTYPE Tunnel::Deestablish(string caller)
          ofLogVerbose(__func__) << destinationComponent->getName() << " TUNNELED TO NULL FAIL";
         if(error == OMX_ErrorIncorrectStateOperation)
         {
-            ofLogVerbose(__func__) << getOMXStateString(destinationComponent->getState());
+            ofLogVerbose(__func__) << GetOMXStateString(destinationComponent->getState());
 
         }
     }
@@ -140,7 +140,7 @@ OMX_ERRORTYPE Tunnel::Deestablish(string caller)
         ofLogVerbose(__func__) << sourceComponent->getName() << " TUNNELED TO NULL FAIL";
         if(error == OMX_ErrorIncorrectStateOperation)
         {
-            ofLogVerbose(__func__) << getOMXStateString(sourceComponent->getState());
+            ofLogVerbose(__func__) << GetOMXStateString(sourceComponent->getState());
             
         }
     }

@@ -22,7 +22,7 @@ extern "C"
 	#include <libavfilter/avfiltergraph.h>
 	#include <libavfilter/buffersink.h>
 	#include <libavfilter/buffersrc.h>
-	#include <libavfilter/avcodec.h>
+	//#include <libavfilter/avcodec.h>
 		
 	#include <libavutil/avutil.h>
 	#include <libavutil/crc.h>
@@ -45,8 +45,8 @@ extern "C"
 							 int out_stride[6],
 							 void *  in[6], 
 							 int  in_stride[6], int len);
-	#include <libavutil/opt.h>
-	#include <libavcodec/opt.h>
+	//#include <libavutil/opt.h>
+	//#include <libavcodec/opt.h>
 	#include <libavutil/mem.h>
 }
 

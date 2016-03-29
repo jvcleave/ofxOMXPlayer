@@ -19,28 +19,23 @@
  *
  */
 
-
 #include "OMXAudioPlayer.h"
 
 #include <stdio.h>
 #include <unistd.h>
-
-
-
 #include "XMemUtils.h"
-
 
 #define MAX_DATA_SIZE    3 * 1024 * 1024
 
 OMXAudioPlayer::OMXAudioPlayer()
 {
     isOpen          = false;
-    omxClock      = NULL;
-    omxReader    = NULL;
-    decoder       = NULL;
+    omxClock        = NULL;
+    omxReader       = NULL;
+    decoder         = NULL;
     doFlush         = false;
-    cachedSize   = 0;
-    channelMap   = NULL;
+    cachedSize      = 0;
+    channelMap      = NULL;
     audioCodecOMX   = NULL;
     speed         = DVD_PLAYSPEED_NORMAL;
     hasErrors  = false;
@@ -101,17 +96,17 @@ bool OMXAudioPlayer::open(StreamInfo& hints,
     }
 
 
-    omxStreamInfo       = hints;
-    omxClock    = av_clock;
-    omxReader  = omx_reader;
+    omxStreamInfo   = hints;
+    omxClock        = av_clock;
+    omxReader       = omx_reader;
     deviceName      = device;
-    currentPTS = DVD_NOPTS_VALUE;
-    doAbort      = false;
-    doFlush       = false;
-    cachedSize = 0;
-    audioCodecOMX = NULL;
-    channelMap = NULL;
-    speed       = DVD_PLAYSPEED_NORMAL;
+    currentPTS      = DVD_NOPTS_VALUE;
+    doAbort         = false;
+    doFlush         = false;
+    cachedSize      = 0;
+    audioCodecOMX   = NULL;
+    channelMap      = NULL;
+    speed           = DVD_PLAYSPEED_NORMAL;
 
 // omxClock->SetMasterClock(false);
 
@@ -196,18 +191,18 @@ bool OMXAudioPlayer::decode(OMXPacket *pkt)
     unsigned int old_bitrate = omxStreamInfo.bitrate;
     unsigned int new_bitrate = pkt->hints.bitrate;
 
-    /* only check bitrate changes on CODEC_ID_DTS, CODEC_ID_AC3, CODEC_ID_EAC3 */
-    if(omxStreamInfo.codec != CODEC_ID_DTS && omxStreamInfo.codec != CODEC_ID_AC3 && omxStreamInfo.codec != CODEC_ID_EAC3)
+    /* only check bitrate changes on AV_CODEC_ID_DTS, AV_CODEC_ID_AC3, AV_CODEC_ID_EAC3 */
+    if(omxStreamInfo.codec != AV_CODEC_ID_DTS && omxStreamInfo.codec != AV_CODEC_ID_AC3 && omxStreamInfo.codec != AV_CODEC_ID_EAC3)
     {
         new_bitrate = old_bitrate = 0;
     }
 
     /* audio codec changed. reinit device and decoder */
-    if(omxStreamInfo.codec         != pkt->hints.codec ||
-            omxStreamInfo.channels      != channels ||
-            omxStreamInfo.samplerate    != pkt->hints.samplerate ||
-            old_bitrate           != new_bitrate ||
-            omxStreamInfo.bitspersample != pkt->hints.bitspersample)
+    if(omxStreamInfo.codec!= pkt->hints.codec ||
+       omxStreamInfo.channels != channels ||
+       omxStreamInfo.samplerate != pkt->hints.samplerate ||
+       old_bitrate != new_bitrate ||
+       omxStreamInfo.bitspersample != pkt->hints.bitspersample)
     {
        
         closeDecoder();
@@ -282,7 +277,7 @@ bool OMXAudioPlayer::decode(OMXPacket *pkt)
 
 void OMXAudioPlayer::process()
 {
-    OMXPacket *omxPacket = NULL;
+    OMXPacket* omxPacket = NULL;
 
     while(!doStop && !doAbort)
     {
@@ -411,8 +406,7 @@ void OMXAudioPlayer::closeCodec()
 
 bool OMXAudioPlayer::openDecoder()
 {
-    //ofLogVerbose(__func__) << "doHardwareDecode: " << doHardwareDecode;
-    //ofLogVerbose(__func__) << "doPassthrough: " << doPassthrough;
+
     bool bAudioRenderOpen = false;
 
     decoder = new OMXAudioDecoder();

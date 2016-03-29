@@ -27,7 +27,6 @@ BaseVideoPlayer::BaseVideoPlayer()
 	pthread_mutex_init(&m_lock, NULL);
 	pthread_mutex_init(&m_lock_decoder, NULL);
 	validHistoryPTS = 0;
-	doFlush_requested = false;
 }
 
 BaseVideoPlayer::~BaseVideoPlayer()
@@ -147,10 +146,8 @@ void BaseVideoPlayer::flush()
 {
 
 
-	doFlush_requested = true;
 	lock();
 	lockDecoder();
-	doFlush_requested = false;
 	doFlush = true;
 	while (!packets.empty())
 	{

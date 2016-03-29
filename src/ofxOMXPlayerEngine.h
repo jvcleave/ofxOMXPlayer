@@ -56,6 +56,8 @@ public:
     bool isTextureEnabled;
     
     void stepFrameForward();
+    void stepFrame(int);
+    void scrubForward(int);
     void increaseVolume();
     void decreaseVolume();
     

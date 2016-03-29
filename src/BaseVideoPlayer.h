@@ -68,7 +68,6 @@ public:
     
     
     uint32_t validHistoryPTS;
-    bool doFlush_requested;
         
     int getCurrentFrame();
     void resetFrameCounter();

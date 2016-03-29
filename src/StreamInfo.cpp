@@ -17,7 +17,7 @@ StreamInfo::~StreamInfo()
 
 void StreamInfo::Clear()
 {
-	codec = CODEC_ID_NONE;
+	codec = AV_CODEC_ID_NONE;
 	software = false;
 	codec_tag  = 0;
 
