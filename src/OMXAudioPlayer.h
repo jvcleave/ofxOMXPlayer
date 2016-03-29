@@ -25,33 +25,34 @@
 class OMXAudioPlayer : public OMXThread
 {
 	protected:
-		std::deque<OMXPacket *>   packets;
-		bool                      isOpen;
-		StreamInfo            omxStreamInfo;
-		double                    currentPTS;
-		pthread_cond_t            m_packet_cond;
-		pthread_cond_t            m_audio_cond;
-		pthread_mutex_t           m_lock;
-		pthread_mutex_t           m_lock_decoder;
-		OMXClock*					omxClock;
-		OMXReader*					omxReader;
-		OMXAudioDecoder*					decoder;
-		std::string               codecName;
-		std::string               deviceName;
-		bool                      doPassthrough;
-		bool                      doHardwareDecode;
-		bool                      doBoostOnDownmix;
-		bool                      doAbort;
-		bool                      doFlush;
-		enum PCMChannels          *channelMap;
-		unsigned int              cachedSize;
-		AudioCodecOMX         *audioCodecOMX;
-		int                       speed;
-
-		int64_t m_errortime; //timestamp of last time we measured
-
-
-		bool   hasErrors;
+		std::deque<OMXPacket*> packets;
+		StreamInfo  omxStreamInfo;
+		double      currentPTS;
+    
+		pthread_cond_t  m_packet_cond;
+		pthread_cond_t  m_audio_cond;
+		pthread_mutex_t m_lock;
+		pthread_mutex_t m_lock_decoder;
+		OMXClock*           omxClock;
+		OMXReader*          omxReader;
+    
+		OMXAudioDecoder*    decoder;
+		string         codecName;
+		string         deviceName;
+    
+		bool    doPassthrough;
+		bool    doHardwareDecode;
+		bool    doBoostOnDownmix;
+		bool    doAbort;
+		bool    doFlush;
+    
+		enum PCMChannels*   channelMap;
+		unsigned int        cachedSize;
+		AudioCodecOMX       *audioCodecOMX;
+    
+		int     speed;
+		bool    hasErrors;
+        bool    isOpen;
 
 
 		void lock();

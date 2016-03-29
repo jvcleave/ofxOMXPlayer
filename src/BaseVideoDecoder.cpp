@@ -207,21 +207,6 @@ bool BaseVideoDecoder::decode(uint8_t* demuxer_content, int iSize, double pts)
                 //ofLogVerbose(__func__) << "OMX_BUFFERFLAG_ENDOFFRAME";
                 omxBuffer->nFlags |= OMX_BUFFERFLAG_ENDOFFRAME;
             }
-#if 0            
-            error = decoderComponent.EmptyThisBuffer(omxBuffer);
-            OMX_TRACE(error);
-            if (error != OMX_ErrorNone)
-            {
-                decoderComponent.EmptyBufferDoneCallback(decoderComponent.getHandle(), &decoderComponent, omxBuffer);
-                return false;
-            }
-            //CLog::Log(LOGINFO, "VideD: dts:%.0f pts:%.0f size:%d)\n", dts, pts, iSize);
-            
-           // error = decoderComponent.waitForEvent(OMX_EventPortSettingsChanged, 0);
-            //OMX_TRACE(error);
-            //error = decoderComponent.waitForEvent(OMX_EventParamOrConfigChanged, 0);
-           // OMX_TRACE(error);
-#endif      
 
             int nRetry = 0;
             while(true)
