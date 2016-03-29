@@ -25,7 +25,7 @@ public:
 	{
         currentFilterName = "None";
         currentFilterIndex = 0;
-        currentFilter = getImageFilter(currentFilterName);
+        currentFilter = GetImageFilter(currentFilterName);
 	}
 	
 	void setup(string initialFilterName = "None")
@@ -44,7 +44,7 @@ public:
             }
         }
         currentFilterName = filterName;
-        currentFilter = getImageFilter(currentFilterName);
+        currentFilter = GetImageFilter(currentFilterName);
         ofLogVerbose() << "currentFilterName: " << currentFilterName;
 		return currentFilter;
 	}
