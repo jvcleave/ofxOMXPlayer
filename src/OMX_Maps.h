@@ -858,12 +858,26 @@ string GetPortDefinitionString(OMX_PARAM_PORTDEFINITIONTYPE def)
     info << "bEnabled: " << def.bEnabled << endl;
     info << "bPopulated: " << def.bPopulated << endl;
     info << "bBuffersContiguous: " << def.bBuffersContiguous << endl;
-    info << "nFrameWidth: " << def.format.video.nFrameWidth << endl;
-    info << "nFrameHeight: " << def.format.video.nFrameHeight << endl;
-    info << "nStride: " << def.format.video.nStride << endl;
-    info << "nSliceHeight: " << def.format.video.nSliceHeight << endl;
-    info << "xFramerate: " << (def.format.video.xFramerate >> 16) << endl;
-    info << "eColorFormat: " << GetColorFormatString(def.format.video.eColorFormat) << endl;
+    
+    if (def.eDomain == OMX_PortDomainVideo)
+    {
+        info << "video nFrameWidth: " << def.format.video.nFrameWidth << endl;
+        info << "video nFrameHeight: " << def.format.video.nFrameHeight << endl;
+        info << "video nStride: " << def.format.video.nStride << endl;
+        info << "video nSliceHeight: " << def.format.video.nSliceHeight << endl;
+        info << "video xFramerate: " << (def.format.video.xFramerate >> 16) << endl;
+        info << "video eCompressionFormat: "<< GetVideoCodingString(def.format.video.eCompressionFormat) << endl;
+        info << "video eColorFormat: " << GetColorFormatString(def.format.video.eColorFormat) << endl;
+    }
+    if (def.eDomain == OMX_PortDomainImage)
+    {
+        info << "image nFrameWidth: " << def.format.image.nFrameWidth << endl;
+        info << "image nFrameHeight: " << def.format.image.nFrameHeight << endl;
+        info << "image nStride: " << def.format.image.nStride << endl;
+        info << "image nSliceHeight: " << def.format.image.nSliceHeight << endl;
+        info << "image coding type: " << GetImageCodingString(def.format.image.eCompressionFormat) << endl;
+        info << "image eColorFormat: " << GetColorFormatString(def.format.image.eColorFormat) << endl;
+    }
     return info.str();
 }
 static 
@@ -914,6 +928,15 @@ memset(&(a), 0, sizeof(a)); \
 #define IMAGE_ENCODER_INPUT_PORT 340
 #define IMAGE_ENCODER_OUTPUT_PORT 341
 
+#define OMX_IMAGE_DECODER (OMX_STRING)"OMX.broadcom.image_decode"
+#define IMAGE_DECODER_INPUT_PORT 320
+#define IMAGE_DECODER_OUTPUT_PORT 321
+
+
+#define OMX_RESIZER (OMX_STRING)"OMX.broadcom.resize"
+#define RESIZER_INPUT_PORT 60
+#define RESIZER_OUTPUT_PORT 61
+
 #define OMX_VIDEO_ENCODER (OMX_STRING)"OMX.broadcom.video_encode"
 #define VIDEO_ENCODE_INPUT_PORT 200
 #define VIDEO_ENCODE_OUTPUT_PORT 201
@@ -961,7 +984,7 @@ memset(&(a), 0, sizeof(a)); \
 #define DVD_PLAYSPEED_NORMAL      1000
 
 
-extern inline  
+static  
 string omxErrorToString(OMX_ERRORTYPE error)
 {
     return OMX_Maps::getInstance().getOMXError(error);
@@ -978,7 +1001,7 @@ string omxErrorToString(OMX_ERRORTYPE error)
 #define OMX_LOG_LEVEL OMX_LOG_LEVEL_ERROR_ONLY
 #endif
 
-extern inline  
+static  
 void logOMXError(OMX_ERRORTYPE error, string comments="", string functionName="", int lineNumber=0)
 {
     string commentLine = " ";
@@ -1021,7 +1044,7 @@ void logOMXError(OMX_ERRORTYPE error, string comments="", string functionName=""
     
 }
 
-extern inline
+static
 void PrintPortDef(OMX_PARAM_PORTDEFINITIONTYPE portDefinition)
 {
     stringstream info;
@@ -1073,13 +1096,13 @@ void PrintPortDef(OMX_PARAM_PORTDEFINITIONTYPE portDefinition)
 }
 
 
-extern inline  
+static  
 string eglErrorToString(EGLint error)
 {
     return OMX_Maps::getInstance().eglErrors[error];
 }
 
-extern inline  
+static  
 void logEGLError(EGLint error, string comments="", string functionName="", int lineNumber=0)
 {
     string commentLine = " ";
@@ -1143,37 +1166,37 @@ void logEGLError(EGLint error, string comments="", string functionName="", int l
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #endif
 
-extern inline 
+static 
 const char* omxErrorToCString(OMX_ERRORTYPE error)
 {
     return OMX_Maps::getInstance().getOMXError(error).c_str();
 }
 
-extern inline 
+static 
 OMX_BOOL toOMXBool(bool boolean)
 {
     if(boolean) { return OMX_TRUE; } else { return OMX_FALSE; }
 }
 
-extern inline  
+static  
 bool fromOMXBool(OMX_BOOL omxBool)
 {
     if(omxBool == OMX_TRUE) { return true; } else { return false; } 
 }
 
-extern inline 
+static 
 int toQ16(float n) 
 {
     return (int)(n* 65536); 
 }
 
-extern inline 
+static 
 float fromQ16(float n) 
 { 
     return n*(1/65536.0); 
 }
 
-extern inline
+static
 OMX_ERRORTYPE DisableAllPortsForComponent(OMX_HANDLETYPE* handle, string componentName="")
 {
     
@@ -1228,4 +1251,215 @@ OMX_ERRORTYPE DisableAllPortsForComponent(OMX_HANDLETYPE* handle, string compone
     
     return error;
 }
+static
+OMX_PARAM_PORTDEFINITIONTYPE 
+EnablePortBuffers(OMX_HANDLETYPE handle, OMX_BUFFERHEADERTYPE** targetBuffer, int portIndex)
+{
+    OMX_ERRORTYPE error;
+    
+    OMX_BUFFERHEADERTYPE* list = NULL;
+    OMX_BUFFERHEADERTYPE** end = &list;
+    
+    OMX_PARAM_PORTDEFINITIONTYPE portdef;
+    OMX_INIT_STRUCTURE(portdef);
+    portdef.nPortIndex = portIndex;
+    
+    // work out buffer requirements, check port is in the right state
+    error = OMX_GetParameter(handle, OMX_IndexParamPortDefinition, &portdef);
+    OMX_TRACE(error);
+    //ofLogVerbose(__func__) << GetPortDefinitionString(portdef);
+    
+    
+    if( portdef.bEnabled != OMX_FALSE)
+    {
+        ofLogError(__func__) << "buffer requirements bEnabled" << portdef.bEnabled;
+    }
+    if( portdef.nBufferCountActual == 0)
+    {
+        ofLogError(__func__) << "buffer requirements nBufferCountActual" << portdef.nBufferCountActual;
+    }
+    
+    if( portdef.nBufferSize == 0)
+    {
+        ofLogError(__func__) << "buffer requirements nBufferSize" << portdef.nBufferSize;
+    }
+    
+    // check component is in the right state to accept buffers
+    OMX_STATETYPE state;
+    error = OMX_GetState(handle, &state);
+    OMX_TRACE(error);
+    if (!(state == OMX_StateIdle || state == OMX_StateExecuting || state == OMX_StatePause)) 
+    {
+        ofLogError(__func__) << "Incorrect state: " << GetOMXStateString(state);
+    }
+    
+    // enable the port
+    error = OMX_SendCommand(handle, OMX_CommandPortEnable, portIndex, NULL);
+    OMX_TRACE(error);
+    
+    for (size_t i=0; i != portdef.nBufferCountActual; i++)
+    {
+        unsigned char *buf;
+        buf = (unsigned char *)vcos_malloc_aligned(portdef.nBufferSize, portdef.nBufferAlignment, "whatever");
+        
+        
+        if(!buf)
+        {
+            ofLogError(__func__) << "no buf";
+            break;
+        }
+        
+        error = OMX_UseBuffer(handle, end, portIndex, NULL, portdef.nBufferSize, buf);
+        OMX_TRACE(error);
+        if(error != OMX_ErrorNone)
+        {
+            vcos_free(buf);
+        }
+        end = (OMX_BUFFERHEADERTYPE **) &((*end)->pAppPrivate);
+    }
+    
+    *targetBuffer = list;
+    
+    return portdef;
+    
+}
+
+static
+void 
+EnablePortBuffers(OMX_HANDLETYPE handle, OMX_PARAM_PORTDEFINITIONTYPE& portdef, OMX_BUFFERHEADERTYPE** targetBuffer, int portIndex)
+{
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    
+    OMX_BUFFERHEADERTYPE* list = NULL;
+    OMX_BUFFERHEADERTYPE** end = &list;
+    
+    
+    if( portdef.bEnabled != OMX_FALSE)
+    {
+        ofLogError(__func__) << "buffer requirements bEnabled" << portdef.bEnabled;
+    }
+    if( portdef.nBufferCountActual == 0)
+    {
+        ofLogError(__func__) << "buffer requirements nBufferCountActual" << portdef.nBufferCountActual;
+    }
+    
+    if( portdef.nBufferSize == 0)
+    {
+        ofLogError(__func__) << "buffer requirements nBufferSize" << portdef.nBufferSize;
+    }
+    
+    // check component is in the right state to accept buffers
+    OMX_STATETYPE state;
+    error = OMX_GetState(handle, &state);
+    OMX_TRACE(error);
+    if (!(state == OMX_StateIdle || state == OMX_StateExecuting || state == OMX_StatePause)) 
+    {
+        ofLogError(__func__) << "Incorrect state: " << GetOMXStateString(state);
+    }
+    
+    // enable the port
+    error = OMX_SendCommand(handle, OMX_CommandPortEnable, portIndex, NULL);
+    OMX_TRACE(error);
+    
+    for (size_t i=0; i != portdef.nBufferCountActual; i++)
+    {
+        unsigned char *buf;
+        buf = (unsigned char *)vcos_malloc_aligned(portdef.nBufferSize, portdef.nBufferAlignment, "whatever");
+        
+        
+        if(!buf)
+        {
+            ofLogError(__func__) << "no buf";
+            break;
+        }
+        
+        error = OMX_UseBuffer(handle, end, portIndex, NULL, portdef.nBufferSize, buf);
+        OMX_TRACE(error);
+        if(error != OMX_ErrorNone)
+        {
+            vcos_free(buf);
+        }
+        end = (OMX_BUFFERHEADERTYPE **) &((*end)->pAppPrivate);
+    }
+    
+    *targetBuffer = list;
+    
+}
+
+
+static
+void ProbeCompression(OMX_HANDLETYPE handle, int port)
+{
+    OMX_IMAGE_PARAM_PORTFORMATTYPE imageEncodingType;
+    OMX_INIT_STRUCTURE(imageEncodingType);
+    imageEncodingType.nPortIndex = port;
+    
+    
+    OMX_ERRORTYPE error =OMX_GetParameter(handle, OMX_IndexParamPortDefinition, &imageEncodingType);
+    OMX_TRACE(error);
+    
+    vector<string> imageCodingNames = OMX_Maps::getInstance().getImageCodingNames();
+    for (size_t i=0; i<imageCodingNames.size(); i++)
+    {
+        string name = imageCodingNames[i];
+        imageEncodingType.eCompressionFormat = GetImageCoding(name);
+        error =OMX_SetParameter(handle, OMX_IndexParamPortDefinition, &imageEncodingType);
+        OMX_TRACE(error);
+        if(error == OMX_ErrorNone)
+        {
+            ofLogVerbose(__func__) << name << "WORKED";
+        }
+    }
+}
+
+static
+void ProbeImageEncoding(OMX_HANDLETYPE handle, int port)
+{
+    
+    ofLogVerbose(__func__) << "port: " << port;
+    OMX_IMAGE_PARAM_PORTFORMATTYPE imageEncodingType;
+    OMX_INIT_STRUCTURE(imageEncodingType);
+    imageEncodingType.nPortIndex = port;
+    
+    
+    OMX_ERRORTYPE error =OMX_GetParameter(handle, OMX_IndexParamPortDefinition, &imageEncodingType);
+    OMX_TRACE(error);
+    
+    stringstream info;
+    info << "imageEncodingType eCompressionFormat: " << GetImageCodingString(imageEncodingType.eCompressionFormat) << endl;
+    info << "imageEncodingType eColorFormat: " << GetColorFormatString(imageEncodingType.eColorFormat) << endl;
+    ofLogVerbose(__func__) << info.str();
+}
+
+static
+void ProbeImageColorFormats(OMX_HANDLETYPE handle,
+                            OMX_PARAM_PORTDEFINITIONTYPE portdef)
+{
+    
+    
+    for (size_t i = 0; i<OMX_Maps::getInstance().getColorFormatNames().size(); i++) 
+    {
+        string name = OMX_Maps::getInstance().getColorFormatNames()[i];
+        OMX_COLOR_FORMATTYPE colorFormat = GetColorFormat(name);
+        portdef.format.image.eColorFormat = colorFormat;
+        OMX_ERRORTYPE error =OMX_SetParameter(handle, OMX_IndexParamPortDefinition, &portdef);
+        if (error == OMX_ErrorNone)
+        {
+            ofLogVerbose(__func__) << "COLOR NAME: " << name << " PASS";
+        }else
+        {
+            //ofLogVerbose(__func__) << "COLOR NAME: " << name << " FAIL";
+        }
+    }
+}
+
+static
+OMX_ERRORTYPE FlushOMXComponent(OMX_HANDLETYPE handle, int port)
+{
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    error = OMX_SendCommand(handle, OMX_CommandFlush, port, NULL);
+    OMX_TRACE(error);
+    return error;
+}
+
 #endif
