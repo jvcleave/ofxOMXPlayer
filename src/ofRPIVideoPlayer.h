@@ -1,3 +1,5 @@
+#pragma once
+
 #include "ofMain.h"
 #include "ofxOMXPlayer.h"
 #include "ofBaseTypes.h"
