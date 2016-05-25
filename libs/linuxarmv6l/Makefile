@@ -71,8 +71,6 @@ configure:
 			--enable-gpl \
 			--enable-version3 \
 			--enable-protocols \
-			--enable-libsmbclient \
-			--enable-libssh \
 			--enable-nonfree \
 			--enable-openssl \
 			--enable-pthreads \

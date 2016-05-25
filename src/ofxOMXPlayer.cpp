@@ -894,6 +894,8 @@ void ofxOMXPlayer::close()
 
 ofxOMXPlayer::~ofxOMXPlayer()
 {
+    ofRemoveListener(ofEvents().update, this, &ofxOMXPlayer::onUpdate);
+
     close();
 }
 
