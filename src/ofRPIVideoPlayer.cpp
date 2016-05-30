@@ -83,6 +83,18 @@ void ofRPIVideoPlayer::stop()
     //omxPlayer.stop();
 }
 
+
+void ofRPIVideoPlayer::setVolume(float volume)
+{
+    omxPlayer.setVolume(volume);
+}
+
+float ofRPIVideoPlayer::getVolume()
+{
+    return omxPlayer.getVolume();
+}
+
+
 void ofRPIVideoPlayer::setPaused(bool doPause)
 {
     omxPlayer.setPaused(doPause);

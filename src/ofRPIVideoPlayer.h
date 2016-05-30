@@ -39,6 +39,8 @@ public:
     void disablePixels();
     bool pixelsEnabled() { return doPixels; };
     void setPaused(bool doPause);
+    void setVolume(float);
+    float getVolume();
     int getCurrentFrame();
     int getTotalNumFrames();
 protected:
