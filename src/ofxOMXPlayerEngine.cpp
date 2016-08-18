@@ -41,6 +41,7 @@ ofxOMXPlayerEngine::ofxOMXPlayerEngine()
     doSeek = false;
     
     eglImage = NULL;
+    doRestart = false;
     
     
 }
@@ -313,36 +314,43 @@ void ofxOMXPlayerEngine::process()
             
             if (isCacheEmpty)
             {
-                omxReader.SeekTime(0 * 1000.0f, AVSEEK_FLAG_BACKWARD, &startpts);
-                
-                packet = omxReader.Read();
-                
-                if(hasAudio)
+                if(omxReader.isStream)
                 {
-                    loop_offset = audioPlayer->getCurrentPTS();
-                }
-                else
+                    doRestart = true;
+                }else
                 {
-                    if(hasVideo)
+                    omxReader.SeekTime(0 * 1000.0f, AVSEEK_FLAG_BACKWARD, &startpts);
+                    
+                    packet = omxReader.Read();
+                    
+                    if(hasAudio)
                     {
-                        loop_offset = videoPlayer->getCurrentPTS();
+                        loop_offset = audioPlayer->getCurrentPTS();
+                    }
+                    else
+                    {
+                        if(hasVideo)
+                        {
+                            loop_offset = videoPlayer->getCurrentPTS();
+                        }
+                    }
+                    if (previousLoopOffset != loop_offset)
+                    {
+                        
+                        previousLoopOffset = loop_offset;
+                        loopCounter++;                    
+                        ofLog(OF_LOG_VERBOSE, "Loop offset : %8.02f\n", loop_offset / DVD_TIME_BASE);
+                        
+                        onVideoLoop();
+                        
+                    }
+                    if (omxReader.wasFileRewound)
+                    {
+                        omxReader.wasFileRewound = false;
+                        onVideoLoop();
                     }
                 }
-                if (previousLoopOffset != loop_offset)
-                {
-                    
-                    previousLoopOffset = loop_offset;
-                    loopCounter++;                    
-                    ofLog(OF_LOG_VERBOSE, "Loop offset : %8.02f\n", loop_offset / DVD_TIME_BASE);
-                    
-                    onVideoLoop();
-                    
-                }
-                if (omxReader.wasFileRewound)
-                {
-                    omxReader.wasFileRewound = false;
-                    onVideoLoop();
-                }
+                
                 
             }
             else

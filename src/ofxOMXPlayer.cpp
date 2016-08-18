@@ -784,6 +784,11 @@ void ofxOMXPlayer::updateCurrentFrame()
 
 void ofxOMXPlayer::onUpdate(ofEventArgs& args)
 {
+    if(engine && engine->doRestart)
+    {
+        doRestart = true;
+        engine->doRestart = false;
+    }
     if (doRestart) 
     {
         ofxOMXPlayerSettings currentSettings = getSettings();

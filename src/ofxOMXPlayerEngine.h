@@ -101,6 +101,7 @@ public:
     {
         return doLooping;
     }
+    bool doRestart;
 private:
     
     

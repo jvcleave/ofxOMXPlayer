@@ -157,7 +157,6 @@ public:
     bool canSeek();
     bool wasFileRewound;
     
-protected:
     int videoIndex;
     int audioIndex;
     int subtitleIndex;
@@ -182,5 +181,6 @@ protected:
     void lock();
     void unlock();
     bool setActiveStreamInternal(OMXStreamType type, unsigned int index);
+    bool isStream;
 };
 
