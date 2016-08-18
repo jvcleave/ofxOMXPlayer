@@ -8,6 +8,7 @@
 OMXReader::OMXReader()
 {
     isOpen = false;
+    isStream = false;
     fileName = "";
     isMatroska = false;
     isAVI = false;
@@ -92,12 +93,18 @@ bool OMXReader::open(std::string filename, bool doSkipAvProbe)
     if(fileName.substr(0, 8) == "shout://" )
         fileName.replace(0, 8, "http://");
     
-    if(fileName.substr(0,6) == "mms://" || fileName.substr(0,7) == "mmsh://" || fileName.substr(0,7) == "mmst://" || fileName.substr(0,7) == "mmsu://" ||
-       fileName.substr(0,7) == "http://" || 
-       fileName.substr(0,7) == "rtmp://" || fileName.substr(0,6) == "udp://" ||
+    if(fileName.substr(0,6) == "mms://" ||
+       fileName.substr(0,7) == "mmsh://" ||
+       fileName.substr(0,7) == "mmst://" ||
+       fileName.substr(0,7) == "mmsu://" ||
+       fileName.substr(0,7) == "http://" ||
+       fileName.substr(0,8) == "https://" || 
+       fileName.substr(0,7) == "rtmp://" ||
+       fileName.substr(0,6) == "udp://" ||
        fileName.substr(0,7) == "rtsp://" )
     {
         doSkipAvProbe = false;
+        isStream = true;
         // ffmpeg dislikes the useragent from AirPlay urls
         //int idx = fileName.Find("|User-Agent=AppleCoreMedia");
         size_t idx = fileName.find("|");
@@ -106,7 +113,7 @@ bool OMXReader::open(std::string filename, bool doSkipAvProbe)
         
         AVDictionary *d = NULL;
         // Enable seeking if http
-        if(fileName.substr(0,7) == "http://")
+        if(fileName.substr(0,7) == "http://" || fileName.substr(0,8) == "https://")
         {
             av_dict_set(&d, "seekable", "1", 0);
         }
@@ -116,7 +123,7 @@ bool OMXReader::open(std::string filename, bool doSkipAvProbe)
         if(av_dict_count(d) == 0)
         {
             ofLog(OF_LOG_VERBOSE, "OMXReader::OpenFile - avformat_open_input enabled SEEKING ");
-            if(fileName.substr(0,7) == "http://")
+            if(fileName.substr(0,7) == "http://" || fileName.substr(0,8) == "https://")
                 avFormatContext->pb->seekable = AVIO_SEEKABLE_NORMAL;
         }
         av_dict_free(&d);
@@ -129,6 +136,7 @@ bool OMXReader::open(std::string filename, bool doSkipAvProbe)
     }
     else
     {
+        isStream = false;
         fileObject = new File();
         
         if (!fileObject->open(fileName, flags))
@@ -366,7 +374,11 @@ bool OMXReader::SeekTime(int time, bool backwords, double *startpts, bool doLoop
         updateCurrentPTS();
     }else {
         //ofLogVerbose(__func__) << "av_seek_frame returned >= 0, no updateCurrentPTS" << ret;
-        fileObject->rewindFile();
+        if(fileObject)
+        {
+           fileObject->rewindFile(); 
+        }
+        
     }
     
     
