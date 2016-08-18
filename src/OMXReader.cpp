@@ -87,6 +87,7 @@ bool OMXReader::open(std::string filename, bool doSkipAvProbe)
     AVInputFormat *iformat  = NULL;
     unsigned char *buffer   = NULL;
     unsigned int  flags     = READ_TRUNCATED | READ_BITRATE | READ_CHUNKED;
+    ofLogVerbose(__func__) << "fileName: " << fileName;
     
     if(fileName.substr(0, 8) == "shout://" )
         fileName.replace(0, 8, "http://");
@@ -109,18 +110,19 @@ bool OMXReader::open(std::string filename, bool doSkipAvProbe)
         {
             av_dict_set(&d, "seekable", "1", 0);
         }
-        ofLog(OF_LOG_VERBOSE, "OMXPlayer::OpenFile - avformat_open_input %s ", fileName.c_str());
+        
+        ofLog(OF_LOG_VERBOSE, "OMXReader::OpenFile - avformat_open_input %s ", fileName.c_str());
         result = avformat_open_input(&avFormatContext, fileName.c_str(), iformat, &d);
         if(av_dict_count(d) == 0)
         {
-            ofLog(OF_LOG_VERBOSE, "OMXPlayer::OpenFile - avformat_open_input enabled SEEKING ");
+            ofLog(OF_LOG_VERBOSE, "OMXReader::OpenFile - avformat_open_input enabled SEEKING ");
             if(fileName.substr(0,7) == "http://")
                 avFormatContext->pb->seekable = AVIO_SEEKABLE_NORMAL;
         }
         av_dict_free(&d);
         if(result < 0)
         {
-            ofLog(OF_LOG_ERROR, "OMXPlayer::OpenFile - avformat_open_input %s ", fileName.c_str());
+            ofLog(OF_LOG_ERROR, "OMXReader::OpenFile - avformat_open_input %s ", fileName.c_str());
             close();
             return false;
         }
@@ -131,7 +133,7 @@ bool OMXReader::open(std::string filename, bool doSkipAvProbe)
         
         if (!fileObject->open(fileName, flags))
         {
-            ofLog(OF_LOG_ERROR, "OMXPlayer::OpenFile - %s ", fileName.c_str());
+            ofLog(OF_LOG_ERROR, "OMXReader::OpenFile - %s ", fileName.c_str());
             close();
             return false;
         }
@@ -151,7 +153,7 @@ bool OMXReader::open(std::string filename, bool doSkipAvProbe)
         
         if(!iformat)
         {
-            ofLog(OF_LOG_ERROR, "OMXPlayer::OpenFile - av_probe_input_buffer %s ", fileName.c_str());
+            ofLog(OF_LOG_ERROR, "OMXReader::OpenFile - av_probe_input_buffer %s ", fileName.c_str());
             close();
             return false;
         }
@@ -221,7 +223,7 @@ bool OMXReader::open(std::string filename, bool doSkipAvProbe)
             unsigned rate = len * 1000 / tim;
             unsigned maxrate = rate + 1024 * 1024 / 8;
             if(fileObject->IoControl(IOCTRL_CACHE_SETRATE, &maxrate) >= 0)
-                ofLog(OF_LOG_VERBOSE, "OMXPlayer::OpenFile - set cache throttle rate to %u bytes per second", maxrate);
+                ofLog(OF_LOG_VERBOSE, "OMXReader::OpenFile - set cache throttle rate to %u bytes per second", maxrate);
         }
     }
     
