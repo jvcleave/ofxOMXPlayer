@@ -6,8 +6,7 @@ int main()
 {
     ofSetLogLevel(OF_LOG_VERBOSE);
     ofGLESWindowSettings settings;
-    settings.width = 1280;
-    settings.height = 720;
+    settings.setSize(1280, 720);
     settings.setGLESVersion(2);
     ofCreateWindow(settings);
 
