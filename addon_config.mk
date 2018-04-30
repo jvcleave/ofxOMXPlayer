@@ -21,32 +21,9 @@ meta:
 	ADDON_TAGS = "raspberry pi, video player"
 	ADDON_URL = https://github.com/jvcleave/ofxOMXPlayer
 
-linuxarmv6l:
-	FFMPEG_LIB_VERSION = linuxarmv6l
-		
-linuxarmv7l:
-	FFMPEG_LIB_VERSION = linuxarmv7l
-	ADDITIONAL_LIBS = -lbz2  
-
 common:
 	OFXOMXPLAYER_ROOT = $(OF_ROOT)/addons/ofxOMXPlayer
 	FFMPEG_ROOT = $(OFXOMXPLAYER_ROOT)/libs/$(FFMPEG_LIB_VERSION)/ffmpeg
-	ADDON_INCLUDES = $(OFXOMXPLAYER_ROOT)/src $(FFMPEG_ROOT)/include 
-	
-	ADDON_CFLAGS = -I$(OFXOMXPLAYER_ROOT)/src
-	ADDON_CFLAGS += -I$(FFMPEG_ROOT)/include
-	ADDON_CFLAGS += -fPIC -U_FORTIFY_SOURCE -Wall -ftree-vectorize -ftree-vectorize -Wno-deprecated-declarations -Wno-sign-compare -Wno-unknown-pragmas -Wno-unused-function -Wno-unused-but-set-variable
-
-	FFMPEG_LIBS = $(FFMPEG_ROOT)/lib
-	FORMAT_STATIC=$(FFMPEG_LIBS)/libavformat.a
-	CODEC_STATIC=$(FFMPEG_LIBS)/libavcodec.a
-	SCALE_STATIC=$(FFMPEG_LIBS)/libswscale.a
-	UTIL_STATIC=$(FFMPEG_LIBS)/libavutil.a
-
-	#unused but available
-	FILTER_STATIC=$(FFMPEG_LIBS)/libavfilter.a
-	POSTPROC_STATIC=$(FFMPEG_LIBS)/libpostproc.a
-	DEVICE_STATIC=$(FFMPEG_LIBS)/libavdevice.a
-	RESAMPLE_STATIC=$(FFMPEG_LIBS)/libswresample.a
-
-	ADDON_LDFLAGS=-L$(FFMPEG_LIBS) $(FORMAT_STATIC) $(CODEC_STATIC) $(SCALE_STATIC) $(UTIL_STATIC) $(RESAMPLE_STATIC) $(FILTER_STATIC) -lm $(ADDITIONAL_LIBS)
+	ADDON_INCLUDES = $(OFXOMXPLAYER_ROOT)/src 
+	ADDON_CFLAGS = -fPIC -U_FORTIFY_SOURCE -Wall -ftree-vectorize -ftree-vectorize -Wno-deprecated-declarations -Wno-sign-compare -Wno-unknown-pragmas -Wno-unused-function -Wno-unused-but-set-variable
+	ADDON_LDFLAGS= -lavcodec -lavformat -lswscale -lavutil -lswresample -lavfilter -lm -lz
