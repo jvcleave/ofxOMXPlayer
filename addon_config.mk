@@ -22,8 +22,6 @@ meta:
 	ADDON_URL = https://github.com/jvcleave/ofxOMXPlayer
 
 common:
-	OFXOMXPLAYER_ROOT = $(OF_ROOT)/addons/ofxOMXPlayer
-	FFMPEG_ROOT = $(OFXOMXPLAYER_ROOT)/libs/$(FFMPEG_LIB_VERSION)/ffmpeg
-	ADDON_INCLUDES = $(OFXOMXPLAYER_ROOT)/src 
+	ADDON_INCLUDES = src 
 	ADDON_CFLAGS = -fPIC -U_FORTIFY_SOURCE -Wall -ftree-vectorize -ftree-vectorize -Wno-deprecated-declarations -Wno-sign-compare -Wno-unknown-pragmas -Wno-unused-function -Wno-unused-but-set-variable
 	ADDON_LDFLAGS= -lavcodec -lavformat -lswscale -lavutil -lswresample -lavfilter -lm -lz
