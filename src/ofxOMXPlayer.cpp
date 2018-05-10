@@ -128,8 +128,6 @@ void ofxOMXPlayer::generateEGLImage(int videoWidth_, int videoHeight_)
     //ofLogVerbose(__func__) << "textureID: " << textureID;
     //ofLogVerbose(__func__) << "tex.isAllocated(): " << texture.isAllocated();
 
-    glEnable(GL_TEXTURE_2D);
-
     // setup first texture
     int dataSize = videoWidth * videoHeight * 4;
 
@@ -163,7 +161,7 @@ void ofxOMXPlayer::generateEGLImage(int videoWidth_, int videoHeight_)
                    EGL_GL_TEXTURE_2D_KHR,
                    (EGLClientBuffer)textureID,
                    NULL);
-    glDisable(GL_TEXTURE_2D);
+
     if (eglImage == EGL_NO_IMAGE_KHR)
     {
         ofLogError()    << "Create EGLImage FAIL <---------------- :(";
@@ -171,7 +169,6 @@ void ofxOMXPlayer::generateEGLImage(int videoWidth_, int videoHeight_)
     else
     {
         ofLogVerbose()  << "Create EGLImage PASS <---------------- :)";
-
     }
 }
 
