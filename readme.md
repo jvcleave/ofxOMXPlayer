@@ -10,6 +10,7 @@ This is an openFrameworks video player addon for the Raspberry Pi. The video pla
 REQUIREMENTS:   
 GPU split set to 128 (may need to be higher for larger videos)
 openFrameworks version 0.8 or higher http://www.openframeworks.cc/setup/raspberrypi/
+libavfilter-dev, install it with `sudo apt-get install libavfilter-dev`
 
 USAGE:   
 (NEW) Clone into openFrameworks/addons
