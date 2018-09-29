@@ -34,6 +34,8 @@ public:
         av_register_all();
         avformat_network_init();
         omxCore.Initialize();
+        ofAddListener(ofEvents().update, this, &ofxOMXPlayer::onUpdate);
+
         
     }
     ~ofxOMXPlayer()
@@ -67,17 +69,16 @@ public:
     
     bool setup(ofxOMXPlayerSettings settings_)
     {
+      
         settings = settings_;
         if(settings.listener)
         {
             listener = settings.listener;  
         }
-        
         bool result = openEngine();
         if(result)
         {
-            engine.listener = this;
-            ofAddListener(ofEvents().update, this, &ofxOMXPlayer::onUpdate);
+            engine.listener = this; 
         }
         return result;
     }

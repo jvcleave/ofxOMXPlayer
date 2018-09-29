@@ -252,8 +252,24 @@ public:
    void updatePixels()
     {    
         lock();
-        if (!texture.isAllocated() && !fbo.isAllocated())
+        
+        if(!texture.isAllocated())
         {
+            ofLogError() << "NO TEXTURE";
+            unlock();
+            return;
+            
+        }
+        if(!fbo.isAllocated())
+        {
+            ofLogError() << "NO fbo";
+            unlock();
+            return;
+            
+        }
+        if(!pixels)
+        {
+            ofLogError() << "NO pixels";
             unlock();
             return;
         }
