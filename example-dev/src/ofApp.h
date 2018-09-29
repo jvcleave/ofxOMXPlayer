@@ -30,7 +30,7 @@ public:
         currentFileIndex = 0;
         doCreatePlayer = true;
         terminalListener.setup(this);
-        videoFiles.push_back("/home/pi/videos/Timecoded_Big_bunny_1.mov");
+        videoFiles.push_back("/home/pi/videos/current/Timecoded_Big_bunny_1.mov");
 
         videoFiles.push_back("/home/pi/videos/AirBallonTimecode720pAAC.mov");
         
@@ -42,7 +42,14 @@ public:
         videoFiles.push_back("/opt/vc/src/hello_pi/hello_video/test.h264");
         ofxOMXPlayerSettings settings;
         settings.videoPath = videoFiles[currentFileIndex];
+        settings.initialVolume = 0.6;
         settings.listener = this;
+        omxPlayer.engine.m_config_audio.device = "omx:alsa";
+        //omxPlayer.engine.m_config_audio.subdevice = "default";
+        omxPlayer.engine.m_config_audio.subdevice = "hw:1,0";
+
+        
+        
         omxPlayer.setup(settings);
         
     }
