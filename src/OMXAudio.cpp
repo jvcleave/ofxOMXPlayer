@@ -115,7 +115,13 @@ bool COMXAudio::PortSettingsChanged()
   if (m_config.device == "omx:alsa")
   {
     if(!m_omx_render_analog.Initialize("OMX.alsa.audio_render", OMX_IndexParamAudioInit))
-      return false;
+    {
+        printf("%s", "ALSA INIT FAILED");
+        return false;
+    }else
+    {
+        printf("%s", "COMXAudio::PortSettingsChanged USING ALSA");
+    }
   }
 
   UpdateAttenuation();
@@ -402,6 +408,9 @@ bool COMXAudio::Initialize(OMXClock *clock, const OMXAudioConfig &config, uint64
     return false;
 
   m_config = config;
+    
+    printf("m_config.device PASSED AS %s ", m_config.device.c_str());
+    
   m_InputChannels = count_bits(channelMap);
 
   if(m_InputChannels == 0)
