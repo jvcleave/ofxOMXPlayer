@@ -502,6 +502,9 @@ public:
         m_filename = settings->videoPath;
         useTexture = settings->enableTexture;
         
+        
+
+        
         bool didOpen = true;
         
         m_config_video.useTexture = useTexture;
@@ -677,7 +680,13 @@ public:
                 
                 omxClock.OMXReset(m_has_video, m_has_audio);
                 omxClock.OMXStateExecute();
-                m_player_audio.SetVolume(0.1);
+                
+                if(settings->initialVolume)
+                {
+                    float value = ofMap(settings->initialVolume, 0.0, 1.0, -6000.0, 6000.0, true);
+                    m_Volume = value;
+                }
+                m_player_audio.SetVolume(pow(10, m_Volume / 2000.0));
             }
         }
 
