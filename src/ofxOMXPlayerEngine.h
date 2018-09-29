@@ -496,11 +496,11 @@ public:
         doExit(); 
     }
 
-    bool setup(ofxOMXPlayerSettings* settings)
+    bool setup(ofxOMXPlayerSettings& settings)
     {
         
-        m_filename = settings->videoPath;
-        useTexture = settings->enableTexture;
+        m_filename = settings.videoPath;
+        useTexture = settings.enableTexture;
         
         
 
@@ -547,7 +547,11 @@ public:
         
         
         m_has_video     = m_omx_reader.VideoStreamCount();
-        m_has_audio     = m_omx_reader.AudioStreamCount();
+        if(settings.enableAudio)
+        {
+            m_has_audio     = m_omx_reader.AudioStreamCount();
+
+        }
         
         
         omxClock.OMXReset(m_has_video, m_has_audio);
@@ -681,9 +685,9 @@ public:
                 omxClock.OMXReset(m_has_video, m_has_audio);
                 omxClock.OMXStateExecute();
                 
-                if(settings->initialVolume)
+                if(settings.initialVolume)
                 {
-                    float value = ofMap(settings->initialVolume, 0.0, 1.0, -6000.0, 6000.0, true);
+                    float value = ofMap(settings.initialVolume, 0.0, 1.0, -6000.0, 6000.0, true);
                     m_Volume = value;
                 }
                 m_player_audio.SetVolume(pow(10, m_Volume / 2000.0));

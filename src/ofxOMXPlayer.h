@@ -136,7 +136,7 @@ public:
     
     bool openEngine()
     {
-        return engine.setup(&settings);
+        return engine.setup(settings);
     }
 
     void draw(float x, float y, float w, float h)
