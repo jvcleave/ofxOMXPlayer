@@ -11,7 +11,8 @@ class ofApp : public ofBaseApp, public KeyListener, public ofxOMXPlayerListener
 public:
     
     
-    ofxOMXPlayer omxPlayer;
+    vector<ofxOMXPlayer*> omxPlayers; 
+
     TerminalListener terminalListener;
     vector<string> videoFiles;
     int currentFileIndex;
@@ -27,9 +28,54 @@ public:
     
     void setup()
     {
+        videoFiles.push_back("/home/pi/videos/current/Timecoded_Big_bunny_1.mov");
+        
+        videoFiles.push_back("/home/pi/videos/AirBallonTimecode720pAAC.mov");
+        
+        videoFiles.push_back("https://devimages.apple.com.edgekey.net/samplecode/avfoundationMedia/AVFoundationQueuePlayer_HLS2/master.m3u8");
+        
+        videoFiles.push_back("http://devimages.apple.com/iphone/samples/bipbop/gear1/prog_index.m3u8");
+        
+        videoFiles.push_back("/home/pi/videos/KALI UCHIS - NEVER BE YOURS.mp3");
+        videoFiles.push_back("/opt/vc/src/hello_pi/hello_video/test.h264");
+        
         currentFileIndex = 0;
-        doCreatePlayer = true;
         terminalListener.setup(this);
+        ofDirectory currentVideoDirectory(ofToDataPath("../../../video", true));
+        if (currentVideoDirectory.exists()) 
+        {
+            currentVideoDirectory.listDir();
+            vector<ofFile> files = currentVideoDirectory.getFiles();
+            
+            
+            for (int i=0; i<files.size(); i++) 
+            {
+                ofxOMXPlayerSettings settings;
+                settings.videoPath = files[i].path();
+                settings.useHDMIForAudio = true;    //default true
+                settings.enableLooping = true;        //default true
+                settings.enableAudio = true;        //default true, save resources by disabling
+                settings.enableTexture = false;        //default true
+                settings.listener = this;
+
+                
+                ofxOMXPlayer* player = new ofxOMXPlayer();
+                player->engine.m_config_audio.device = "omx:alsa";
+                player->engine.m_config_audio.subdevice = "hw:1,0";
+
+                player->setup(settings);
+                player->setAlpha(ofRandom(90, 255));
+                //player->setLayer(i);
+                omxPlayers.emplace_back(player);
+            }
+        }else{
+            ofLogError() << "currentVideoDirectory: " << currentVideoDirectory.path() << " MISSING";
+            
+            
+        }
+#if 0
+        doCreatePlayer = true;
+        t
         videoFiles.push_back("/home/pi/videos/current/Timecoded_Big_bunny_1.mov");
 
         videoFiles.push_back("/home/pi/videos/AirBallonTimecode720pAAC.mov");
@@ -44,7 +90,8 @@ public:
         settings.videoPath = videoFiles[currentFileIndex];
         settings.initialVolume = 0.6;
         settings.enableAudio = true;
-        
+        settings.enableTexture = true;
+
         //settings.loopPoint = "0:0:10";
         settings.loopPoint = "10";
         settings.debugLevel = -1;
@@ -56,7 +103,7 @@ public:
         
         
         omxPlayer.setup(settings);
-        
+#endif       
     }
     
     void update()
@@ -72,8 +119,12 @@ public:
             {
                 currentFileIndex = 0;
             }
-            
-            omxPlayer.loadMovie(videoFiles[currentFileIndex]);
+            for (int i=0; i<omxPlayers.size(); i++) 
+            {
+                ofxOMXPlayer* player = omxPlayers[i];
+                player->loadMovie(videoFiles[currentFileIndex]);
+
+            }
         }
    
 
@@ -87,15 +138,53 @@ public:
   
     }
     
+    int layerCounter = 0;
     void draw()
     {
         
         
         ofBackgroundGradient(ofColor::red, ofColor::black);
-        omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
-        
         stringstream info;
-        info << omxPlayer.getInfo() << endl;
+        ofRectangle drawRect;
+        for (int i=0; i<omxPlayers.size(); i++) 
+        {
+            ofxOMXPlayer* player = omxPlayers[i];
+            if(player->isPlaying())
+            {
+                drawRect.set((player->getWidth()/4)*i, 20, player->getWidth()/4, player->getHeight()/4);
+                
+                if(player->isTextureEnabled())
+                {
+                    //player->draw(20, 20, player->getWidth()/4, player->getHeight()/4);
+                    
+                    player->draw(drawRect.x, drawRect.y, drawRect.getWidth(), drawRect.getHeight());
+                    
+                }else
+                {
+                    
+                    //player->setAlpha(ofRandom(90, 255));
+                    //player->setLayer(i);
+                    if(layerCounter +1 < 10)
+                    {
+                        layerCounter++;
+                    }else
+                    {
+                        layerCounter = 0;
+                    }
+                    ofRectangle cropRect;
+                    //ofRectangle drawRect(ofRandom(ofGetWidth()), ofRandom(ofGetHeight()), player->getWidth()/2, player->getHeight()/2);
+                    
+                    player->drawCropped(cropRect.x, cropRect.y, cropRect.getWidth(), cropRect.getHeight(),
+                                        drawRect.x, drawRect.y, drawRect.getWidth(), drawRect.getHeight());
+                    
+                    
+                }
+                info << player->getInfo() << endl;
+                info << drawRect << endl;
+            }
+            
+        }
+        
         info << endl;
         info << "COMMANDS" << endl;
         info << "PRESS p TO PAUSE" << endl;
@@ -112,103 +201,107 @@ public:
         info << "PRESS - TO SEEK TO DECREASE VOLUME" << endl;
         info << "PRESS + or = TO SEEK TO INCREASE VOLUME" << endl;
         
-        ofDrawBitmapStringHighlight(info.str(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
+        ofDrawBitmapStringHighlight(info.str(), 60, 200, ofColor(ofColor::black, 90), ofColor::yellow);
     }
     
     
     void keyPressed  (int key){
         
         ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
-        switch (key) 
+        for (int i=0; i<omxPlayers.size(); i++) 
         {
-            case ' ':
-            case 'p':
+            ofxOMXPlayer* omxPlayer = omxPlayers[i];
+            switch (key) 
             {
-                omxPlayer.togglePause();
-                break;
+                case ' ':
+                case 'p':
+                {
+                    omxPlayer->togglePause();
+                    break;
+                }
+                case '1':
+                {
+                    omxPlayer->decreaseSpeed();
+                    break;
+                }
+                case '2':
+                {
+                    omxPlayer->increaseSpeed();
+                    break;
+                }
+                case '3':
+                {
+                    omxPlayer->setNormalSpeed();
+                    break;
+                }
+                case '-':
+                {
+                    
+                    ofLogVerbose() << "decreaseVolume";
+                    omxPlayer->decreaseVolume();
+                    break;
+                }
+                case '=':
+                case '+':
+                {
+                    ofLogVerbose() << "increaseVolume";
+                    omxPlayer->increaseVolume();
+                    break;
+                }
+                case 'v':
+                {
+                    ofLogVerbose() << "stepFrameForward";
+                    omxPlayer->stepFrameForward();
+                    break;
+                }
+                case 'V':
+                {
+                    ofLogVerbose() << "stepNumFrames 5";
+                    omxPlayer->stepNumFrames(5);
+                    break;
+                }
+                case 's':
+                {
+                    doSeek = true;
+                    break;
+                }
+                case 'r':
+                {
+                    omxPlayer->restartMovie();
+                    break;
+                }
+                case '>':
+                case '.':
+                {
+                    omxPlayer->fastForward();
+                    break;
+                }    
+                case '<':
+                case ',':
+                {
+                    omxPlayer->rewind();
+                    break;
+                }     
+                case 'q':
+                {
+                    omxPlayer->close();
+                    break;
+                }
+                case 'o':
+                {
+                    doReopen = true;
+                    break;
+                }
+                case 'n':
+                {
+                    doLoadNext = true;
+                    break;
+                }
+                default:
+                {
+                    break;
+                }    
             }
-            case '1':
-            {
-                omxPlayer.decreaseSpeed();
-                break;
-            }
-            case '2':
-            {
-                omxPlayer.increaseSpeed();
-                break;
-            }
-            case '3':
-            {
-                omxPlayer.setNormalSpeed();
-                break;
-            }
-            case '-':
-            {
-                
-                ofLogVerbose() << "decreaseVolume";
-                omxPlayer.decreaseVolume();
-                break;
-            }
-            case '=':
-            case '+':
-            {
-                ofLogVerbose() << "increaseVolume";
-                omxPlayer.increaseVolume();
-                break;
-            }
-            case 'v':
-            {
-                ofLogVerbose() << "stepFrameForward";
-                omxPlayer.stepFrameForward();
-                break;
-            }
-            case 'V':
-            {
-                ofLogVerbose() << "stepNumFrames 5";
-                omxPlayer.stepNumFrames(5);
-                break;
-            }
-            case 's':
-            {
-                doSeek = true;
-                break;
-            }
-            case 'r':
-            {
-                omxPlayer.restartMovie();
-                break;
-            }
-            case '>':
-            case '.':
-            {
-                omxPlayer.fastForward();
-                break;
-            }    
-            case '<':
-            case ',':
-            {
-                omxPlayer.rewind();
-                break;
-            }     
-            case 'q':
-            {
-                omxPlayer.close();
-                break;
-            }
-            case 'o':
-            {
-                doReopen = true;
-                break;
-            }
-            case 'n':
-            {
-                doLoadNext = true;
-                break;
-            }
-            default:
-            {
-                break;
-            }    
         }
         
 #if 0

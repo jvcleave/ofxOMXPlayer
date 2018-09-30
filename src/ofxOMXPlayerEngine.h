@@ -324,11 +324,44 @@ public:
     
     void draw(float x, float y, float width, float height)
     {
-        if (!texture.isAllocated() && !fbo.isAllocated()) return;
-        fbo.draw(x, y, width, height);
+        lock();
+        if(m_has_video)
+        {
+            if(useTexture)
+            {
+                if (!texture.isAllocated() && !fbo.isAllocated()) return;
+                fbo.draw(x, y, width, height);
+            }else
+            {
+               
+                CRect cropRect;
+                CRect drawRect(x, y, width, height);
+                m_player_video.SetVideoRect(cropRect, drawRect);
+            }
+        }
+        unlock();
     }
     
+    void drawCropped(float cropX, float cropY, float cropWidth, float cropHeight,
+                     float drawX, float drawY, float drawWidth, float drawHeight)
+    {
+        lock();
+        if(m_has_video && !useTexture)
+        {
+            CRect cropRect(cropX, cropY, cropWidth, cropHeight);
+            CRect drawRect(drawX, drawY, drawWidth, drawHeight);
+            m_player_video.SetVideoRect(cropRect, drawRect);
+        }
+        unlock();
+        
+    }
     
+    void setLayer(int layer)
+    {
+        lock();
+            m_player_video.SetLayer(layer);
+        unlock();
+    }
     
     void onUpdate(ofEventArgs& eventArgs)
     {
@@ -355,21 +388,11 @@ public:
     }
     
     
-    bool generateEGLImage(int videoWidth_, int videoHeight_)
+    bool generateEGLImage()
     {
         bool success = false;
         bool needsRegeneration = false;
-        if (videoWidth != videoWidth_)
-        {
-            needsRegeneration = true;
-            videoWidth = videoWidth_;
-        }
-        if (videoHeight != videoHeight_)
-        {
-            needsRegeneration = true;
-            videoHeight = videoHeight_;
-        }
-        
+
         if (!texture.isAllocated())
         {
             needsRegeneration = true;
@@ -587,6 +610,9 @@ public:
 
         if(m_has_video)
         {
+            videoWidth = m_config_video.hints.width;
+            videoHeight = m_config_video.hints.height;
+            
             //calculate numFrames/fps
             totalNumFrames = m_config_video.hints.nb_frames;
             if(!totalNumFrames)
@@ -608,7 +634,7 @@ public:
             duration = m_config_video.hints.nb_frames / videoFrameRate;
             if(useTexture)
             {
-                bool didCreateEGLImage = generateEGLImage(m_config_video.hints.width, m_config_video.hints.height);
+                bool didCreateEGLImage = generateEGLImage();
                 if(!didCreateEGLImage)
                 {
                     didOpen = false;
@@ -620,7 +646,7 @@ public:
                 
             }else
             {
-                
+               
                 if(settings.setDisplayResolution)
                 {
                     SetVideoMode(m_config_video.hints.width,
@@ -1300,6 +1326,19 @@ public:
         omxClock.OMXSetSpeed(iSpeed, true, true);
     }
     
+    
+    void setAlpha(int alpha)
+    {
+        lock();
+        if(m_has_video)
+        {
+            if(!useTexture)
+            {
+                m_player_video.SetAlpha(alpha);
+            }
+        }
+        unlock();
+    }
     void SetVideoMode(int width, int height, int fpsrate, int fpsscale)
     {
         bool m_gen_log  = false;

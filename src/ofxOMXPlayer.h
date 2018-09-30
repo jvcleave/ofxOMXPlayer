@@ -143,6 +143,21 @@ public:
     {
         engine.draw(x, y, w, h);
     }
+    void drawCropped(float cropX, float cropY, float cropWidth, float cropHeight,
+                     float drawX, float drawY, float drawWidth, float drawHeight)
+    {
+        engine.drawCropped(cropX, cropY, cropWidth, cropHeight,
+                           drawX, drawY, drawWidth, drawHeight);
+    }
+    void setAlpha(int alpha)
+    {
+        engine.setAlpha(alpha);
+    }
+    
+    void setLayer(int layer)
+    {
+        engine.setLayer(layer);
+    }
     
     ofTexture&  getTextureReference()
     {
