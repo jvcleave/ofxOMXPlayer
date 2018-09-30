@@ -43,6 +43,11 @@ public:
         ofxOMXPlayerSettings settings;
         settings.videoPath = videoFiles[currentFileIndex];
         settings.initialVolume = 0.6;
+        settings.enableAudio = false;
+        
+        //settings.loopPoint = "0:0:10";
+        settings.loopPoint = "10";
+
         settings.listener = this;
         omxPlayer.engine.m_config_audio.device = "omx:alsa";
         //omxPlayer.engine.m_config_audio.subdevice = "default";

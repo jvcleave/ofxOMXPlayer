@@ -36,6 +36,7 @@ public:
         enableTexture = true;
         doFlipTexture = false; //true for older firmware
         enableLooping = true;
+        loopPoint = "0";
         enableAudio   = true;
         initialVolume = 0.5;
         videoWidth  = 0;
@@ -53,9 +54,10 @@ public:
     bool enableTexture;
     bool doFlipTexture;
     bool enableAudio;
-    float initialVolume;
+    float initialVolume; //0.0 - 1.0
     bool useHDMIForAudio;
     bool enableLooping;
+    string loopPoint;
     ofRectangle drawRectangle;
     ofxOMXPlayerListener* listener;
 
@@ -109,7 +111,6 @@ public:
     OMXPacket *m_omx_pkt;
     bool m_send_eos;
     double m_loop_from;
-    bool didSeek;
     bool m_seek_flush;
     bool m_chapter_seek;
     bool sentStarted;
@@ -231,12 +232,8 @@ public:
         last_seek_pos = 0;
         m_omx_pkt = NULL;
         m_send_eos = false;
-        int h = 0;
-        int m = 0;
-        int s = 1;
         m_incr = 0;
         m_loop_from = m_incr;
-        didSeek = false;
     }
     ~ofxOMXPlayerEngine()
     {
@@ -502,7 +499,22 @@ public:
         m_filename = settings.videoPath;
         useTexture = settings.enableTexture;
         
-        
+        if(strchr(settings.loopPoint.c_str(), ':'))
+        {
+            unsigned int h, m, s;
+            if(sscanf(settings.loopPoint.c_str(), "%u:%u:%u", &h, &m, &s) == 3)
+            {
+                m_incr = h*3600 + m*60 + s;
+            }
+        }
+        else
+        {
+            m_incr = atof(settings.loopPoint.c_str());
+        }
+        if(m_loop)
+        {
+            m_loop_from = m_incr;
+        }
 
         
         bool didOpen = true;
