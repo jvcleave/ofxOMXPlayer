@@ -34,7 +34,6 @@ public:
         
         useHDMIForAudio = true;
         enableTexture = true;
-        doFlipTexture = false; //true for older firmware
         enableLooping = true;
         loopPoint = "0";
         enableAudio   = true;
@@ -55,7 +54,6 @@ public:
     int videoWidth;
     int videoHeight;
     bool enableTexture;
-    bool doFlipTexture;
     bool enableAudio;
     float initialVolume; //0.0 - 1.0
     bool useHDMIForAudio;
