@@ -47,6 +47,7 @@ public:
         debugLevel = LOG_LEVEL_NONE;
         logDirectory = ofToDataPath("", true);
         logToOF = true;
+        setDisplayResolution = false;
     }
     bool enableFilters;
     OMX_IMAGEFILTERTYPE filter;
@@ -67,7 +68,8 @@ public:
     
     ofRectangle drawRectangle;
     ofxOMXPlayerListener* listener;
-
+    
+    bool setDisplayResolution; //direct only
     
     
     //PlayerDirectDisplayOptions directDisplayOptions;
@@ -561,7 +563,7 @@ public:
         if(!didOpenReader)
         {
             didOpen = false;
-            ofLogError() << "READER OPEN FAILED";
+            ofLogError() << "READER COULD NOT OPEN " << m_filename;
 
             return didOpen;
         }
@@ -620,9 +622,8 @@ public:
                 
             }else
             {
-                bool setDisplayResolution = false;
                 
-                if(setDisplayResolution)
+                if(settings.setDisplayResolution)
                 {
                     SetVideoMode(m_config_video.hints.width,
                                  m_config_video.hints.height,
@@ -1496,6 +1497,8 @@ public:
         // g_RBP.Deinitialize();
         ofLog(OF_LOG_NOTICE, "have a nice day ;)\n");
         clear();
+        return EXIT_SUCCESS;
+#if 0
         // exit status success on playback end
         if (m_send_eos)
             return EXIT_SUCCESS;
@@ -1504,6 +1507,7 @@ public:
             return 3;
         // exit status failure on other cases
         return EXIT_FAILURE;
+#endif
     }
     
 #if 0

@@ -18,7 +18,7 @@ public:
     bool doCreatePlayer;
     bool doSeek = false;
     bool doReopen = false;
-    
+    bool doLoadNext = false;
     // required for ofxOMXPlayerListener
     void onVideoEnd(ofxOMXPlayer* player)
     {
@@ -43,11 +43,11 @@ public:
         ofxOMXPlayerSettings settings;
         settings.videoPath = videoFiles[currentFileIndex];
         settings.initialVolume = 0.6;
-        settings.enableAudio = false;
+        settings.enableAudio = true;
         
         //settings.loopPoint = "0:0:10";
         settings.loopPoint = "10";
-        settings.debugLevel = 2;
+        settings.debugLevel = -1;
         settings.listener = this;
         omxPlayer.engine.m_config_audio.device = "omx:alsa";
         //omxPlayer.engine.m_config_audio.subdevice = "default";
@@ -61,26 +61,22 @@ public:
     
     void update()
     {
-        /*
-        if(doCreatePlayer)
+        if(doLoadNext)
         {
-            doCreatePlayer = false;
-            if(player)
-            {
-                player->close();
-                delete player;
-            }
-            player = new ofxOMXMediaPlayer();
-            player->setup(videoFiles[currentFileIndex], true);
+            doLoadNext = false;
             if(currentFileIndex+1 < videoFiles.size())
             {
                 currentFileIndex++;
-
+                
             }else
             {
                 currentFileIndex = 0;
             }
-        }*/
+            
+            omxPlayer.loadMovie(videoFiles[currentFileIndex]);
+        }
+   
+
         
     }
     
@@ -202,6 +198,11 @@ public:
             case 'o':
             {
                 doReopen = true;
+                break;
+            }
+            case 'n':
+            {
+                doLoadNext = true;
                 break;
             }
             default:
