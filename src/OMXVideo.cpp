@@ -530,7 +530,6 @@ bool COMXVideo::PortSettingsChanged()
         OMX_TRACE(error);
         if(error != OMX_ErrorNone) return false;
         
-        //doSetStartTime      = true;
         error = m_omx_render.SetStateForComponent(OMX_StateExecuting);
         OMX_TRACE(error);
         if(error != OMX_ErrorNone) return false;
@@ -1043,17 +1042,7 @@ int COMXVideo::Decode(uint8_t *pData, int iSize, double dts, double pts)
             
             omx_buffer->nFlags = nFlags;
             omx_buffer->nOffset = 0;
-            
-            if(doSetStartTime)
-            {
-                omx_buffer->nFlags |= OMX_BUFFERFLAG_STARTTIME;
-                ofLog(OF_LOG_VERBOSE, "VideoDecoderDirect::Decode VDec : setStartTime %f\n", (pts == DVD_NOPTS_VALUE ? 0.0 : pts) / DVD_TIME_BASE);
-                doSetStartTime = false;
-            }
-            else if(pts == DVD_NOPTS_VALUE)
-            {
-                omx_buffer->nFlags |= OMX_BUFFERFLAG_TIME_UNKNOWN;
-            }
+  
             
             omx_buffer->nTimeStamp = ToOMXTime((uint64_t)(pts != DVD_NOPTS_VALUE ? pts : dts != DVD_NOPTS_VALUE ? dts : 0));
             omx_buffer->nFilledLen = std::min((OMX_U32)demuxer_bytes, omx_buffer->nAllocLen);

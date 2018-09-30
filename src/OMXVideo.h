@@ -128,7 +128,6 @@ public:
   bool IsEOS();
   bool SubmittedEOS() { return m_submitted_eos; }
   bool BadState() { return m_omx_decoder.BadState(); };
-    bool doSetStartTime;
     
     OMX_BUFFERHEADERTYPE* eglBuffer;
     
