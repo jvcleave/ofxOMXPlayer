@@ -44,7 +44,9 @@ public:
         enableFilters = false;
         filter = OMX_ImageFilterNone;
         listener = NULL;
-        
+        debugLevel = LOG_LEVEL_NONE;
+        logDirectory = ofToDataPath("", true);
+        logToOF = true;
     }
     bool enableFilters;
     OMX_IMAGEFILTERTYPE filter;
@@ -58,6 +60,11 @@ public:
     bool useHDMIForAudio;
     bool enableLooping;
     string loopPoint;
+    
+    int debugLevel;
+    string logDirectory;
+    bool logToOF;
+    
     ofRectangle drawRectangle;
     ofxOMXPlayerListener* listener;
 
@@ -126,6 +133,12 @@ public:
     TV_DISPLAY_STATE_T   tv_state;
     long m_Volume;
     double startpts;
+    int m_timeout;
+    string m_cookie;
+    string m_user_agent;
+    string m_lavfdopts;
+    
+    
     int playspeed_current;
     map<int,int> keymap;
     int playspeeds[20];
@@ -184,10 +197,7 @@ public:
         playspeeds[19] = S(32.0);
         keymap = KeyConfig::buildDefaultKeymap();
         
-        CLog::SetLogLevel(LOG_LEVEL_NONE);
-        string logDirectory = ofToDataPath("", true);
-        bool logToOF = true;
-        CLog::Init(logDirectory.c_str(), logToOF);
+        
         
     }
     
@@ -234,6 +244,11 @@ public:
         m_send_eos = false;
         m_incr = 0;
         m_loop_from = m_incr;
+        
+        m_timeout = 1000;
+        m_cookie = "";
+        m_user_agent = "";
+        m_lavfdopts = "";
     }
     ~ofxOMXPlayerEngine()
     {
@@ -495,9 +510,13 @@ public:
 
     bool setup(ofxOMXPlayerSettings& settings)
     {
+       
         
         m_filename = settings.videoPath;
         useTexture = settings.enableTexture;
+        
+        CLog::SetLogLevel(settings.debugLevel);
+        CLog::Init(settings.logDirectory.c_str(), settings.logToOF);
         
         if(strchr(settings.loopPoint.c_str(), ':'))
         {
@@ -522,10 +541,7 @@ public:
         m_config_video.useTexture = useTexture;
         bool m_dump_format = true;
         bool m_config_audio_is_live = false;
-        int m_timeout = 1000;
-        string m_cookie = "";
-        string m_user_agent = "";
-        string m_lavfdopts = "";
+
         
         bool didOpenReader = m_omx_reader.Open(m_filename.c_str(),
                                    m_dump_format,

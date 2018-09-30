@@ -47,7 +47,7 @@ public:
         
         //settings.loopPoint = "0:0:10";
         settings.loopPoint = "10";
-
+        settings.debugLevel = 2;
         settings.listener = this;
         omxPlayer.engine.m_config_audio.device = "omx:alsa";
         //omxPlayer.engine.m_config_audio.subdevice = "default";
