@@ -11,7 +11,7 @@ class ofApp : public ofBaseApp, public KeyListener, public ofxOMXPlayerListener
 public:
     
     
-    vector<ofxOMXPlayer*> omxPlayers; 
+    map<int, ofxOMXPlayer*> omxPlayers; 
 
     TerminalListener terminalListener;
     vector<string> videoFiles;
@@ -55,18 +55,34 @@ public:
                 settings.useHDMIForAudio = true;    //default true
                 settings.enableLooping = true;        //default true
                 settings.enableAudio = true;        //default true, save resources by disabling
-                settings.enableTexture = false;        //default true
+                settings.enableTexture = i==0;        //default true
                 settings.listener = this;
+                
+                settings.drawRectangle.x = (640*i);
+                settings.drawRectangle.y = 0;
+                
+                settings.drawRectangle.width = 640+settings.drawRectangle.x;
+                settings.drawRectangle.height = 360;
+                settings.autoStart = true;
 
                 
+                
                 ofxOMXPlayer* player = new ofxOMXPlayer();
-                player->engine.m_config_audio.device = "omx:alsa";
-                player->engine.m_config_audio.subdevice = "hw:1,0";
+                //player->engine.m_config_video.aspectMode = 3;
+                /*player->engine.m_config_video.dst_rect.SetRect(settings.drawRectangle.x,
+                                                               settings.drawRectangle.y,
+                                                               settings.drawRectangle.x+settings.drawRectangle.width,
+                                                               settings.drawRectangle.height);*/
+                player->setup(settings); 
+                omxPlayers[i] = player;
+                
+                //player->engine.m_config_audio.device = "omx:alsa";
+                //player->engine.m_config_audio.subdevice = "hw:1,0";
 
-                player->setup(settings);
-                player->setAlpha(ofRandom(90, 255));
+                //
+                //player->setAlpha(ofRandom(90, 255));
                 //player->setLayer(i);
-                omxPlayers.emplace_back(player);
+               
             }
         }else{
             ofLogError() << "currentVideoDirectory: " << currentVideoDirectory.path() << " MISSING";
@@ -76,22 +92,12 @@ public:
 #if 0
         doCreatePlayer = true;
         t
-        videoFiles.push_back("/home/pi/videos/current/Timecoded_Big_bunny_1.mov");
 
-        videoFiles.push_back("/home/pi/videos/AirBallonTimecode720pAAC.mov");
-        
-        videoFiles.push_back("https://devimages.apple.com.edgekey.net/samplecode/avfoundationMedia/AVFoundationQueuePlayer_HLS2/master.m3u8");
-
-        videoFiles.push_back("http://devimages.apple.com/iphone/samples/bipbop/gear1/prog_index.m3u8");
-        
-        videoFiles.push_back("/home/pi/videos/KALI UCHIS - NEVER BE YOURS.mp3");
-        videoFiles.push_back("/opt/vc/src/hello_pi/hello_video/test.h264");
         ofxOMXPlayerSettings settings;
         settings.videoPath = videoFiles[currentFileIndex];
         settings.initialVolume = 0.6;
         settings.enableAudio = true;
         settings.enableTexture = true;
-
         //settings.loopPoint = "0:0:10";
         settings.loopPoint = "10";
         settings.debugLevel = -1;
@@ -121,24 +127,25 @@ public:
             }
             for (int i=0; i<omxPlayers.size(); i++) 
             {
-                ofxOMXPlayer* player = omxPlayers[i];
-                player->loadMovie(videoFiles[currentFileIndex]);
+                //ofxOMXPlayer* player = omxPlayers[i];
+                omxPlayers[i]->loadMovie(videoFiles[currentFileIndex]);
 
             }
         }
-   
+        
+        
 
         
     }
     
     void onCharacterReceived(KeyListenerEventData& e)
     {
-        
         keyPressed(e.character);
   
     }
     
     int layerCounter = 0;
+    int xCounter = 0;
     void draw()
     {
         
@@ -148,22 +155,25 @@ public:
         ofRectangle drawRect;
         for (int i=0; i<omxPlayers.size(); i++) 
         {
-            ofxOMXPlayer* player = omxPlayers[i];
-            if(player->isPlaying())
+            if(omxPlayers[i]->isPlaying())
             {
-                drawRect.set((player->getWidth()/4)*i, 20, player->getWidth()/4, player->getHeight()/4);
+                drawRect.set((omxPlayers[i]->getWidth()/4)*i, 20, omxPlayers[i]->getWidth()/4, omxPlayers[i]->getHeight()/4);
                 
-                if(player->isTextureEnabled())
+                if(omxPlayers[i]->isTextureEnabled())
                 {
-                    //player->draw(20, 20, player->getWidth()/4, player->getHeight()/4);
+                    //omxPlayers[i]->draw(20, 20, omxPlayers[i]->getWidth()/4, omxPlayers[i]->getHeight()/4);
                     
-                    player->draw(drawRect.x, drawRect.y, drawRect.getWidth(), drawRect.getHeight());
+                    omxPlayers[i]->draw(omxPlayers[i]->settings.drawRectangle.x,
+                                 omxPlayers[i]->settings.drawRectangle.y,
+                                 omxPlayers[i]->settings.drawRectangle.getWidth(),
+                                 omxPlayers[i]->settings.drawRectangle.getHeight());
                     
                 }else
                 {
-                    
-                    //player->setAlpha(ofRandom(90, 255));
-                    //player->setLayer(i);
+                   //omxPlayers[i]->setAlpha(128);
+#if 0
+                    //omxPlayers[i]->setAlpha(ofRandom(90, 255));
+                    //omxPlayers[i]->setLayer(i);
                     if(layerCounter +1 < 10)
                     {
                         layerCounter++;
@@ -171,16 +181,28 @@ public:
                     {
                         layerCounter = 0;
                     }
+#endif  
                     ofRectangle cropRect;
-                    //ofRectangle drawRect(ofRandom(ofGetWidth()), ofRandom(ofGetHeight()), player->getWidth()/2, player->getHeight()/2);
+                    if(xCounter<ofGetWidth())
+                    {
+                        xCounter++;
+                    }else
+                    {
+                        xCounter = 0;
+                    }
+                    ofRectangle drawRect = omxPlayers[i]->settings.drawRectangle;
                     
-                    player->drawCropped(cropRect.x, cropRect.y, cropRect.getWidth(), cropRect.getHeight(),
+                    
+                    
+                    //ofRectangle drawRect((640*i)+0.5, 0.5, 320.05, 240.5);
+
+                    omxPlayers[i]->drawCropped(cropRect.x, cropRect.y, cropRect.getWidth(), cropRect.getHeight(),
                                         drawRect.x, drawRect.y, drawRect.getWidth(), drawRect.getHeight());
                     
-                    
+                 
                 }
-                info << player->getInfo() << endl;
-                info << drawRect << endl;
+                info << omxPlayers[i]->getInfo() << endl;
+                info << omxPlayers[i]->settings.drawRectangle << endl;
             }
             
         }

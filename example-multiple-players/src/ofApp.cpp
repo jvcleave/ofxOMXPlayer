@@ -52,11 +52,16 @@ void ofApp::draw(){
 	ofBackgroundGradient(ofColor::red, ofColor::black, OF_GRADIENT_BAR);
 	for (int i=0; i<omxPlayers.size(); i++) 
 	{
-		ofxOMXPlayer* player = omxPlayers[i];
-        player->draw(player->settings.drawRectangle.x,
-                     player->settings.drawRectangle.y,
-                     player->settings.drawRectangle.getWidth(),
-                     player->settings.drawRectangle.getHeight());
+        ofxOMXPlayer* player = omxPlayers[i];
+
+        if(player->isTextureEnabled())
+        {
+            player->draw(player->settings.drawRectangle.x,
+                         player->settings.drawRectangle.y,
+                         player->settings.drawRectangle.getWidth(),
+                         player->settings.drawRectangle.getHeight()); 
+        }
+		
         ofDrawBitmapStringHighlight(player->getInfo(), player->settings.drawRectangle.x, 60, ofColor(ofColor::black, 90), ofColor::yellow);
 
 	}

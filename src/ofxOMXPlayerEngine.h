@@ -143,7 +143,13 @@ public:
     map<int,int> keymap;
     int playspeeds[20];
     string m_filename;
-    const int playspeed_slow_min = 0, playspeed_slow_max = 7, playspeed_rew_max = 8, playspeed_rew_min = 13, playspeed_normal = 14, playspeed_ff_min = 15, playspeed_ff_max = 19; 
+    int playspeed_slow_min;
+    int playspeed_slow_max;
+    int playspeed_rew_max;
+    int playspeed_rew_min;
+    int playspeed_normal;
+    int playspeed_ff_min; 
+    int playspeed_ff_max;
 
     int keyCommand;
     
@@ -170,11 +176,25 @@ public:
     EngineListener* listener;
     bool hasNewFrame;
     float currentPlaybackSpeed;
+    ofRectangle drawRectangle;
+    CRect cropRect;
+    CRect drawRect;
     ofxOMXPlayerEngine()
     {
         eglImage = NULL;
 
-        clear();
+       
+        playspeed_slow_min = 0;
+        playspeed_slow_max = 7;
+        playspeed_rew_max = 8;
+        playspeed_rew_min = 13;
+        playspeed_normal = 14;
+        playspeed_ff_min = 15;
+        playspeed_ff_max = 19;
+        
+        
+        playspeed_current = playspeed_normal;
+        
         playspeeds[0] = S(0);
         playspeeds[1] = S(1/16.0);
         playspeeds[2] = S(1/8.0);
@@ -195,6 +215,7 @@ public:
         playspeeds[17] = S(8.0);
         playspeeds[18] = S(16.0);
         playspeeds[19] = S(32.0);
+        clear();
         keymap = KeyConfig::buildDefaultKeymap();
         
         
@@ -203,6 +224,14 @@ public:
     
     void clear()
     {
+        cropRect.SetRect(0,0,0,0);
+        drawRect.SetRect(0,0,0,0);
+        textureID = 0;
+        videoWidth = 0;
+        videoHeight = 0;
+        useTexture = false;
+        m_has_video = false;
+        m_has_audio = false;
         currentPlaybackSpeed = 0.0;
         hasNewFrame = false;
         listener = NULL;
@@ -324,7 +353,7 @@ public:
     
     void draw(float x, float y, float width, float height)
     {
-        lock();
+       // lock();
         if(m_has_video)
         {
             if(useTexture)
@@ -334,12 +363,25 @@ public:
             }else
             {
                
-                CRect cropRect;
-                CRect drawRect(x, y, width, height);
-                m_player_video.SetVideoRect(cropRect, drawRect);
+           
+                ofRectangle compare(x, y, width, height);
+                if(drawRectangle.isZero())
+                {
+                    drawRectangle = compare;
+                }else
+                {
+                    if(drawRectangle != compare)
+                    {
+                        drawRectangle = compare;
+                        drawRect.SetRect(drawRectangle.x, drawRectangle.y, drawRectangle.getWidth(), drawRectangle.getHeight());
+                        m_player_video.SetVideoRect(cropRect, drawRect);
+                    }
+                }
+                
+                
             }
         }
-        unlock();
+        //unlock();
     }
     
     void drawCropped(float cropX, float cropY, float cropWidth, float cropHeight,
@@ -531,7 +573,7 @@ public:
         doExit(); 
     }
 
-    bool setup(ofxOMXPlayerSettings& settings)
+    bool setup(ofxOMXPlayerSettings settings)
     {
        
         
@@ -600,8 +642,8 @@ public:
         m_has_video     = m_omx_reader.VideoStreamCount();
         if(settings.enableAudio)
         {
-            m_has_audio     = m_omx_reader.AudioStreamCount();
-
+            m_has_audio = m_omx_reader.AudioStreamCount();
+            
         }
         
         
@@ -749,7 +791,11 @@ public:
 
         if(didOpen)
         {
-           startThread(); 
+            if(settings.autoStart)
+            {
+                startThread(); 
+ 
+            }
         }
         isOpen = didOpen;
         return didOpen;

@@ -43,6 +43,13 @@ public:
         
     }
     
+    void start()
+    {
+        if(!engine.isThreadRunning())
+        {
+            engine.startThread();
+        }
+    }
     void loadMovie(string videoPath)
     {
         settings.videoPath = videoPath;
@@ -355,6 +362,7 @@ public:
             }        
             info << "CURRENT VOLUME: " << getVolume() << endl;
             info << "CURRENT VOLUME NORMALIZED: " << getVolumeNormalized() << endl; 
+            info << "FILE: " << settings.videoPath << endl; 
         }else
         {
             info << "CLOSED" << endl;
