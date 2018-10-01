@@ -353,7 +353,7 @@ public:
     
     void draw(float x, float y, float width, float height)
     {
-       // lock();
+        lock();
         if(m_has_video)
         {
             if(useTexture)
@@ -363,25 +363,11 @@ public:
             }else
             {
                
-           
-                ofRectangle compare(x, y, width, height);
-                if(drawRectangle.isZero())
-                {
-                    drawRectangle = compare;
-                }else
-                {
-                    if(drawRectangle != compare)
-                    {
-                        drawRectangle = compare;
-                        drawRect.SetRect(drawRectangle.x, drawRectangle.y, drawRectangle.getWidth(), drawRectangle.getHeight());
-                        m_player_video.SetVideoRect(cropRect, drawRect);
-                    }
-                }
-                
-                
+                drawRect.SetRect(x, y, width, height);
+                m_player_video.SetVideoRect(cropRect, drawRect);
             }
         }
-        //unlock();
+        unlock();
     }
     
     void drawCropped(float cropX, float cropY, float cropWidth, float cropHeight,

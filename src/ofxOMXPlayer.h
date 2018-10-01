@@ -145,17 +145,43 @@ public:
     {
         return engine.setup(settings);
     }
-
+    
     void draw(float x, float y, float w, float h)
     {
+        //ofLog() << "draw: " << ofRectangle(x, y, w, h);
+        
         engine.draw(x, y, w, h);
     }
+    
+    void draw(ofRectangle& rectangle)
+    {
+        if(isTextureEnabled())
+        {
+            draw(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+
+        }else
+        {
+            ofRectangle cropRect;
+            rectangle.width += rectangle.x;
+            drawCropped(cropRect, rectangle);
+        }
+
+    }
+    
     void drawCropped(float cropX, float cropY, float cropWidth, float cropHeight,
                      float drawX, float drawY, float drawWidth, float drawHeight)
     {
         engine.drawCropped(cropX, cropY, cropWidth, cropHeight,
                            drawX, drawY, drawWidth, drawHeight);
     }
+    
+    void drawCropped(ofRectangle& cropRectangle, ofRectangle& drawRectangle)
+    {
+        
+        drawCropped(cropRectangle.x, cropRectangle.y, cropRectangle.width, cropRectangle.height,
+                    drawRectangle.x, drawRectangle.y, drawRectangle.width, drawRectangle.height);
+    }
+    
     void setAlpha(int alpha)
     {
         engine.setAlpha(alpha);
