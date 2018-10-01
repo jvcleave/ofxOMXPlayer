@@ -17,13 +17,8 @@ void ofApp::setup()
 			settings.useHDMIForAudio = true;	//default true
 			settings.enableLooping = true;		//default true
 			settings.enableAudio = true;		//default true, save resources by disabling
-			settings.enableTexture = true;		//default true
+			settings.enableTexture = i==1;		//default true
             
-            settings.drawRectangle.x = 40+(400*i);
-            settings.drawRectangle.y = 100;
-            
-            settings.drawRectangle.width = 400;
-            settings.drawRectangle.height = 300;
 			
 			ofxOMXPlayer* player = new ofxOMXPlayer();
             
@@ -52,17 +47,20 @@ void ofApp::draw(){
 	ofBackgroundGradient(ofColor::red, ofColor::black, OF_GRADIENT_BAR);
 	for (int i=0; i<omxPlayers.size(); i++) 
 	{
-		ofxOMXPlayer* player = omxPlayers[i];
-        player->draw(player->settings.drawRectangle.x,
-                     player->settings.drawRectangle.y,
-                     player->settings.drawRectangle.getWidth(),
-                     player->settings.drawRectangle.getHeight());
-        ofDrawBitmapStringHighlight(player->getInfo(), player->settings.drawRectangle.x, 60, ofColor(ofColor::black, 90), ofColor::yellow);
+        ofxOMXPlayer* player = omxPlayers[i];
+        float halfWidth = player->getWidth()*.5;
+        
+        ofRectangle drawRect(halfWidth*i,
+                             0,
+                             halfWidth,
+                             player->getHeight()*.5);
+
+        player->draw(drawRect); 
+		
+        ofDrawBitmapStringHighlight(player->getInfo(), drawRect.x, drawRect.getHeight()+20, ofColor(ofColor::black, 90), ofColor::yellow);
 
 	}
-	stringstream fpsInfo;
-	fpsInfo <<"\n" <<  "APP FPS: "+ ofToString(ofGetFrameRate());
-	ofDrawBitmapStringHighlight(fpsInfo.str(), 60, 20, ofColor::black, ofColor::yellow);
+
 }
 
 //--------------------------------------------------------------

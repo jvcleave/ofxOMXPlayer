@@ -31,7 +31,7 @@ public:
     ofxOMXPlayerSettings()
     {
         videoPath = "";
-        
+        autoStart = true;
         useHDMIForAudio = true;
         enableTexture = true;
         enableLooping = true;
@@ -59,12 +59,11 @@ public:
     bool useHDMIForAudio;
     bool enableLooping;
     string loopPoint;
-    
+    bool autoStart;
     int debugLevel;
     string logDirectory;
     bool logToOF;
     
-    ofRectangle drawRectangle;
     ofxOMXPlayerListener* listener;
     
     bool setDisplayResolution; //direct only
@@ -143,7 +142,13 @@ public:
     map<int,int> keymap;
     int playspeeds[20];
     string m_filename;
-    const int playspeed_slow_min = 0, playspeed_slow_max = 7, playspeed_rew_max = 8, playspeed_rew_min = 13, playspeed_normal = 14, playspeed_ff_min = 15, playspeed_ff_max = 19; 
+    int playspeed_slow_min;
+    int playspeed_slow_max;
+    int playspeed_rew_max;
+    int playspeed_rew_min;
+    int playspeed_normal;
+    int playspeed_ff_min; 
+    int playspeed_ff_max;
 
     int keyCommand;
     
@@ -170,11 +175,24 @@ public:
     EngineListener* listener;
     bool hasNewFrame;
     float currentPlaybackSpeed;
+    CRect cropRect;
+    CRect drawRect;
     ofxOMXPlayerEngine()
     {
         eglImage = NULL;
 
-        clear();
+       
+        playspeed_slow_min = 0;
+        playspeed_slow_max = 7;
+        playspeed_rew_max = 8;
+        playspeed_rew_min = 13;
+        playspeed_normal = 14;
+        playspeed_ff_min = 15;
+        playspeed_ff_max = 19;
+        
+        
+        playspeed_current = playspeed_normal;
+        
         playspeeds[0] = S(0);
         playspeeds[1] = S(1/16.0);
         playspeeds[2] = S(1/8.0);
@@ -195,6 +213,7 @@ public:
         playspeeds[17] = S(8.0);
         playspeeds[18] = S(16.0);
         playspeeds[19] = S(32.0);
+        clear();
         keymap = KeyConfig::buildDefaultKeymap();
         
         
@@ -203,6 +222,14 @@ public:
     
     void clear()
     {
+        cropRect.SetRect(0,0,0,0);
+        drawRect.SetRect(0,0,0,0);
+        textureID = 0;
+        videoWidth = 0;
+        videoHeight = 0;
+        useTexture = false;
+        m_has_video = false;
+        m_has_audio = false;
         currentPlaybackSpeed = 0.0;
         hasNewFrame = false;
         listener = NULL;
@@ -324,11 +351,43 @@ public:
     
     void draw(float x, float y, float width, float height)
     {
-        if (!texture.isAllocated() && !fbo.isAllocated()) return;
-        fbo.draw(x, y, width, height);
+        lock();
+        if(m_has_video)
+        {
+            if(useTexture)
+            {
+                if (!texture.isAllocated() && !fbo.isAllocated()) return;
+                fbo.draw(x, y, width, height);
+            }else
+            {
+               
+                drawRect.SetRect(x, y, width, height);
+                m_player_video.SetVideoRect(cropRect, drawRect);
+            }
+        }
+        unlock();
     }
     
+    void drawCropped(float cropX, float cropY, float cropWidth, float cropHeight,
+                     float drawX, float drawY, float drawWidth, float drawHeight)
+    {
+        lock();
+        if(m_has_video && !useTexture)
+        {
+            CRect cropRect(cropX, cropY, cropWidth, cropHeight);
+            CRect drawRect(drawX, drawY, drawWidth, drawHeight);
+            m_player_video.SetVideoRect(cropRect, drawRect);
+        }
+        unlock();
+        
+    }
     
+    void setLayer(int layer)
+    {
+        lock();
+            m_player_video.SetLayer(layer);
+        unlock();
+    }
     
     void onUpdate(ofEventArgs& eventArgs)
     {
@@ -355,21 +414,11 @@ public:
     }
     
     
-    bool generateEGLImage(int videoWidth_, int videoHeight_)
+    bool generateEGLImage()
     {
         bool success = false;
         bool needsRegeneration = false;
-        if (videoWidth != videoWidth_)
-        {
-            needsRegeneration = true;
-            videoWidth = videoWidth_;
-        }
-        if (videoHeight != videoHeight_)
-        {
-            needsRegeneration = true;
-            videoHeight = videoHeight_;
-        }
-        
+
         if (!texture.isAllocated())
         {
             needsRegeneration = true;
@@ -508,7 +557,7 @@ public:
         doExit(); 
     }
 
-    bool setup(ofxOMXPlayerSettings& settings)
+    bool setup(ofxOMXPlayerSettings settings)
     {
        
         
@@ -577,8 +626,8 @@ public:
         m_has_video     = m_omx_reader.VideoStreamCount();
         if(settings.enableAudio)
         {
-            m_has_audio     = m_omx_reader.AudioStreamCount();
-
+            m_has_audio = m_omx_reader.AudioStreamCount();
+            
         }
         
         
@@ -587,6 +636,9 @@ public:
 
         if(m_has_video)
         {
+            videoWidth = m_config_video.hints.width;
+            videoHeight = m_config_video.hints.height;
+            
             //calculate numFrames/fps
             totalNumFrames = m_config_video.hints.nb_frames;
             if(!totalNumFrames)
@@ -608,7 +660,7 @@ public:
             duration = m_config_video.hints.nb_frames / videoFrameRate;
             if(useTexture)
             {
-                bool didCreateEGLImage = generateEGLImage(m_config_video.hints.width, m_config_video.hints.height);
+                bool didCreateEGLImage = generateEGLImage();
                 if(!didCreateEGLImage)
                 {
                     didOpen = false;
@@ -620,7 +672,7 @@ public:
                 
             }else
             {
-                
+               
                 if(settings.setDisplayResolution)
                 {
                     SetVideoMode(m_config_video.hints.width,
@@ -723,7 +775,11 @@ public:
 
         if(didOpen)
         {
-           startThread(); 
+            if(settings.autoStart)
+            {
+                startThread(); 
+ 
+            }
         }
         isOpen = didOpen;
         return didOpen;
@@ -1300,6 +1356,19 @@ public:
         omxClock.OMXSetSpeed(iSpeed, true, true);
     }
     
+    
+    void setAlpha(int alpha)
+    {
+        lock();
+        if(m_has_video)
+        {
+            if(!useTexture)
+            {
+                m_player_video.SetAlpha(alpha);
+            }
+        }
+        unlock();
+    }
     void SetVideoMode(int width, int height, int fpsrate, int fpsscale)
     {
         bool m_gen_log  = false;

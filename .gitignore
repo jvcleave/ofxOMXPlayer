@@ -6,3 +6,4 @@ example-*/bin/libs
 example-*/bin/example-*
 omxplayer.log
 omxplayer.old.log
+src/.smbdelete*
