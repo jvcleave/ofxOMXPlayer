@@ -386,9 +386,11 @@ public:
             {
                 info << "REMAINING FRAMES: N/A, NO TOTAL FRAMES" << endl;
             }        
+            info << "LOOPING ENABLED: " << isLoopingEnabled() << endl;
             info << "CURRENT VOLUME: " << getVolume() << endl;
             info << "CURRENT VOLUME NORMALIZED: " << getVolumeNormalized() << endl; 
             info << "FILE: " << settings.videoPath << endl; 
+            info << "TEXTURE ENABLED: " << isTextureEnabled() << endl; 
         }else
         {
             info << "CLOSED" << endl;

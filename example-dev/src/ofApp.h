@@ -11,7 +11,7 @@ class ofApp : public ofBaseApp, public KeyListener, public ofxOMXPlayerListener
 public:
     
     
-    map<int, ofxOMXPlayer*> omxPlayers; 
+    vector<ofxOMXPlayer*> omxPlayers; 
 
     TerminalListener terminalListener;
     vector<string> videoFiles;
@@ -28,24 +28,23 @@ public:
     
     void setup()
     {
-        videoFiles.push_back("/home/pi/videos/current/Timecoded_Big_bunny_1.mov");
+        ofDirectory currentVideoDirectory("/home/pi/videos/current");
+        vector<ofFile> files = currentVideoDirectory.getFiles();
         
-        videoFiles.push_back("/home/pi/videos/AirBallonTimecode720pAAC.mov");
-        
-        videoFiles.push_back("https://devimages.apple.com.edgekey.net/samplecode/avfoundationMedia/AVFoundationQueuePlayer_HLS2/master.m3u8");
-        
-        videoFiles.push_back("http://devimages.apple.com/iphone/samples/bipbop/gear1/prog_index.m3u8");
-        
-        videoFiles.push_back("/home/pi/videos/KALI UCHIS - NEVER BE YOURS.mp3");
-        videoFiles.push_back("/opt/vc/src/hello_pi/hello_video/test.h264");
+        for (int i=0; i<files.size(); i++) 
+        {
+            videoFiles.push_back(files[i].getAbsolutePath());
+            
+        }
+
         
         currentFileIndex = 0;
         terminalListener.setup(this);
-        ofDirectory currentVideoDirectory(ofToDataPath("../../../video", true));
-        if (currentVideoDirectory.exists()) 
+        ofDirectory videoDirectory(ofToDataPath("../../../video", true));
+        if (videoDirectory.exists()) 
         {
-            currentVideoDirectory.listDir();
-            vector<ofFile> files = currentVideoDirectory.getFiles();
+            videoDirectory.listDir();
+            vector<ofFile> files = videoDirectory.getFiles();
             
             
             for (int i=0; i<files.size(); i++) 
@@ -56,31 +55,38 @@ public:
                 settings.enableLooping = true;        //default true
                 settings.enableAudio = true;        //default true, save resources by disabling
                 settings.enableTexture = i==0;        //default true
+                //settings.loopPoint = "0:0:10";
+                //settings.loopPoint = "10";
                 settings.listener = this;
                 
-                settings.drawRectangle.x = (640*i);
-                settings.drawRectangle.y = 0;
-                
-                settings.drawRectangle.width = 640+settings.drawRectangle.x;
-                settings.drawRectangle.height = 360;
                 settings.autoStart = true;
 
+                
                 
                 
                 ofxOMXPlayer* player = new ofxOMXPlayer();
                 //player->engine.m_config_video.aspectMode = 3;
                 /*player->engine.m_config_video.dst_rect.SetRect(settings.drawRectangle.x,
                                                                settings.drawRectangle.y,
-                                                               settings.drawRectangle.x+settings.drawRectangle.width,
-                                                               settings.drawRectangle.height);*/
+                                                               settings.drawRectangle.x+settings.drawRectangle.width,*/
+                    
+                 
+                if(!settings.enableTexture)
+                {
+                    player->engine.m_config_audio.device = "omx:alsa";
+                    //omxPlayer.engine.m_config_audio.subdevice = "default";
+                    player->engine.m_config_audio.subdevice = "hw:1,0";
+                }
+                
                 player->setup(settings); 
-                omxPlayers[i] = player;
+                omxPlayers.push_back(player);
+                
                 
                 //player->engine.m_config_audio.device = "omx:alsa";
                 //player->engine.m_config_audio.subdevice = "hw:1,0";
 
                 //
-                //player->setAlpha(ofRandom(90, 255));
+                //
                 //player->setLayer(i);
                
             }
@@ -89,27 +95,7 @@ public:
             
             
         }
-#if 0
-        doCreatePlayer = true;
-        t
-
-        ofxOMXPlayerSettings settings;
-        settings.videoPath = videoFiles[currentFileIndex];
-        settings.initialVolume = 0.6;
-        settings.enableAudio = true;
-        settings.enableTexture = true;
-        //settings.loopPoint = "0:0:10";
-        settings.loopPoint = "10";
-        settings.debugLevel = -1;
-        settings.listener = this;
-        omxPlayer.engine.m_config_audio.device = "omx:alsa";
-        //omxPlayer.engine.m_config_audio.subdevice = "default";
-        omxPlayer.engine.m_config_audio.subdevice = "hw:1,0";
-
-        
-        
-        omxPlayer.setup(settings);
-#endif       
+     
     }
     
     void update()
@@ -127,7 +113,6 @@ public:
             }
             for (int i=0; i<omxPlayers.size(); i++) 
             {
-                //ofxOMXPlayer* player = omxPlayers[i];
                 omxPlayers[i]->loadMovie(videoFiles[currentFileIndex]);
 
             }
@@ -145,85 +130,45 @@ public:
     }
     
     int layerCounter = 0;
-    int xCounter = 0;
     void draw()
     {
         
         
         ofBackgroundGradient(ofColor::red, ofColor::black);
-        stringstream info;
-        ofRectangle drawRect;
+        //ofLog() << "omxPlayers.size(): " << omxPlayers.size();
         for (int i=0; i<omxPlayers.size(); i++) 
         {
-            if(omxPlayers[i]->isPlaying())
-            {
-                drawRect.set((omxPlayers[i]->getWidth()/4)*i, 20, omxPlayers[i]->getWidth()/4, omxPlayers[i]->getHeight()/4);
-                
-                if(omxPlayers[i]->isTextureEnabled())
-                {
-                    //omxPlayers[i]->draw(20, 20, omxPlayers[i]->getWidth()/4, omxPlayers[i]->getHeight()/4);
-                    
-                    omxPlayers[i]->draw(omxPlayers[i]->settings.drawRectangle.x,
-                                 omxPlayers[i]->settings.drawRectangle.y,
-                                 omxPlayers[i]->settings.drawRectangle.getWidth(),
-                                 omxPlayers[i]->settings.drawRectangle.getHeight());
-                    
-                }else
-                {
-                   //omxPlayers[i]->setAlpha(128);
-#if 0
-                    //omxPlayers[i]->setAlpha(ofRandom(90, 255));
-                    //omxPlayers[i]->setLayer(i);
-                    if(layerCounter +1 < 10)
-                    {
-                        layerCounter++;
-                    }else
-                    {
-                        layerCounter = 0;
-                    }
-#endif  
-                    ofRectangle cropRect;
-                    if(xCounter<ofGetWidth())
-                    {
-                        xCounter++;
-                    }else
-                    {
-                        xCounter = 0;
-                    }
-                    ofRectangle drawRect = omxPlayers[i]->settings.drawRectangle;
-                    
-                    
-                    
-                    //ofRectangle drawRect((640*i)+0.5, 0.5, 320.05, 240.5);
-
-                    omxPlayers[i]->drawCropped(cropRect.x, cropRect.y, cropRect.getWidth(), cropRect.getHeight(),
-                                        drawRect.x, drawRect.y, drawRect.getWidth(), drawRect.getHeight());
-                    
-                 
-                }
-                info << omxPlayers[i]->getInfo() << endl;
-                info << omxPlayers[i]->settings.drawRectangle << endl;
-            }
+            stringstream info;
+            float halfWidth = omxPlayers[i]->getWidth()*.5;
             
+                ofRectangle drawRect(halfWidth*i,
+                                     0,
+                                     halfWidth,
+                                     omxPlayers[i]->getHeight()*.5);
+            
+                omxPlayers[i]->draw(drawRect);
+
+                info << "drawRect: " << drawRect << endl;
+                info << omxPlayers[i]->getInfo() << endl;
+                info << endl;
+                info << "COMMANDS" << endl;
+                info << "PRESS p TO PAUSE" << endl;
+                info << "PRESS v TO STEP FRAME" << endl;
+                //info << "PRESS r TO RESTART" << endl;
+                info << "PRESS 1 TO DECREASE SPEED" << endl;
+                info << "PRESS 2 TO INCREASE SPEED" << endl;
+                info << "PRESS 3 FOR NORMAL SPEED" << endl;
+                info << "PRESS s FOR RANDOM SEEK" << endl;
+                info << "PRESS r TO RESTART MOVIE" << endl;
+                info << "PRESS p TO TOGGLE PAUSE"<< endl;
+                info << "PRESS v TO SEEK TO STEP FORWARD 1 FRAME" << endl;
+                info << "PRESS V TO SEEK TO STEP FORWARD 5 FRAMES" << endl;
+                info << "PRESS - TO SEEK TO DECREASE VOLUME" << endl;
+                info << "PRESS + or = TO SEEK TO INCREASE VOLUME" << endl;
+                
+                ofDrawBitmapStringHighlight(info.str(), drawRect.x, drawRect.getHeight(), ofColor(ofColor::black, 90), ofColor::yellow);
         }
-        
-        info << endl;
-        info << "COMMANDS" << endl;
-        info << "PRESS p TO PAUSE" << endl;
-        info << "PRESS v TO STEP FRAME" << endl;
-        //info << "PRESS r TO RESTART" << endl;
-        info << "PRESS 1 TO DECREASE SPEED" << endl;
-        info << "PRESS 2 TO INCREASE SPEED" << endl;
-        info << "PRESS 3 FOR NORMAL SPEED" << endl;
-        info << "PRESS s FOR RANDOM SEEK" << endl;
-        info << "PRESS r TO RESTART MOVIE" << endl;
-        info << "PRESS p TO TOGGLE PAUSE"<< endl;
-        info << "PRESS v TO SEEK TO STEP FORWARD 1 FRAME" << endl;
-        info << "PRESS V TO SEEK TO STEP FORWARD 5 FRAMES" << endl;
-        info << "PRESS - TO SEEK TO DECREASE VOLUME" << endl;
-        info << "PRESS + or = TO SEEK TO INCREASE VOLUME" << endl;
-        
-        ofDrawBitmapStringHighlight(info.str(), 60, 200, ofColor(ofColor::black, 90), ofColor::yellow);
+
     }
     
     

@@ -31,7 +31,7 @@ public:
     ofxOMXPlayerSettings()
     {
         videoPath = "";
-        
+        autoStart = true;
         useHDMIForAudio = true;
         enableTexture = true;
         enableLooping = true;
@@ -59,12 +59,11 @@ public:
     bool useHDMIForAudio;
     bool enableLooping;
     string loopPoint;
-    
+    bool autoStart;
     int debugLevel;
     string logDirectory;
     bool logToOF;
     
-    ofRectangle drawRectangle;
     ofxOMXPlayerListener* listener;
     
     bool setDisplayResolution; //direct only
@@ -176,7 +175,6 @@ public:
     EngineListener* listener;
     bool hasNewFrame;
     float currentPlaybackSpeed;
-    ofRectangle drawRectangle;
     CRect cropRect;
     CRect drawRect;
     ofxOMXPlayerEngine()
