@@ -635,10 +635,6 @@ void COMXVideo::onFillBuffer(OMX_HANDLETYPE hComponent, OMX_BUFFERHEADERTYPE* pB
     OMX_FillThisBuffer(hComponent, pBuffer);
     frameCounter++;
     //ofLog() << "onFillBuffer: " << frameCounter;
-    /*if(frameCounterListener)
-    {
-        frameCounterListener->onFrameCounterChange(frameCounter);
-    }*/
 }
 
 

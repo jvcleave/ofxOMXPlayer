@@ -20,6 +20,8 @@
 class EngineListener
 {
 public:
+    EngineListener(){};
+    virtual ~EngineListener(){};
     virtual void onVideoEnd() = 0;
     virtual void onVideoLoop(bool needsRestart)= 0;
 };
@@ -37,7 +39,7 @@ public:
         enableLooping = true;
         loopPoint = "0";
         enableAudio   = true;
-        initialVolume = 0.5;
+        initialVolume = 0.3;
         videoWidth  = 0;
         videoHeight = 0;
         enableFilters = false;
@@ -82,8 +84,7 @@ public:
 
 
 
-#define TRICKPLAY(speed) (speed < 0 || speed > 4 * DVD_PLAYSPEED_NORMAL)
-#define S(x) (int)(DVD_PLAYSPEED_NORMAL*(x))
+
 
 
 
@@ -165,7 +166,6 @@ public:
     EGLContext      context;
     ofAppEGLWindow* appEGLWindow;
     int updateCounter;
-    int frameCounter;
     
     int totalNumFrames;
     int videoFrameRate;
@@ -174,7 +174,7 @@ public:
 
     EngineListener* listener;
     bool hasNewFrame;
-    float currentPlaybackSpeed;
+    //float currentPlaybackSpeed;
     CRect cropRect;
     CRect drawRect;
     ofxOMXPlayerEngine()
@@ -191,33 +191,44 @@ public:
         playspeed_ff_max = 19;
         
         
-        playspeed_current = playspeed_normal;
-        
-        playspeeds[0] = S(0);
-        playspeeds[1] = S(1/16.0);
-        playspeeds[2] = S(1/8.0);
-        playspeeds[3] = S(1/4.0);
-        playspeeds[4] = S(1/2.0);
-        playspeeds[5] = S(0.975);
-        playspeeds[6] = S(1.0);
-        playspeeds[7] = S(1.125);
-        playspeeds[8] = S(-32.0);
-        playspeeds[9] = S(-16.0);
-        playspeeds[10] = S(-8.0);
-        playspeeds[11] = S(-4);
-        playspeeds[12] = S(-2);
-        playspeeds[13] = S(-1);
-        playspeeds[14] = S(1);
-        playspeeds[15] = S(2.0);
-        playspeeds[16] = S(4.0);
-        playspeeds[17] = S(8.0);
-        playspeeds[18] = S(16.0);
-        playspeeds[19] = S(32.0);
+       
+
+        playspeeds[0] = createSpeed(0);
+        playspeeds[1] = createSpeed(1/16.0);
+        playspeeds[2] = createSpeed(1/8.0);
+        playspeeds[3] = createSpeed(1/4.0);
+        playspeeds[4] = createSpeed(1/2.0);
+        playspeeds[5] = createSpeed(0.975);
+        playspeeds[6] = createSpeed(1.0);
+        playspeeds[7] = createSpeed(1.125);
+        playspeeds[8] = createSpeed(-32.0);
+        playspeeds[9] = createSpeed(-16.0);
+        playspeeds[10] = createSpeed(-8.0);
+        playspeeds[11] = createSpeed(-4);
+        playspeeds[12] = createSpeed(-2);
+        playspeeds[13] = createSpeed(-1);
+        playspeeds[14] = createSpeed(1);
+        playspeeds[15] = createSpeed(2.0);
+        playspeeds[16] = createSpeed(4.0);
+        playspeeds[17] = createSpeed(8.0);
+        playspeeds[18] = createSpeed(16.0);
+        playspeeds[19] = createSpeed(32.0);
+
         clear();
         keymap = KeyConfig::buildDefaultKeymap();
         
         
         
+    }
+    
+    int createSpeed(float x)
+    {
+        return  (int)(DVD_PLAYSPEED_NORMAL*(x));
+    }
+    
+    bool TRICKPLAY(int speed)
+    {
+        return (speed < 0 || speed > 4 * DVD_PLAYSPEED_NORMAL);
     }
     
     void clear()
@@ -230,7 +241,7 @@ public:
         useTexture = false;
         m_has_video = false;
         m_has_audio = false;
-        currentPlaybackSpeed = 0.0;
+        //currentPlaybackSpeed = 0.0;
         hasNewFrame = false;
         listener = NULL;
         isOpen = false;
@@ -255,7 +266,6 @@ public:
         m_Volume = 0;
         startpts = 0;
         updateCounter = 0;
-        frameCounter = 0;
         
         pixels = NULL;
         display = NULL;
@@ -276,6 +286,10 @@ public:
         m_cookie = "";
         m_user_agent = "";
         m_lavfdopts = "";
+        
+        playspeed_current = playspeed_normal;
+        //currentPlaybackSpeed = playspeeds[playspeed_current]/1000.0f;
+        
     }
     ~ofxOMXPlayerEngine()
     {
@@ -405,7 +419,6 @@ public:
             texture.draw(0, 0, texture.getWidth(), texture.getHeight()); 
             fbo.end();
             updateCounter = frameNumber;
-            //ofLog() << "frameCounter: " << frameNumber;
         }else
         {
             hasNewFrame = false;
@@ -768,6 +781,8 @@ public:
                 {
                     float value = ofMap(settings.initialVolume, 0.0, 1.0, -6000.0, 6000.0, true);
                     m_Volume = value;
+                    ofLog() << "settings.initialVolume: " << settings.initialVolume << " m_Volume: " << m_Volume;
+                    
                 }
                 m_player_audio.SetVolume(pow(10, m_Volume / 2000.0));
             }
@@ -1032,8 +1047,8 @@ public:
                                 else if (m_latency > 1.1f*m_threshold)
                                     speed = 1.001f;
                                 
-                                omxClock.OMXSetSpeed(S(speed));
-                                omxClock.OMXSetSpeed(S(speed), true, true);
+                                omxClock.OMXSetSpeed(createSpeed(speed));
+                                omxClock.OMXSetSpeed(createSpeed(speed), true, true);
                                 ofLog(OF_LOG_NOTICE,  "Live: %.2f (%.2f) S:%.3f T:%.2f\n", m_latency, latency, speed, m_threshold);
                             }
                         }
@@ -1342,8 +1357,8 @@ public:
     
     void SetSpeed(int iSpeed)
     {
-        currentPlaybackSpeed = playspeeds[playspeed_current]/1000.0f;
-        ofLog(OF_LOG_NOTICE, "Playspeed: %.3f", currentPlaybackSpeed);
+        //currentPlaybackSpeed = playspeeds[playspeed_current]/1000.0f;
+        ofLog(OF_LOG_NOTICE, "Playspeed: %d", playspeeds[playspeed_current]);
         m_omx_reader.SetSpeed(iSpeed);
         
         // flush when in trickplay mode

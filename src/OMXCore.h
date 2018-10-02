@@ -84,6 +84,8 @@ private:
 class FillBufferListener
 {
 public:
+    FillBufferListener(){};
+    virtual ~FillBufferListener(){};
     virtual void onFillBuffer(OMX_HANDLETYPE hComponent, OMX_BUFFERHEADERTYPE* pBuffer) = 0;
 };
 

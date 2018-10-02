@@ -26,6 +26,9 @@ public:
     ofxOMXPlayerSettings settings;
     ofxOMXPlayerListener* listener;
     bool engineNeedsRestart;
+    
+#pragma mark SETUP
+
     ofxOMXPlayer()
     {
         listener = NULL;
@@ -38,10 +41,23 @@ public:
 
         
     }
-    ~ofxOMXPlayer()
+    
+    bool setup(ofxOMXPlayerSettings settings_)
     {
         
+        settings = settings_;
+        if(settings.listener)
+        {
+            listener = settings.listener;  
+        }
+        bool result = engine.setup(settings);
+        if(result)
+        {
+            engine.listener = this; 
+        }
+        return result;
     }
+    
     
     void start()
     {
@@ -61,6 +77,208 @@ public:
         engineNeedsRestart = true;
     }
     
+#pragma mark GETTERS
+
+    int getWidth()
+    {
+        return engine.videoWidth; 
+    }
+    
+    int getHeight()
+    {
+        return engine.videoHeight; 
+    }
+    
+    float getFPS()
+    {
+        return engine.videoFrameRate;
+    }
+    
+    int getTotalNumFrames()
+    {
+        return engine.totalNumFrames;
+    }
+    
+    float getDurationInSeconds()
+    {
+        return engine.duration;
+    }
+    
+    ofTexture&  getTextureReference()
+    {
+        return engine.fbo.getTextureReference();
+    }
+    
+    GLuint getTextureID()
+    {
+        return engine.texture.getTextureData().textureID;
+    }
+    
+    unsigned char* getPixels()
+    {
+        return engine.pixels;
+    }
+    
+    int getClockSpeed()
+    {
+        return engine.omxClock.OMXPlaySpeed();
+    }
+    
+    bool isOpen()
+    {
+        return engine.isOpen;
+    }
+    
+    bool getIsOpen()
+    {
+        return isOpen();
+    }
+    
+    bool isPlaying()
+    {
+        bool result = false;
+        if(isOpen() && !isPaused() && engine.isThreadRunning())
+        {
+            result = true;
+        }
+        return result;
+    }
+    
+    float getPlaybackSpeed()
+    {
+        return engine.playspeeds[engine.playspeed_current];
+    }
+    
+    
+   
+    
+    float getMediaTime()
+    {
+        float t = (float)(engine.omxClock.OMXMediaTime()*1e-6);
+        return t;
+    }
+    
+    int getCurrentFrame()
+    {
+        int result =0;
+        int fps = getFPS();
+        if(fps)
+        {            
+            result = getMediaTime()*fps;
+        }
+        return result;
+    }
+    
+    float getVolume()
+    {
+        return getVolumeNormalized();
+    }
+    
+    float getVolumeDB()
+    {
+        return engine.m_Volume;
+    }
+    
+    bool isLoopingEnabled()
+    {
+        return engine.m_loop; 
+    }
+    
+    
+    bool isTextureEnabled()
+    {
+        return settings.enableTexture;
+    }
+    
+    bool isFrameNew()
+    {
+        return engine.hasNewFrame;
+    }
+    
+    COMXStreamInfo&  getVideoStreamInfo()
+    {
+        return engine.m_config_video.hints;
+    }
+    COMXStreamInfo&  getAudioStreamInfo()
+    {
+        return engine.m_config_audio.hints;
+    }
+    
+    static string getRandomVideo(string path)
+    {
+        string videoPath = "";
+        
+        ofDirectory currentVideoDirectory(ofToDataPath(path, true));
+        if (currentVideoDirectory.exists())
+        {
+            currentVideoDirectory.listDir();
+            currentVideoDirectory.sort();
+            vector<ofFile> files = currentVideoDirectory.getFiles();
+            if (files.size()>0)
+            {
+                if (files.size()==1)
+                {
+                    videoPath = files[0].path();
+                }else
+                {
+                    int randomIndex = ofRandom(files.size());
+                    videoPath = files[randomIndex].path(); 
+                }
+                
+            }
+            
+        }else
+        {
+            ofLogError(__func__) << "NO FILES FOUND AT" << currentVideoDirectory.path();
+        }
+        
+        if(videoPath.empty())
+        {
+            ofLogWarning(__func__) << "returning empty string";
+        }
+        return videoPath;
+    }  
+    
+    string getInfo()
+    {
+        stringstream info;
+        info << "APP FPS: "+ ofToString(ofGetFrameRate()) << endl;
+        if(isOpen())
+        {
+            int t = getMediaTime();
+            info << "MEDIA TIME: " << (t/3600)<<"h:"<< (t/60)%60 <<"m:"<< t%60 <<":s"<<  " raw: " << getMediaTime() <<endl;
+            
+            info << "OMX CLOCK SPEED: " << getClockSpeed() << endl;
+            info << "DIMENSIONS: " << getWidth()<<"x"<<getHeight();
+            
+            info << "FPS: " << getFPS() << endl;
+            info << "DURATION IN SECS: " << getDurationInSeconds() << endl;
+            info << "TOTAL FRAMES: " << getTotalNumFrames() << endl;
+            info << "CURRENT FRAME: " << getCurrentFrame() << endl;
+            if (getTotalNumFrames() > 0) 
+            {
+                info << "REMAINING FRAMES: " << getTotalNumFrames() - getCurrentFrame() << endl;
+            }else 
+            {
+                info << "REMAINING FRAMES: N/A, NO TOTAL FRAMES" << endl;
+            }        
+            info << "LOOPING ENABLED: " << isLoopingEnabled() << endl;
+            info << "CURRENT VOLUME: " << getVolume() << endl;
+            info << "CURRENT VOLUME NORMALIZED: " << getVolumeNormalized() << endl; 
+            info << "FILE: " << settings.videoPath << endl; 
+            info << "TEXTURE ENABLED: " << isTextureEnabled() << endl; 
+        }else
+        {
+            info << "CLOSED" << endl;
+            
+        }
+        
+        
+        return info.str();
+    }
+    
+#pragma mark LISTENERS
+    
     void onVideoEnd()
     {
         if(listener)
@@ -74,21 +292,7 @@ public:
     }
 
     
-    bool setup(ofxOMXPlayerSettings settings_)
-    {
-      
-        settings = settings_;
-        if(settings.listener)
-        {
-            listener = settings.listener;  
-        }
-        bool result = openEngine();
-        if(result)
-        {
-            engine.listener = this; 
-        }
-        return result;
-    }
+    
     
     void onUpdate(ofEventArgs& eventArgs)
     {
@@ -103,6 +307,8 @@ public:
             setup(settings);
         }
     }
+    
+    
     void close()
     {
         engine.close();
@@ -118,34 +324,8 @@ public:
         engine.m_loop = false; 
     }
     
-    bool isLoopingEnabled()
-    {
-        return engine.m_loop; 
-    }
-    
-    
-    bool isTextureEnabled()
-    {
-        return settings.enableTexture;
-    }
-    
-   
-    int getWidth()
-    {
-        return engine.videoWidth; 
-    }
-    
-    int getHeight()
-    {
-        return engine.videoHeight; 
-    }
-    
-    
-    bool openEngine()
-    {
-        return engine.setup(settings);
-    }
-    
+#pragma mark DRAWING
+
     void draw(float x, float y, float w, float h)
     {
         //ofLog() << "draw: " << ofRectangle(x, y, w, h);
@@ -191,17 +371,9 @@ public:
     {
         engine.setLayer(layer);
     }
-    
-    ofTexture&  getTextureReference()
-    {
-        return engine.fbo.getTextureReference();
-    }
-    
-    GLuint getTextureID()
-    {
-        return engine.texture.getTextureData().textureID;
-    }
-    
+
+#pragma mark PLAYBACK CONTROLS
+
     bool isPaused()
     {
         return engine.m_Pause;
@@ -216,60 +388,6 @@ public:
     {
         engine.m_Pause = !engine.m_Pause;
     }
-    
-    void increaseVolume()
-    {
-        engine.increaseVolume();
-    }
-    
-    void decreaseVolume()
-    {
-        engine.decreaseVolume();
-
-    }
-    
-    void stepFrameForward()
-    {
-        stepNumFrames(1);
-    }
-    
-    void stepNumFrames(int step)
-    {
-        engine.stepNumFrames(step);
-    }
-    
-    void updatePixels()
-    {
-        engine.updatePixels();
-    }
-    
-    bool isFrameNew()
-    {
-        return engine.hasNewFrame;
-    }
-    
-    unsigned char* getPixels()
-    {
-        return engine.pixels;
-    }
-    
-    void saveImage(string imagePath="")
-    {
-        if(!isTextureEnabled()) return;
-        if(imagePath == "")
-        {
-            imagePath = ofToDataPath(ofGetTimestampString()+".png", true);
-        }
-        updatePixels();
-        //TODO make smarter, re-allocating every time
-        ofImage image;
-        image.setFromPixels(getPixels(), getWidth(), getHeight(), OF_IMAGE_COLOR_ALPHA);
-        image.saveImage(imagePath);
-        
-        ofLog() << "SAVED IMAGE TO: " << imagePath;
-    }
-    
-    
     
     void setNormalSpeed()
     {
@@ -286,49 +404,24 @@ public:
         engine.decreaseSpeed();
     }
     
-    float getFPS()
+    void stepFrameForward()
     {
-        return engine.videoFrameRate;
+        stepNumFrames(1);
     }
     
-    int getTotalNumFrames()
+    void stepNumFrames(int step)
     {
-        return engine.totalNumFrames;
-    }
-    float getVolume()
-    {
-        return engine.m_Volume;
+        engine.stepNumFrames(step);
     }
     
-    float getDurationInSeconds()
-    {
-        return engine.duration;
-    }
     void seekToTimeInSeconds(int timeInSeconds)
     {
         engine.seekToTimeInSeconds(timeInSeconds);
-    }
-    float getMediaTime()
-    {
-        float t = (float)(engine.omxClock.OMXMediaTime()*1e-6);
-        return t;
-    }
-    
-    int getCurrentFrame()
-    {
-        int result =0;
-        int fps = getFPS();
-        if(fps)
-        {            
-            result = getMediaTime()*fps;
-        }
-        return result;
     }
     
     void seekToFrame(int frameTarget)
     {
         engine.seekToFrame(frameTarget);
-
     }
     
     void fastForward()
@@ -346,10 +439,28 @@ public:
         seekToFrame(0);
     }
     
+#pragma mark PLAYBACK AUDIO
+ 
+    void increaseVolume()
+    {
+        engine.increaseVolume();
+    }
+    
+    void decreaseVolume()
+    {
+        engine.decreaseVolume();
+
+    }
+    
     void setVolumeNormalized(float volume)
     {
         float value = ofMap(volume, 0.0, 1.0, -6000.0, 6000.0, true);
         engine.m_Volume = value;
+    }
+    
+    void setVolume(float volume)
+    {
+        setVolumeNormalized(volume);
     }
     
     float getVolumeNormalized()
@@ -358,133 +469,45 @@ public:
         return value;
     }
     
-    int getClockSpeed()
+   
+    
+#pragma mark PIXELS
+    
+    void updatePixels()
     {
-        return engine.omxClock.OMXPlaySpeed();
+        engine.updatePixels();
     }
     
-    string getInfo()
+    
+    void saveImage(string imagePath="")
     {
-        stringstream info;
-        info << "APP FPS: "+ ofToString(ofGetFrameRate()) << endl;
-        if(isOpen())
+        if(!isTextureEnabled()) return;
+        if(imagePath == "")
         {
-            int t = getMediaTime();
-            info << "MEDIA TIME: " << (t/3600)<<"h:"<< (t/60)%60 <<"m:"<< t%60 <<":s"<<  " raw: " << getMediaTime() <<endl;
-            
-            info << "OMX CLOCK SPEED: " << getClockSpeed() << endl;
-            info << "DIMENSIONS: " << getWidth()<<"x"<<getHeight();
-            
-            info << "FPS: " << getFPS() << endl;
-            info << "DURATION IN SECS: " << getDurationInSeconds() << endl;
-            info << "TOTAL FRAMES: " << getTotalNumFrames() << endl;
-            info << "CURRENT FRAME: " << getCurrentFrame() << endl;
-            if (getTotalNumFrames() > 0) 
-            {
-                info << "REMAINING FRAMES: " << getTotalNumFrames() - getCurrentFrame() << endl;
-            }else 
-            {
-                info << "REMAINING FRAMES: N/A, NO TOTAL FRAMES" << endl;
-            }        
-            info << "LOOPING ENABLED: " << isLoopingEnabled() << endl;
-            info << "CURRENT VOLUME: " << getVolume() << endl;
-            info << "CURRENT VOLUME NORMALIZED: " << getVolumeNormalized() << endl; 
-            info << "FILE: " << settings.videoPath << endl; 
-            info << "TEXTURE ENABLED: " << isTextureEnabled() << endl; 
-        }else
-        {
-            info << "CLOSED" << endl;
-
+            imagePath = ofToDataPath(ofGetTimestampString()+".png", true);
         }
-
+        updatePixels();
+        //TODO make smarter, re-allocating every time
+        ofImage image;
+        image.setFromPixels(getPixels(), getWidth(), getHeight(), OF_IMAGE_COLOR_ALPHA);
+        image.saveImage(imagePath);
         
-        return info.str();
+        ofLog() << "SAVED IMAGE TO: " << imagePath;
     }
+    
+
     //void        draw(float x=0, float y=0);
     //void        draw(ofRectangle&);
-    bool isOpen()
-    {
-        
-        return engine.isOpen;
-    }
     
-    bool getIsOpen()
-    {
-        return isOpen();
-    }
-    
-    bool isPlaying()
-    {
-        bool result = false;
-        if(isOpen() && !isPaused() && engine.isThreadRunning())
-        {
-            result = true;
-        }
-        return result;
-    }
-    
-    float getPlaybackSpeed()
-    {
-        return engine.currentPlaybackSpeed;
-    }
-    
-    
-    int getSpeedMultiplier()
-    {
-        ofLogError() << "NOT IMPLEMENTED";
-        return 0;
-    }
-   
     void scrubForward(int step=1)
     {
-        ofLogError() << "NOT IMPLEMENTED";
+        ofLogError() << " scrubForward NOT IMPLEMENTED";
 
     }
     
     
-    COMXStreamInfo&  getVideoStreamInfo()
-    {
-        return engine.m_config_video.hints;
-    }
-    COMXStreamInfo&  getAudioStreamInfo()
-    {
-         return engine.m_config_audio.hints;
-    }
     
-    static string getRandomVideo(string path)
-    {
-        string videoPath = "";
-        
-        ofDirectory currentVideoDirectory(ofToDataPath(path, true));
-        if (currentVideoDirectory.exists())
-        {
-            currentVideoDirectory.listDir();
-            currentVideoDirectory.sort();
-            vector<ofFile> files = currentVideoDirectory.getFiles();
-            if (files.size()>0)
-            {
-                if (files.size()==1)
-                {
-                    videoPath = files[0].path();
-                }else
-                {
-                    int randomIndex = ofRandom(files.size());
-                    videoPath = files[randomIndex].path(); 
-                }
-                
-            }
-            
-        }else
-        {
-            ofLogError(__func__) << "NO FILES FOUND AT" << currentVideoDirectory.path();
-        }
-        
-        if(videoPath.empty())
-        {
-            ofLogWarning(__func__) << "returning empty string";
-        }
-        return videoPath;
-    }  
+#pragma mark OLD/TODO
     
 #if 0     
     void applyFilter(OMX_IMAGEFILTERTYPE filter);
