@@ -138,6 +138,13 @@ public:
         //ofLog() << "omxPlayers.size(): " << omxPlayers.size();
         for (int i=0; i<omxPlayers.size(); i++) 
         {
+            
+            if(ofGetFrameNum()%60 == 0)
+            {
+                int degrees = (ofGetFrameNum()%360);
+                omxPlayers[i]->rotateVideo(degrees, ofRandom(0, 1)); 
+            }
+            
             stringstream info;
             float halfWidth = omxPlayers[i]->getWidth()*.5;
             
@@ -147,7 +154,10 @@ public:
                                      omxPlayers[i]->getHeight()*.5);
             
                 omxPlayers[i]->draw(drawRect);
-
+                
+                
+             
+            
                 info << "drawRect: " << drawRect << endl;
                 info << omxPlayers[i]->getInfo() << endl;
                 info << endl;

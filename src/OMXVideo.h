@@ -135,6 +135,8 @@ public:
     OMX_CALLBACKTYPE textureCallbacks;
     int frameCounter;
 
+    void SetOrientation(int degreesClockWise, bool doMirror=false);
+    
 protected:
     // Video format
     bool              m_drop_state;

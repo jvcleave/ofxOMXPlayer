@@ -372,6 +372,14 @@ public:
         engine.setLayer(layer);
     }
 
+    void rotateVideo(int degrees, bool doMirror = false)
+    {
+        if(isTextureEnabled())return;
+        if(degrees<0) return;
+        if(degrees>360) return;
+        engine.rotateVideo(degrees, doMirror);
+    }
+    
 #pragma mark PLAYBACK CONTROLS
 
     bool isPaused()
@@ -497,6 +505,7 @@ public:
     }
     
     
+
     
 #pragma mark OLD/TODO
     

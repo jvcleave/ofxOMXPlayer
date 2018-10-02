@@ -1183,6 +1183,72 @@ void COMXVideo::SetLayer(int layer)
     
 }
 
+void COMXVideo::SetOrientation(int degreesClockWise, bool doMirror)
+{
+    CSingleLock lock (m_critSection);
+    if(!m_is_open)
+    {
+        return;
+    }
+    if(useTexture)
+    {
+        return;
+    }
+
+    if(degreesClockWise<0)
+    {
+        m_transform = OMX_DISPLAY_ROT0;
+    }
+    if(degreesClockWise >=90 && degreesClockWise < 180)
+    {
+        m_transform = OMX_DISPLAY_ROT90;
+    }
+    if(degreesClockWise >=180 && degreesClockWise < 270)
+    {
+        m_transform = OMX_DISPLAY_ROT270;
+    }
+    
+    if(doMirror)
+    {
+        switch (m_transform) 
+        {
+            case OMX_DISPLAY_ROT0:
+            {
+                m_transform = OMX_DISPLAY_MIRROR_ROT0;
+                break;
+            }
+            case OMX_DISPLAY_ROT90:
+            {
+                m_transform = OMX_DISPLAY_MIRROR_ROT90;
+                break;
+            }
+            case OMX_DISPLAY_ROT270:
+            {
+                m_transform = OMX_DISPLAY_MIRROR_ROT270;
+                break;
+            }
+                
+            default:
+                break;
+        }
+    }
+    
+    
+    OMX_CONFIG_DISPLAYREGIONTYPE configDisplay;
+    OMX_INIT_STRUCTURE(configDisplay);
+    configDisplay.nPortIndex = m_omx_render.GetInputPort();
+    
+    configDisplay.set = OMX_DISPLAY_SET_TRANSFORM;
+    configDisplay.transform = m_transform;
+    OMX_ERRORTYPE omx_err = m_omx_render.SetConfig(OMX_IndexConfigDisplayRegion, &configDisplay);
+    if(omx_err != OMX_ErrorNone)
+    {
+        ofLog(OF_LOG_NOTICE, "%s::%s - could not set transform : %d", CLASSNAME, __func__, m_transform);
+        return;
+    }
+    
+}
+
 void COMXVideo::SetAlpha(int alpha)
 {
     CSingleLock lock (m_critSection);

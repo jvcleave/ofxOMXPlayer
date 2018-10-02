@@ -1322,6 +1322,20 @@ public:
         }
         unlock();
     }
+    
+    void rotateVideo(int degrees, bool doMirror = false)
+    {
+        lock();
+        if(m_has_video)
+        {
+            if(!useTexture)
+            {
+                m_player_video.SetOrientation(degrees, doMirror);
+            }
+        }
+        unlock();
+    }
+
     void SetVideoMode(int width, int height, int fpsrate, int fpsscale)
     {
         bool m_gen_log  = false;

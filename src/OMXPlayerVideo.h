@@ -43,63 +43,65 @@ using namespace std;
 class OMXPlayerVideo : public OMXThread
 {
 public:
-  AVStream                  *m_pStream;
-  int                       m_stream_id;
-  std::deque<OMXPacket *>   m_packets;
-  DllAvUtil                 m_dllAvUtil;
-  DllAvCodec                m_dllAvCodec;
-  DllAvFormat               m_dllAvFormat;
-  bool                      m_open;
-  double                    m_iCurrentPts;
-  pthread_cond_t            m_packet_cond;
-  pthread_cond_t            m_picture_cond;
-  pthread_mutex_t           m_lock;
-  pthread_mutex_t           m_lock_decoder;
-  OMXClock                  *m_av_clock;
-  COMXVideo                 *m_decoder;
-  float                     m_fps;
-  double                    m_frametime;
-  float                     m_display_aspect;
-  bool                      m_bAbort;
-  bool                      m_flush;
-  std::atomic<bool>         m_flush_requested;
-  unsigned int              m_cached_size;
-  double                    m_iVideoDelay;
-  OMXVideoConfig            m_config;
-
-  void Lock();
-  void UnLock();
-  void LockDecoder();
-  void UnLockDecoder();
-
-
-  OMXPlayerVideo();
-  ~OMXPlayerVideo();
-  bool Open(OMXClock *av_clock, const OMXVideoConfig &config);
-  bool Close();
-  bool Reset();
-  bool Decode(OMXPacket *pkt);
-  void Process();
-  void Flush();
-  bool AddPacket(OMXPacket *pkt);
-  bool OpenDecoder();
-  bool CloseDecoder();
-  int  GetDecoderBufferSize();
-  int  GetDecoderFreeSpace();
-  double GetCurrentPTS() { return m_iCurrentPts; };
-  double GetFPS() { return m_fps; };
-  unsigned int GetCached() { return m_cached_size; };
-  unsigned int GetMaxCached() { return m_config.queue_size * 1024 * 1024; };
-  unsigned int GetLevel() { return m_config.queue_size ? 100.0f * m_cached_size / (m_config.queue_size * 1024.0f * 1024.0f) : 0; };
-  void SubmitEOS();
-  bool IsEOS();
-  void SetDelay(double delay) { m_iVideoDelay = delay; }
-  double GetDelay() { return m_iVideoDelay; }
-  void SetAlpha(int alpha);
-  void SetLayer(int layer);
-  void SetVideoRect(const CRect& SrcRect, const CRect& DestRect);
-  void SetVideoRect(int aspectMode);
+    AVStream                  *m_pStream;
+    int                       m_stream_id;
+    std::deque<OMXPacket *>   m_packets;
+    DllAvUtil                 m_dllAvUtil;
+    DllAvCodec                m_dllAvCodec;
+    DllAvFormat               m_dllAvFormat;
+    bool                      m_open;
+    double                    m_iCurrentPts;
+    pthread_cond_t            m_packet_cond;
+    pthread_cond_t            m_picture_cond;
+    pthread_mutex_t           m_lock;
+    pthread_mutex_t           m_lock_decoder;
+    OMXClock                  *m_av_clock;
+    COMXVideo                 *m_decoder;
+    float                     m_fps;
+    double                    m_frametime;
+    float                     m_display_aspect;
+    bool                      m_bAbort;
+    bool                      m_flush;
+    std::atomic<bool>         m_flush_requested;
+    unsigned int              m_cached_size;
+    double                    m_iVideoDelay;
+    OMXVideoConfig            m_config;
+    
+    void Lock();
+    void UnLock();
+    void LockDecoder();
+    void UnLockDecoder();
+    
+    
+    OMXPlayerVideo();
+    ~OMXPlayerVideo();
+    bool Open(OMXClock *av_clock, const OMXVideoConfig &config);
+    bool Close();
+    bool Reset();
+    bool Decode(OMXPacket *pkt);
+    void Process();
+    void Flush();
+    bool AddPacket(OMXPacket *pkt);
+    bool OpenDecoder();
+    bool CloseDecoder();
+    int  GetDecoderBufferSize();
+    int  GetDecoderFreeSpace();
+    double GetCurrentPTS() { return m_iCurrentPts; };
+    double GetFPS() { return m_fps; };
+    unsigned int GetCached() { return m_cached_size; };
+    unsigned int GetMaxCached() { return m_config.queue_size * 1024 * 1024; };
+    unsigned int GetLevel() { return m_config.queue_size ? 100.0f * m_cached_size / (m_config.queue_size * 1024.0f * 1024.0f) : 0; };
+    void SubmitEOS();
+    bool IsEOS();
+    void SetDelay(double delay) { m_iVideoDelay = delay; }
+    double GetDelay() { return m_iVideoDelay; }
+    void SetAlpha(int alpha);
+    void SetLayer(int layer);
+    void SetVideoRect(const CRect& SrcRect, const CRect& DestRect);
+    void SetVideoRect(int aspectMode);
     int getFrameNumber();
+    void SetOrientation(int degreesClockWise, bool doMirror=false);
     
 };
 #endif
+

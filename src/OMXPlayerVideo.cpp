@@ -193,6 +193,12 @@ void OMXPlayerVideo::SetVideoRect(int aspectMode)
   m_decoder->SetVideoRect(aspectMode);
 }
 
+void OMXPlayerVideo::SetOrientation(int degreesClockWise, bool doMirror)
+{
+    m_decoder->SetOrientation(degreesClockWise, doMirror);
+
+}
+
 bool OMXPlayerVideo::Decode(OMXPacket *pkt)
 {
   if(!pkt)
