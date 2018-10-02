@@ -139,17 +139,10 @@ public:
     string m_lavfdopts;
     
     
-    int playspeed_current;
     map<int,int> keymap;
-    int playspeeds[20];
+    vector<int>speeds;
     string m_filename;
-    int playspeed_slow_min;
-    int playspeed_slow_max;
-    int playspeed_rew_max;
-    int playspeed_rew_min;
-    int playspeed_normal;
-    int playspeed_ff_min; 
-    int playspeed_ff_max;
+
 
     int keyCommand;
     
@@ -177,43 +170,24 @@ public:
     //float currentPlaybackSpeed;
     CRect cropRect;
     CRect drawRect;
+    
+    int currentSpeed; 
+    int normalSpeedIndex;
     ofxOMXPlayerEngine()
     {
         eglImage = NULL;
 
-       
-        playspeed_slow_min = 0;
-        playspeed_slow_max = 7;
-        playspeed_rew_max = 8;
-        playspeed_rew_min = 13;
-        playspeed_normal = 14;
-        playspeed_ff_min = 15;
-        playspeed_ff_max = 19;
+        speeds.push_back(createSpeed(0.0625));
+        speeds.push_back(createSpeed(0.125));
+        speeds.push_back(createSpeed(0.25));
+        speeds.push_back(createSpeed(0.50));
+        speeds.push_back(createSpeed(0.975));
+        speeds.push_back(createSpeed(1.0));
+        speeds.push_back(createSpeed(1.125));
+        speeds.push_back(createSpeed(2.0));
+        speeds.push_back(createSpeed(4.0));
         
-        
-       
-
-        playspeeds[0] = createSpeed(0);
-        playspeeds[1] = createSpeed(1/16.0);
-        playspeeds[2] = createSpeed(1/8.0);
-        playspeeds[3] = createSpeed(1/4.0);
-        playspeeds[4] = createSpeed(1/2.0);
-        playspeeds[5] = createSpeed(0.975);
-        playspeeds[6] = createSpeed(1.0);
-        playspeeds[7] = createSpeed(1.125);
-        playspeeds[8] = createSpeed(-32.0);
-        playspeeds[9] = createSpeed(-16.0);
-        playspeeds[10] = createSpeed(-8.0);
-        playspeeds[11] = createSpeed(-4);
-        playspeeds[12] = createSpeed(-2);
-        playspeeds[13] = createSpeed(-1);
-        playspeeds[14] = createSpeed(1);
-        playspeeds[15] = createSpeed(2.0);
-        playspeeds[16] = createSpeed(4.0);
-        playspeeds[17] = createSpeed(8.0);
-        playspeeds[18] = createSpeed(16.0);
-        playspeeds[19] = createSpeed(32.0);
-
+        normalSpeedIndex = 5;
         clear();
         keymap = KeyConfig::buildDefaultKeymap();
         
@@ -286,9 +260,10 @@ public:
         m_cookie = "";
         m_user_agent = "";
         m_lavfdopts = "";
+        currentSpeed = normalSpeedIndex;
         
-        playspeed_current = playspeed_normal;
-        //currentPlaybackSpeed = playspeeds[playspeed_current]/1000.0f;
+
+        //currentPlaybackSpeed = speeds[playspeed_current]/1000.0f;
         
     }
     ~ofxOMXPlayerEngine()
@@ -1194,33 +1169,34 @@ public:
     void increaseSpeed()
     {
         lock();
-        if (playspeed_current < playspeed_slow_min || playspeed_current > playspeed_slow_max)
+        
+        if(currentSpeed+1<speeds.size())
         {
-            playspeed_current = playspeed_slow_max-1;
-        }
-        playspeed_current = std::min(playspeed_current+1, playspeed_slow_max);
-        SetSpeed(playspeeds[playspeed_current]);
-        m_Pause = false;
+            currentSpeed++;
+            SetSpeed();
+            m_Pause = false;
+        } 
         unlock();
     }
     
     void decreaseSpeed()
     {
         lock();
-        if (playspeed_current < playspeed_slow_min || playspeed_current > playspeed_slow_max)
+        
+        if(currentSpeed-1 >= 0)
         {
-             playspeed_current = playspeed_slow_max-1;
+            currentSpeed--;
+            SetSpeed();
+            m_Pause = false;
         }
-        playspeed_current = std::max(playspeed_current-1, playspeed_slow_min);
-        SetSpeed(playspeeds[playspeed_current]);
-        m_Pause = false;
         unlock();
         
     }
     
     void setNormalSpeed()
     {
-        SetSpeed(playspeeds[playspeed_normal]);
+        currentSpeed = normalSpeedIndex;
+        SetSpeed();
     }
     
     void stepFrameForward()
@@ -1250,48 +1226,7 @@ public:
         unlock();
     }
     
-    void rewind()
-    {
-        lock();
-        if (playspeed_current >= playspeed_ff_min && playspeed_current <= playspeed_ff_max)
-        {
-            playspeed_current = playspeed_normal;
-            m_seek_flush = true;
-        }
-        else if (playspeed_current < playspeed_rew_max || playspeed_current > playspeed_rew_min)
-        {
-            playspeed_current = playspeed_rew_min;
-        }
-        else
-        {
-            playspeed_current = std::max(playspeed_current-1, playspeed_rew_max);
-        }
-        SetSpeed(playspeeds[playspeed_current]);
-        m_Pause = false;
-        unlock();
-    }
     
-    void fastForward()
-    {
-        lock();
-        if (playspeed_current >= playspeed_rew_max && playspeed_current <= playspeed_rew_min)
-        {
-            playspeed_current = playspeed_normal;
-            m_seek_flush = true;
-        } 
-        else if (playspeed_current < playspeed_ff_min || playspeed_current > playspeed_ff_max)
-        {
-            playspeed_current = playspeed_ff_min;
-        } 
-        else
-        {
-            playspeed_current = std::min(playspeed_current+1, playspeed_ff_max);
-        }
-        SetSpeed(playspeeds[playspeed_current]);
-
-        m_Pause = false;
-        unlock();
-    }
     void decreaseVolume()
     {
         m_Volume -= 300;
@@ -1355,20 +1290,23 @@ public:
         }
     }
     
-    void SetSpeed(int iSpeed)
+    void SetSpeed()
     {
-        //currentPlaybackSpeed = playspeeds[playspeed_current]/1000.0f;
-        ofLog(OF_LOG_NOTICE, "Playspeed: %d", playspeeds[playspeed_current]);
-        m_omx_reader.SetSpeed(iSpeed);
+        
+        int speed = speeds[currentSpeed];
+        
+        //currentPlaybackSpeed = speeds[playspeed_current]/1000.0f;
+        ofLog(OF_LOG_NOTICE, "Playspeed: %d", speed);
+        m_omx_reader.SetSpeed(speed);
         
         // flush when in trickplay mode
-        if (TRICKPLAY(iSpeed) || TRICKPLAY(omxClock.OMXPlaySpeed()))
+        if (TRICKPLAY(speed) || TRICKPLAY(omxClock.OMXPlaySpeed()))
         {
             FlushStreams(DVD_NOPTS_VALUE);
         }
         
-        omxClock.OMXSetSpeed(iSpeed);
-        omxClock.OMXSetSpeed(iSpeed, true, true);
+        omxClock.OMXSetSpeed(speed);
+        omxClock.OMXSetSpeed(speed, true, true);
     }
     
     
@@ -1730,7 +1668,7 @@ public:
                 {
                     printf("resume\n");
                     playspeed_current = playspeed_normal;
-                    SetSpeed(playspeeds[playspeed_current]);
+                    SetSpeed(speeds[playspeed_current]);
                     m_seek_flush = true;
                 }
                 if(m_Pause)

@@ -146,7 +146,7 @@ public:
     
     float getPlaybackSpeed()
     {
-        return engine.playspeeds[engine.playspeed_current];
+        return engine.speeds[engine.currentSpeed];
     }
     
     
@@ -424,15 +424,6 @@ public:
         engine.seekToFrame(frameTarget);
     }
     
-    void fastForward()
-    {
-        engine.fastForward();
-    }
-    
-    void rewind()
-    {
-        engine.rewind();
-    }
     
     void restartMovie()
     {

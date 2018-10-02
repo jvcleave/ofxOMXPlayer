@@ -172,13 +172,13 @@ void ofApp::keyPressed  (int key){
         case '>':
         case '.':
         {
-            omxPlayer.fastForward();
+            omxPlayer.increaseSpeed();
             break;
         }    
         case '<':
         case ',':
         {
-            omxPlayer.rewind();
+            omxPlayer.decreaseSpeed();
             break;
         }     
         case 'q':
