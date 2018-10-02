@@ -62,6 +62,7 @@ std::map<OMX_EVENTTYPE, std::string> eventTypes;
 
 COMXVideo::COMXVideo() : m_video_codec_name("")
 {
+    doFilters = true;
     m_is_open           = false;
     m_deinterlace       = false;
     m_drop_state        = false;
@@ -203,8 +204,10 @@ bool COMXVideo::PortSettingsChanged()
     
     //if(useTexture) return TexturePortSettingsChanged();
     CSingleLock lock (m_critSection);
+    
+    
+   
     OMX_ERRORTYPE omx_err   = OMX_ErrorNone;
-    bool doFilters = false;
     if (m_settings_changed)
     {
         m_omx_decoder.DisablePort(m_omx_decoder.GetOutputPort(), true);
@@ -301,7 +304,7 @@ bool COMXVideo::PortSettingsChanged()
     if(!m_omx_sched.Initialize("OMX.broadcom.video_scheduler", OMX_IndexParamVideoInit))
         return false;
     
-    if(m_deinterlace || m_config.anaglyph)
+    if(m_deinterlace || m_config.anaglyph || doFilters)
     {
         if(!m_omx_image_fx.Initialize("OMX.broadcom.image_fx", OMX_IndexParamImageInit))
             return false;
@@ -400,7 +403,7 @@ bool COMXVideo::PortSettingsChanged()
         }
     }
     
-    if(m_deinterlace || m_config.anaglyph)
+    if(m_deinterlace || m_config.anaglyph || doFilters)
     {
         m_omx_tunnel_decoder.Initialize(&m_omx_decoder, m_omx_decoder.GetOutputPort(), &m_omx_image_fx, m_omx_image_fx.GetInputPort());
         m_omx_tunnel_image_fx.Initialize(&m_omx_image_fx, m_omx_image_fx.GetOutputPort(), &m_omx_sched, m_omx_sched.GetInputPort());
@@ -428,7 +431,7 @@ bool COMXVideo::PortSettingsChanged()
             return false;
         }
         
-        if(m_deinterlace || m_config.anaglyph)
+        if(m_deinterlace || m_config.anaglyph || doFilters)
         {
             omx_err = m_omx_tunnel_image_fx.Establish();
             if(omx_err != OMX_ErrorNone)
@@ -485,7 +488,7 @@ bool COMXVideo::PortSettingsChanged()
         if(error != OMX_ErrorNone) return false;
         
         
-#if 0
+#if 1
         if(doFilters)
         {
             
@@ -499,10 +502,10 @@ bool COMXVideo::PortSettingsChanged()
             OMX_TRACE(error);
             if(error != OMX_ErrorNone) return false;
             
-            filterManager.setup(&m_omx_image_fx);
-            filterManager.setFilter(settings.filter);
-            OMX_TRACE(error);
-            if(error != OMX_ErrorNone) return false;
+            //filterManager.setup(&m_omx_image_fx);
+            //filterManager.setFilter(settings.filter);
+            //OMX_TRACE(error);
+            //if(error != OMX_ErrorNone) return false;
             
         }
 #endif

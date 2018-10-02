@@ -71,9 +71,11 @@ public:
     float fifo_size;
     bool useTexture;
     EGLImageKHR eglImage;
-    
+    OMX_IMAGEFILTERTYPE filterType;
     OMXVideoConfig()
     {
+        
+        filterType = OMX_ImageFilterNone;
         eglImage = NULL;
         useTexture = true;
         use_thread = true;
@@ -169,6 +171,8 @@ protected:
     OMX_DISPLAYTRANSFORMTYPE m_transform;
     bool              m_settings_changed;
     CCriticalSection  m_critSection;
+    
+    bool doFilters;
 };
 
 #endif
