@@ -646,6 +646,8 @@ public:
             }
             
             duration = m_config_video.hints.nb_frames / videoFrameRate;
+            
+            m_config_video.enableFilters = settings.enableFilters;
             if(useTexture)
             {
                 bool didCreateEGLImage = generateEGLImage();

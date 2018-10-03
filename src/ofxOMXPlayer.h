@@ -309,6 +309,8 @@ public:
             info << "CURRENT VOLUME NORMALIZED: " << getVolumeNormalized() << endl; 
             info << "FILE: " << settings.videoPath << endl; 
             info << "TEXTURE ENABLED: " << isTextureEnabled() << endl; 
+            info << "FILTERS ENABLED: " << settings.enableFilters << endl; 
+
             info << "FILTER: " << currentFilterName << endl; 
 
             
