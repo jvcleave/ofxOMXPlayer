@@ -37,18 +37,16 @@ public:
     bool doDecreaseSpeedTest;
     int decreaseSpeedTestFrameNum;
 
-    vector<string> filterNames;
     bool doFilterTest;
     int currentFilterIndex;
     int filterTestFrameNum;
     PlaybackTestRunner()
     {
         stopAll();
-        //filterNames = OMX_Maps::getInstance().getImageFilterNames();
 
     }
     
-    
+  
     void stopAll()
     {
         test = NULL;
@@ -283,7 +281,7 @@ public:
                     seekToFrameFrameNum = 0;
                 }
             }
-            
+#if 0
             if(doIncreaseSpeedTest)
             {
                 if(!increaseSpeedTestFrameNum)
@@ -336,39 +334,36 @@ public:
                     }
                 }
             }
-#if 0
+#endif
             if(doFilterTest)
             {
-                string filterName;
 
                 if(!filterTestFrameNum)
                 {
                     
                     filterTestFrameNum = ofGetFrameNum();
-                    filterName = filterNames[currentFilterIndex];
-                    ofLogVerbose(__func__) << "filterName: " << filterName;
-                    test->omxPlayer->applyFilter(OMX_Maps::getInstance().getImageFilter(filterName));
                 }else
                 {
-                    if(ofGetFrameNum()-filterTestFrameNum == 300)
+                    if(ofGetFrameNum()-filterTestFrameNum == 150)
                     {
-                        if(currentFilterIndex+1 < filterNames.size())
+                      
+                        filterTestFrameNum = ofGetFrameNum();
+                        
+                        if(currentFilterIndex+1 < test->omxPlayer->imageFilters.size())
                         {
                             currentFilterIndex++;
-                            filterName = filterNames[currentFilterIndex];
-                            ofLogVerbose(__func__) << "filterName: " << filterName;
-                            test->omxPlayer->applyFilter(OMX_Maps::getInstance().getImageFilter(filterName));
-                            filterTestFrameNum = ofGetFrameNum();
                         }else
                         {
                             currentFilterIndex = 0;
                             filterTestFrameNum = 0;
                             doFilterTest = false;
                         }
+                        ImageFilter imageFilter = test->omxPlayer->imageFilters[currentFilterIndex];
+                        ofLogVerbose(__func__) << "imageFilter: " << imageFilter.name;
+                        test->omxPlayer->setFilter(imageFilter.filterType);
                     }
                 }
             }
-#endif
             if(doVolumeTest)
             {
                 float currentVolume = test->omxPlayer->getVolume();

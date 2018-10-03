@@ -21,6 +21,10 @@ public:
     bool doReopen = false;
     bool doLoadNext = false;
     // required for ofxOMXPlayerListener
+    
+    vector<ImageFilter>imageFilters;
+
+    
     void onVideoEnd(ofxOMXPlayer* player)
     {
         ofLog() << "ofApp::onVideoEnd: LOOPING ENABLED" << player->isLoopingEnabled();
@@ -70,7 +74,7 @@ public:
                                                                settings.drawRectangle.y,
                                                                settings.drawRectangle.x+settings.drawRectangle.width,*/
                     
-                 
+                imageFilters = player->imageFilters;
                 if(!settings.enableTexture)
                 {
                     player->engine.m_config_audio.device = "omx:alsa";
@@ -123,9 +127,38 @@ public:
         
     }
     
+    int index = 0;
     void onCharacterReceived(KeyListenerEventData& e)
     {
-        keyPressed(e.character);
+        if(e.character == 'F')
+        {
+            for (int i=0; i<omxPlayers.size(); i++) 
+            {
+                omxPlayers[i]->setFilter(OMX_ImageFilterNone); 
+            }
+        }
+        
+        if(e.character == 'f')
+        {
+            ofLog() << "APPLYING FILTER: " << imageFilters[index].name;
+            for (int i=0; i<omxPlayers.size(); i++) 
+            {
+                omxPlayers[i]->setFilter(imageFilters[index].filterType); 
+            }
+            if(index+1 < imageFilters.size())
+            {
+                index++;
+            }else
+            {
+                index = 0;
+            }
+        }else
+        {
+            keyPressed(e.character);
+
+        }
+
+        
   
     }
     
@@ -175,7 +208,8 @@ public:
                 info << "PRESS V TO SEEK TO STEP FORWARD 5 FRAMES" << endl;
                 info << "PRESS - TO SEEK TO DECREASE VOLUME" << endl;
                 info << "PRESS + or = TO SEEK TO INCREASE VOLUME" << endl;
-                
+                info << "PRESS f for RANDOM FILTER" << endl;
+
                 ofDrawBitmapStringHighlight(info.str(), drawRect.x, drawRect.getHeight(), ofColor(ofColor::black, 90), ofColor::yellow);
         }
 
@@ -274,6 +308,7 @@ public:
                     doLoadNext = true;
                     break;
                 }
+                
                 default:
                 {
                     break;

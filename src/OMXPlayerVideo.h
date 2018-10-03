@@ -101,7 +101,8 @@ public:
     void SetVideoRect(int aspectMode);
     int getFrameNumber();
     void SetOrientation(int degreesClockWise, bool doMirror=false);
-    
+    void SetFilter(OMX_IMAGEFILTERTYPE filterType);
+
 };
 #endif
 

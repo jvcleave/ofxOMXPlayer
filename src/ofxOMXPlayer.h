@@ -12,6 +12,18 @@ public:
     virtual void onVideoEnd(ofxOMXPlayer*) = 0;
 };
 
+class ImageFilter
+{
+public:
+    string name;
+    OMX_IMAGEFILTERTYPE filterType;
+    ImageFilter(string name_, OMX_IMAGEFILTERTYPE filterType_ )
+    {
+        name = name_;
+        filterType = filterType_;
+    };
+};
+
 class ofxOMXPlayer : public EngineListener
 {
 public:
@@ -20,17 +32,43 @@ public:
     COMXCore omxCore;
     ofxOMXPlayerEngine engine;
 
-    
-    int speedMultiplier;
-
     ofxOMXPlayerSettings settings;
     ofxOMXPlayerListener* listener;
     bool engineNeedsRestart;
     
+    vector<ImageFilter>imageFilters;
+    string currentFilterName;
 #pragma mark SETUP
 
     ofxOMXPlayer()
     {
+        currentFilterName = "";
+        imageFilters.push_back(ImageFilter("None", OMX_ImageFilterNone));
+        imageFilters.push_back(ImageFilter("Noise", OMX_ImageFilterNoise));
+        imageFilters.push_back(ImageFilter("Emboss", OMX_ImageFilterEmboss));
+        imageFilters.push_back(ImageFilter("Negative", OMX_ImageFilterNegative));
+        imageFilters.push_back(ImageFilter("Sketch", OMX_ImageFilterSketch));
+        imageFilters.push_back(ImageFilter("OilPaint", OMX_ImageFilterOilPaint));
+        imageFilters.push_back(ImageFilter("Hatch", OMX_ImageFilterHatch));
+        imageFilters.push_back(ImageFilter("Gpen", OMX_ImageFilterGpen));
+        //imageFilters.push_back(ImageFilter("Antialias", OMX_ImageFilterAntialias));
+        //imageFilters.push_back(ImageFilter("DeRing", OMX_ImageFilterDeRing));
+        imageFilters.push_back(ImageFilter("Solarize", OMX_ImageFilterSolarize));
+        imageFilters.push_back(ImageFilter("Watercolor", OMX_ImageFilterWatercolor));
+        imageFilters.push_back(ImageFilter("Pastel", OMX_ImageFilterPastel));
+        imageFilters.push_back(ImageFilter("Sharpen", OMX_ImageFilterSharpen));
+        imageFilters.push_back(ImageFilter("Film", OMX_ImageFilterFilm));
+        //imageFilters.push_back(ImageFilter("Blur", OMX_ImageFilterBlur));
+        imageFilters.push_back(ImageFilter("Saturation", OMX_ImageFilterSaturation));
+        //imageFilters.push_back(ImageFilter("DeInterlaceLineDouble", OMX_ImageFilterDeInterlaceLineDouble));
+        //imageFilters.push_back(ImageFilter("DeInterlaceAdvanced", OMX_ImageFilterDeInterlaceAdvanced));
+        imageFilters.push_back(ImageFilter("ColourSwap", OMX_ImageFilterColourSwap));
+        imageFilters.push_back(ImageFilter("WashedOut", OMX_ImageFilterWashedOut));
+        imageFilters.push_back(ImageFilter("ColourPoint", OMX_ImageFilterColourPoint));
+        imageFilters.push_back(ImageFilter("Posterise", OMX_ImageFilterPosterise));
+        imageFilters.push_back(ImageFilter("ColourBalance", OMX_ImageFilterColourBalance));
+        imageFilters.push_back(ImageFilter("Cartoon", OMX_ImageFilterCartoon));
+        
         listener = NULL;
         engineNeedsRestart = false;
         OMX_Init();
@@ -54,6 +92,7 @@ public:
         if(result)
         {
             engine.listener = this; 
+            currentFilterName = findFilterName(engine.m_config_video.filterType);
         }
         return result;
     }
@@ -249,6 +288,9 @@ public:
             info << "MEDIA TIME: " << (t/3600)<<"h:"<< (t/60)%60 <<"m:"<< t%60 <<":s"<<  " raw: " << getMediaTime() <<endl;
             
             info << "OMX CLOCK SPEED: " << getClockSpeed() << endl;
+            info << "PLAYBACK SPEED: " << getPlaybackSpeed() << endl;
+
+            
             info << "DIMENSIONS: " << getWidth()<<"x"<<getHeight();
             
             info << "FPS: " << getFPS() << endl;
@@ -267,6 +309,11 @@ public:
             info << "CURRENT VOLUME NORMALIZED: " << getVolumeNormalized() << endl; 
             info << "FILE: " << settings.videoPath << endl; 
             info << "TEXTURE ENABLED: " << isTextureEnabled() << endl; 
+            info << "FILTERS ENABLED: " << settings.enableFilters << endl; 
+
+            info << "FILTER: " << currentFilterName << endl; 
+
+            
         }else
         {
             info << "CLOSED" << endl;
@@ -504,8 +551,27 @@ public:
 
     }
     
-    
+    void setFilter(OMX_IMAGEFILTERTYPE filterType)
+    {
+        
+        currentFilterName = findFilterName(filterType);
+        engine.setFilter(filterType);
+    }
 
+    string findFilterName(OMX_IMAGEFILTERTYPE filterType)
+    {
+        string result = "";
+        for(int i=0; i<imageFilters.size(); i++)
+        {
+            if(imageFilters[i].filterType == filterType)
+            {
+                result = imageFilters[i].name;
+                break;
+            }
+            
+        }
+        return result;
+    }
     
 #pragma mark OLD/TODO
     
