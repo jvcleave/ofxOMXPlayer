@@ -71,9 +71,12 @@ public:
     float fifo_size;
     bool useTexture;
     EGLImageKHR eglImage;
-    
+    OMX_IMAGEFILTERTYPE filterType;
+    bool enableFilters;
     OMXVideoConfig()
     {
+        enableFilters = false;
+        filterType = OMX_ImageFilterNone;
         eglImage = NULL;
         useTexture = true;
         use_thread = true;
@@ -136,7 +139,8 @@ public:
     int frameCounter;
 
     void SetOrientation(int degreesClockWise, bool doMirror=false);
-    
+    void SetFilter(OMX_IMAGEFILTERTYPE filterType);
+
 protected:
     // Video format
     bool              m_drop_state;
@@ -169,6 +173,8 @@ protected:
     OMX_DISPLAYTRANSFORMTYPE m_transform;
     bool              m_settings_changed;
     CCriticalSection  m_critSection;
+    
+    bool filtersEnabled;
 };
 
 #endif

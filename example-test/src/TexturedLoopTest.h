@@ -37,7 +37,7 @@ public:
         settings.enableLooping = true;		//default true
         settings.enableAudio = true;		//default true, save resources by disabling
         //settings.doFlipTexture = true;		//default false
-        
+        settings.enableFilters = false;
         settings.listener = this;
         //so either pass in the settings
         omxPlayer = new ofxOMXPlayer();

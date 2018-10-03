@@ -574,7 +574,7 @@ public:
 
         
         bool didOpen = true;
-        
+        //m_config_video.filterType = OMX_ImageFilterCartoon;
         m_config_video.useTexture = useTexture;
         bool m_dump_format = true;
         bool m_config_audio_is_live = false;
@@ -646,6 +646,8 @@ public:
             }
             
             duration = m_config_video.hints.nb_frames / videoFrameRate;
+            
+            m_config_video.enableFilters = settings.enableFilters;
             if(useTexture)
             {
                 bool didCreateEGLImage = generateEGLImage();
@@ -1319,6 +1321,17 @@ public:
             {
                 m_player_video.SetAlpha(alpha);
             }
+        }
+        unlock();
+    }
+    
+    
+    void setFilter(OMX_IMAGEFILTERTYPE filterType)
+    {
+        lock();
+        if(m_has_video)
+        {
+            m_player_video.SetFilter(filterType);
         }
         unlock();
     }
