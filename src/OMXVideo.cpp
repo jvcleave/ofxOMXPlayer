@@ -261,10 +261,8 @@ bool COMXVideo::PortSettingsChanged()
     
     if(useTexture)
     {
-        OMX_ERRORTYPE error = OMX_ErrorNone;
         std::string componentName = "OMX.broadcom.egl_render";
-        
-        
+                
         if(!m_omx_render.Initialize(componentName, OMX_IndexParamVideoInit))
         {
             return false;
@@ -302,13 +300,15 @@ bool COMXVideo::PortSettingsChanged()
     PortSettingsChangedLogger(port_image, interlace.eMode);
     
     if(!m_omx_sched.Initialize("OMX.broadcom.video_scheduler", OMX_IndexParamVideoInit))
-        return false;
-    
-    if(m_deinterlace || m_config.anaglyph || doFilters)
     {
-        if(!m_omx_image_fx.Initialize("OMX.broadcom.image_fx", OMX_IndexParamImageInit))
-            return false;
+        return false;
     }
+    
+    if(!m_omx_image_fx.Initialize("OMX.broadcom.image_fx", OMX_IndexParamImageInit))
+    {
+        return false;
+    }
+    
     
     if(!useTexture)
     {
@@ -353,11 +353,12 @@ bool COMXVideo::PortSettingsChanged()
         }
     }
     
-    
+
     if(m_deinterlace || m_config.anaglyph)
     {
+
         bool advanced_deinterlace = m_config.advanced_hd_deinterlace || port_image.format.video.nFrameWidth * port_image.format.video.nFrameHeight <= 576 * 720;
-        
+#if 0       
         if (m_config.anaglyph != OMX_ImageFilterAnaglyphNone || !advanced_deinterlace)
         {
             // Image_fx assumed 3 frames of context. anaglyph and simple deinterlace don't require this
@@ -372,7 +373,8 @@ bool COMXVideo::PortSettingsChanged()
                 return false;
             }
         }
-        
+#endif 
+        ofLog() << "advanced_deinterlace: " << advanced_deinterlace;
         OMX_CONFIG_IMAGEFILTERPARAMSTYPE image_filter;
         OMX_INIT_STRUCTURE(image_filter);
         
@@ -403,65 +405,80 @@ bool COMXVideo::PortSettingsChanged()
         }
     }
     
-    if(m_deinterlace || m_config.anaglyph || doFilters)
+    
+    if(m_config.filterType != OMX_ImageFilterNone)
     {
-        m_omx_tunnel_decoder.Initialize(&m_omx_decoder, m_omx_decoder.GetOutputPort(), &m_omx_image_fx, m_omx_image_fx.GetInputPort());
-        m_omx_tunnel_image_fx.Initialize(&m_omx_image_fx, m_omx_image_fx.GetOutputPort(), &m_omx_sched, m_omx_sched.GetInputPort());
+        OMX_CONFIG_IMAGEFILTERPARAMSTYPE image_filter;
+        OMX_INIT_STRUCTURE(image_filter);
+        
+        image_filter.nPortIndex = m_omx_image_fx.GetOutputPort();
+        image_filter.eImageFilter = m_config.filterType;
+        omx_err = m_omx_image_fx.SetConfig(OMX_IndexConfigCommonImageFilterParameters, &image_filter);
+        if(omx_err != OMX_ErrorNone)
+        {
+            ofLog(OF_LOG_NOTICE, "%s::%s - OMX_IndexConfigCommonImageFilterParameters omx_err(%s)", CLASSNAME, __func__, omxErrorTypes[omx_err].c_str());
+            return false;
+        }
     }
-    else
-    {
-        m_omx_tunnel_decoder.Initialize(&m_omx_decoder, m_omx_decoder.GetOutputPort(), &m_omx_sched, m_omx_sched.GetInputPort());
-    }
+
+    m_omx_tunnel_decoder.Initialize(&m_omx_decoder, m_omx_decoder.GetOutputPort(), &m_omx_image_fx, m_omx_image_fx.GetInputPort());
+    m_omx_tunnel_image_fx.Initialize(&m_omx_image_fx, m_omx_image_fx.GetOutputPort(), &m_omx_sched, m_omx_sched.GetInputPort());
     m_omx_tunnel_sched.Initialize(&m_omx_sched, m_omx_sched.GetOutputPort(), &m_omx_render, m_omx_render.GetInputPort());
     m_omx_tunnel_clock.Initialize(m_omx_clock, m_omx_clock->GetInputPort() + 1, &m_omx_sched, m_omx_sched.GetOutputPort() + 1);
     
+    omx_err = m_omx_tunnel_clock.Establish();
+    if(omx_err != OMX_ErrorNone)
+    {
+        ofLog(OF_LOG_NOTICE, "%s::%s - m_omx_tunnel_clock.Establish omx_err(%s)", CLASSNAME, __func__, omxErrorTypes[omx_err].c_str());
+        return false;
+    }
+    
+    omx_err = m_omx_tunnel_decoder.Establish();
+    if (omx_err != OMX_ErrorNone)
+    {
+        ofLog(OF_LOG_NOTICE, "%s::%s - m_omx_tunnel_decoder.Establish omx_err(%s)", CLASSNAME, __func__, omxErrorTypes[omx_err].c_str());
+        return false;
+    }
+    
+    omx_err = m_omx_tunnel_image_fx.Establish();
+    if(omx_err != OMX_ErrorNone)
+    {
+        ofLog(OF_LOG_NOTICE, "%s::%s - m_omx_tunnel_image_fx.Establish omx_err(%s)", CLASSNAME, __func__, omxErrorTypes[omx_err].c_str());
+        return false;
+    }
+    
+    omx_err = m_omx_image_fx.SetStateForComponent(OMX_StateExecuting);
+    if (omx_err != OMX_ErrorNone)
+    {
+        ofLog(OF_LOG_NOTICE, "%s::%s - m_omx_image_fx.SetStateForComponent omx_err(%s)", CLASSNAME, __func__, omxErrorTypes[omx_err].c_str());
+        return false;
+    }
+    
+    if(useTexture)
+    {
+        omx_err = m_omx_decoder.SetStateForComponent(OMX_StateExecuting);
+        OMX_TRACE(omx_err);
+        if(omx_err != OMX_ErrorNone) return false;
+    }
+    
+    omx_err = m_omx_tunnel_sched.Establish();
+    if(omx_err != OMX_ErrorNone)
+    {
+        ofLog(OF_LOG_NOTICE, "%s::%s - m_omx_tunnel_sched.Establish omx_err(%s)", CLASSNAME, __func__, omxErrorTypes[omx_err].c_str());
+        return false;
+    }
+    
+    omx_err = m_omx_sched.SetStateForComponent(OMX_StateExecuting);
+    if(omx_err != OMX_ErrorNone)
+    {
+        ofLog(OF_LOG_NOTICE, "%s::%s - m_omx_sched.SetStateForComponent omx_err(%s)", CLASSNAME, __func__, omxErrorTypes[omx_err].c_str());
+        return false;
+    }
+    
+    
     if(!useTexture)
     {
-        omx_err = m_omx_tunnel_clock.Establish();
-        if(omx_err != OMX_ErrorNone)
-        {
-            ofLog(OF_LOG_NOTICE, "%s::%s - m_omx_tunnel_clock.Establish omx_err(%s)", CLASSNAME, __func__, omxErrorTypes[omx_err].c_str());
-            return false;
-        }
-        
-        omx_err = m_omx_tunnel_decoder.Establish();
-        if (omx_err != OMX_ErrorNone)
-        {
-            ofLog(OF_LOG_NOTICE, "%s::%s - m_omx_tunnel_decoder.Establish omx_err(%s)", CLASSNAME, __func__, omxErrorTypes[omx_err].c_str());
-            return false;
-        }
-        
-        if(m_deinterlace || m_config.anaglyph || doFilters)
-        {
-            omx_err = m_omx_tunnel_image_fx.Establish();
-            if(omx_err != OMX_ErrorNone)
-            {
-                ofLog(OF_LOG_NOTICE, "%s::%s - m_omx_tunnel_image_fx.Establish omx_err(%s)", CLASSNAME, __func__, omxErrorTypes[omx_err].c_str());
-                return false;
-            }
-            
-            omx_err = m_omx_image_fx.SetStateForComponent(OMX_StateExecuting);
-            if (omx_err != OMX_ErrorNone)
-            {
-                ofLog(OF_LOG_NOTICE, "%s::%s - m_omx_image_fx.SetStateForComponent omx_err(%s)", CLASSNAME, __func__, omxErrorTypes[omx_err].c_str());
-                return false;
-            }
-        }
-        
-        omx_err = m_omx_tunnel_sched.Establish();
-        if(omx_err != OMX_ErrorNone)
-        {
-            ofLog(OF_LOG_NOTICE, "%s::%s - m_omx_tunnel_sched.Establish omx_err(%s)", CLASSNAME, __func__, omxErrorTypes[omx_err].c_str());
-            return false;
-        }
-        
-        omx_err = m_omx_sched.SetStateForComponent(OMX_StateExecuting);
-        if(omx_err != OMX_ErrorNone)
-        {
-            ofLog(OF_LOG_NOTICE, "%s::%s - m_omx_sched.SetStateForComponent omx_err(%s)", CLASSNAME, __func__, omxErrorTypes[omx_err].c_str());
-            return false;
-        }
-        
+
         omx_err = m_omx_render.SetStateForComponent(OMX_StateExecuting);
         if(omx_err != OMX_ErrorNone)
         {
@@ -471,75 +488,29 @@ bool COMXVideo::PortSettingsChanged()
         
     }else
     {
-        OMX_ERRORTYPE error  = OMX_ErrorNone;
- 
-        
-        error = m_omx_tunnel_clock.Establish();
-        OMX_TRACE(error);
-        if(error != OMX_ErrorNone) return false;
-        
-        
-        error = m_omx_tunnel_decoder.Establish();
-        OMX_TRACE(error);
-        if(error != OMX_ErrorNone) return false;
-        
-        error = m_omx_decoder.SetStateForComponent(OMX_StateExecuting);
-        OMX_TRACE(error);
-        if(error != OMX_ErrorNone) return false;
-        
-        
-#if 1
-        if(doFilters)
-        {
-            
-            //m_omx_decoder.doFreeHandle = false;
-            
-            error = m_omx_tunnel_image_fx.Establish();
-            OMX_TRACE(error);
-            if(error != OMX_ErrorNone) return false;
-            
-            error = m_omx_image_fx.SetStateForComponent(OMX_StateExecuting);
-            OMX_TRACE(error);
-            if(error != OMX_ErrorNone) return false;
-            
-            //filterManager.setup(&m_omx_image_fx);
-            //filterManager.setFilter(settings.filter);
-            //OMX_TRACE(error);
-            //if(error != OMX_ErrorNone) return false;
-            
-        }
-#endif
-        error = m_omx_tunnel_sched.Establish();
-        OMX_TRACE(error);
-        if(error != OMX_ErrorNone) return false;
-        
-        error = m_omx_sched.SetStateForComponent(OMX_StateExecuting);
-        OMX_TRACE(error);
-        if(error != OMX_ErrorNone) return false;
-        
 
-        error = m_omx_render.SetStateForComponent(OMX_StateIdle);
-        OMX_TRACE(error);
-        if(error != OMX_ErrorNone) return false;
+        omx_err = m_omx_render.SetStateForComponent(OMX_StateIdle);
+        OMX_TRACE(omx_err);
+        if(omx_err != OMX_ErrorNone) return false;
         
         
-        m_omx_render.EnablePort(m_omx_render.GetOutputPort(), false);
-        OMX_TRACE(error);
-        if(error != OMX_ErrorNone) return false;
+        omx_err = m_omx_render.EnablePort(m_omx_render.GetOutputPort(), false);
+        OMX_TRACE(omx_err);
+        if(omx_err != OMX_ErrorNone) return false;
         
         
         eglBuffer = NULL;
-        error = m_omx_render.UseEGLImage(&eglBuffer, m_omx_render.GetOutputPort(), NULL, m_config.eglImage);
-        OMX_TRACE(error);
-        if(error != OMX_ErrorNone) return false;
+        omx_err = m_omx_render.UseEGLImage(&eglBuffer, m_omx_render.GetOutputPort(), NULL, m_config.eglImage);
+        OMX_TRACE(omx_err);
+        if(omx_err != OMX_ErrorNone) return false;
         
-        error = m_omx_render.SetStateForComponent(OMX_StateExecuting);
-        OMX_TRACE(error);
-        if(error != OMX_ErrorNone) return false;
+        omx_err = m_omx_render.SetStateForComponent(OMX_StateExecuting);
+        OMX_TRACE(omx_err);
+        if(omx_err != OMX_ErrorNone) return false;
         
         //error = m_omx_render.WaitForEvent(OMX_EventPortSettingsChanged, 0);
-        error = m_omx_render.FillThisBuffer(eglBuffer);
-        OMX_TRACE(error);        
+        omx_err = m_omx_render.FillThisBuffer(eglBuffer);
+        OMX_TRACE(omx_err);        
     }
 
     m_settings_changed = true;
@@ -964,16 +935,16 @@ void COMXVideo::Close()
     CSingleLock lock (m_critSection);
     m_omx_tunnel_clock.Deestablish();
     m_omx_tunnel_decoder.Deestablish();
-    if(m_deinterlace || m_config.anaglyph)
-        m_omx_tunnel_image_fx.Deestablish();
+    m_omx_tunnel_image_fx.Deestablish();
+        
     m_omx_tunnel_sched.Deestablish();
     
     m_omx_decoder.FlushInput();
     
     m_omx_sched.Deinitialize();
     m_omx_decoder.Deinitialize();
-    if(m_deinterlace || m_config.anaglyph)
-        m_omx_image_fx.Deinitialize();
+    m_omx_image_fx.Deinitialize();
+        
     m_omx_render.Deinitialize();
     
     m_is_open       = false;
@@ -1094,12 +1065,38 @@ void COMXVideo::Reset(void)
     
     m_setStartTime      = true;
     m_omx_decoder.FlushInput();
-    if(m_deinterlace || m_config.anaglyph)
-        m_omx_image_fx.FlushInput();
+    m_omx_image_fx.FlushInput();
+        
     m_omx_render.ResetEos();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////
+bool COMXVideo::SetFilter(OMX_IMAGEFILTERTYPE filterType)
+{
+    CSingleLock lock (m_critSection);
+    if(!m_is_open)
+    {
+        return false;
+
+    }    
+    m_omx_image_fx.FlushAll();
+    OMX_CONFIG_IMAGEFILTERPARAMSTYPE image_filter;
+    OMX_INIT_STRUCTURE(image_filter);
+    
+    image_filter.nPortIndex = m_omx_image_fx.GetOutputPort();
+
+    image_filter.eImageFilter = filterType;
+    OMX_ERRORTYPE omx_err = m_omx_image_fx.SetConfig(OMX_IndexConfigCommonImageFilterParameters, &image_filter);
+    if(omx_err != OMX_ErrorNone)
+    {
+        ofLog(OF_LOG_NOTICE, "%s::%s - OMX_IndexConfigCommonImageFilterParameters omx_err(%s)", CLASSNAME, __func__, omxErrorTypes[omx_err].c_str());
+        return false;
+    }
+    
+    return true;
+}
+
+
+
 void COMXVideo::SetVideoRect(const CRect& SrcRect, const CRect& DestRect)
 {
     m_config.src_rect = SrcRect;

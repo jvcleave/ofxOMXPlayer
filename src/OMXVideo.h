@@ -138,7 +138,8 @@ public:
     int frameCounter;
 
     void SetOrientation(int degreesClockWise, bool doMirror=false);
-    
+    bool SetFilter(OMX_IMAGEFILTERTYPE filterType);
+
 protected:
     // Video format
     bool              m_drop_state;

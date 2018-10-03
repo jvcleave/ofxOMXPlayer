@@ -199,6 +199,12 @@ void OMXPlayerVideo::SetOrientation(int degreesClockWise, bool doMirror)
 
 }
 
+void OMXPlayerVideo::SetFilter(OMX_IMAGEFILTERTYPE filterType)
+{
+    m_decoder->SetFilter(filterType);
+
+}
+
 bool OMXPlayerVideo::Decode(OMXPacket *pkt)
 {
   if(!pkt)
