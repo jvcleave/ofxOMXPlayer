@@ -551,7 +551,8 @@ public:
         
         m_filename = settings.videoPath;
         useTexture = settings.enableTexture;
-        
+        m_loop = settings.enableLooping;
+                
         CLog::SetLogLevel(settings.debugLevel);
         CLog::Init(settings.logDirectory.c_str(), settings.logToOF);
         
@@ -1085,27 +1086,29 @@ public:
                         continue;
                     }
                     ofLog() << "REACHED END OF STREAM";
-                    if(listener)
-                    {
-                        listener->onVideoEnd();
-                    }
+                    
                     if (m_loop)
                     {
+                        bool needsRestart = false;
                         if(totalNumFrames)
                         {
                             m_incr = m_loop_from - (omxClock.OMXMediaTime() ? omxClock.OMXMediaTime() / DVD_TIME_BASE : last_seek_pos); 
                         }else
                         {
                             ofLog() << "WILL LOOP VIA RESTART";
-
-                            if(listener)
-                            {
-                                listener->onVideoLoop(true);
-                            }
-                        }    
-                        
-                        
-                        continue;
+                            needsRestart = true;
+                        }
+                        //continue;
+                        if(listener)
+                        {
+                            listener->onVideoLoop(needsRestart);
+                        }
+                    }else
+                    {
+                        if(listener)
+                        {
+                            listener->onVideoEnd();
+                        }
                     }
                     
                     break;

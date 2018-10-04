@@ -27,9 +27,15 @@ public:
     
     void onVideoEnd(ofxOMXPlayer* player)
     {
-        ofLog() << "ofApp::onVideoEnd: LOOPING ENABLED" << player->isLoopingEnabled();
+        ofLog() << "ofApp::onVideoEnd";
     };
     
+    void onVideoLoop(ofxOMXPlayer* player)
+    {
+        ofLog() << "ofApp::onVideoLoop";
+
+    };
+
     void setup()
     {
         ofDirectory currentVideoDirectory("/home/pi/videos/current");

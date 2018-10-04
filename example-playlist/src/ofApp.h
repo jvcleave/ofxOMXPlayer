@@ -18,6 +18,7 @@ class ofApp : public ofBaseApp, public ofxOMXPlayerListener, public KeyListener{
 		ofxOMXPlayer omxPlayer;
 	
 		void onVideoEnd(ofxOMXPlayer* player);
+        void onVideoLoop(ofxOMXPlayer* player);
 
 		
 		vector<ofFile> files;

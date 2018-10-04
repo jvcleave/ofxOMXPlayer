@@ -4,7 +4,6 @@
 #include "TexturedLoopTest.h"
 #include "TexturedStreamTest.h"
 #include "DirectLoopTest.h"
-#include "PlaylistTest.h"
 
 #include "TerminalListener.h"
 #include "PlaybackTestRunner.h"
@@ -41,14 +40,12 @@ public:
         DirectLoopTest* directLoopTest = new DirectLoopTest();
         directLoopTest->setup("DirectLoopTest");
         
-        PlaylistTest* playlistTest = new PlaylistTest();
-        playlistTest->setup("PlaylistTest");
+
         
         tests.push_back(texturedLoopTest);
         tests.push_back(directLoopTest);
         
         tests.push_back(texturedStreamTest);
-        tests.push_back(playlistTest);
 
 
         
@@ -66,8 +63,10 @@ public:
     {
         if(doDeleteCurrent)
         {
-            ofLogVerbose(__func__) << "CLOSING TEST: " << currentTest->name;
-            currentTest->close();
+            if(currentTest->isOpen)
+            {
+                currentTest->close(); 
+            }
             doDeleteCurrent = false;
             doNextTest = true;
             playbackTestRunner.stopAll();
@@ -128,6 +127,10 @@ public:
     void onTestComplete(BaseTest* test)
     {
         ofLogVerbose(__func__) << test->name << " COMPLETE";
+        ofLogVerbose(__func__) << "CLOSING TEST: " << test->name;
+
+        test->close();
+
         doDeleteCurrent = true;
         
     }
@@ -198,6 +201,7 @@ public:
             case 'n':
             {
                 doDeleteCurrent = true;
+                
                 break;
             }
             case 'a' :

@@ -165,15 +165,15 @@ public:
         {
             if(doPause)
             {
-                ofLogVerbose() << "Paused test currentFrame: " << test->omxPlayer->getCurrentFrame();
+                ofLogVerbose() << "Paused test currentFrame: " << test->omxPlayer.getCurrentFrame();
                 if(!pauseStartTime)
                 {
                     pauseStartTime = ofGetFrameNum();
-                    test->omxPlayer->setPaused(true);
+                    test->omxPlayer.setPaused(true);
                 }
                 if(ofGetFrameNum()-pauseStartTime == 300)
                 {
-                    test->omxPlayer->setPaused(false);
+                    test->omxPlayer.setPaused(false);
                     doPause = false;
                     pauseStartTime = 0;
                     ofLogVerbose(__func__) << test->name << " PAUSE TEST COMPLETE";
@@ -183,19 +183,19 @@ public:
             if(doRestart)
             {
                 doRestart = false;
-                test->omxPlayer->restartMovie();
+                test->omxPlayer.restartMovie();
             }
             if(doStepTest)
             {
                 bool doStopStepTest = false;
-                int currentFrame = test->omxPlayer->getCurrentFrame();
+                int currentFrame = test->omxPlayer.getCurrentFrame();
                 if(ofGetFrameNum() % 30 == 0)
                 {
                     ofLogVerbose() << "stepCounter: " << stepCounter << " currentFrame: " << currentFrame;
 
-                    if(currentFrame+1 < test->omxPlayer->getTotalNumFrames())
+                    if(currentFrame+1 < test->omxPlayer.getTotalNumFrames())
                     {
-                        test->omxPlayer->stepFrameForward();
+                        test->omxPlayer.stepFrameForward();
                         stepCounter++;
                         
                     }else
@@ -211,7 +211,7 @@ public:
                     {
                         doStepTest = false;
                         stepCounter = 0;
-                        test->omxPlayer->restartMovie();
+                        test->omxPlayer.restartMovie();
                     }
                 }
                 
@@ -223,7 +223,7 @@ public:
                 {
                     if(scrubCounter < 10)
                     {
-                        test->omxPlayer->scrubForward(step);
+                        test->omxPlayer.scrubForward(step);
                         scrubCounter++;
                         ofLog() << "scrubCounter: " << scrubCounter;
                     }else
@@ -239,11 +239,11 @@ public:
             }
             if(doSeekTest)
             {
-                float totalSeconds = test->omxPlayer->getDurationInSeconds();
+                float totalSeconds = test->omxPlayer.getDurationInSeconds();
                 if(totalSeconds)
                 {
                     float middle = totalSeconds*0.5;
-                    int frameTarget = middle*test->omxPlayer->getFPS();
+                    int frameTarget = middle*test->omxPlayer.getFPS();
                     stringstream info;
                     info << "totalSeconds: " << totalSeconds << endl;
                     info << "middle: " << middle << endl;
@@ -251,7 +251,7 @@ public:
 
                     ofLogVerbose(__func__) << info.str();
 
-                    test->omxPlayer->seekToTimeInSeconds(middle);
+                    test->omxPlayer.seekToTimeInSeconds(middle);
                     //doPause = true;
                 }else
                 {
@@ -264,7 +264,7 @@ public:
             
             if(doSeekToFrameTest)
             {
-                test->omxPlayer->seekToFrame(250);
+                test->omxPlayer.seekToFrame(250);
                 doSeekToFrameTest =false;
                 seekToFrameFrameNum = ofGetFrameNum();
             }
@@ -273,11 +273,11 @@ public:
                 if(ofGetFrameNum()-seekToFrameFrameNum == 5)
                 {
                     //doPause = true;
-                    test->omxPlayer->setPaused(true);
+                    test->omxPlayer.setPaused(true);
                 }
                 if (ofGetFrameNum()-seekToFrameFrameNum >= 60)
                 {
-                    test->omxPlayer->setPaused(false);
+                    test->omxPlayer.setPaused(false);
                     seekToFrameFrameNum = 0;
                 }
             }
@@ -287,20 +287,20 @@ public:
                 if(!increaseSpeedTestFrameNum)
                 {
                     increaseSpeedTestFrameNum = ofGetFrameNum();
-                    test->omxPlayer->increaseSpeed();
+                    test->omxPlayer.increaseSpeed();
                 }else
                 {
                     if(ofGetFrameNum()-increaseSpeedTestFrameNum == 60)
                     {
-                        if(test->omxPlayer->getSpeedMultiplier() < 4.0)
+                        if(test->omxPlayer.getSpeedMultiplier() < 4.0)
                         {
                             increaseSpeedTestFrameNum = ofGetFrameNum();
-                            test->omxPlayer->increaseSpeed();
+                            test->omxPlayer.increaseSpeed();
                         }else
                         {
                             increaseSpeedTestFrameNum = 0;
                             doIncreaseSpeedTest = false;
-                            test->omxPlayer->setNormalSpeed();
+                            test->omxPlayer.setNormalSpeed();
                         }
                     }
                 }
@@ -311,26 +311,26 @@ public:
                 if(!decreaseSpeedTestFrameNum)
                 {
                     decreaseSpeedTestFrameNum = ofGetFrameNum();
-                    test->omxPlayer->decreaseSpeed();
+                    test->omxPlayer.decreaseSpeed();
                 }else
                 {
                     if(ofGetFrameNum()-decreaseSpeedTestFrameNum == 60)
                     {
-                        float currentSpeed = test->omxPlayer->getSpeedMultiplier();
+                        float currentSpeed = test->omxPlayer.getSpeedMultiplier();
                         if(currentSpeed > 1/16.0)
                         {
                             decreaseSpeedTestFrameNum = ofGetFrameNum();
-                            test->omxPlayer->decreaseSpeed();
+                            test->omxPlayer.decreaseSpeed();
                             //ofLogVerbose(__func__) << "DECREASED";
                         }else
                         {
                             //ofLogVerbose(__func__) << "DECREASED";
                             decreaseSpeedTestFrameNum = 0;
                             doDecreaseSpeedTest = false;
-                            test->omxPlayer->setNormalSpeed();
+                            test->omxPlayer.setNormalSpeed();
                         }
                         
-                        ofLogVerbose(__func__) << "currentSpeed: " << currentSpeed << " getSpeedMultiplier: " << test->omxPlayer->getSpeedMultiplier();
+                        ofLogVerbose(__func__) << "currentSpeed: " << currentSpeed << " getSpeedMultiplier: " << test->omxPlayer.getSpeedMultiplier();
                     }
                 }
             }
@@ -349,7 +349,7 @@ public:
                       
                         filterTestFrameNum = ofGetFrameNum();
                         
-                        if(currentFilterIndex+1 < test->omxPlayer->imageFilters.size())
+                        if(currentFilterIndex+1 < test->omxPlayer.imageFilters.size())
                         {
                             currentFilterIndex++;
                         }else
@@ -358,15 +358,15 @@ public:
                             filterTestFrameNum = 0;
                             doFilterTest = false;
                         }
-                        ImageFilter imageFilter = test->omxPlayer->imageFilters[currentFilterIndex];
+                        ImageFilter imageFilter = test->omxPlayer.imageFilters[currentFilterIndex];
                         ofLogVerbose(__func__) << "imageFilter: " << imageFilter.name;
-                        test->omxPlayer->setFilter(imageFilter.filterType);
+                        test->omxPlayer.setFilter(imageFilter.filterType);
                     }
                 }
             }
             if(doVolumeTest)
             {
-                float currentVolume = test->omxPlayer->getVolume();
+                float currentVolume = test->omxPlayer.getVolume();
                 if(ofGetFrameNum() % 30 == 0)
                 {
 
@@ -375,8 +375,8 @@ public:
                         ofLog() << "increaseTestComplete: " << increaseTestComplete << "currentVolume: " << currentVolume;
                         if(currentVolume < 1)
                         {
-                            test->omxPlayer->increaseVolume();
-                            currentVolume = test->omxPlayer->getVolume();
+                            test->omxPlayer.increaseVolume();
+                            currentVolume = test->omxPlayer.getVolume();
                             if(currentVolume >= 1)
                             {
                                 increaseTestComplete = true;
@@ -388,11 +388,11 @@ public:
 
                         if(!decreaseTestComplete)
                         {
-                            currentVolume = test->omxPlayer->getVolume();
+                            currentVolume = test->omxPlayer.getVolume();
                             if(currentVolume >= 0)
                             {
-                                test->omxPlayer->decreaseVolume();
-                                currentVolume = test->omxPlayer->getVolume();
+                                test->omxPlayer.decreaseVolume();
+                                currentVolume = test->omxPlayer.getVolume();
                                 if(currentVolume <= 0)
                                 {
                                     decreaseTestComplete = true;
@@ -402,7 +402,7 @@ public:
                     }
                     if(decreaseTestComplete && increaseTestComplete)
                     {
-                        test->omxPlayer->setVolume(0.4);
+                        test->omxPlayer.setVolume(0.4);
                         doVolumeTest = false;
                     }
                 }

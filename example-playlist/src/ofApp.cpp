@@ -6,7 +6,7 @@
 
 //This also demonstrates the ofxOMXPlayerListener pattern available
 
-//If your app extends ofxOMXPlayerListener you will receive an event when the video ends
+//If your app extends ofxOMXPlayerListener you will receive an event when the video ends or loops
 
 
 
@@ -21,6 +21,11 @@ void ofApp::onVideoEnd(ofxOMXPlayer* player)
     doLoadNextMovie = true;
 
 }
+
+void onVideoLoop(ofxOMXPlayer* player)
+{
+    
+};
 
 
 void ofApp::onCharacterReceived(KeyListenerEventData& e)

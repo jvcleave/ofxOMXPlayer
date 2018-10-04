@@ -10,6 +10,8 @@ class ofxOMXPlayerListener
 {
 public:
     virtual void onVideoEnd(ofxOMXPlayer*) = 0;
+    virtual void onVideoLoop(ofxOMXPlayer*) = 0;
+    
 };
 
 class ImageFilter
@@ -35,7 +37,7 @@ public:
     ofxOMXPlayerSettings settings;
     ofxOMXPlayerListener* listener;
     bool engineNeedsRestart;
-    
+    bool pendingLoopMessage;
     vector<ImageFilter>imageFilters;
     string currentFilterName;
 #pragma mark SETUP
@@ -71,6 +73,7 @@ public:
         
         listener = NULL;
         engineNeedsRestart = false;
+        pendingLoopMessage = false;
         OMX_Init();
         av_register_all();
         avformat_network_init();
@@ -335,6 +338,8 @@ public:
     }
     void onVideoLoop(bool needsRestart)
     {
+        
+        pendingLoopMessage = true;
         engineNeedsRestart = needsRestart;
     }
 
@@ -352,6 +357,15 @@ public:
             }
             
             setup(settings);
+            if(pendingLoopMessage)
+            {
+                if(listener)
+                {
+                    listener->onVideoLoop(this);
+                }
+                pendingLoopMessage = false;
+            }
+            
         }
     }
     

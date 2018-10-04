@@ -5,14 +5,15 @@ class TexturedStreamTest : public BaseTest
 {
 public:
     
+    int loopCount = 0;
     TexturedStreamTest()
     {
         
     }
     void close()
     {
-        delete omxPlayer;
-        omxPlayer = NULL;
+        isOpen = false;
+        omxPlayer.close();
         listener = NULL;
     }
     
@@ -29,12 +30,13 @@ public:
         settings.enableTexture = true;		//default true
         settings.enableLooping = false;		//default true
         settings.enableAudio = true;		//default true, save resources by disabling
-        //settings.doFlipTexture = true;		//default false
+        settings.enableFilters = true;
         
         settings.listener = this;
         //so either pass in the settings
-        omxPlayer = new ofxOMXPlayer();
-        omxPlayer->setup(settings);
+        omxPlayer.setup(settings);
+        isOpen = true;
+
     }
     void update()
     {
@@ -43,38 +45,48 @@ public:
     
     void draw()
     {
-        if(!omxPlayer)
-        {
-            return;
-        }
-        if(!omxPlayer->isTextureEnabled())
+       
+        if(!omxPlayer.isTextureEnabled())
         {
             return;
         }
         
-        omxPlayer->draw(0, 0, ofGetWidth(), ofGetHeight());
+        omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
         
         //draw a smaller version in the lower right
-        int scaledHeight	= omxPlayer->getHeight()/4;
-        int scaledWidth		= omxPlayer->getWidth()/4;
-        omxPlayer->draw(ofGetWidth()-scaledWidth, ofGetHeight()-scaledHeight, scaledWidth, scaledHeight);
+        int scaledHeight	= omxPlayer.getHeight()/4;
+        int scaledWidth		= omxPlayer.getWidth()/4;
+        omxPlayer.draw(ofGetWidth()-scaledWidth, ofGetHeight()-scaledHeight, scaledWidth, scaledHeight);
         
-        ofDrawBitmapStringHighlight(omxPlayer->getInfo(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
+        ofDrawBitmapStringHighlight(omxPlayer.getInfo(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
     }
     
     void onVideoEnd(ofxOMXPlayer* player)
     {
-        if(listener)
+        if(!player->isLoopingEnabled())
         {
-            listener->onTestComplete(this);
+            if(listener)
+            {
+                listener->onTestComplete(this);
+            }
+        }
+        
+    }
+
+    void onVideoLoop(ofxOMXPlayer* player)
+    {
+        loopCount++;
+        ofLogVerbose(__func__)  << "loopCount: " << loopCount;
+        
+        if(loopCount == 2)
+        {
+            if(listener)
+            {
+                listener->onTestComplete(this);
+            } 
         }
     }
     
-    
-    void onVideoLoop(ofxOMXPlayer* player)
-    {
-        
-    }
     
     void onKeyPressed(int key)
     {

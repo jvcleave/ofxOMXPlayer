@@ -15,14 +15,15 @@ class BaseTest : public ofxOMXPlayerListener
 {
 public:
     
-    ofxOMXPlayer* omxPlayer;
+    ofxOMXPlayer omxPlayer;
     TestListener* listener;
     string name;
+    bool isOpen;
     BaseTest()
     {
         name = "UNDEFINED";
-        omxPlayer = NULL;
         listener = NULL;
+        isOpen = false;
     }
     
     

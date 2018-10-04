@@ -13,11 +13,12 @@ void ofRPIVideoPlayer::onVideoEnd(ofxOMXPlayer* player)
 {
     videoHasEnded = true;
 }
-/*
-void ofRPIVideoPlayer::onVideoLoop(ofxOMXPlayerListenerEventData& e)
+
+void ofRPIVideoPlayer::onVideoLoop(ofxOMXPlayer* player)
 {
+    //videoHasEnded = true;
+
 }
-*/
 
 ofRPIVideoPlayer::ofRPIVideoPlayer()
 {

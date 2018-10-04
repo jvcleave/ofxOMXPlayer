@@ -54,7 +54,8 @@ protected:
     bool doPixels;
     bool videoHasEnded;
     void onVideoEnd(ofxOMXPlayer*);
-    //void onVideoLoop(ofxOMXPlayerListenerEventData&);
+    void onVideoLoop(ofxOMXPlayer*);
+
     ofxOMXPlayerSettings settings;
     bool openOMXPlayer(ofxOMXPlayerSettings);
 };
