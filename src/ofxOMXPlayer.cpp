@@ -345,8 +345,14 @@ void ofxOMXPlayer::disableLooping()
 void ofxOMXPlayer::draw(float x, float y, float w, float h)
 {
     //ofLog() << "draw: " << ofRectangle(x, y, w, h);
-    
-    engine.draw(x, y, w, h);
+    if(isTextureEnabled())
+    {
+        engine.draw(x, y, w, h);
+    }else
+    {
+        ofRectangle drawRect(x, y, w, h);
+        draw(drawRect);
+    }
 }
 
 void ofxOMXPlayer::draw(ofRectangle& rectangle)
@@ -359,7 +365,9 @@ void ofxOMXPlayer::draw(ofRectangle& rectangle)
     {
         ofRectangle cropRect;
         rectangle.width += rectangle.x;
+        rectangle.height += rectangle.y;
         drawCropped(cropRect, rectangle);
+        //ofLog() << rectangle;
     }
     
 }

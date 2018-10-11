@@ -69,7 +69,8 @@ public:
     ofxOMXPlayerListener* listener;
     
     bool setDisplayResolution; //direct only
-    
+    ofRectangle directDrawRectangle;
+
     
     //PlayerDirectDisplayOptions directDisplayOptions;
     /*
@@ -548,7 +549,16 @@ public:
     bool setup(ofxOMXPlayerSettings settings)
     {
        
-        
+        if(!settings.directDrawRectangle.isZero())
+        {
+            
+            float left = settings.directDrawRectangle.x;
+            float top = settings.directDrawRectangle.y;
+            float right = settings.directDrawRectangle.x + settings.directDrawRectangle.width;
+            float bottom = top+settings.directDrawRectangle.height;
+            m_config_video.dst_rect.SetRect(left, top, right, bottom);
+            ofLog() << "USING settings.directDrawRectangle: " << settings.directDrawRectangle;
+        }
         m_filename = settings.videoPath;
         useTexture = settings.enableTexture;
         m_loop = settings.enableLooping;
@@ -1089,6 +1099,8 @@ public:
                     
                     if (m_loop)
                     {
+                        ofLog() << "SHOULD LOOP";
+
                         bool needsRestart = false;
                         if(totalNumFrames)
                         {
@@ -1098,11 +1110,15 @@ public:
                             ofLog() << "WILL LOOP VIA RESTART";
                             needsRestart = true;
                         }
-                        //continue;
                         if(listener)
                         {
+                            
+                            ofLog() << "calling onVideoLoop";
+                            
                             listener->onVideoLoop(needsRestart);
                         }
+                        continue;
+                        
                     }else
                     {
                         if(listener)

@@ -1123,7 +1123,9 @@ void COMXVideo::SetVideoRect()
 {
     CSingleLock lock (m_critSection);
     if(!m_is_open)
+    {
         return;
+    }
     
     OMX_ERRORTYPE omx_err;
     OMX_CONFIG_DISPLAYREGIONTYPE configDisplay;
