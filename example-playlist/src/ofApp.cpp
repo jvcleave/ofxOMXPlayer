@@ -22,10 +22,10 @@ void ofApp::onVideoEnd(ofxOMXPlayer* player)
 
 }
 
-void onVideoLoop(ofxOMXPlayer* player)
+void ofApp::onVideoLoop(ofxOMXPlayer* player)
 {
     
-};
+}
 
 
 void ofApp::onCharacterReceived(KeyListenerEventData& e)
