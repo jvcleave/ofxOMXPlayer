@@ -393,6 +393,11 @@ void ofxOMXPlayer::setAlpha(int alpha)
 
 void ofxOMXPlayer::setLayer(int layer)
 {
+    if(!isOpen())
+    {
+        ofLogError() << "TOO EARLY TO SET LAYER, Use ofxOMXPlayerSettings.layer to pass in";
+        return;
+    }
     engine.setLayer(layer);
 }
 
