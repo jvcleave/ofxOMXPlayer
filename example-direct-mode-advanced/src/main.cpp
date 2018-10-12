@@ -99,7 +99,7 @@ int main()
      */
     
     //My custom OF mod - ignore
-    settings.alphaFlags = DISPMANX_FLAGS_ALPHA_FROM_SOURCE;
+    //settings.alphaFlags = DISPMANX_FLAGS_ALPHA_FROM_SOURCE;
 
     ofCreateWindow(settings);   
     ofRunApp( new ofApp()); 
