@@ -49,6 +49,7 @@ public:
         logDirectory = ofToDataPath("", true);
         logToOF = true;
         setDisplayResolution = false;
+        layer = 0;
     }
     bool enableFilters;
     OMX_IMAGEFILTERTYPE filter;
@@ -65,7 +66,7 @@ public:
     int debugLevel;
     string logDirectory;
     bool logToOF;
-    
+    uint layer;
     ofxOMXPlayerListener* listener;
     
     bool setDisplayResolution; //direct only
@@ -559,6 +560,9 @@ public:
             m_config_video.dst_rect.SetRect(left, top, right, bottom);
             ofLog() << "USING settings.directDrawRectangle: " << settings.directDrawRectangle;
         }
+        
+        m_config_video.layer = settings.layer;
+        
         m_filename = settings.videoPath;
         useTexture = settings.enableTexture;
         m_loop = settings.enableLooping;
