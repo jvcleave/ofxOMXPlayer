@@ -16,7 +16,7 @@ void ofApp::setup()
 void ofApp::update()
 {
     
-    ofLog() << "omxPlayer.isFrameNew(): " << omxPlayer.isFrameNew();
+    //ofLog() << "omxPlayer.isFrameNew(): " << omxPlayer.isFrameNew();
 	if (doSaveImage ) 
 	{
 		doSaveImage = false;
