@@ -15,6 +15,8 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::update()
 {
+    
+    ofLog() << "omxPlayer.isFrameNew(): " << omxPlayer.isFrameNew();
 	if (doSaveImage ) 
 	{
 		doSaveImage = false;
@@ -22,14 +24,19 @@ void ofApp::update()
 	}
 	if (doUpdatePixels) 
 	{
-		//since updatePixels() is expensive it is not automatically called in the player		
-		omxPlayer.updatePixels();
-
-		if (!pixelOutput.isAllocated()) 
-		{
-			pixelOutput.allocate(omxPlayer.getWidth(), omxPlayer.getHeight(), GL_RGBA);
-		}
-		pixelOutput.loadData(omxPlayer.getPixels(), omxPlayer.getWidth(), omxPlayer.getHeight(), GL_RGBA);
+        
+        if(omxPlayer.isFrameNew())
+        {
+            //since updatePixels() is expensive it is not automatically called in the player        
+            omxPlayer.updatePixels();
+            
+            if (!pixelOutput.isAllocated()) 
+            {
+                pixelOutput.allocate(omxPlayer.getWidth(), omxPlayer.getHeight(), GL_RGBA);
+            }
+            pixelOutput.loadData(omxPlayer.getPixels(), omxPlayer.getWidth(), omxPlayer.getHeight(), GL_RGBA);
+        }
+		
 	}
 	
 	
@@ -44,7 +51,11 @@ void ofApp::draw(){
 	}
 	
 	omxPlayer.draw(0, 0, ofGetWidth(), ofGetHeight());
-	pixelOutput.draw(20, 20, omxPlayer.getWidth()/2, omxPlayer.getHeight()/2);
+    if(pixelOutput.isAllocated())
+    {
+        pixelOutput.draw(20, 20, omxPlayer.getWidth()/2, omxPlayer.getHeight()/2);
+
+    }
 	
 	stringstream info;
 	info <<"\n" <<	"Press u to toggle doUpdatePixels: " << doUpdatePixels;
@@ -67,6 +78,11 @@ void ofApp::keyPressed  (int key)
 	{
 		doUpdatePixels = !doUpdatePixels;	
 	}
+    
+    if(key == ' ')
+    {
+        omxPlayer.togglePause();  
+    }
 }
 
 void ofApp::onCharacterReceived(KeyListenerEventData& e)
