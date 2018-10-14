@@ -330,10 +330,19 @@ bool ofxOMXPlayerEngine::setup(ofxOMXPlayerSettings settings)
     {
         if (m_config_audio.device == "")
         {
-            if (vc_tv_hdmi_audio_supported(EDID_AudioFormat_ePCM, 2, EDID_AudioSampleRate_e44KHz, EDID_AudioSampleSize_16bit ) == 0)
-                m_config_audio.device = "omx:hdmi";
-            else
+            if(settings.useHDMIForAudio)
+            {
+                if (vc_tv_hdmi_audio_supported(EDID_AudioFormat_ePCM, 2, EDID_AudioSampleRate_e44KHz, EDID_AudioSampleSize_16bit ) == 0)
+                {
+                    m_config_audio.device = "omx:hdmi";
+                }else
+                {
+                    ofLogError() << "HDMI AUDIO FAIL";
+                }
+            }else
+            {
                 m_config_audio.device = "omx:local";
+            }
         }
         
         if ((m_config_audio.hints.codec == AV_CODEC_ID_AC3 || m_config_audio.hints.codec == AV_CODEC_ID_EAC3) &&
@@ -666,13 +675,7 @@ void ofxOMXPlayerEngine::threadedFunction()
                 update = true;
                 m_last_check_time = now;
             }
-            
-            if (update) 
-            {                    
-                //processCommand();
-            }
-            
-            
+
             
             if(m_seek_flush || m_incr != 0)
             {
