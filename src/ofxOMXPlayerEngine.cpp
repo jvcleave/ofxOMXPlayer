@@ -736,8 +736,6 @@ void ofxOMXPlayerEngine::threadedFunction()
                 
                 ofLog(OF_LOG_NOTICE, "m_omx_reader Seeked %.0f %.0f %.0f\n", DVD_MSEC_TO_TIME(seek_pos), startpts, omxClock.OMXMediaTime());
                 
-                //unsigned t = (unsigned)(startpts*1e-6);
-                unsigned t = (unsigned)(pts*1e-6);
                 m_packet_after_seek = false;
             }
             
