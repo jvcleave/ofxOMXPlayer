@@ -76,10 +76,10 @@ public:
 
 #pragma mark DRAWING
     void draw(float x, float y, float w, float h);
-    void draw(ofRectangle& rectangle);
+    void draw(ofRectangle rectangle);
     void drawCropped(float cropX, float cropY, float cropWidth, float cropHeight,
                      float drawX, float drawY, float drawWidth, float drawHeight);
-    void drawCropped(ofRectangle& cropRectangle, ofRectangle& drawRectangle);
+    void drawCropped(ofRectangle cropRectangle, ofRectangle drawRectangle);
     void setAlpha(int alpha);
     void setLayer(int layer);
     void rotateVideo(int degrees, bool doMirror = false);

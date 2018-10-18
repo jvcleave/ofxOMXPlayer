@@ -359,7 +359,7 @@ void ofxOMXPlayer::draw(float x, float y, float w, float h)
     }
 }
 
-void ofxOMXPlayer::draw(ofRectangle& rectangle)
+void ofxOMXPlayer::draw(ofRectangle rectangle)
 {
     if(isTextureEnabled())
     {
@@ -383,7 +383,7 @@ void ofxOMXPlayer::drawCropped(float cropX, float cropY, float cropWidth, float 
                        drawX, drawY, drawWidth, drawHeight);
 }
 
-void ofxOMXPlayer::drawCropped(ofRectangle& cropRectangle, ofRectangle& drawRectangle)
+void ofxOMXPlayer::drawCropped(ofRectangle cropRectangle, ofRectangle drawRectangle)
 {
     
     drawCropped(cropRectangle.x, cropRectangle.y, cropRectangle.width, cropRectangle.height,
