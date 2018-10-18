@@ -49,6 +49,10 @@ bool ofxOMXPlayer::setup(ofxOMXPlayerSettings settings_)
     {
         listener = settings.listener;  
     }
+    if(isOpen())
+    {
+        engine.close();
+    }
     bool result = engine.setup(settings);
     if(result)
     {
