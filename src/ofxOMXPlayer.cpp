@@ -314,8 +314,6 @@ void ofxOMXPlayer::onUpdate(ofEventArgs& eventArgs)
         {
             engine.close();
         }
-        
-        setup(settings);
         if(pendingLoopMessage)
         {
             if(listener)
@@ -324,8 +322,21 @@ void ofxOMXPlayer::onUpdate(ofEventArgs& eventArgs)
             }
             pendingLoopMessage = false;
         }
+        setup(settings);
         
+        
+    }else
+    {
+        if(pendingLoopMessage)
+        {
+            if(listener)
+            {
+                listener->onVideoLoop(this);
+            }
+            pendingLoopMessage = false;
+        }
     }
+    
 }
 
 
