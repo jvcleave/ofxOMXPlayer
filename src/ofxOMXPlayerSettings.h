@@ -8,6 +8,7 @@
 #include <IL/OMX_Video.h>
 #include <IL/OMX_Broadcom.h>
 #include "utils/log.h"
+#define __func__ __PRETTY_FUNCTION__
 
 class ofxOMXPlayerListener;
 class ofxOMXPlayerSettings

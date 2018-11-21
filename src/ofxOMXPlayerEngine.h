@@ -149,7 +149,7 @@ public:
     
     
     void close(bool clearTextures = false);
-    int doExit();
+    void doExit();
     ~ofxOMXPlayerEngine();
     
 };

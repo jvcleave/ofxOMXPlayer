@@ -472,7 +472,7 @@ void ofxOMXPlayerEngine::drawCropped(float cropX, float cropY, float cropWidth, 
 #pragma mark UPDATE
 void ofxOMXPlayerEngine::onUpdate(ofEventArgs& eventArgs)
 {
-    
+    if(!isOpen) return;
     if(!m_has_video) return;
     if (!texture.isAllocated() && !fbo.isAllocated()) return;
     if(omxClock.OMXMediaTime()<0) return; 
@@ -936,8 +936,10 @@ void ofxOMXPlayerEngine::threadedFunction()
                         ofLog() << "calling onVideoLoop";
                         
                         listener->onVideoLoop(needsRestart);
+                        sleep(120);
                     }
                     continue;
+                    
                     
                 }else
                 {
@@ -1327,12 +1329,13 @@ void ofxOMXPlayerEngine::FlushStreams(double pts)
 }
 
 #pragma mark EXIT
-int ofxOMXPlayerEngine::doExit()
+void ofxOMXPlayerEngine::doExit()
 {
     ofLog() << "EXITING";
-    
-    if (m_stats)
-        ofLog(OF_LOG_NOTICE, "\n");
+    if(!isOpen)
+    {
+        return;
+    }
     
     if (m_stop)
     {
@@ -1373,8 +1376,10 @@ int ofxOMXPlayerEngine::doExit()
     // g_RBP.Deinitialize();
     ofLog(OF_LOG_NOTICE, "have a nice day ;)\n");
     clear();
-    return EXIT_SUCCESS;
+    isOpen = false;
 #if 0
+    return EXIT_SUCCESS;
+
     // exit status success on playback end
     if (m_send_eos)
         return EXIT_SUCCESS;

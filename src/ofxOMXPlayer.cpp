@@ -300,7 +300,7 @@ void ofxOMXPlayer::onVideoEnd()
 
 void ofxOMXPlayer::onVideoLoop(bool needsRestart)
 {
-    
+    ofLogNotice(__func__) << endl;
     pendingLoopMessage = true;
     engineNeedsRestart = needsRestart;
 }
