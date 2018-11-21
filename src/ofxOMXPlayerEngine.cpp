@@ -932,15 +932,14 @@ void ofxOMXPlayerEngine::threadedFunction()
                     }
                     if(listener)
                     {
-                        
                         ofLog() << "calling onVideoLoop";
-                        
                         listener->onVideoLoop(needsRestart);
-                        sleep(120);
+                        
                     }
-                    continue;
-                    
-                    
+                    if(!needsRestart)
+                    {
+                        continue; 
+                    }
                 }else
                 {
                     if(listener)
