@@ -137,6 +137,7 @@ public:
     
     void decreaseVolume();
     void increaseVolume();
+    void applyVolume();
     
     void SetSpeed();
     void FlushStreams(double pts);

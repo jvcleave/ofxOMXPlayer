@@ -123,7 +123,6 @@ public:
     void        setDisplayRect(ofRectangle&);
     void        cropVideo(ofRectangle&);
     void        cropVideo(float x, float y, float width, float height);
-    void        rotateVideo(int degrees);
     void        setMirror(bool);
     void        setAlpha(int alpha);
     void        setFullScreen(bool);

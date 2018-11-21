@@ -269,7 +269,7 @@ string ofxOMXPlayer::getInfo()
             info << "REMAINING FRAMES: N/A, NO TOTAL FRAMES" << endl;
         }        
         info << "LOOPING ENABLED: " << isLoopingEnabled() << endl;
-        info << "CURRENT VOLUME: " << getVolume() << endl;
+        info << "CURRENT VOLUME RAW: " << getVolumeDB() << endl;
         info << "CURRENT VOLUME NORMALIZED: " << getVolumeNormalized() << endl; 
         info << "FILE: " << settings.videoPath << endl; 
         info << "TEXTURE ENABLED: " << isTextureEnabled() << endl; 
@@ -499,6 +499,7 @@ void ofxOMXPlayer::setVolumeNormalized(float volume)
 {
     float value = ofMap(volume, 0.0, 1.0, -6000.0, 6000.0, true);
     engine.m_Volume = value;
+    engine.applyVolume();
 }
 
 void ofxOMXPlayer::setVolume(float volume)

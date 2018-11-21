@@ -1091,18 +1091,25 @@ void ofxOMXPlayerEngine::stepNumFrames(int step)
 
 #pragma mark AUDIO
 
+void ofxOMXPlayerEngine::applyVolume()
+{
+    lock();
+    m_player_audio.SetVolume(pow(10, m_Volume / 2000.0));
+    ofLog(OF_LOG_NOTICE, "Current Volume: %.2fdB\n", m_Volume / 100.0f);
+    unlock();
+}
+
 void ofxOMXPlayerEngine::decreaseVolume()
 {
     m_Volume -= 300;
-    m_player_audio.SetVolume(pow(10, m_Volume / 2000.0));
-    ofLog(OF_LOG_NOTICE, "Current Volume: %.2fdB\n", m_Volume / 100.0f);
+    applyVolume();
 }
 
 void ofxOMXPlayerEngine::increaseVolume()
 {
     m_Volume += 300;
-    m_player_audio.SetVolume(pow(10, m_Volume / 2000.0));
-    ofLog(OF_LOG_NOTICE, "Current Volume: %.2fdB\n", m_Volume / 100.0f);
+    applyVolume();
+
 }
 
 #pragma mark DISPLAY
