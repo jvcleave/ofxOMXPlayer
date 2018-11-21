@@ -1,1 +1,1 @@
-ofxOMXMediaPlayer
+ofxOMXPlayer
