@@ -33,7 +33,7 @@ public:
     bool pendingLoopMessage;
     vector<ImageFilter>imageFilters;
     string currentFilterName;
-    
+    int playerID;
     
 #pragma mark SETUP
     ofxOMXPlayer();

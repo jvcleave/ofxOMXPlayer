@@ -2,6 +2,7 @@
 
 ofxOMXPlayer::ofxOMXPlayer()
 {
+    playerID = 0;
     currentFilterName = "";
     imageFilters.push_back(ImageFilter("None", OMX_ImageFilterNone));
     imageFilters.push_back(ImageFilter("Noise", OMX_ImageFilterNoise));
