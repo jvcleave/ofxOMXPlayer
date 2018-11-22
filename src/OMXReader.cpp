@@ -55,6 +55,7 @@ timeout_start = CurrentHostCounter(); \
 timeout_duration = (x) * timeout_default_duration; \
 } while (0)
 
+//#define RESET_TIMEOUT(x)
 
 OMXReader::OMXReader()
 {
