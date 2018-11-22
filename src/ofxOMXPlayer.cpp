@@ -479,7 +479,14 @@ void ofxOMXPlayer::seekToFrame(int frameTarget)
 
 void ofxOMXPlayer::restartMovie()
 {
-    seekToFrame(0);
+    if(getTotalNumFrames())
+    {
+       seekToFrame(0); 
+    }else
+    {
+        reopen();
+    }
+    
 }
 
 #pragma mark PLAYBACK AUDIO
