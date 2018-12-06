@@ -50,6 +50,7 @@ public:
     int getTotalNumFrames();
     float getDurationInSeconds();
     ofTexture&  getTextureReference();
+    ofFbo& getFboReference();
     GLuint getTextureID();
     unsigned char* getPixels();
     int getClockSpeed();

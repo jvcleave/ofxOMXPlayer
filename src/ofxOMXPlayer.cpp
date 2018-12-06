@@ -113,10 +113,14 @@ ofTexture& ofxOMXPlayer::getTextureReference()
 {
     return engine.fbo.getTextureReference();
 }
+ofFbo& ofxOMXPlayer::getFboReference()
+{
+    return engine.fbo;
+}
 
 GLuint ofxOMXPlayer::getTextureID()
 {
-    return engine.texture.getTextureData().textureID;
+    return getTextureReference().getTextureData().textureID;
 }
 
 unsigned char* ofxOMXPlayer::getPixels()
