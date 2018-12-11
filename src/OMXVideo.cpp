@@ -39,6 +39,77 @@
 #endif
 #define CLASSNAME "COMXVideo"
 
+
+#ifndef OMX_Maps_h
+
+#define OMX_IMAGE_FX (OMX_STRING)"OMX.broadcom.image_fx"
+#define IMAGE_FX_INPUT_PORT 190
+#define IMAGE_FX_OUTPUT_PORT 191
+
+
+#define OMX_CAMERA (OMX_STRING)"OMX.broadcom.camera"
+#define CAMERA_PREVIEW_PORT        70
+#define CAMERA_OUTPUT_PORT        71
+#define CAMERA_STILL_OUTPUT_PORT 72
+
+#define OMX_IMAGE_ENCODER (OMX_STRING)"OMX.broadcom.image_encode"
+#define IMAGE_ENCODER_INPUT_PORT 340
+#define IMAGE_ENCODER_OUTPUT_PORT 341
+
+#define OMX_IMAGE_DECODER (OMX_STRING)"OMX.broadcom.image_decode"
+#define IMAGE_DECODER_INPUT_PORT 320
+#define IMAGE_DECODER_OUTPUT_PORT 321
+
+
+#define OMX_RESIZER (OMX_STRING)"OMX.broadcom.resize"
+#define RESIZER_INPUT_PORT 60
+#define RESIZER_OUTPUT_PORT 61
+
+#define OMX_VIDEO_ENCODER (OMX_STRING)"OMX.broadcom.video_encode"
+#define VIDEO_ENCODE_INPUT_PORT 200
+#define VIDEO_ENCODE_OUTPUT_PORT 201
+
+#define OMX_VIDEO_DECODER (OMX_STRING)"OMX.broadcom.video_decode"
+#define VIDEO_DECODE_INPUT_PORT 130
+#define VIDEO_DECODE_OUTPUT_PORT 131
+
+
+#define OMX_VIDEO_SPLITTER (OMX_STRING)"OMX.broadcom.video_splitter"
+#define VIDEO_SPLITTER_INPUT_PORT 250
+
+#define VIDEO_SPLITTER_OUTPUT_PORT1 251
+#define VIDEO_SPLITTER_OUTPUT_PORT2 252
+#define VIDEO_SPLITTER_OUTPUT_PORT3 253
+#define VIDEO_SPLITTER_OUTPUT_PORT4 254
+
+#define OMX_VIDEO_RENDER (OMX_STRING)"OMX.broadcom.video_render"
+#define VIDEO_RENDER_INPUT_PORT    90
+
+#define OMX_EGL_RENDER (OMX_STRING)"OMX.broadcom.egl_render"
+#define EGL_RENDER_INPUT_PORT    220
+#define EGL_RENDER_OUTPUT_PORT    221
+
+#define OMX_NULL_SINK (OMX_STRING)"OMX.broadcom.null_sink"
+#define NULL_SINK_INPUT_PORT 240
+
+#define OMX_VIDEO_SCHEDULER (OMX_STRING)"OMX.broadcom.video_scheduler"
+#define VIDEO_SCHEDULER_INPUT_PORT 10
+#define VIDEO_SCHEDULER_OUTPUT_PORT 11
+#define VIDEO_SCHEDULER_CLOCK_PORT 12
+
+#define OMX_CLOCK (OMX_STRING)"OMX.broadcom.clock"
+#define OMX_CLOCK_OUTPUT_PORT_0 80
+#define OMX_CLOCK_OUTPUT_PORT_1 81
+#define OMX_CLOCK_OUTPUT_PORT_2 82
+#define OMX_CLOCK_OUTPUT_PORT_3 83
+#define OMX_CLOCK_OUTPUT_PORT_4 84
+#define OMX_CLOCK_OUTPUT_PORT_5 85
+
+
+
+#endif
+
+
 #define OMX_VIDEO_DECODER       "OMX.broadcom.video_decode"
 #define OMX_H264BASE_DECODER    OMX_VIDEO_DECODER
 #define OMX_H264MAIN_DECODER    OMX_VIDEO_DECODER
@@ -55,7 +126,12 @@
 #define OMX_VP8_DECODER         OMX_VIDEO_DECODER
 #define OMX_THEORA_DECODER      OMX_VIDEO_DECODER
 #define OMX_MJPEG_DECODER       OMX_VIDEO_DECODER
+
+
+#if !defined(OMX_TRACE)
 #define OMX_TRACE(x) ofLog() << __LINE__ << " "  << omxErrorTypes[x]
+#endif
+
 
 
 std::map<OMX_EVENTTYPE, std::string> eventTypes;
@@ -206,26 +282,22 @@ bool COMXVideo::PortSettingsChanged()
     OMX_ERRORTYPE error   = OMX_ErrorNone;
     if (m_settings_changed)
     {
-        m_omx_decoder.DisablePort(m_omx_decoder.GetOutputPort(), true);
+        m_omx_decoder.DisablePort(VIDEO_DECODE_OUTPUT_PORT, true);
     }
     
     OMX_PARAM_PORTDEFINITIONTYPE port_image;
     OMX_INIT_STRUCTURE(port_image);
-    port_image.nPortIndex = m_omx_decoder.GetOutputPort();
+    port_image.nPortIndex = VIDEO_DECODE_OUTPUT_PORT;
     error = m_omx_decoder.GetParameter(OMX_IndexParamPortDefinition, &port_image);
-    if(error != OMX_ErrorNone)
-    {
-        ofLog(OF_LOG_NOTICE, "%s::%s - error m_omx_decoder.GetParameter(OMX_IndexParamPortDefinition) error(%s)", CLASSNAME, __func__, omxErrorTypes[error].c_str());
-    }
+    OMX_TRACE(error);
+
     
     OMX_CONFIG_POINTTYPE pixel_aspect;
     OMX_INIT_STRUCTURE(pixel_aspect);
-    pixel_aspect.nPortIndex = m_omx_decoder.GetOutputPort();
+    pixel_aspect.nPortIndex = VIDEO_DECODE_OUTPUT_PORT;
     error = m_omx_decoder.GetParameter(OMX_IndexParamBrcmPixelAspectRatio, &pixel_aspect);
-    if(error != OMX_ErrorNone)
-    {
-        ofLog(OF_LOG_NOTICE, "%s::%s - error m_omx_decoder.GetParameter(OMX_IndexParamBrcmPixelAspectRatio) error(%s)", CLASSNAME, __func__, omxErrorTypes[error].c_str());
-    }
+    OMX_TRACE(error);
+
     
     if (pixel_aspect.nX && pixel_aspect.nY && !m_config.hints.forced_aspect)
     {
@@ -237,13 +309,13 @@ bool COMXVideo::PortSettingsChanged()
     {
         PortSettingsChangedLogger(port_image, -1);
         SetVideoRect();
-        m_omx_decoder.EnablePort(m_omx_decoder.GetOutputPort(), true);
+        m_omx_decoder.EnablePort(VIDEO_DECODE_OUTPUT_PORT, true);
         return true;
     }
     
     OMX_CONFIG_INTERLACETYPE interlace;
     OMX_INIT_STRUCTURE(interlace);
-    interlace.nPortIndex = m_omx_decoder.GetOutputPort();
+    interlace.nPortIndex = VIDEO_DECODE_OUTPUT_PORT;
     error = m_omx_decoder.GetConfig(OMX_IndexConfigCommonInterlace, &interlace);
     
     if(filtersEnabled)
@@ -262,21 +334,13 @@ bool COMXVideo::PortSettingsChanged()
     if(useTexture)
     {
         std::string componentName = "OMX.broadcom.egl_render";
-        
-        
-        if(!m_omx_render.Initialize(componentName, OMX_IndexParamVideoInit))
-        {
-            return false;
-        }
+        m_omx_render.Initialize(componentName, OMX_IndexParamVideoInit);
         m_omx_render.fillBufferListener = this;
         
     }else
     {
         string componentName = "OMX.broadcom.video_render";
-        if(!m_omx_render.Initialize(componentName, OMX_IndexParamVideoInit))
-        {
-            return false;
-        }
+        m_omx_render.Initialize(componentName, OMX_IndexParamVideoInit);
     }
     
     
@@ -285,13 +349,11 @@ bool COMXVideo::PortSettingsChanged()
     
     PortSettingsChangedLogger(port_image, interlace.eMode);
     
-    if(!m_omx_sched.Initialize("OMX.broadcom.video_scheduler", OMX_IndexParamVideoInit))
-        return false;
+    m_omx_sched.Initialize("OMX.broadcom.video_scheduler", OMX_IndexParamVideoInit);
     
     if(filtersEnabled)
     {
-        if(!m_omx_image_fx.Initialize("OMX.broadcom.image_fx", OMX_IndexParamImageInit))
-            return false;
+        m_omx_image_fx.Initialize("OMX.broadcom.image_fx", OMX_IndexParamImageInit);
     }
     
     if(!useTexture)
@@ -306,11 +368,8 @@ bool COMXVideo::PortSettingsChanged()
         configDisplay.layer = m_config.layer;
         configDisplay.transform = m_transform;
         error = m_omx_render.SetConfig(OMX_IndexConfigDisplayRegion, &configDisplay);
-        if(error != OMX_ErrorNone)
-        {
-            ofLog(OF_LOG_NOTICE, "%s::%s - could not set transform : %d", CLASSNAME, __func__, m_transform);
-            return false;
-        }
+        OMX_TRACE(error);
+
         
         SetVideoRect(); 
         
@@ -329,11 +388,8 @@ bool COMXVideo::PortSettingsChanged()
             latencyTarget.nAdjCap = 20;
             
             error = m_omx_render.SetConfig(OMX_IndexConfigLatencyTarget, &latencyTarget);
-            if (error != OMX_ErrorNone)
-            {
-                ofLog(OF_LOG_NOTICE, "%s::%s - OMX_IndexConfigLatencyTarget error(%s)", CLASSNAME, __func__, omxErrorTypes[error].c_str());
-                return false;
-            }
+            OMX_TRACE(error);
+
         }
     }
     
@@ -361,7 +417,7 @@ bool COMXVideo::PortSettingsChanged()
             OMX_CONFIG_IMAGEFILTERPARAMSTYPE image_filter;
             OMX_INIT_STRUCTURE(image_filter);
             
-            image_filter.nPortIndex = m_omx_image_fx.GetOutputPort();
+            image_filter.nPortIndex = IMAGE_FX_OUTPUT_PORT;
             if (m_config.anaglyph != OMX_ImageFilterAnaglyphNone)
             {
                 image_filter.nNumParams = 1;
@@ -381,11 +437,8 @@ bool COMXVideo::PortSettingsChanged()
                     image_filter.eImageFilter = OMX_ImageFilterDeInterlaceAdvanced;
             }
             error = m_omx_image_fx.SetConfig(OMX_IndexConfigCommonImageFilterParameters, &image_filter);
-            if(error != OMX_ErrorNone)
-            {
-                ofLog(OF_LOG_NOTICE, "%s::%s - OMX_IndexConfigCommonImageFilterParameters error(%s)", CLASSNAME, __func__, omxErrorTypes[error].c_str());
-                return false;
-            }
+            OMX_TRACE(error);
+
         }else
         {
             SetFilter(m_config.filterType);
@@ -395,46 +448,31 @@ bool COMXVideo::PortSettingsChanged()
     
     if(filtersEnabled)
     {
-        m_omx_tunnel_decoder.Initialize(&m_omx_decoder, m_omx_decoder.GetOutputPort(),
-                                        &m_omx_image_fx, m_omx_image_fx.GetInputPort());
-        m_omx_tunnel_image_fx.Initialize(&m_omx_image_fx, m_omx_image_fx.GetOutputPort(),
-                                         &m_omx_sched, m_omx_sched.GetInputPort());
+        m_omx_tunnel_decoder.Initialize(&m_omx_decoder, VIDEO_DECODE_OUTPUT_PORT,
+                                        &m_omx_image_fx, IMAGE_FX_INPUT_PORT);
+        m_omx_tunnel_image_fx.Initialize(&m_omx_image_fx, IMAGE_FX_OUTPUT_PORT,
+                                         &m_omx_sched, VIDEO_SCHEDULER_INPUT_PORT);
     }
     else
     {
-        m_omx_tunnel_decoder.Initialize(&m_omx_decoder, m_omx_decoder.GetOutputPort(),
-                                        &m_omx_sched, m_omx_sched.GetInputPort());
+        m_omx_tunnel_decoder.Initialize(&m_omx_decoder, VIDEO_DECODE_OUTPUT_PORT,
+                                        &m_omx_sched, VIDEO_SCHEDULER_INPUT_PORT);
     }
-    m_omx_tunnel_sched.Initialize(&m_omx_sched, m_omx_sched.GetOutputPort(),
+    m_omx_tunnel_sched.Initialize(&m_omx_sched, VIDEO_SCHEDULER_OUTPUT_PORT,
                                   &m_omx_render, m_omx_render.GetInputPort());
-    m_omx_tunnel_clock.Initialize(m_omx_clock, m_omx_clock->GetInputPort() + 1,
-                                  &m_omx_sched, m_omx_sched.GetOutputPort() + 1);
+    m_omx_tunnel_clock.Initialize(m_omx_clock, OMX_CLOCK_OUTPUT_PORT_1,
+                                  &m_omx_sched, VIDEO_SCHEDULER_CLOCK_PORT);
     
     error = m_omx_tunnel_clock.Establish();
-    if(error != OMX_ErrorNone)
-    {
-        ofLog(OF_LOG_NOTICE, "%s::%s - m_omx_tunnel_clock.Establish error(%s)", CLASSNAME, __func__, omxErrorTypes[error].c_str());
-        return false;
-    }
-    
+    OMX_TRACE(error);
+
     error = m_omx_tunnel_decoder.Establish();
-    if (error != OMX_ErrorNone)
-    {
-        ofLog(OF_LOG_NOTICE, "%s::%s - m_omx_tunnel_decoder.Establish error(%s)", CLASSNAME, __func__, omxErrorTypes[error].c_str());
-        return false;
-    }
-    
-    
+    OMX_TRACE(error);
+
     if(filtersEnabled)
     {
         error = m_omx_tunnel_image_fx.Establish();
-        if(error != OMX_ErrorNone)
-        {
-            ofLog(OF_LOG_NOTICE, "%s::%s - m_omx_tunnel_image_fx.Establish error(%s)", CLASSNAME, __func__, omxErrorTypes[error].c_str());
-            return false;
-        }
-        
-        
+        OMX_TRACE(error);
     }
     
     error = m_omx_tunnel_sched.Establish();
@@ -456,7 +494,7 @@ bool COMXVideo::PortSettingsChanged()
         eglBuffer = NULL;
         error = m_omx_render.UseEGLImage(&eglBuffer, m_omx_render.GetOutputPort(), NULL, m_config.eglImage);
         OMX_TRACE(error);
-        if(error != OMX_ErrorNone) return false;
+
         
     }
     
@@ -468,27 +506,18 @@ bool COMXVideo::PortSettingsChanged()
     if(filtersEnabled)
     {
         error = m_omx_image_fx.SetStateForComponent(OMX_StateExecuting);
-        if (error != OMX_ErrorNone)
-        {
-            ofLog(OF_LOG_NOTICE, "%s::%s - m_omx_image_fx.SetStateForComponent error(%s)", CLASSNAME, __func__, omxErrorTypes[error].c_str());
-            return false;
-        }
+        OMX_TRACE(error);
+
     }
     
     
     error = m_omx_sched.SetStateForComponent(OMX_StateExecuting);
-    if(error != OMX_ErrorNone)
-    {
-        ofLog(OF_LOG_NOTICE, "%s::%s - m_omx_sched.SetStateForComponent error(%s)", CLASSNAME, __func__, omxErrorTypes[error].c_str());
-        return false;
-    }
+    OMX_TRACE(error);
+
     
     error = m_omx_render.SetStateForComponent(OMX_StateExecuting);
-    if(error != OMX_ErrorNone)
-    {
-        ofLog(OF_LOG_NOTICE, "%s::%s - m_omx_render.SetStateForComponent error(%s)", CLASSNAME, __func__, omxErrorTypes[error].c_str());
-        return false;
-    }
+    OMX_TRACE(error);
+
     
     if(useTexture)
     {
@@ -764,7 +793,7 @@ bool COMXVideo::Open(OMXClock *clock, const OMXVideoConfig &config)
     
     OMX_VIDEO_PARAM_PORTFORMATTYPE formatType;
     OMX_INIT_STRUCTURE(formatType);
-    formatType.nPortIndex = m_omx_decoder.GetInputPort();
+    formatType.nPortIndex = VIDEO_DECODE_INPUT_PORT;
     formatType.eCompressionFormat = m_codingType;
     
     if (m_config.hints.fpsscale > 0 && m_config.hints.fpsrate > 0)
@@ -782,7 +811,7 @@ bool COMXVideo::Open(OMXClock *clock, const OMXVideoConfig &config)
     
     OMX_PARAM_PORTDEFINITIONTYPE portParam;
     OMX_INIT_STRUCTURE(portParam);
-    portParam.nPortIndex = m_omx_decoder.GetInputPort();
+    portParam.nPortIndex = VIDEO_DECODE_INPUT_PORT;
     
     error = m_omx_decoder.GetParameter(OMX_IndexParamPortDefinition, &portParam);
     if(error != OMX_ErrorNone)
@@ -791,7 +820,7 @@ bool COMXVideo::Open(OMXClock *clock, const OMXVideoConfig &config)
         return false;
     }
     
-    portParam.nPortIndex = m_omx_decoder.GetInputPort();
+    portParam.nPortIndex = VIDEO_DECODE_INPUT_PORT;
     portParam.nBufferCountActual = m_config.fifo_size ? m_config.fifo_size * 1024 * 1024 / portParam.nBufferSize : 80;
     
     portParam.format.video.nFrameWidth  = m_config.hints.width;
@@ -807,7 +836,7 @@ bool COMXVideo::Open(OMXClock *clock, const OMXVideoConfig &config)
     // request portsettingschanged on aspect ratio change
     OMX_CONFIG_REQUESTCALLBACKTYPE notifications;
     OMX_INIT_STRUCTURE(notifications);
-    notifications.nPortIndex = m_omx_decoder.GetOutputPort();
+    notifications.nPortIndex = VIDEO_DECODE_OUTPUT_PORT;
     notifications.nIndex = OMX_IndexParamBrcmPixelAspectRatio;
     notifications.bEnable = OMX_TRUE;
     
@@ -836,7 +865,7 @@ bool COMXVideo::Open(OMXClock *clock, const OMXVideoConfig &config)
     {
         OMX_NALSTREAMFORMATTYPE nalStreamFormat;
         OMX_INIT_STRUCTURE(nalStreamFormat);
-        nalStreamFormat.nPortIndex = m_omx_decoder.GetInputPort();
+        nalStreamFormat.nPortIndex = VIDEO_DECODE_INPUT_PORT;
         nalStreamFormat.eNaluFormat = OMX_NaluFormatStartCodes;
         
         error = m_omx_decoder.SetParameter((OMX_INDEXTYPE)OMX_IndexParamNalStreamFormatSelect, &nalStreamFormat);
@@ -922,7 +951,7 @@ bool COMXVideo::Open(OMXClock *clock, const OMXVideoConfig &config)
     
     ofLog(OF_LOG_NOTICE,
           "%s::%s - decoder_component(0x%p), input_port(0x%x), output_port(0x%x) deinterlace %d hdmiclocksync %d\n",
-          CLASSNAME, __func__, m_omx_decoder.GetComponent(), m_omx_decoder.GetInputPort(), m_omx_decoder.GetOutputPort(),
+          CLASSNAME, __func__, m_omx_decoder.GetComponent(), VIDEO_DECODE_INPUT_PORT, VIDEO_DECODE_OUTPUT_PORT,
           m_config.deinterlace, m_config.hdmi_clock_sync);
     
     float fAspect = m_config.hints.aspect ? (float)m_config.hints.aspect / (float)m_config.hints.width * (float)m_config.hints.height : 1.0f;
@@ -1270,7 +1299,7 @@ void COMXVideo::SetFilter(OMX_IMAGEFILTERTYPE filterType)
     OMX_CONFIG_IMAGEFILTERPARAMSTYPE image_filter;
     OMX_INIT_STRUCTURE(image_filter);
     
-    image_filter.nPortIndex = m_omx_image_fx.GetOutputPort();
+    image_filter.nPortIndex = IMAGE_FX_OUTPUT_PORT;
     image_filter.eImageFilter = filterType;
     error = m_omx_image_fx.SetConfig(OMX_IndexConfigCommonImageFilterParameters, &image_filter);
     if(error != OMX_ErrorNone)
