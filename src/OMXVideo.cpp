@@ -310,6 +310,8 @@ bool COMXVideo::PortSettingsChanged()
         PortSettingsChangedLogger(port_image, -1);
         SetVideoRect();
         m_omx_decoder.EnablePort(VIDEO_DECODE_OUTPUT_PORT, true);
+        
+        ofLogNotice(__func__) << __LINE__ << "wtf is this for?";
         return true;
     }
     
@@ -333,14 +335,12 @@ bool COMXVideo::PortSettingsChanged()
     
     if(useTexture)
     {
-        std::string componentName = "OMX.broadcom.egl_render";
-        m_omx_render.Initialize(componentName, OMX_IndexParamVideoInit);
+        m_omx_render.Initialize(OMX_EGL_RENDER, OMX_IndexParamVideoInit);
         m_omx_render.fillBufferListener = this;
         
     }else
     {
-        string componentName = "OMX.broadcom.video_render";
-        m_omx_render.Initialize(componentName, OMX_IndexParamVideoInit);
+        m_omx_render.Initialize(OMX_VIDEO_RENDER, OMX_IndexParamVideoInit);
     }
     
     
@@ -349,11 +349,11 @@ bool COMXVideo::PortSettingsChanged()
     
     PortSettingsChangedLogger(port_image, interlace.eMode);
     
-    m_omx_sched.Initialize("OMX.broadcom.video_scheduler", OMX_IndexParamVideoInit);
+    m_omx_sched.Initialize(OMX_VIDEO_SCHEDULER, OMX_IndexParamVideoInit);
     
     if(filtersEnabled)
     {
-        m_omx_image_fx.Initialize("OMX.broadcom.image_fx", OMX_IndexParamImageInit);
+        m_omx_image_fx.Initialize(OMX_IMAGE_FX, OMX_IndexParamImageInit);
     }
     
     if(!useTexture)
@@ -785,11 +785,8 @@ bool COMXVideo::Open(OMXClock *clock, const OMXVideoConfig &config)
     }
     
     error = m_omx_decoder.SetStateForComponent(OMX_StateIdle);
-    if (error != OMX_ErrorNone)
-    {
-        ofLog(OF_LOG_NOTICE, "COMXVideo::Open m_omx_decoder.SetStateForComponent\n");
-        return false;
-    }
+    OMX_TRACE(error);
+
     
     OMX_VIDEO_PARAM_PORTFORMATTYPE formatType;
     OMX_INIT_STRUCTURE(formatType);
@@ -814,11 +811,8 @@ bool COMXVideo::Open(OMXClock *clock, const OMXVideoConfig &config)
     portParam.nPortIndex = VIDEO_DECODE_INPUT_PORT;
     
     error = m_omx_decoder.GetParameter(OMX_IndexParamPortDefinition, &portParam);
-    if(error != OMX_ErrorNone)
-    {
-        ofLog(OF_LOG_NOTICE, "COMXVideo::Open error OMX_IndexParamPortDefinition error(%s)\n", omxErrorTypes[error].c_str());
-        return false;
-    }
+    OMX_TRACE(error);
+
     
     portParam.nPortIndex = VIDEO_DECODE_INPUT_PORT;
     portParam.nBufferCountActual = m_config.fifo_size ? m_config.fifo_size * 1024 * 1024 / portParam.nBufferSize : 80;
@@ -827,11 +821,8 @@ bool COMXVideo::Open(OMXClock *clock, const OMXVideoConfig &config)
     portParam.format.video.nFrameHeight = m_config.hints.height;
     
     error = m_omx_decoder.SetParameter(OMX_IndexParamPortDefinition, &portParam);
-    if(error != OMX_ErrorNone)
-    {
-        ofLog(OF_LOG_NOTICE, "COMXVideo::Open error OMX_IndexParamPortDefinition error(%s)\n", omxErrorTypes[error].c_str());
-        return false;
-    }
+    OMX_TRACE(error);
+
     
     // request portsettingschanged on aspect ratio change
     OMX_CONFIG_REQUESTCALLBACKTYPE notifications;
@@ -841,11 +832,8 @@ bool COMXVideo::Open(OMXClock *clock, const OMXVideoConfig &config)
     notifications.bEnable = OMX_TRUE;
     
     error = m_omx_decoder.SetParameter((OMX_INDEXTYPE)OMX_IndexConfigRequestCallback, &notifications);
-    if (error != OMX_ErrorNone)
-    {
-        ofLog(OF_LOG_NOTICE, "COMXVideo::Open OMX_IndexConfigRequestCallback error (%s)\n", omxErrorTypes[error].c_str());
-        return false;
-    }
+    OMX_TRACE(error);
+
     
     OMX_PARAM_BRCMVIDEODECODEERRORCONCEALMENTTYPE concanParam;
     OMX_INIT_STRUCTURE(concanParam);
@@ -855,11 +843,8 @@ bool COMXVideo::Open(OMXClock *clock, const OMXVideoConfig &config)
         concanParam.bStartWithValidFrame = OMX_FALSE;
     
     error = m_omx_decoder.SetParameter(OMX_IndexParamBrcmVideoDecodeErrorConcealment, &concanParam);
-    if(error != OMX_ErrorNone)
-    {
-        ofLog(OF_LOG_NOTICE, "COMXVideo::Open error OMX_IndexParamBrcmVideoDecodeErrorConcealment error(%s)\n", omxErrorTypes[error].c_str());
-        return false;
-    }
+    OMX_TRACE(error);
+
     
     if(NaluFormatStartCodes(m_config.hints.codec, (uint8_t *)m_config.hints.extradata, m_config.hints.extrasize))
     {
@@ -869,11 +854,8 @@ bool COMXVideo::Open(OMXClock *clock, const OMXVideoConfig &config)
         nalStreamFormat.eNaluFormat = OMX_NaluFormatStartCodes;
         
         error = m_omx_decoder.SetParameter((OMX_INDEXTYPE)OMX_IndexParamNalStreamFormatSelect, &nalStreamFormat);
-        if (error != OMX_ErrorNone)
-        {
-            ofLog(OF_LOG_NOTICE, "COMXVideo::Open OMX_IndexParamNalStreamFormatSelect error (%s)\n", omxErrorTypes[error].c_str());
-            return false;
-        }
+        OMX_TRACE(error);
+
     }else
     {
         //ofLog() << "NaluFormatStartCodes FAILED";
@@ -881,11 +863,8 @@ bool COMXVideo::Open(OMXClock *clock, const OMXVideoConfig &config)
     
     // Alloc buffers for the omx input port.
     error = m_omx_decoder.AllocInputBuffers();
-    if (error != OMX_ErrorNone)
-    {
-        ofLog(OF_LOG_NOTICE, "COMXVideo::Open AllocOMXInputBuffers error (%s)\n", omxErrorTypes[error].c_str());
-        return false;
-    }
+    OMX_TRACE(error);
+
     
     if(filtersEnabled)
     {
@@ -894,20 +873,14 @@ bool COMXVideo::Open(OMXClock *clock, const OMXVideoConfig &config)
         extra_buffers.nU32 = 5;
         
         error = m_omx_decoder.SetParameter(OMX_IndexParamBrcmExtraBuffers, &extra_buffers);
-        if (error != OMX_ErrorNone)
-        {
-            ofLog(OF_LOG_NOTICE, "COMXVideo::Open OMX_IndexParamBrcmExtraBuffers error (%s)\n", omxErrorTypes[error].c_str());
-            return false;
-        }
+        OMX_TRACE(error);
+
     }
     
     
     error = m_omx_decoder.SetStateForComponent(OMX_StateExecuting);
-    if (error != OMX_ErrorNone)
-    {
-        ofLog(OF_LOG_NOTICE, "COMXVideo::Open error m_omx_decoder.SetStateForComponent\n");
-        return false;
-    }
+    OMX_TRACE(error);
+
  
     
     SendDecoderConfig();
@@ -1169,9 +1142,8 @@ void COMXVideo::SetVideoRect()
     }
     
     error = m_omx_render.SetConfig(OMX_IndexConfigDisplayRegion, &configDisplay);
-    if (error != OMX_ErrorNone) {
-        ofLog(OF_LOG_NOTICE, "COMXVideo::Open error OMX_IndexConfigDisplayRegion error(%s)\n", omxErrorTypes[error].c_str());
-    }
+    OMX_TRACE(error);
+
 }
 
 void COMXVideo::SetLayer(int layer)
@@ -1189,10 +1161,8 @@ void COMXVideo::SetLayer(int layer)
     configDisplay.layer = layer;
     
     error = m_omx_render.SetConfig(OMX_IndexConfigDisplayRegion, &configDisplay);
-    if(error != OMX_ErrorNone)
-    {
-        ofLog(OF_LOG_NOTICE, "COMXVideo::LAYER::Open error OMX_IndexConfigDisplayRegion error(%s)\n", omxErrorTypes[error].c_str());
-    }
+    OMX_TRACE(error);
+
     
 }
 
@@ -1254,11 +1224,8 @@ void COMXVideo::SetOrientation(int degreesClockWise, bool doMirror)
     configDisplay.set = OMX_DISPLAY_SET_TRANSFORM;
     configDisplay.transform = m_transform;
     OMX_ERRORTYPE error = m_omx_render.SetConfig(OMX_IndexConfigDisplayRegion, &configDisplay);
-    if(error != OMX_ErrorNone)
-    {
-        ofLog(OF_LOG_NOTICE, "%s::%s - could not set transform : %d", CLASSNAME, __func__, m_transform);
-        return;
-    }
+    OMX_TRACE(error);
+
     
 }
 
@@ -1277,10 +1244,8 @@ void COMXVideo::SetAlpha(int alpha)
     configDisplay.alpha = alpha;
     
     error = m_omx_render.SetConfig(OMX_IndexConfigDisplayRegion, &configDisplay);
-    if(error != OMX_ErrorNone)
-    {
-        ofLog(OF_LOG_NOTICE, "COMXVideo::ALPHA::Open error OMX_IndexConfigDisplayRegion error(%s)\n", omxErrorTypes[error].c_str());
-    }
+    OMX_TRACE(error);
+
     
 }
 
@@ -1302,11 +1267,8 @@ void COMXVideo::SetFilter(OMX_IMAGEFILTERTYPE filterType)
     image_filter.nPortIndex = IMAGE_FX_OUTPUT_PORT;
     image_filter.eImageFilter = filterType;
     error = m_omx_image_fx.SetConfig(OMX_IndexConfigCommonImageFilterParameters, &image_filter);
-    if(error != OMX_ErrorNone)
-    {
-        ofLog(OF_LOG_NOTICE, "%s::%s - OMX_IndexConfigCommonImageFilterParameters error(%s)", CLASSNAME, __func__, omxErrorTypes[error].c_str());
-        return;
-    }
+    OMX_TRACE(error);
+
 }
 
 int COMXVideo::GetInputBufferSize()
