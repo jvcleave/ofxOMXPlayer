@@ -604,7 +604,7 @@ bool COMXAudio::Initialize(OMXClock *clock, const OMXAudioConfig &config, uint64
     if (omx_err != OMX_ErrorNone)
     {
       CLog::Log(LOGERROR, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, omx_err);
-      m_omx_decoder.DecoderEmptyBufferDone(m_omx_decoder.GetComponent(), omx_buffer);
+      m_omx_decoder.onEmptyBufferDone(m_omx_decoder.GetComponent(), omx_buffer);
       return false;
     }
   } 
@@ -632,7 +632,7 @@ bool COMXAudio::Initialize(OMXClock *clock, const OMXAudioConfig &config, uint64
       if (omx_err != OMX_ErrorNone)
       {
         CLog::Log(LOGERROR, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, omx_err);
-        m_omx_decoder.DecoderEmptyBufferDone(m_omx_decoder.GetComponent(), omx_buffer);
+        m_omx_decoder.onEmptyBufferDone(m_omx_decoder.GetComponent(), omx_buffer);
         return false;
       }
     }
@@ -974,7 +974,7 @@ unsigned int COMXAudio::AddPackets(const void* data, unsigned int len, double dt
     {
       CLog::Log(LOGERROR, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, omx_err);
       printf("%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, omx_err);
-      m_omx_decoder.DecoderEmptyBufferDone(m_omx_decoder.GetComponent(), omx_buffer);
+      m_omx_decoder.onEmptyBufferDone(m_omx_decoder.GetComponent(), omx_buffer);
       return 0;
     }
     //CLog::Log(LOGINFO, "AudiD: dts:%.0f pts:%.0f size:%d\n", dts, pts, len);
@@ -1206,7 +1206,7 @@ void COMXAudio::SubmitEOS()
   if (omx_err != OMX_ErrorNone)
   {
     CLog::Log(LOGERROR, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, omx_err);
-    m_omx_decoder.DecoderEmptyBufferDone(m_omx_decoder.GetComponent(), omx_buffer);
+    m_omx_decoder.onEmptyBufferDone(m_omx_decoder.GetComponent(), omx_buffer);
     return;
   }
   CLog::Log(LOGINFO, "%s::%s", CLASSNAME, __func__);

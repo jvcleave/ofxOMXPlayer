@@ -121,19 +121,19 @@ public:
   bool          Deinitialize();
     int frameCounter;
   // OMXCore Decoder delegate callback routines.
-  static OMX_ERRORTYPE DecoderEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData,
+  static OMX_ERRORTYPE EventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData,
     OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData);
-  static OMX_ERRORTYPE DecoderEmptyBufferDoneCallback(
+  static OMX_ERRORTYPE EmptyBufferDoneCallback(
     OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_BUFFERHEADERTYPE* pBuffer);
-  static OMX_ERRORTYPE DecoderFillBufferDoneCallback(
+  static OMX_ERRORTYPE FillBufferDoneCallback(
     OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_BUFFERHEADERTYPE* pBufferHeader);
 
   // OMXCore decoder callback routines.
-  OMX_ERRORTYPE DecoderEventHandler(OMX_HANDLETYPE hComponent,
+  OMX_ERRORTYPE onEvent(OMX_HANDLETYPE hComponent,
     OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData);
-  OMX_ERRORTYPE DecoderEmptyBufferDone(
+  OMX_ERRORTYPE onEmptyBufferDone(
     OMX_HANDLETYPE hComponent, OMX_BUFFERHEADERTYPE* pBuffer);
-  OMX_ERRORTYPE DecoderFillBufferDone(
+  OMX_ERRORTYPE onFillBufferDone(
     OMX_HANDLETYPE hComponent, OMX_BUFFERHEADERTYPE* pBuffer);
 
   void TransitionToStateLoaded();

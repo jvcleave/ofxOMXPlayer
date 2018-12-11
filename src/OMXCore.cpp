@@ -1296,7 +1296,7 @@ OMX_ERRORTYPE COMXCoreComponent::DisablePort(unsigned int port, bool wait)
 
 OMX_ERRORTYPE COMXCoreComponent::UseEGLImage(OMX_BUFFERHEADERTYPE** ppBufferHdr, OMX_U32 nPortIndex, OMX_PTR pAppPrivate, void* eglImage)
 {
-if (m_callbacks.FillBufferDone == &COMXCoreComponent::DecoderFillBufferDoneCallback)
+if (m_callbacks.FillBufferDone == &COMXCoreComponent::FillBufferDoneCallback)
 {
   OMX_ERRORTYPE omx_err = OMX_ErrorNone;
 
@@ -1419,9 +1419,9 @@ bool COMXCoreComponent::Initialize( const std::string &component_name, OMX_INDEX
 
   m_componentName = component_name;
   
-  m_callbacks.EventHandler    = &COMXCoreComponent::DecoderEventHandlerCallback;
-  m_callbacks.EmptyBufferDone = &COMXCoreComponent::DecoderEmptyBufferDoneCallback;
-  m_callbacks.FillBufferDone  = &COMXCoreComponent::DecoderFillBufferDoneCallback;
+  m_callbacks.EventHandler    = &COMXCoreComponent::EventHandlerCallback;
+  m_callbacks.EmptyBufferDone = &COMXCoreComponent::EmptyBufferDoneCallback;
+  m_callbacks.FillBufferDone  = &COMXCoreComponent::FillBufferDoneCallback;
 
   if (callbacks && callbacks->EventHandler)
     m_callbacks.EventHandler    = callbacks->EventHandler;
@@ -1539,9 +1539,8 @@ bool COMXCoreComponent::Deinitialize()
   return true;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////
-// DecoderEventHandler -- OMX event callback
-OMX_ERRORTYPE COMXCoreComponent::DecoderEventHandlerCallback(
+
+OMX_ERRORTYPE COMXCoreComponent::EventHandlerCallback(
   OMX_HANDLETYPE hComponent,
   OMX_PTR pAppData,
   OMX_EVENTTYPE eEvent,
@@ -1553,11 +1552,11 @@ OMX_ERRORTYPE COMXCoreComponent::DecoderEventHandlerCallback(
     return OMX_ErrorNone;
 
   COMXCoreComponent *ctx = static_cast<COMXCoreComponent*>(pAppData);
-  return ctx->DecoderEventHandler(hComponent, eEvent, nData1, nData2, pEventData);
+  return ctx->onEvent(hComponent, eEvent, nData1, nData2, pEventData);
 }
 
-// DecoderEmptyBufferDone -- OMXCore input buffer has been emptied
-OMX_ERRORTYPE COMXCoreComponent::DecoderEmptyBufferDoneCallback(
+//EmptyBufferDone -- OMXCore input buffer has been emptied
+OMX_ERRORTYPE COMXCoreComponent::EmptyBufferDoneCallback(
   OMX_HANDLETYPE hComponent,
   OMX_PTR pAppData,
   OMX_BUFFERHEADERTYPE* pBuffer)
@@ -1566,11 +1565,11 @@ OMX_ERRORTYPE COMXCoreComponent::DecoderEmptyBufferDoneCallback(
     return OMX_ErrorNone;
 
   COMXCoreComponent *ctx = static_cast<COMXCoreComponent*>(pAppData);
-  return ctx->DecoderEmptyBufferDone( hComponent, pBuffer);
+  return ctx->onEmptyBufferDone( hComponent, pBuffer);
 }
 
-// DecoderFillBufferDone -- OMXCore output buffer has been filled
-OMX_ERRORTYPE COMXCoreComponent::DecoderFillBufferDoneCallback(
+//FillBufferDone -- OMXCore output buffer has been filled
+OMX_ERRORTYPE COMXCoreComponent::FillBufferDoneCallback(
   OMX_HANDLETYPE hComponent,
   OMX_PTR pAppData,
   OMX_BUFFERHEADERTYPE* pBuffer)
@@ -1590,7 +1589,7 @@ OMX_ERRORTYPE COMXCoreComponent::DecoderFillBufferDoneCallback(
     {
         
         //printf("%s", "NO fillBufferListener");
-         return ctx->DecoderFillBufferDone(hComponent, pBuffer);
+         return ctx->onFillBufferDone(hComponent, pBuffer);
 
     }
 
@@ -1598,13 +1597,13 @@ OMX_ERRORTYPE COMXCoreComponent::DecoderFillBufferDoneCallback(
    
 }
 
-OMX_ERRORTYPE COMXCoreComponent::DecoderEmptyBufferDone(OMX_HANDLETYPE hComponent, OMX_BUFFERHEADERTYPE* pBuffer)
+OMX_ERRORTYPE COMXCoreComponent::onEmptyBufferDone(OMX_HANDLETYPE hComponent, OMX_BUFFERHEADERTYPE* pBuffer)
 {
   if(m_exit)
     return OMX_ErrorNone;
 
   #if defined(OMX_DEBUG_EVENTHANDLER)
-  CLog::Log(LOGDEBUG, "COMXCoreComponent::DecoderEmptyBufferDone component(%s) %p %d/%d\n", m_componentName.c_str(), pBuffer, m_omx_input_avaliable.size(), m_input_buffer_count);
+  CLog::Log(LOGDEBUG, "COMXCoreComponent::onEmptyBufferDone component(%s) %p %d/%d\n", m_componentName.c_str(), pBuffer, m_omx_input_avaliable.size(), m_input_buffer_count);
   #endif
   pthread_mutex_lock(&m_omx_input_mutex);
   m_omx_input_avaliable.push(pBuffer);
@@ -1617,13 +1616,13 @@ OMX_ERRORTYPE COMXCoreComponent::DecoderEmptyBufferDone(OMX_HANDLETYPE hComponen
   return OMX_ErrorNone;
 }
 
-OMX_ERRORTYPE COMXCoreComponent::DecoderFillBufferDone(OMX_HANDLETYPE hComponent, OMX_BUFFERHEADERTYPE* pBuffer)
+OMX_ERRORTYPE COMXCoreComponent::onFillBufferDone(OMX_HANDLETYPE hComponent, OMX_BUFFERHEADERTYPE* pBuffer)
 {
   if(m_exit)
     return OMX_ErrorNone;
 
   #if defined(OMX_DEBUG_EVENTHANDLER)
-  CLog::Log(LOGDEBUG, "COMXCoreComponent::DecoderFillBufferDone component(%s) %p %d/%d\n", m_componentName.c_str(), pBuffer, m_omx_output_available.size(), m_output_buffer_count);
+  CLog::Log(LOGDEBUG, "COMXCoreComponent::onFillBufferDone component(%s) %p %d/%d\n", m_componentName.c_str(), pBuffer, m_omx_output_available.size(), m_output_buffer_count);
   #endif
   pthread_mutex_lock(&m_omx_output_mutex);
   m_omx_output_available.push(pBuffer);
@@ -1636,15 +1635,12 @@ OMX_ERRORTYPE COMXCoreComponent::DecoderFillBufferDone(OMX_HANDLETYPE hComponent
   return OMX_ErrorNone;
 }
 
-// DecoderEmptyBufferDone -- OMXCore input buffer has been emptied
-////////////////////////////////////////////////////////////////////////////////////////////
 // Component event handler -- OMX event callback
-OMX_ERRORTYPE COMXCoreComponent::DecoderEventHandler(
-  OMX_HANDLETYPE hComponent,
-  OMX_EVENTTYPE eEvent,
-  OMX_U32 nData1,
-  OMX_U32 nData2,
-  OMX_PTR pEventData)
+OMX_ERRORTYPE COMXCoreComponent::onEvent( OMX_HANDLETYPE hComponent,
+                                          OMX_EVENTTYPE eEvent,
+                                          OMX_U32 nData1,
+                                          OMX_U32 nData2,
+                                          OMX_PTR pEventData)
 {
 #ifdef OMX_DEBUG_EVENTS
   CLog::Log(LOGDEBUG,

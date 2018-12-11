@@ -244,7 +244,7 @@ bool COMXVideo::SendDecoderConfig()
         if (error != OMX_ErrorNone)
         {
             ofLog(OF_LOG_NOTICE, "%s::%s - OMX_EmptyThisBuffer() failed with result(%s)\n", CLASSNAME, __func__, omxErrorTypes[error].c_str());
-            m_omx_decoder.DecoderEmptyBufferDone(m_omx_decoder.GetComponent(), omx_buffer);
+            m_omx_decoder.onEmptyBufferDone(m_omx_decoder.GetComponent(), omx_buffer);
             return false;
         }
     }
@@ -331,7 +331,8 @@ bool COMXVideo::PortSettingsChanged()
     }
 
     
-    
+    videoSplitter.Initialize(OMX_VIDEO_SPLITTER, OMX_IndexParamVideoInit);
+    videoSplitter.DisableAllPorts();
     
     if(useTexture)
     {
@@ -458,8 +459,20 @@ bool COMXVideo::PortSettingsChanged()
         m_omx_tunnel_decoder.Initialize(&m_omx_decoder, VIDEO_DECODE_OUTPUT_PORT,
                                         &m_omx_sched, VIDEO_SCHEDULER_INPUT_PORT);
     }
+    
+    
+    
+    
     m_omx_tunnel_sched.Initialize(&m_omx_sched, VIDEO_SCHEDULER_OUTPUT_PORT,
-                                  &m_omx_render, m_omx_render.GetInputPort());
+                                  &videoSplitter, VIDEO_SPLITTER_INPUT_PORT);
+    
+    
+    m_omx_tunnel_splitter.Initialize(&videoSplitter, VIDEO_SPLITTER_OUTPUT_PORT1,
+                                     &m_omx_render, m_omx_render.GetInputPort());
+    
+    
+    
+    
     m_omx_tunnel_clock.Initialize(m_omx_clock, OMX_CLOCK_OUTPUT_PORT_1,
                                   &m_omx_sched, VIDEO_SCHEDULER_CLOCK_PORT);
     
@@ -477,18 +490,20 @@ bool COMXVideo::PortSettingsChanged()
     
     error = m_omx_tunnel_sched.Establish();
     OMX_TRACE(error);
-    if(error != OMX_ErrorNone) return false;
+    
+    
+    error = m_omx_tunnel_splitter.Establish();
+    OMX_TRACE(error);
+    
     
     if(useTexture)
     {
         error = m_omx_render.SetStateForComponent(OMX_StateIdle);
         OMX_TRACE(error);
-        if(error != OMX_ErrorNone) return false;
         
         
         m_omx_render.EnablePort(m_omx_render.GetOutputPort(), false);
         OMX_TRACE(error);
-        if(error != OMX_ErrorNone) return false;
         
         
         eglBuffer = NULL;
@@ -500,7 +515,6 @@ bool COMXVideo::PortSettingsChanged()
     
     error = m_omx_decoder.SetStateForComponent(OMX_StateExecuting);
     OMX_TRACE(error);
-    if(error != OMX_ErrorNone) return false;
     
     
     if(filtersEnabled)
@@ -514,6 +528,9 @@ bool COMXVideo::PortSettingsChanged()
     error = m_omx_sched.SetStateForComponent(OMX_StateExecuting);
     OMX_TRACE(error);
 
+    
+    error = videoSplitter.SetStateForComponent(OMX_StateExecuting);
+    OMX_TRACE(error);
     
     error = m_omx_render.SetStateForComponent(OMX_StateExecuting);
     OMX_TRACE(error);
@@ -943,11 +960,12 @@ void COMXVideo::Close()
         m_omx_tunnel_image_fx.Deestablish();
     }
     m_omx_tunnel_sched.Deestablish();
-    
+    m_omx_tunnel_splitter.Deestablish();
     m_omx_decoder.FlushInput();
     
     m_omx_sched.Deinitialize();
     m_omx_decoder.Deinitialize();
+    videoSplitter.Deinitialize();
     if(filtersEnabled)
     {
         m_omx_image_fx.Deinitialize();
@@ -1036,7 +1054,7 @@ int COMXVideo::Decode(uint8_t *pData, int iSize, double dts, double pts)
             if (error != OMX_ErrorNone)
             {
                 ofLog(OF_LOG_NOTICE, "%s::%s - OMX_EmptyThisBuffer() failed with result(%s)\n", CLASSNAME, __func__, omxErrorTypes[error].c_str());
-                m_omx_decoder.DecoderEmptyBufferDone(m_omx_decoder.GetComponent(), omx_buffer);
+                m_omx_decoder.onEmptyBufferDone(m_omx_decoder.GetComponent(), omx_buffer);
                 return false;
             }
             //ofLog(OF_LOG_NOTICE, "VideD: dts:%.0f pts:%.0f size:%d)\n", dts, pts, iSize);
@@ -1306,7 +1324,7 @@ void COMXVideo::SubmitEOS()
     if (error != OMX_ErrorNone)
     {
         ofLog(OF_LOG_NOTICE, "%s::%s - OMX_EmptyThisBuffer() failed with result(%s)\n", CLASSNAME, __func__, omxErrorTypes[error].c_str());
-        m_omx_decoder.DecoderEmptyBufferDone(m_omx_decoder.GetComponent(), omx_buffer);
+        m_omx_decoder.onEmptyBufferDone(m_omx_decoder.GetComponent(), omx_buffer);
         return;
     }
     

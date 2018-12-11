@@ -147,6 +147,8 @@ protected:
     
     OMX_VIDEO_CODINGTYPE m_codingType;
     
+    
+    COMXCoreComponent videoSplitter;
     COMXCoreComponent m_omx_decoder;
     COMXCoreComponent m_omx_render;
     COMXCoreComponent m_omx_sched;
@@ -158,6 +160,8 @@ protected:
     COMXCoreTunel     m_omx_tunnel_clock;
     COMXCoreTunel     m_omx_tunnel_sched;
     COMXCoreTunel     m_omx_tunnel_image_fx;
+    COMXCoreTunel     m_omx_tunnel_splitter;
+
     bool              m_is_open;
     
     bool              m_setStartTime;
