@@ -6,7 +6,7 @@ public:
     
     ofxOMXPlayer* omxPlayer;
     
-    COMXCoreComponent* splitterComponent;
+    
     OMX_HANDLETYPE splitter;
     OMX_HANDLETYPE encoder;
     

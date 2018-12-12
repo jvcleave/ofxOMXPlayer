@@ -2,17 +2,19 @@
 
 
 
-OMX_ERRORTYPE ofxOMXPlayerRecorder::encoderEventHandlerCallback(OMX_HANDLETYPE encoder, OMX_PTR omxPlayerRecorder_,
-                                                         OMX_EVENTTYPE event, OMX_U32 nData1,
-                                                         OMX_U32 nData2, OMX_PTR pEventData)
+OMX_ERRORTYPE ofxOMXPlayerRecorder::encoderEventHandlerCallback(OMX_HANDLETYPE encoder,
+                                                                OMX_PTR omxPlayerRecorder_,
+                                                                OMX_EVENTTYPE event,
+                                                                OMX_U32 nData1,
+                                                                OMX_U32 nData2,
+                                                                OMX_PTR pEventData)
 {
-    
+    /*
     ofLog() << "ENCODER: " << DebugEventHandlerString(encoder, event, nData1, nData2, pEventData); 
     if(event == OMX_EventBufferFlag)
     {
         ofxOMXPlayerRecorder* omxPlayerRecorder = static_cast<ofxOMXPlayerRecorder*>(omxPlayerRecorder_);
-        //engine->writeFile();
-    }
+    }*/
     return OMX_ErrorNone;
 }
 
@@ -79,7 +81,6 @@ ofxOMXPlayerRecorder::ofxOMXPlayerRecorder()
     recordedFrameCounter = 0;
     encoder = NULL;
     splitter = NULL;
-    splitterComponent = NULL;
     encoderOutputBuffer = NULL;
     recordingRateMB = 2.0;
 }
@@ -87,17 +88,9 @@ ofxOMXPlayerRecorder::ofxOMXPlayerRecorder()
 void ofxOMXPlayerRecorder::setup(ofxOMXPlayer* omxPlayer_)
 {
     omxPlayer = omxPlayer_;
-    
     isOpen = true;
-    
-    ofLogNotice(__func__) << "isOpen: " << isOpen;
-    
-    
-   
-    
-    //OMX_ERRORTYPE error = splitter->EnablePort(VIDEO_SPLITTER_OUTPUT_PORT2, false);
-    //OMX_TRACE(error);
 }
+
 void ofxOMXPlayerRecorder::startRecording(float recordingRateMB_) //default =2.0
 {
     if(isRecording)
@@ -105,11 +98,12 @@ void ofxOMXPlayerRecorder::startRecording(float recordingRateMB_) //default =2.0
         ofLogError(__func__) << "ALREADY RECORDING";
         return;
     }
+    if(!omxPlayer) return;
+    
     recordingRateMB = recordingRateMB_;
     
     if(omxPlayer->getVideoSplitter() != NULL)
     {
-        splitterComponent = omxPlayer->getVideoSplitter();
         splitter = omxPlayer->getVideoSplitter()->GetComponent();
         if(splitter == NULL)
         {
@@ -118,9 +112,7 @@ void ofxOMXPlayerRecorder::startRecording(float recordingRateMB_) //default =2.0
         }
         
         printf("splitter %p", splitter);
-        
     }
-    
     
     OMX_ERRORTYPE error = OMX_ErrorNone;
     isRecording = true;
@@ -313,3 +305,5 @@ void ofxOMXPlayerRecorder::writeFile()
     stopRequested = false;
     isStopping = false;
 }
+
+
