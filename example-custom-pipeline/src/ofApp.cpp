@@ -7,11 +7,14 @@ void ofApp::setup()
     consoleListener.setup(this);
 
 	string videoPath = ofToDataPath("../../../video/Timecoded_Big_bunny_1.mov", true);
+    
+    
+    
 	//Somewhat like ofFboSettings we may have a lot of options so this is the current model
 	ofxOMXPlayerSettings settings;
 	settings.videoPath = videoPath;
 	settings.useHDMIForAudio = true;	//default true
-	settings.enableTexture = true;		//default true
+    settings.enableTexture = false;		//default true
 	settings.enableLooping = true;		//default true
 	settings.enableAudio = true;		//default true, save resources by disabling
 	//settings.doFlipTexture = true;		//default false
@@ -19,9 +22,8 @@ void ofApp::setup()
 	
 	//so either pass in the settings
 	omxPlayer.setup(settings);
-	
-	//or live with the defaults
-	//omxPlayer.loadMovie(videoPath);
+	omxPlayerRecorder.setup(&omxPlayer);
+
 	
 }
 
@@ -30,13 +32,6 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::update()
 {
-    if(!splitterController.isOpen)
-    {
-        if(omxPlayer.isOpen())
-        {
-            splitterController.setup(&omxPlayer);
-        }
-    }
     
 }
 
@@ -66,12 +61,12 @@ void ofApp::keyPressed  (int key)
     {
         case '1':
         {
-            splitterController.startRecording();
+            omxPlayerRecorder.startRecording(4.0);
             break;
         }
         case '2':
         {
-            splitterController.stopRecording();
+            omxPlayerRecorder.stopRecording();
             break;
         }
         default:

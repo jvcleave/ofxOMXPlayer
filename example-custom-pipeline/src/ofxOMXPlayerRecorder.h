@@ -1,6 +1,6 @@
 #include "ofxOMXPlayer.h"
 
-class SplitterController
+class ofxOMXPlayerRecorder
 {
 public:
     
@@ -21,12 +21,12 @@ public:
     bool isRecording;
 
     
-    SplitterController();
+    ofxOMXPlayerRecorder();
     void setup(ofxOMXPlayer* omxPlayer_);
 
-    void startRecording();
+    void startRecording(float recordingRateMB_=2.0);
     void stopRecording();
-    
+    float recordingRateMB;
 protected:
     void writeFile();
 

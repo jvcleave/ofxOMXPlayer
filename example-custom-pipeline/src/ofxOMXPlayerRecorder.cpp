@@ -1,8 +1,8 @@
-#include "SplitterController.h"
+#include "ofxOMXPlayerRecorder.h"
 
 
 
-OMX_ERRORTYPE SplitterController::encoderEventHandlerCallback(OMX_HANDLETYPE encoder, OMX_PTR splitterController_,
+OMX_ERRORTYPE ofxOMXPlayerRecorder::encoderEventHandlerCallback(OMX_HANDLETYPE encoder, OMX_PTR omxPlayerRecorder_,
                                                          OMX_EVENTTYPE event, OMX_U32 nData1,
                                                          OMX_U32 nData2, OMX_PTR pEventData)
 {
@@ -10,22 +10,22 @@ OMX_ERRORTYPE SplitterController::encoderEventHandlerCallback(OMX_HANDLETYPE enc
     ofLog() << "ENCODER: " << DebugEventHandlerString(encoder, event, nData1, nData2, pEventData); 
     if(event == OMX_EventBufferFlag)
     {
-        SplitterController* splitterController = static_cast<SplitterController*>(splitterController_);
+        ofxOMXPlayerRecorder* omxPlayerRecorder = static_cast<ofxOMXPlayerRecorder*>(omxPlayerRecorder_);
         //engine->writeFile();
     }
     return OMX_ErrorNone;
 }
 
 
-OMX_ERRORTYPE SplitterController::encoderFillBufferDone(OMX_HANDLETYPE encoder,
-                                                        OMX_PTR splitterController_,
+OMX_ERRORTYPE ofxOMXPlayerRecorder::encoderFillBufferDone(OMX_HANDLETYPE encoder,
+                                                        OMX_PTR omxPlayerRecorder_,
                                                         OMX_BUFFERHEADERTYPE* encoderOutputBuffer)
 {    
-    SplitterController* splitterController = static_cast<SplitterController*>(splitterController_);
+    ofxOMXPlayerRecorder* omxPlayerRecorder = static_cast<ofxOMXPlayerRecorder*>(omxPlayerRecorder_);
 
     
     bool isKeyframeValid = false;
-    splitterController->recordedFrameCounter++;
+    omxPlayerRecorder->recordedFrameCounter++;
     /*
      The user wants to quit, but don't exit
      the loop until we are certain that we have processed
@@ -35,29 +35,29 @@ OMX_ERRORTYPE SplitterController::encoderFillBufferDone(OMX_HANDLETYPE encoder,
      avoid corruption of the last encoded at the expense of
      small delay in exiting.
      */
-    if(splitterController->stopRequested && !splitterController->isStopping) 
+    if(omxPlayerRecorder->stopRequested && !omxPlayerRecorder->isStopping) 
     {
         ofLogVerbose(__func__) << "Exit signal detected, waiting for next key frame boundry before exiting...";
-        splitterController->isStopping = true;
+        omxPlayerRecorder->isStopping = true;
         isKeyframeValid = encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_SYNCFRAME;
     }
-    if(splitterController->isStopping && (isKeyframeValid ^ (encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_SYNCFRAME))) 
+    if(omxPlayerRecorder->isStopping && (isKeyframeValid ^ (encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_SYNCFRAME))) 
     {
         ofLogVerbose(__func__) << "Key frame boundry reached, exiting loop...";
-        splitterController->writeFile();
+        omxPlayerRecorder->writeFile();
     }else 
     {
-        splitterController->recordingFileBuffer.append((const char*) encoderOutputBuffer->pBuffer + encoderOutputBuffer->nOffset, encoderOutputBuffer->nFilledLen);
+        omxPlayerRecorder->recordingFileBuffer.append((const char*) encoderOutputBuffer->pBuffer + encoderOutputBuffer->nOffset, encoderOutputBuffer->nFilledLen);
         //ofLogVerbose(__func__) << "encoderOutputBuffer->nFilledLen: " << encoderOutputBuffer->nFilledLen;
-        ofLog() << splitterController->recordingFileBuffer.size();
+        ofLog() << omxPlayerRecorder->recordingFileBuffer.size();
         OMX_ERRORTYPE error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
         if(error != OMX_ErrorNone) 
         {
             ofLog(OF_LOG_ERROR, "encoder OMX_FillThisBuffer FAIL error: 0x%08x", error);
-            if(!splitterController->didWriteFile)
+            if(!omxPlayerRecorder->didWriteFile)
             {
                 ofLogError() << "HAD ERROR FILLING BUFFER, JUST WRITING WHAT WE HAVE";
-                splitterController->writeFile();
+                omxPlayerRecorder->writeFile();
                 
             }
         }
@@ -67,7 +67,7 @@ OMX_ERRORTYPE SplitterController::encoderFillBufferDone(OMX_HANDLETYPE encoder,
 
 
 
-SplitterController::SplitterController()
+ofxOMXPlayerRecorder::ofxOMXPlayerRecorder()
 {
     omxPlayer = NULL;
     isOpen = false;
@@ -81,10 +81,10 @@ SplitterController::SplitterController()
     splitter = NULL;
     splitterComponent = NULL;
     encoderOutputBuffer = NULL;
-    
+    recordingRateMB = 2.0;
 }
 
-void SplitterController::setup(ofxOMXPlayer* omxPlayer_)
+void ofxOMXPlayerRecorder::setup(ofxOMXPlayer* omxPlayer_)
 {
     omxPlayer = omxPlayer_;
     
@@ -98,8 +98,14 @@ void SplitterController::setup(ofxOMXPlayer* omxPlayer_)
     //OMX_ERRORTYPE error = splitter->EnablePort(VIDEO_SPLITTER_OUTPUT_PORT2, false);
     //OMX_TRACE(error);
 }
-void SplitterController::startRecording()
+void ofxOMXPlayerRecorder::startRecording(float recordingRateMB_) //default =2.0
 {
+    if(isRecording)
+    {
+        ofLogError(__func__) << "ALREADY RECORDING";
+        return;
+    }
+    recordingRateMB = recordingRateMB_;
     
     if(omxPlayer->getVideoSplitter() != NULL)
     {
@@ -132,16 +138,16 @@ void SplitterController::startRecording()
     OMX_TRACE(error);
 }
 
-void SplitterController::createEncoder()
+void ofxOMXPlayerRecorder::createEncoder()
 {
 #pragma mark ENCODER SETUP  
     
     OMX_ERRORTYPE error;
     
     OMX_CALLBACKTYPE encoderCallbacks;
-    encoderCallbacks.EventHandler       = &SplitterController::encoderEventHandlerCallback;
-    encoderCallbacks.EmptyBufferDone    = &SplitterController::nullEmptyBufferDone;
-    encoderCallbacks.FillBufferDone     = &SplitterController::encoderFillBufferDone;
+    encoderCallbacks.EventHandler       = &ofxOMXPlayerRecorder::encoderEventHandlerCallback;
+    encoderCallbacks.EmptyBufferDone    = &ofxOMXPlayerRecorder::nullEmptyBufferDone;
+    encoderCallbacks.FillBufferDone     = &ofxOMXPlayerRecorder::encoderFillBufferDone;
     
     error =OMX_GetHandle(&encoder, OMX_VIDEO_ENCODER, this , &encoderCallbacks);
     OMX_TRACE(error);
@@ -230,7 +236,7 @@ void SplitterController::createEncoder()
     
 }
 
-void SplitterController::destroyEncoder()
+void ofxOMXPlayerRecorder::destroyEncoder()
 {
     if(!encoder) return;
     OMX_ERRORTYPE error = OMX_ErrorNone;
@@ -262,13 +268,13 @@ void SplitterController::destroyEncoder()
 }
 
 
-void SplitterController::stopRecording()
+void ofxOMXPlayerRecorder::stopRecording()
 {
     stopRequested = true;
 }
 
 
-void SplitterController::writeFile()
+void ofxOMXPlayerRecorder::writeFile()
 {
     OMX_ERRORTYPE error = OMX_ErrorNone;
     

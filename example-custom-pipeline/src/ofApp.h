@@ -2,7 +2,7 @@
 
 #include "ofMain.h"
 #include "ofxOMXPlayer.h"
-#include "SplitterController.h"
+#include "ofxOMXPlayerRecorder.h"
 #include "TerminalListener.h"
 
 class ofApp : public ofBaseApp, public KeyListener
@@ -15,7 +15,7 @@ public:
     void draw();
     
     ofxOMXPlayer omxPlayer;
-    SplitterController splitterController;
+    ofxOMXPlayerRecorder omxPlayerRecorder;
     TerminalListener consoleListener;
     void onCharacterReceived(KeyListenerEventData& e)
     {
