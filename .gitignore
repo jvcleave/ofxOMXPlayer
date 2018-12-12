@@ -7,3 +7,5 @@ example-*/bin/example-*
 omxplayer.log
 omxplayer.old.log
 src/.smbdelete*
+example-custom-pipeline/bin/data/*.h264
+/example-custom-pipeline/example-custom-pipeline.xcodeproj

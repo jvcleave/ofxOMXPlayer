@@ -1540,13 +1540,12 @@ bool COMXCoreComponent::Deinitialize()
 }
 
 
-OMX_ERRORTYPE COMXCoreComponent::EventHandlerCallback(
-  OMX_HANDLETYPE hComponent,
-  OMX_PTR pAppData,
-  OMX_EVENTTYPE eEvent,
-  OMX_U32 nData1,
-  OMX_U32 nData2,
-  OMX_PTR pEventData)
+OMX_ERRORTYPE COMXCoreComponent::EventHandlerCallback(OMX_HANDLETYPE hComponent,
+                                                      OMX_PTR pAppData,
+                                                      OMX_EVENTTYPE eEvent,
+                                                      OMX_U32 nData1,
+                                                      OMX_U32 nData2,
+                                                      OMX_PTR pEventData)
 {
   if(!pAppData)
     return OMX_ErrorNone;
@@ -1556,10 +1555,9 @@ OMX_ERRORTYPE COMXCoreComponent::EventHandlerCallback(
 }
 
 //EmptyBufferDone -- OMXCore input buffer has been emptied
-OMX_ERRORTYPE COMXCoreComponent::EmptyBufferDoneCallback(
-  OMX_HANDLETYPE hComponent,
-  OMX_PTR pAppData,
-  OMX_BUFFERHEADERTYPE* pBuffer)
+OMX_ERRORTYPE COMXCoreComponent::EmptyBufferDoneCallback(OMX_HANDLETYPE hComponent,
+                                                         OMX_PTR pAppData,
+                                                         OMX_BUFFERHEADERTYPE* pBuffer)
 {
   if(!pAppData)
     return OMX_ErrorNone;
@@ -1569,10 +1567,9 @@ OMX_ERRORTYPE COMXCoreComponent::EmptyBufferDoneCallback(
 }
 
 //FillBufferDone -- OMXCore output buffer has been filled
-OMX_ERRORTYPE COMXCoreComponent::FillBufferDoneCallback(
-  OMX_HANDLETYPE hComponent,
-  OMX_PTR pAppData,
-  OMX_BUFFERHEADERTYPE* pBuffer)
+OMX_ERRORTYPE COMXCoreComponent::FillBufferDoneCallback(OMX_HANDLETYPE hComponent,
+                                                        OMX_PTR pAppData,
+                                                        OMX_BUFFERHEADERTYPE* pBuffer)
 {
   if(!pAppData)
   {

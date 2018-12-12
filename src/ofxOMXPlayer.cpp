@@ -582,3 +582,22 @@ string ofxOMXPlayer::findFilterName(OMX_IMAGEFILTERTYPE filterType)
     }
     return result;
 }
+
+COMXCoreComponent* ofxOMXPlayer::getVideoSplitter()
+{
+    COMXCoreComponent* videoSplitter=NULL;
+    if(engine.m_player_video.m_decoder)
+    {
+        //ofLog() << "DECODER";
+        videoSplitter = &engine.m_player_video.m_decoder->videoSplitter;
+    }else
+    {
+        //ofLog() << "NO DECODER";
+
+    }
+    return videoSplitter;
+}
+
+
+
+

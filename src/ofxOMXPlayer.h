@@ -116,7 +116,7 @@ public:
 
 #pragma mark OLD/TODO
     void scrubForward(int step=1);
-
+    COMXCoreComponent* getVideoSplitter();
 #if 0     
     void applyFilter(OMX_IMAGEFILTERTYPE filter);
     //direct only

@@ -19,6 +19,9 @@
  *  http://www.gnu.org/copyleft/gpl.html
  *
  */
+
+#include "OMX_Maps.h"
+
 #define HAVE_OMXLIB
 
 #if defined(HAVE_OMXLIB)
@@ -33,7 +36,6 @@
 
 #include "guilib/Geometry.h"
 #include "utils/SingleLock.h"
-#include "ofMain.h"
 #include <EGL/egl.h>
 #include <EGL/eglplatform.h>
 #include <EGL/eglext.h>
@@ -105,7 +107,6 @@ public:
     COMXVideo();
     ~COMXVideo();
     bool useTexture;
-    std::map<OMX_ERRORTYPE, std::string> omxErrorTypes; 
     void processCodec(COMXStreamInfo& hints);
     
     // Required overrides
@@ -140,6 +141,7 @@ public:
 
     void SetOrientation(int degreesClockWise, bool doMirror=false);
     void SetFilter(OMX_IMAGEFILTERTYPE filterType);
+    COMXCoreComponent videoSplitter;
 
 protected:
     // Video format
@@ -148,7 +150,6 @@ protected:
     OMX_VIDEO_CODINGTYPE m_codingType;
     
     
-    COMXCoreComponent videoSplitter;
     COMXCoreComponent m_omx_decoder;
     COMXCoreComponent m_omx_render;
     COMXCoreComponent m_omx_sched;

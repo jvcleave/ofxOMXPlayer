@@ -40,74 +40,7 @@
 #define CLASSNAME "COMXVideo"
 
 
-#ifndef OMX_Maps_h
 
-#define OMX_IMAGE_FX (OMX_STRING)"OMX.broadcom.image_fx"
-#define IMAGE_FX_INPUT_PORT 190
-#define IMAGE_FX_OUTPUT_PORT 191
-
-
-#define OMX_CAMERA (OMX_STRING)"OMX.broadcom.camera"
-#define CAMERA_PREVIEW_PORT        70
-#define CAMERA_OUTPUT_PORT        71
-#define CAMERA_STILL_OUTPUT_PORT 72
-
-#define OMX_IMAGE_ENCODER (OMX_STRING)"OMX.broadcom.image_encode"
-#define IMAGE_ENCODER_INPUT_PORT 340
-#define IMAGE_ENCODER_OUTPUT_PORT 341
-
-#define OMX_IMAGE_DECODER (OMX_STRING)"OMX.broadcom.image_decode"
-#define IMAGE_DECODER_INPUT_PORT 320
-#define IMAGE_DECODER_OUTPUT_PORT 321
-
-
-#define OMX_RESIZER (OMX_STRING)"OMX.broadcom.resize"
-#define RESIZER_INPUT_PORT 60
-#define RESIZER_OUTPUT_PORT 61
-
-#define OMX_VIDEO_ENCODER (OMX_STRING)"OMX.broadcom.video_encode"
-#define VIDEO_ENCODE_INPUT_PORT 200
-#define VIDEO_ENCODE_OUTPUT_PORT 201
-
-#define OMX_VIDEO_DECODER (OMX_STRING)"OMX.broadcom.video_decode"
-#define VIDEO_DECODE_INPUT_PORT 130
-#define VIDEO_DECODE_OUTPUT_PORT 131
-
-
-#define OMX_VIDEO_SPLITTER (OMX_STRING)"OMX.broadcom.video_splitter"
-#define VIDEO_SPLITTER_INPUT_PORT 250
-
-#define VIDEO_SPLITTER_OUTPUT_PORT1 251
-#define VIDEO_SPLITTER_OUTPUT_PORT2 252
-#define VIDEO_SPLITTER_OUTPUT_PORT3 253
-#define VIDEO_SPLITTER_OUTPUT_PORT4 254
-
-#define OMX_VIDEO_RENDER (OMX_STRING)"OMX.broadcom.video_render"
-#define VIDEO_RENDER_INPUT_PORT    90
-
-#define OMX_EGL_RENDER (OMX_STRING)"OMX.broadcom.egl_render"
-#define EGL_RENDER_INPUT_PORT    220
-#define EGL_RENDER_OUTPUT_PORT    221
-
-#define OMX_NULL_SINK (OMX_STRING)"OMX.broadcom.null_sink"
-#define NULL_SINK_INPUT_PORT 240
-
-#define OMX_VIDEO_SCHEDULER (OMX_STRING)"OMX.broadcom.video_scheduler"
-#define VIDEO_SCHEDULER_INPUT_PORT 10
-#define VIDEO_SCHEDULER_OUTPUT_PORT 11
-#define VIDEO_SCHEDULER_CLOCK_PORT 12
-
-#define OMX_CLOCK (OMX_STRING)"OMX.broadcom.clock"
-#define OMX_CLOCK_OUTPUT_PORT_0 80
-#define OMX_CLOCK_OUTPUT_PORT_1 81
-#define OMX_CLOCK_OUTPUT_PORT_2 82
-#define OMX_CLOCK_OUTPUT_PORT_3 83
-#define OMX_CLOCK_OUTPUT_PORT_4 84
-#define OMX_CLOCK_OUTPUT_PORT_5 85
-
-
-
-#endif
 
 
 #define OMX_VIDEO_DECODER       "OMX.broadcom.video_decode"
@@ -128,13 +61,9 @@
 #define OMX_MJPEG_DECODER       OMX_VIDEO_DECODER
 
 
-#if !defined(OMX_TRACE)
-#define OMX_TRACE(x) ofLog() << __LINE__ << " "  << omxErrorTypes[x]
-#endif
 
 
 
-std::map<OMX_EVENTTYPE, std::string> eventTypes;
 
 COMXVideo::COMXVideo() : m_video_codec_name("")
 {
@@ -151,64 +80,7 @@ COMXVideo::COMXVideo() : m_video_codec_name("")
     m_transform         = OMX_DISPLAY_ROT0;
     m_pixel_aspect      = 1.0f;
     frameCounter = 0;
-    omxErrorTypes[OMX_ErrorNone] =  "OMX_ErrorNone";
-    omxErrorTypes[OMX_ErrorInsufficientResources] =  "OMX_ErrorInsufficientResources";
-    omxErrorTypes[OMX_ErrorUndefined] =  "OMX_ErrorUndefined";
-    omxErrorTypes[OMX_ErrorInvalidComponentName] =  "OMX_ErrorInvalidComponentName";
-    omxErrorTypes[OMX_ErrorComponentNotFound] =  "OMX_ErrorComponentNotFound";
-    omxErrorTypes[OMX_ErrorInvalidComponent] =  "OMX_ErrorInvalidComponent";
-    omxErrorTypes[OMX_ErrorBadParameter] =  "OMX_ErrorBadParameter";
-    omxErrorTypes[OMX_ErrorNotImplemented] =  "OMX_ErrorNotImplemented";
-    omxErrorTypes[OMX_ErrorUnderflow] =  "OMX_ErrorUnderflow";
-    omxErrorTypes[OMX_ErrorOverflow] =  "OMX_ErrorOverflow";
-    omxErrorTypes[OMX_ErrorHardware] =  "OMX_ErrorHardware";
-    omxErrorTypes[OMX_ErrorInvalidState] =  "OMX_ErrorInvalidState";
-    omxErrorTypes[OMX_ErrorStreamCorrupt] =  "OMX_ErrorStreamCorrupt";
-    omxErrorTypes[OMX_ErrorPortsNotCompatible] =  "OMX_ErrorPortsNotCompatible";
-    omxErrorTypes[OMX_ErrorResourcesLost] =  "OMX_ErrorResourcesLost";
-    omxErrorTypes[OMX_ErrorNoMore] =  "OMX_ErrorNoMore";
-    omxErrorTypes[OMX_ErrorVersionMismatch] =  "OMX_ErrorVersionMismatch";
-    omxErrorTypes[OMX_ErrorNotReady] =  "OMX_ErrorNotReady";
-    omxErrorTypes[OMX_ErrorTimeout] =  "OMX_ErrorTimeout";
-    omxErrorTypes[OMX_ErrorSameState] =  "OMX_ErrorSameState";
-    omxErrorTypes[OMX_ErrorResourcesPreempted] =  "OMX_ErrorResourcesPreempted";
-    omxErrorTypes[OMX_ErrorPortUnresponsiveDuringAllocation] =  "OMX_ErrorPortUnresponsiveDuringAllocation";
-    omxErrorTypes[OMX_ErrorPortUnresponsiveDuringDeallocation] =  "OMX_ErrorPortUnresponsiveDuringDeallocation";
-    omxErrorTypes[OMX_ErrorPortUnresponsiveDuringStop] =  "OMX_ErrorPortUnresponsiveDuringStop";
-    omxErrorTypes[OMX_ErrorIncorrectStateTransition] =  "OMX_ErrorIncorrectStateTransition";
-    omxErrorTypes[OMX_ErrorIncorrectStateOperation] =  "OMX_ErrorIncorrectStateOperation";
-    omxErrorTypes[OMX_ErrorUnsupportedSetting] =  "OMX_ErrorUnsupportedSetting";
-    omxErrorTypes[OMX_ErrorUnsupportedIndex] =  "OMX_ErrorUnsupportedIndex";
-    omxErrorTypes[OMX_ErrorBadPortIndex] =  "OMX_ErrorBadPortIndex";
-    omxErrorTypes[OMX_ErrorPortUnpopulated] =  "OMX_ErrorPortUnpopulated";
-    omxErrorTypes[OMX_ErrorComponentSuspended] =  "OMX_ErrorComponentSuspended";
-    omxErrorTypes[OMX_ErrorDynamicResourcesUnavailable] =  "OMX_ErrorDynamicResourcesUnavailable";
-    omxErrorTypes[OMX_ErrorMbErrorsInFrame] =  "OMX_ErrorMbErrorsInFrame";
-    omxErrorTypes[OMX_ErrorFormatNotDetected] =  "OMX_ErrorFormatNotDetected";
-    omxErrorTypes[OMX_ErrorContentPipeOpenFailed] =  "OMX_ErrorContentPipeOpenFailed";
-    omxErrorTypes[OMX_ErrorContentPipeCreationFailed] =  "OMX_ErrorContentPipeCreationFailed";
-    omxErrorTypes[OMX_ErrorSeperateTablesUsed] =  "OMX_ErrorSeperateTablesUsed";
-    omxErrorTypes[OMX_ErrorTunnelingUnsupported] =  "OMX_ErrorTunnelingUnsupported";
-    omxErrorTypes[OMX_ErrorKhronosExtensions] =  "OMX_ErrorKhronosExtensions";
-    omxErrorTypes[OMX_ErrorVendorStartUnused] =  "OMX_ErrorVendorStartUnused";
-    omxErrorTypes[OMX_ErrorDiskFull] =  "OMX_ErrorDiskFull";
-    omxErrorTypes[OMX_ErrorMaxFileSize] =  "OMX_ErrorMaxFileSize";
-    omxErrorTypes[OMX_ErrorDrmUnauthorised] =  "OMX_ErrorDrmUnauthorised";
-    omxErrorTypes[OMX_ErrorDrmExpired] =  "OMX_ErrorDrmExpired";
-    omxErrorTypes[OMX_ErrorDrmGeneral] =  "OMX_ErrorDrmGeneral";
-    
-    
-    eventTypes[OMX_EventError] = "OMX_EventError";
-    eventTypes[OMX_EventCmdComplete] = "OMX_EventCmdComplete";
-    eventTypes[OMX_EventMark] = "OMX_EventMark";
-    eventTypes[OMX_EventPortSettingsChanged] = "OMX_EventPortSettingsChanged";
-    eventTypes[OMX_EventBufferFlag] = "OMX_EventBufferFlag";
-    eventTypes[OMX_EventResourcesAcquired] = "OMX_EventResourcesAcquired";
-    eventTypes[OMX_EventComponentResumed] = "OMX_EventComponentResumed";
-    eventTypes[OMX_EventDynamicResourcesAvailable] = "OMX_EventDynamicResourcesAvailable";
-    eventTypes[OMX_EventKhronosExtensions] = "OMX_EventKhronosExtensions";
-    eventTypes[OMX_EventVendorStartUnused] = "OMX_EventVendorStartUnused";
-    eventTypes[OMX_EventParamOrConfigChanged] = "OMX_EventParamOrConfigChanged";
+   
 }
 
 
@@ -229,7 +101,6 @@ bool COMXVideo::SendDecoderConfig()
         
         if(omx_buffer == NULL)
         {
-            ofLog(OF_LOG_NOTICE, "%s::%s - buffer error %s", CLASSNAME, __func__, omxErrorTypes[error].c_str());
             return false;
         }
         
@@ -243,7 +114,6 @@ bool COMXVideo::SendDecoderConfig()
         error = m_omx_decoder.EmptyThisBuffer(omx_buffer);
         if (error != OMX_ErrorNone)
         {
-            ofLog(OF_LOG_NOTICE, "%s::%s - OMX_EmptyThisBuffer() failed with result(%s)\n", CLASSNAME, __func__, omxErrorTypes[error].c_str());
             m_omx_decoder.onEmptyBufferDone(m_omx_decoder.GetComponent(), omx_buffer);
             return false;
         }
@@ -1053,7 +923,6 @@ int COMXVideo::Decode(uint8_t *pData, int iSize, double dts, double pts)
             error = m_omx_decoder.EmptyThisBuffer(omx_buffer);
             if (error != OMX_ErrorNone)
             {
-                ofLog(OF_LOG_NOTICE, "%s::%s - OMX_EmptyThisBuffer() failed with result(%s)\n", CLASSNAME, __func__, omxErrorTypes[error].c_str());
                 m_omx_decoder.onEmptyBufferDone(m_omx_decoder.GetComponent(), omx_buffer);
                 return false;
             }
@@ -1064,7 +933,6 @@ int COMXVideo::Decode(uint8_t *pData, int iSize, double dts, double pts)
             {
                 if(!PortSettingsChanged())
                 {
-                    ofLog(OF_LOG_NOTICE, "%s::%s - error PortSettingsChanged error(%s)\n", CLASSNAME, __func__, omxErrorTypes[error].c_str());
                     return false;
                 }
             }
@@ -1073,7 +941,7 @@ int COMXVideo::Decode(uint8_t *pData, int iSize, double dts, double pts)
             {
                 if(!PortSettingsChanged())
                 {
-                    ofLog(OF_LOG_NOTICE, "%s::%s - error PortSettingsChanged (EventParamOrConfigChanged) error(%s)\n", CLASSNAME, __func__, omxErrorTypes[error].c_str());
+  
                 }
             }
         }
@@ -1309,7 +1177,6 @@ void COMXVideo::SubmitEOS()
     
     if(omx_buffer == NULL)
     {
-        ofLog(OF_LOG_NOTICE, "%s::%s - buffer error %s", CLASSNAME, __func__, omxErrorTypes[error].c_str());
         m_failed_eos = true;
         return;
     }
@@ -1323,7 +1190,6 @@ void COMXVideo::SubmitEOS()
     error = m_omx_decoder.EmptyThisBuffer(omx_buffer);
     if (error != OMX_ErrorNone)
     {
-        ofLog(OF_LOG_NOTICE, "%s::%s - OMX_EmptyThisBuffer() failed with result(%s)\n", CLASSNAME, __func__, omxErrorTypes[error].c_str());
         m_omx_decoder.onEmptyBufferDone(m_omx_decoder.GetComponent(), omx_buffer);
         return;
     }

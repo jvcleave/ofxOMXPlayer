@@ -1,12 +1,7 @@
 #pragma once
 
-#include "ofMain.h"
-#include <IL/OMX_Core.h>
-#include <IL/OMX_Component.h>
-#include <IL/OMX_Index.h>
-#include <IL/OMX_Image.h>
-#include <IL/OMX_Video.h>
-#include <IL/OMX_Broadcom.h>
+#include "OMX_Maps.h"
+
 #include "utils/log.h"
 #define __func__ __PRETTY_FUNCTION__
 
