@@ -495,19 +495,11 @@ bool COMXVideo::Open(OMXClock *clock, const OMXVideoConfig &config)
         
         OMX_PARAM_BRCMDISABLEPROPRIETARYTUNNELSTYPE tunnelConfig;
         OMX_INIT_STRUCTURE(tunnelConfig);
-        tunnelConfig.nPortIndex = VIDEO_DECODE_INPUT_PORT;
+        tunnelConfig.nPortIndex = VIDEO_DECODE_OUTPUT_PORT;
         tunnelConfig.bUseBuffers = OMX_TRUE;
         
         error = m_omx_decoder.SetParameter(OMX_IndexParamBrcmDisableProprietaryTunnels, &tunnelConfig);
         OMX_TRACE(error);
-        
-        ofLogNotice(__func__) << "VIDEO_DECODE_INPUT_PORT " << tunnelConfig.bUseBuffers;
-
-        tunnelConfig.nPortIndex = VIDEO_DECODE_OUTPUT_PORT;
-        error = m_omx_decoder.SetParameter(OMX_IndexParamBrcmDisableProprietaryTunnels, &tunnelConfig);
-        OMX_TRACE(error);
-        
-        ofLogNotice(__func__) << "VIDEO_DECODE_OUTPUT_PORT " << tunnelConfig.bUseBuffers;
 
     }
     
@@ -926,11 +918,7 @@ void COMXVideo::Close()
         error = WaitForState(m_omx_decoder.GetComponent(), OMX_StateIdle);
         OMX_TRACE(error);
         
-        
-        //error = WaitForState(m_omx_decoder.GetComponent(), OMX_StateLoaded);
-        //OMX_TRACE(error);
-        
-        
+           
         error = DisableAllPortsForComponent(&m_omx_decoder.m_handle);
         OMX_TRACE(error);
         
@@ -1029,29 +1017,6 @@ void COMXVideo::Close()
         ofLog() << __LINE__ << " : " << result;
     }
  
-
-#if 0
-    if(!filtersEnabled)
-    {
-        result = m_omx_decoder.Deinitialize();    
-        ofLog() << __LINE__ << " : " << result;
-    }else
-    {
-        if(m_omx_decoder.m_handle)
-        {
-            
-            
-            //m_omx_decoder.FreeInputBuffers();
-            //error = OMX_FreeHandle(m_omx_decoder.m_handle);
-            //OMX_TRACE(error);
-            m_omx_decoder.m_handle = NULL;
-
-        }
-        
-    }
-#endif 
-
-
     
     m_is_open       = false;
     
