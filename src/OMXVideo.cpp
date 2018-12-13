@@ -908,17 +908,16 @@ void COMXVideo::Close()
     if(m_omx_decoder.GetComponent())
     {
         
-        error = FlushOMXComponent(m_omx_image_fx.GetComponent(), VIDEO_DECODE_INPUT_PORT);
+        error = FlushOMXComponent(m_omx_decoder.GetComponent(), VIDEO_DECODE_INPUT_PORT);
         OMX_TRACE(error);
         
-        error = FlushOMXComponent(m_omx_image_fx.GetComponent(), VIDEO_DECODE_OUTPUT_PORT);
+        error = FlushOMXComponent(m_omx_decoder.GetComponent(), VIDEO_DECODE_OUTPUT_PORT);
         OMX_TRACE(error);
         
         
         error = WaitForState(m_omx_decoder.GetComponent(), OMX_StateIdle);
         OMX_TRACE(error);
         
-           
         error = DisableAllPortsForComponent(&m_omx_decoder.m_handle);
         OMX_TRACE(error);
         
@@ -938,10 +937,10 @@ void COMXVideo::Close()
         error = WaitForState(m_omx_image_fx.GetComponent(), OMX_StateIdle);
         OMX_TRACE(error);
         
-        error = FlushOMXComponent(m_omx_image_fx.GetComponent(), VIDEO_DECODE_INPUT_PORT);
+        error = FlushOMXComponent(m_omx_image_fx.GetComponent(), IMAGE_FX_INPUT_PORT);
         OMX_TRACE(error);
         
-        error = FlushOMXComponent(m_omx_image_fx.GetComponent(), VIDEO_DECODE_OUTPUT_PORT);
+        error = FlushOMXComponent(m_omx_image_fx.GetComponent(), IMAGE_FX_OUTPUT_PORT);
         OMX_TRACE(error);
         
         error = DisableAllPortsForComponent(&m_omx_image_fx.m_handle);
@@ -1320,13 +1319,12 @@ void COMXVideo::SetFilter(OMX_IMAGEFILTERTYPE imageFilter)
     if(!filtersEnabled) return;
     OMX_ERRORTYPE error;
     
-    
     error = FlushOMXComponent(m_omx_decoder.GetComponent(), VIDEO_DECODE_OUTPUT_PORT);
     OMX_TRACE(error); 
-
     
     error = FlushOMXComponent(m_omx_image_fx.GetComponent(), IMAGE_FX_INPUT_PORT);
     OMX_TRACE(error);
+
     
     
     OMX_CONFIG_IMAGEFILTERTYPE imagefilterConfig;

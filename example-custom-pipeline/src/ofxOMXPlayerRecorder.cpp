@@ -200,11 +200,23 @@ void ofxOMXPlayerRecorder::createEncoder()
     error = SetComponentState(splitter, OMX_StateIdle);
     OMX_TRACE(error);
     
+    /*
+    OMX_PARAM_BRCMDISABLEPROPRIETARYTUNNELSTYPE tunnelConfig;
+    OMX_INIT_STRUCTURE(tunnelConfig);
+    tunnelConfig.nPortIndex = VIDEO_SPLITTER_OUTPUT_PORT2;
+    tunnelConfig.bUseBuffers = OMX_TRUE;
+    
+    
+    error = OMX_SetParameter(splitter, OMX_IndexParamBrcmDisableProprietaryTunnels, &tunnelConfig);
+    OMX_TRACE(error);*/
+    
+    
     // Create splitter->encoder Tunnel
     error = OMX_SetupTunnel(splitter, VIDEO_SPLITTER_OUTPUT_PORT2,
                             encoder, VIDEO_ENCODE_INPUT_PORT);
     
     OMX_TRACE(error);
+    
     //Enable splitter output2 port
     error = EnableComponentPort(splitter, VIDEO_SPLITTER_OUTPUT_PORT2);
     OMX_TRACE(error);

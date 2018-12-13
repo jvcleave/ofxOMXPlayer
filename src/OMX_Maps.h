@@ -338,8 +338,7 @@ private:
         imageFilters["Posterise"] = OMX_ImageFilterPosterise;
         imageFilters["ColourBalance"] = OMX_ImageFilterColourBalance;
         imageFilters["Cartoon"] = OMX_ImageFilterCartoon;
-        
-#if 0    
+           
         imageFilters["Gpen"] = OMX_ImageFilterGpen;
         imageFilters["Hatch"] = OMX_ImageFilterHatch;
 
@@ -350,7 +349,7 @@ private:
         imageFilters["DeInterlaceLineDouble"] = OMX_ImageFilterDeInterlaceLineDouble;
         imageFilters["DeInterlaceAdvanced"] = OMX_ImageFilterDeInterlaceAdvanced;
         imageFilters["DeRing"] = OMX_ImageFilterDeRing;
-#endif
+
         collectNames<OMX_IMAGEFILTERTYPE>(imageFilters, imageFilterNames, imageFilterTypes);
         
         

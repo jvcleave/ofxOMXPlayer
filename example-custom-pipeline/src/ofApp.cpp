@@ -8,6 +8,9 @@ void ofApp::setup()
 	ofSetLogLevel(OF_LOG_VERBOSE);
     consoleListener.setup(this);
     
+    imageFilterNames = OMX_Maps::getInstance().imageFilterNames;
+    
+#if 0 
     imageFilterNames.push_back("None");
     imageFilterNames.push_back("Cartoon");
     imageFilterNames.push_back("Negative");
@@ -25,7 +28,7 @@ void ofApp::setup()
     imageFilterNames.push_back("Posterise");
     //imageFilterNames.push_back("ColourBalance");
     
-#if 0    
+   
     imageFilterNames.push_back("Gpen");
     imageFilterNames.push_back("Hatch");
     imageFilterNames.push_back("Noise");
@@ -115,7 +118,7 @@ void ofApp::keyPressed  (int key)
     {
         case '1':
         {
-            omxPlayerRecorder.startRecording(2.0);
+            omxPlayerRecorder.startRecording(1.0);
             break;
         }
         case '2':
