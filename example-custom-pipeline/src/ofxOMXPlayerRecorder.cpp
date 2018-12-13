@@ -128,6 +128,12 @@ void ofxOMXPlayerRecorder::startRecording(float recordingRateMB_) //default =2.0
     
     error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
     OMX_TRACE(error);
+    if(error !=OMX_ErrorNone)
+    {
+        ofLogError(__func__) << "RECORDING START FAILED";
+        isRecording = false;
+        destroyEncoder();
+    }
 }
 
 void ofxOMXPlayerRecorder::createEncoder()
@@ -306,4 +312,18 @@ void ofxOMXPlayerRecorder::writeFile()
     isStopping = false;
 }
 
-
+ofxOMXPlayerRecorder::~ofxOMXPlayerRecorder()
+{
+    omxPlayer = NULL;
+    isOpen = false;
+    stopRequested = false;     
+    isStopping = false;
+    isRecording = false;
+    didWriteFile = false;
+    recordedFrameCounter = 0;
+    destroyEncoder();
+    encoder = NULL;
+    splitter = NULL;
+    encoderOutputBuffer = NULL;
+    
+}

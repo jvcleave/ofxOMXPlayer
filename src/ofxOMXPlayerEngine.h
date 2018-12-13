@@ -122,6 +122,7 @@ public:
     void setLayer(int layer);
     void setAlpha(int alpha);
     void setFilter(OMX_IMAGEFILTERTYPE filterType);
+    void setFilter(OMX_IMAGEFILTERTYPE filterType, vector<int>params);
     void rotateVideo(int degrees, bool doMirror = false);
     
     void onUpdate(ofEventArgs& eventArgs);

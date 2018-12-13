@@ -22,6 +22,8 @@ public:
 
     
     ofxOMXPlayerRecorder();
+    ~ofxOMXPlayerRecorder();
+
     void setup(ofxOMXPlayer* omxPlayer_);
 
     void startRecording(float recordingRateMB_=2.0);

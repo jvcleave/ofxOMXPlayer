@@ -141,6 +141,7 @@ public:
 
     void SetOrientation(int degreesClockWise, bool doMirror=false);
     void SetFilter(OMX_IMAGEFILTERTYPE filterType);
+    void SetFilter(OMX_IMAGEFILTERTYPE filterType, vector<int> params);
     COMXCoreComponent videoSplitter;
 
 protected:

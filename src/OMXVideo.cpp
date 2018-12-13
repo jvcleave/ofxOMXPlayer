@@ -266,6 +266,15 @@ bool COMXVideo::PortSettingsChanged()
     
     if(filtersEnabled)
     {
+        /*
+        OMX_PARAM_U32TYPE extra_buffers;
+        OMX_INIT_STRUCTURE(extra_buffers);
+        extra_buffers.nU32 = 10;
+        
+        error = m_omx_image_fx.SetParameter(OMX_IndexParamBrcmExtraBuffers, &extra_buffers);
+        OMX_TRACE(error);*/
+         
+        
         if(m_deinterlace || m_config.anaglyph)
         {
             bool advanced_deinterlace = m_config.advanced_hd_deinterlace || port_image.format.video.nFrameWidth * port_image.format.video.nFrameHeight <= 576 * 720;
@@ -827,6 +836,7 @@ void COMXVideo::Close()
     m_omx_tunnel_decoder.Deestablish();
     if(filtersEnabled)
     {
+        m_omx_image_fx.FlushAll();
         m_omx_tunnel_image_fx.Deestablish();
     }
     m_omx_tunnel_sched.Deestablish();
@@ -1136,7 +1146,48 @@ void COMXVideo::SetAlpha(int alpha)
 }
 
 
-void COMXVideo::SetFilter(OMX_IMAGEFILTERTYPE filterType)
+void COMXVideo::SetFilter(OMX_IMAGEFILTERTYPE imageFilter)
+{
+    CSingleLock lock (m_critSection);
+    if(!m_is_open) return;
+    if(!filtersEnabled) return;
+    OMX_ERRORTYPE error;
+    
+    
+
+    error = FlushOMXComponent(m_omx_image_fx.GetComponent(), OMX_ALL);
+    OMX_TRACE(error);
+    
+    //error = FlushOMXComponent(m_omx_decoder.GetComponent(), VIDEO_DECODE_OUTPUT_PORT);
+    //OMX_TRACE(error); 
+    
+    
+    //error = FlushOMXComponent(m_omx_sched.GetComponent(), OMX_ALL);
+    //OMX_TRACE(error);
+    
+    
+    //error = FlushOMXComponent(m_omx_render.GetComponent(), OMX_ALL);
+    //OMX_TRACE(error);
+
+    
+    OMX_CONFIG_IMAGEFILTERTYPE imagefilterConfig;
+    OMX_INIT_STRUCTURE(imagefilterConfig);
+    imagefilterConfig.nPortIndex = IMAGE_FX_OUTPUT_PORT;
+    imagefilterConfig.eImageFilter = imageFilter;
+    
+    error = m_omx_image_fx.SetConfig(OMX_IndexConfigCommonImageFilter, &imagefilterConfig);
+    OMX_TRACE(error);
+    
+    if(error != OMX_ErrorNone)
+    {
+        ofLogError(__func__) << GetImageFilterString(imageFilter) << " FAILED";
+    }
+    
+
+}
+
+
+void COMXVideo::SetFilter(OMX_IMAGEFILTERTYPE filterType, vector<int> params)
 {
     CSingleLock lock (m_critSection);
     if(!m_is_open) return;
@@ -1152,6 +1203,11 @@ void COMXVideo::SetFilter(OMX_IMAGEFILTERTYPE filterType)
     
     image_filter.nPortIndex = IMAGE_FX_OUTPUT_PORT;
     image_filter.eImageFilter = filterType;
+    for(int i=0; i<params.size(); i++)
+    {
+        image_filter.nParams[i] = params[i];        
+    }
+    
     error = m_omx_image_fx.SetConfig(OMX_IndexConfigCommonImageFilterParameters, &image_filter);
     OMX_TRACE(error);
 

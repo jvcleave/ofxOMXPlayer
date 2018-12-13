@@ -9,17 +9,7 @@ public:
     virtual void onVideoLoop(ofxOMXPlayer*) = 0;
     
 };
-class ImageFilter
-{
-public:
-    string name;
-    OMX_IMAGEFILTERTYPE filterType;
-    ImageFilter(string name_, OMX_IMAGEFILTERTYPE filterType_ )
-    {
-        name = name_;
-        filterType = filterType_;
-    };
-};
+
 class ofxOMXPlayer : public EngineListener
 {
 public:
@@ -31,7 +21,6 @@ public:
     ofxOMXPlayerListener* listener;
     bool engineNeedsRestart;
     bool pendingLoopMessage;
-    vector<ImageFilter>imageFilters;
     string currentFilterName;
     int playerID;
     
@@ -86,7 +75,8 @@ public:
     void rotateVideo(int degrees, bool doMirror = false);
     
     void setFilter(OMX_IMAGEFILTERTYPE filterType);
-    string findFilterName(OMX_IMAGEFILTERTYPE filterType);
+    void setFilter(OMX_IMAGEFILTERTYPE filterType, vector<int> params);
+
 #pragma mark PLAYBACK CONTROLS
     bool isPaused();
     void setPaused(bool doPause);

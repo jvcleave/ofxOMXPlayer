@@ -184,6 +184,12 @@ bool ofxOMXPlayerEngine::setup(ofxOMXPlayerSettings settings)
     
     
     bool didOpen = true;
+    
+    if(settings.enableFilters)
+    {
+        m_config_video.filterType = settings.filter;
+    }
+    
     //m_config_video.filterType = OMX_ImageFilterCartoon;
     m_config_video.useTexture = useTexture;
     bool m_dump_format = true;
@@ -1142,6 +1148,18 @@ void ofxOMXPlayerEngine::setFilter(OMX_IMAGEFILTERTYPE filterType)
     }
     unlock();
 }
+
+
+void ofxOMXPlayerEngine::setFilter(OMX_IMAGEFILTERTYPE filterType, vector<int>params)
+{
+    lock();
+    if(m_has_video)
+    {
+        m_player_video.SetFilter(filterType, params);
+    }
+    unlock();
+}
+
 
 void ofxOMXPlayerEngine::rotateVideo(int degrees, bool doMirror)//default doMirror = false
 {
