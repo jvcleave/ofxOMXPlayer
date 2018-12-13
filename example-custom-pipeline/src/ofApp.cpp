@@ -56,11 +56,25 @@ void ofApp::setup()
 }
 
 
-
+bool doFilterChange = false;
 //--------------------------------------------------------------
 void ofApp::update()
 {
-    
+    if(doFilterChange)
+    {
+        if(ofGetFrameNum() % 120 == 0)
+        {
+            if(currentFilterIndex+1 < imageFilterNames.size())
+            {
+                currentFilterIndex++;
+            }else
+            {
+                currentFilterIndex = 0;
+            }
+            omxPlayer.setFilter(GetImageFilter(imageFilterNames[currentFilterIndex]));
+        }
+        
+    }
 }
 
 
@@ -92,6 +106,7 @@ void ofApp::draw(){
     ofDrawBitmapStringHighlight(info.str(), 60, 60, ofColor(ofColor::black, 90), ofColor::yellow);
 }
 
+
 void ofApp::keyPressed  (int key)
 {
     ofLogVerbose(__func__) << "key: " << key;
@@ -110,15 +125,9 @@ void ofApp::keyPressed  (int key)
         }
         case '3' :
         {
-            if(currentFilterIndex+1 < imageFilterNames.size())
-            {
-                currentFilterIndex++;
-            }else
-            {
-                currentFilterIndex = 0;
-            }
-            ofLog() << "currentFilterIndex: " << currentFilterIndex;
-            omxPlayer.setFilter(GetImageFilter(imageFilterNames[currentFilterIndex]));
+            doFilterChange = !doFilterChange;
+
+
         }
         default:
             break;

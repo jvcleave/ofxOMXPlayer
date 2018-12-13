@@ -40,7 +40,7 @@
 #include <EGL/eglplatform.h>
 #include <EGL/eglext.h>
 
-#define VIDEO_BUFFERS 60
+#define EXTRA_IMAGE_FX_BUFFERS 5
 
 enum EDEINTERLACEMODE
 {

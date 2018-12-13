@@ -1024,7 +1024,7 @@ string omxErrorToString(OMX_ERRORTYPE error)
 #define OMX_LOG_LEVEL_SILENT 9
 
 #ifndef OMX_LOG_LEVEL
-#define OMX_LOG_LEVEL OMX_LOG_LEVEL_ERROR_ONLY
+#define OMX_LOG_LEVEL OMX_LOG_LEVEL_VERBOSE
 #endif
 
 #define TRACE_LINE ofLogNotice(__func__) << __LINE__;
@@ -1067,7 +1067,7 @@ void logOMXError(OMX_ERRORTYPE error, string comments="", string functionName=""
         }
         case OMX_LOG_LEVEL_VERBOSE:
         {
-            ofLogError(functionName)  << commentLine << omxErrorToString(error);
+            ofLogVerbose(functionName)  << lineNumber << " : " << omxErrorToString(error);
             break;
         }
         default:

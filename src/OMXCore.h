@@ -169,8 +169,9 @@ public:
   void ResetEos();
   void IgnoreNextError(OMX_S32 error) { m_ignore_error = error; }
     FillBufferListener* fillBufferListener;
+    OMX_HANDLETYPE m_handle;
+
 private:
-  OMX_HANDLETYPE m_handle;
   unsigned int   m_input_port;
   unsigned int   m_output_port;
   std::string    m_componentName;
