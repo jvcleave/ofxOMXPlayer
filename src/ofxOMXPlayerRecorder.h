@@ -29,6 +29,13 @@ public:
     void startRecording(float recordingRateMB_=2.0);
     void stopRecording();
     float recordingRateMB;
+    
+    bool isRecordingPaused;
+    bool pauseRequested;
+
+    void pauseRecording();
+    void resumeRecording();
+
 protected:
     void writeFile();
 

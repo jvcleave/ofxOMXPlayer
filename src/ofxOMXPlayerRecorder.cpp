@@ -41,28 +41,62 @@ OMX_ERRORTYPE ofxOMXPlayerRecorder::encoderFillBufferDone(OMX_HANDLETYPE encoder
     {
         ofLogVerbose(__func__) << "Exit signal detected, waiting for next key frame boundry before exiting...";
         omxPlayerRecorder->isStopping = true;
-        isKeyframeValid = encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_SYNCFRAME;
     }
-    if(omxPlayerRecorder->isStopping && (isKeyframeValid ^ (encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_SYNCFRAME))) 
+    
+    
+    isKeyframeValid = encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_SYNCFRAME;
+
+    if((omxPlayerRecorder->isStopping || omxPlayerRecorder->pauseRequested) &&
+       (isKeyframeValid ^ (encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_SYNCFRAME))) 
     {
         ofLogVerbose(__func__) << "Key frame boundry reached, exiting loop...";
-        omxPlayerRecorder->writeFile();
+
+        if(omxPlayerRecorder->pauseRequested)
+        {
+            omxPlayerRecorder->isRecordingPaused = true;
+            omxPlayerRecorder->pauseRequested = false;
+            OMX_ERRORTYPE error = FlushOMXComponent(encoder, VIDEO_ENCODE_INPUT_PORT);
+            OMX_TRACE(error);
+            
+            error = FlushOMXComponent(encoder, VIDEO_ENCODE_OUTPUT_PORT);
+            OMX_TRACE(error);
+            
+            error = FlushOMXComponent(encoder, VIDEO_ENCODE_OUTPUT_PORT);
+            OMX_TRACE(error);
+            
+            
+            //Set encoder to Idle
+            error = WaitForState(encoder, OMX_StateIdle);
+            OMX_TRACE(error);
+            
+            
+            
+        }else
+        {
+            omxPlayerRecorder->writeFile();
+        }
+        
     }else 
     {
         omxPlayerRecorder->recordingFileBuffer.append((const char*) encoderOutputBuffer->pBuffer + encoderOutputBuffer->nOffset, encoderOutputBuffer->nFilledLen);
         //ofLogVerbose(__func__) << "encoderOutputBuffer->nFilledLen: " << encoderOutputBuffer->nFilledLen;
         ofLog() << omxPlayerRecorder->recordingFileBuffer.size();
-        OMX_ERRORTYPE error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
-        if(error != OMX_ErrorNone) 
+        
+        if(!omxPlayerRecorder->isRecordingPaused)
         {
-            ofLog(OF_LOG_ERROR, "encoder OMX_FillThisBuffer FAIL error: 0x%08x", error);
-            if(!omxPlayerRecorder->didWriteFile)
+            OMX_ERRORTYPE error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
+            if(error != OMX_ErrorNone) 
             {
-                ofLogError() << "HAD ERROR FILLING BUFFER, JUST WRITING WHAT WE HAVE";
-                omxPlayerRecorder->writeFile();
-                
+                ofLog(OF_LOG_ERROR, "encoder OMX_FillThisBuffer FAIL error: 0x%08x", error);
+                if(!omxPlayerRecorder->didWriteFile)
+                {
+                    ofLogError() << "HAD ERROR FILLING BUFFER, JUST WRITING WHAT WE HAVE";
+                    omxPlayerRecorder->writeFile();
+                    
+                }
             }
         }
+        
     }
     return OMX_ErrorNone;
 }
@@ -83,6 +117,8 @@ ofxOMXPlayerRecorder::ofxOMXPlayerRecorder()
     splitter = NULL;
     encoderOutputBuffer = NULL;
     recordingRateMB = 2.0;
+    isRecordingPaused = false;
+    pauseRequested = false;
 }
 
 void ofxOMXPlayerRecorder::setup(ofxOMXPlayer* omxPlayer_)
@@ -136,6 +172,44 @@ void ofxOMXPlayerRecorder::startRecording(float recordingRateMB_) //default =2.0
     }
 }
 
+void ofxOMXPlayerRecorder::pauseRecording()
+{
+    if(isRecording)
+    {
+       pauseRequested = true; 
+    }
+}
+
+void ofxOMXPlayerRecorder::resumeRecording()
+{
+    if(!isRecording)
+    {
+        ofLogError() << "WASN'T RECORDING";
+        return;
+    }
+    
+    if(!isRecordingPaused)
+    {
+        ofLogError() << "WASN'T PAUSED";
+        return;
+    }
+    
+    isRecordingPaused = false;
+    OMX_ERRORTYPE error;
+    
+    error = WaitForState(encoder, OMX_StateExecuting);
+    OMX_TRACE(error);
+    
+    
+    error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
+    OMX_TRACE(error);
+    if(error !=OMX_ErrorNone)
+    {
+        ofLogError(__func__) << "RECORDING START FAILED";
+        isRecording = false;
+        destroyEncoder();
+    }
+}
 void ofxOMXPlayerRecorder::createEncoder()
 {
 #pragma mark ENCODER SETUP  
@@ -160,7 +234,9 @@ void ofxOMXPlayerRecorder::createEncoder()
     error =OMX_GetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
     OMX_TRACE(error);
     
-    
+    ofLogNotice(__func__) << "VIDEO_ENCODE_OUTPUT_PORT: " << PrintPortDefinition(encoder, VIDEO_ENCODE_OUTPUT_PORT);
+    ofLogNotice(__func__) << "VIDEO_ENCODE_INPUT_PORT: " << PrintPortDefinition(encoder, VIDEO_ENCODE_INPUT_PORT);
+
     int recordingBitRate = MEGABYTE_IN_BITS * 2.0;
     
     encoderOutputPortDefinition.format.video.nBitrate = recordingBitRate;
@@ -208,9 +284,9 @@ void ofxOMXPlayerRecorder::createEncoder()
     
     
     error = OMX_SetParameter(splitter, OMX_IndexParamBrcmDisableProprietaryTunnels, &tunnelConfig);
-    OMX_TRACE(error);*/
+    OMX_TRACE(error);
     
-    
+    */
     // Create splitter->encoder Tunnel
     error = OMX_SetupTunnel(splitter, VIDEO_SPLITTER_OUTPUT_PORT2,
                             encoder, VIDEO_ENCODE_INPUT_PORT);

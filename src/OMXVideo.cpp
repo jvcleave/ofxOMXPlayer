@@ -83,170 +83,17 @@ COMXVideo::COMXVideo() : m_video_codec_name("")
    
 }
 
-
 COMXVideo::~COMXVideo()
 {
     Close();
-}
-
-bool COMXVideo::SendDecoderConfig()
-{
-    CSingleLock lock (m_critSection);
-    OMX_ERRORTYPE error   = OMX_ErrorNone;
-    
-    /* send decoder config */
-    if(m_config.hints.extrasize > 0 && m_config.hints.extradata != NULL)
-    {
-        OMX_BUFFERHEADERTYPE *omx_buffer = m_omx_decoder.GetInputBuffer();
-        
-        if(omx_buffer == NULL)
-        {
-            return false;
-        }
-        
-        omx_buffer->nOffset = 0;
-        omx_buffer->nFilledLen = std::min((OMX_U32)m_config.hints.extrasize, omx_buffer->nAllocLen);
-        
-        memset((unsigned char *)omx_buffer->pBuffer, 0x0, omx_buffer->nAllocLen);
-        memcpy((unsigned char *)omx_buffer->pBuffer, m_config.hints.extradata, omx_buffer->nFilledLen);
-        omx_buffer->nFlags = OMX_BUFFERFLAG_CODECCONFIG | OMX_BUFFERFLAG_ENDOFFRAME;
-        
-        error = m_omx_decoder.EmptyThisBuffer(omx_buffer);
-        if (error != OMX_ErrorNone)
-        {
-            m_omx_decoder.onEmptyBufferDone(m_omx_decoder.GetComponent(), omx_buffer);
-            return false;
-        }
-    }
-    return true;
-}
-
-bool COMXVideo::NaluFormatStartCodes(enum AVCodecID codec, uint8_t *in_extradata, int in_extrasize)
-{
-    switch(codec)
-    {
-        case AV_CODEC_ID_H264:
-            if (in_extrasize < 7 || in_extradata == NULL)
-                return true;
-            // valid avcC atom data always starts with the value 1 (version), otherwise annexb
-            else if ( *in_extradata != 1 )
-                return true;
-        default: break;
-    }
-    return false;    
-}
-
-void COMXVideo::PortSettingsChangedLogger(OMX_PARAM_PORTDEFINITIONTYPE port_image, int interlaceEMode)
-{
-    ofLog(OF_LOG_NOTICE, "%s::%s - %dx%d@%.2f interlace:%d deinterlace:%d anaglyph:%d par:%.2f display:%d layer:%d alpha:%d aspectMode:%d", CLASSNAME, __func__,
-          port_image.format.video.nFrameWidth, port_image.format.video.nFrameHeight,
-          port_image.format.video.xFramerate / (float)(1<<16), interlaceEMode, m_deinterlace, m_config.anaglyph, m_pixel_aspect, m_config.display,
-          m_config.layer, m_config.alpha, m_config.aspectMode);
-    
-}
-
-
-
-void COMXVideo::processCodec(COMXStreamInfo& hints)
-{
-    switch (hints.codec)
-    {
-        case AV_CODEC_ID_H264:
-        {
-            switch(hints.profile)
-            {
-                case FF_PROFILE_H264_BASELINE:
-                    // (role name) video_decoder.avc
-                    // H.264 Baseline profile
-                    m_codingType = OMX_VIDEO_CodingAVC;
-                    break;
-                case FF_PROFILE_H264_MAIN:
-                    // (role name) video_decoder.avc
-                    // H.264 Main profile
-                    m_codingType = OMX_VIDEO_CodingAVC;
-                    break;
-                case FF_PROFILE_H264_HIGH:
-                    // (role name) video_decoder.avc
-                    // H.264 Main profile
-                    m_codingType = OMX_VIDEO_CodingAVC;
-                    break;
-                case FF_PROFILE_UNKNOWN:
-                    m_codingType = OMX_VIDEO_CodingAVC;
-                    break;
-                default:
-                    m_codingType = OMX_VIDEO_CodingAVC;
-                    break;
-            }
-        }
-            break;
-        case AV_CODEC_ID_MPEG4:
-            // (role name) video_decoder.mpeg4
-            // MPEG-4, DivX 4/5 and Xvid compatible
-            m_codingType = OMX_VIDEO_CodingMPEG4;
-            break;
-        case AV_CODEC_ID_MPEG1VIDEO:
-        case AV_CODEC_ID_MPEG2VIDEO:
-            // (role name) video_decoder.mpeg2
-            // MPEG-2
-            m_codingType = OMX_VIDEO_CodingMPEG2;
-            break;
-        case AV_CODEC_ID_H263:
-            // (role name) video_decoder.mpeg4
-            // MPEG-4, DivX 4/5 and Xvid compatible
-            m_codingType = OMX_VIDEO_CodingMPEG4;
-            break;
-        case AV_CODEC_ID_VP6:
-        case AV_CODEC_ID_VP6F:
-        case AV_CODEC_ID_VP6A:
-            // (role name) video_decoder.vp6
-            // VP6
-            m_codingType = OMX_VIDEO_CodingVP6;
-            break;
-        case AV_CODEC_ID_VP8:
-            // (role name) video_decoder.vp8
-            // VP8
-            m_codingType = OMX_VIDEO_CodingVP8;
-            break;
-        case AV_CODEC_ID_THEORA:
-            // (role name) video_decoder.theora
-            // theora
-            m_codingType = OMX_VIDEO_CodingTheora;
-            break;
-        case AV_CODEC_ID_MJPEG:
-        case AV_CODEC_ID_MJPEGB:
-            // (role name) video_decoder.mjpg
-            // mjpg
-            m_codingType = OMX_VIDEO_CodingMJPEG;
-            break;
-        case AV_CODEC_ID_VC1:
-        case AV_CODEC_ID_WMV3:
-            // (role name) video_decoder.vc1
-            // VC-1, WMV9
-            m_codingType = OMX_VIDEO_CodingWMV;
-            break;
-        default:
-            m_codingType = OMX_VIDEO_CodingUnused;
-            ofLog(OF_LOG_VERBOSE, "Video codec id unknown: %x\n", hints.codec);
-            break;
-    }
-}
-    
-
-
-
-void COMXVideo::onFillBuffer(OMX_HANDLETYPE hComponent, OMX_BUFFERHEADERTYPE* pBuffer)
-{
-    OMX_FillThisBuffer(hComponent, pBuffer);
-    frameCounter++;
-    //ofLog() << "onFillBuffer: " << frameCounter;
 }
 
 
 bool COMXVideo::Open(OMXClock *clock, const OMXVideoConfig &config)
 {
     CSingleLock lock (m_critSection);
-   
-
+    
+    
     Close();
     
     frameCounter = 0;
@@ -402,7 +249,7 @@ bool COMXVideo::Open(OMXClock *clock, const OMXVideoConfig &config)
     
     error = m_omx_decoder.SetStateForComponent(OMX_StateIdle);
     OMX_TRACE(error);
-
+    
     
     OMX_VIDEO_PARAM_PORTFORMATTYPE formatType;
     OMX_INIT_STRUCTURE(formatType);
@@ -428,7 +275,7 @@ bool COMXVideo::Open(OMXClock *clock, const OMXVideoConfig &config)
     
     error = m_omx_decoder.GetParameter(OMX_IndexParamPortDefinition, &portParam);
     OMX_TRACE(error);
-
+    
     
     portParam.nPortIndex = VIDEO_DECODE_INPUT_PORT;
     portParam.nBufferCountActual = m_config.fifo_size ? m_config.fifo_size * 1024 * 1024 / portParam.nBufferSize : 80;
@@ -438,7 +285,7 @@ bool COMXVideo::Open(OMXClock *clock, const OMXVideoConfig &config)
     
     error = m_omx_decoder.SetParameter(OMX_IndexParamPortDefinition, &portParam);
     OMX_TRACE(error);
-
+    
     
     // request portsettingschanged on aspect ratio change
     OMX_CONFIG_REQUESTCALLBACKTYPE notifications;
@@ -449,7 +296,7 @@ bool COMXVideo::Open(OMXClock *clock, const OMXVideoConfig &config)
     
     error = m_omx_decoder.SetParameter((OMX_INDEXTYPE)OMX_IndexConfigRequestCallback, &notifications);
     OMX_TRACE(error);
-
+    
     
     OMX_PARAM_BRCMVIDEODECODEERRORCONCEALMENTTYPE concanParam;
     OMX_INIT_STRUCTURE(concanParam);
@@ -460,7 +307,7 @@ bool COMXVideo::Open(OMXClock *clock, const OMXVideoConfig &config)
     
     error = m_omx_decoder.SetParameter(OMX_IndexParamBrcmVideoDecodeErrorConcealment, &concanParam);
     OMX_TRACE(error);
-
+    
     
     if(NaluFormatStartCodes(m_config.hints.codec, (uint8_t *)m_config.hints.extradata, m_config.hints.extrasize))
     {
@@ -471,7 +318,7 @@ bool COMXVideo::Open(OMXClock *clock, const OMXVideoConfig &config)
         
         error = m_omx_decoder.SetParameter((OMX_INDEXTYPE)OMX_IndexParamNalStreamFormatSelect, &nalStreamFormat);
         OMX_TRACE(error);
-
+        
     }else
     {
         //ofLog() << "NaluFormatStartCodes FAILED";
@@ -480,7 +327,7 @@ bool COMXVideo::Open(OMXClock *clock, const OMXVideoConfig &config)
     // Alloc buffers for the omx input port.
     error = m_omx_decoder.AllocInputBuffers();
     OMX_TRACE(error);
-
+    
     
     if(filtersEnabled)
     {
@@ -500,14 +347,14 @@ bool COMXVideo::Open(OMXClock *clock, const OMXVideoConfig &config)
         
         error = m_omx_decoder.SetParameter(OMX_IndexParamBrcmDisableProprietaryTunnels, &tunnelConfig);
         OMX_TRACE(error);
-
+        
     }
     
     
     error = m_omx_decoder.SetStateForComponent(OMX_StateExecuting);
     OMX_TRACE(error);
-
- 
+    
+    
     
     SendDecoderConfig();
     
@@ -618,6 +465,7 @@ bool COMXVideo::PortSettingsChanged()
     videoSplitter.Initialize(OMX_VIDEO_SPLITTER, OMX_IndexParamVideoInit);
     videoSplitter.DisableAllPorts();
     
+
     if(useTexture)
     {
         m_omx_render.Initialize(OMX_EGL_RENDER, OMX_IndexParamVideoInit);
@@ -680,15 +528,6 @@ bool COMXVideo::PortSettingsChanged()
     
     if(filtersEnabled)
     {
-        /*
-         OMX_CONFIG_BOOLEANTYPE imagePoolConfig;
-         OMX_INIT_STRUCTURE(imagePoolConfig);
-         imagePoolConfig.bEnabled = OMX_TRUE;
-         
-         error = m_omx_image_fx.SetParameter(OMX_IndexParamBrcmLazyImagePoolDestroy, &imagePoolConfig);
-         OMX_TRACE(error);
-         */
-        
         
         OMX_PARAM_U32TYPE imagefx_extra_buffers;
         OMX_INIT_STRUCTURE(imagefx_extra_buffers);
@@ -852,178 +691,68 @@ bool COMXVideo::PortSettingsChanged()
 }
 
 
-void COMXVideo::Close()
+
+bool COMXVideo::SendDecoderConfig()
 {
-    if(!m_omx_decoder.m_handle)
-    {
-        ofLogNotice(__func__) << "fucking off";
-         return;
-    }
-    
     CSingleLock lock (m_critSection);
     OMX_ERRORTYPE error   = OMX_ErrorNone;
-
-    error = m_omx_tunnel_clock.Deestablish();
-    OMX_TRACE(error);
-
-    error = m_omx_tunnel_decoder.Deestablish();
-    OMX_TRACE(error);
-
     
-    OMX_PARAM_U32TYPE decoder_extra_buffers;
-    OMX_INIT_STRUCTURE(decoder_extra_buffers);
-    decoder_extra_buffers.nU32 = 0;
-    
-    
-    if(m_omx_decoder.GetComponent())
+    /* send decoder config */
+    if(m_config.hints.extrasize > 0 && m_config.hints.extradata != NULL)
     {
-        error = WaitForState(m_omx_decoder.GetComponent(), OMX_StateIdle);
-        OMX_TRACE(error);
-    }
-    
-    if(filtersEnabled)
-    {
+        OMX_BUFFERHEADERTYPE *omx_buffer = m_omx_decoder.GetInputBuffer();
         
-        if(m_omx_image_fx.GetComponent())
+        if(omx_buffer == NULL)
         {
-            error = WaitForState(m_omx_decoder.GetComponent(), OMX_StateIdle);
-            OMX_TRACE(error);
+            return false;
         }
         
-        error = m_omx_image_fx.SetParameter(OMX_IndexParamBrcmExtraBuffers, &decoder_extra_buffers);
-        OMX_TRACE(error);
+        omx_buffer->nOffset = 0;
+        omx_buffer->nFilledLen = std::min((OMX_U32)m_config.hints.extrasize, omx_buffer->nAllocLen);
         
+        memset((unsigned char *)omx_buffer->pBuffer, 0x0, omx_buffer->nAllocLen);
+        memcpy((unsigned char *)omx_buffer->pBuffer, m_config.hints.extradata, omx_buffer->nFilledLen);
+        omx_buffer->nFlags = OMX_BUFFERFLAG_CODECCONFIG | OMX_BUFFERFLAG_ENDOFFRAME;
         
-        error = m_omx_tunnel_image_fx.Deestablish();
-        OMX_TRACE(error);
+        error = m_omx_decoder.EmptyThisBuffer(omx_buffer);
+        if (error != OMX_ErrorNone)
+        {
+            m_omx_decoder.onEmptyBufferDone(m_omx_decoder.GetComponent(), omx_buffer);
+            return false;
+        }
+    }
+    return true;
+}
 
+bool COMXVideo::NaluFormatStartCodes(enum AVCodecID codec, uint8_t *in_extradata, int in_extrasize)
+{
+    switch(codec)
+    {
+        case AV_CODEC_ID_H264:
+            if (in_extrasize < 7 || in_extradata == NULL)
+                return true;
+            // valid avcC atom data always starts with the value 1 (version), otherwise annexb
+            else if ( *in_extradata != 1 )
+                return true;
+        default: break;
     }
-    error = m_omx_tunnel_sched.Deestablish();
-    OMX_TRACE(error);
+    return false;    
+}
 
-    error = m_omx_tunnel_splitter.Deestablish();
-    OMX_TRACE(error);
+void COMXVideo::PortSettingsChangedLogger(OMX_PARAM_PORTDEFINITIONTYPE port_image, int interlaceEMode)
+{
+    ofLog(OF_LOG_NOTICE, "%s::%s - %dx%d@%.2f interlace:%d deinterlace:%d anaglyph:%d par:%.2f display:%d layer:%d alpha:%d aspectMode:%d", CLASSNAME, __func__,
+          port_image.format.video.nFrameWidth, port_image.format.video.nFrameHeight,
+          port_image.format.video.xFramerate / (float)(1<<16), interlaceEMode, m_deinterlace, m_config.anaglyph, m_pixel_aspect, m_config.display,
+          m_config.layer, m_config.alpha, m_config.aspectMode);
+    
+}
 
-    
-    if(m_omx_decoder.GetComponent())
-    {
-        
-        error = FlushOMXComponent(m_omx_decoder.GetComponent(), VIDEO_DECODE_INPUT_PORT);
-        OMX_TRACE(error);
-        
-        error = FlushOMXComponent(m_omx_decoder.GetComponent(), VIDEO_DECODE_OUTPUT_PORT);
-        OMX_TRACE(error);
-        
-        
-        error = WaitForState(m_omx_decoder.GetComponent(), OMX_StateIdle);
-        OMX_TRACE(error);
-        
-        error = DisableAllPortsForComponent(&m_omx_decoder.m_handle);
-        OMX_TRACE(error);
-        
-        error = m_omx_decoder.SetParameter(OMX_IndexParamBrcmExtraBuffers, &decoder_extra_buffers);
-        OMX_TRACE(error);
-        
-        error = m_omx_decoder.FreeInputBuffers();
-        OMX_TRACE(error);
-
-
-        
-    }
-    
-    
-    if(m_omx_image_fx.GetComponent())
-    {
-        error = WaitForState(m_omx_image_fx.GetComponent(), OMX_StateIdle);
-        OMX_TRACE(error);
-        
-        error = FlushOMXComponent(m_omx_image_fx.GetComponent(), IMAGE_FX_INPUT_PORT);
-        OMX_TRACE(error);
-        
-        error = FlushOMXComponent(m_omx_image_fx.GetComponent(), IMAGE_FX_OUTPUT_PORT);
-        OMX_TRACE(error);
-        
-        error = DisableAllPortsForComponent(&m_omx_image_fx.m_handle);
-        OMX_TRACE(error);
-        
-        
-        
-    }
-    
-    
-    if(m_omx_sched.GetComponent())
-    {
-        error = WaitForState(m_omx_sched.GetComponent(), OMX_StateIdle);
-        OMX_TRACE(error);
-        
-        error = FlushOMXComponent(m_omx_sched.GetComponent(), OMX_ALL);
-        OMX_TRACE(error);
-        
-        error = DisableAllPortsForComponent(&m_omx_sched.m_handle);
-        OMX_TRACE(error);
-        
-    }
-   
-    if(videoSplitter.GetComponent())
-    {
-        error = WaitForState(videoSplitter.GetComponent(), OMX_StateIdle);
-        OMX_TRACE(error); 
-        
-        error = FlushOMXComponent(videoSplitter.GetComponent(), OMX_ALL);
-        OMX_TRACE(error);
-        
-        error = DisableAllPortsForComponent(&videoSplitter.m_handle);
-        OMX_TRACE(error);
-    }
-    
-    if(m_omx_render.GetComponent())
-    {
-        error = WaitForState(m_omx_render.GetComponent(), OMX_StateIdle);
-        OMX_TRACE(error);
-        
-        error = FlushOMXComponent(m_omx_render.GetComponent(), OMX_ALL);
-        OMX_TRACE(error);
-        
-        error = DisableAllPortsForComponent(&m_omx_render.m_handle);
-        OMX_TRACE(error);
-    }
-    
-    bool result = false;
-
-    
-    result = m_omx_sched.Deinitialize();
-    ofLog() << __LINE__ << " : " << result;
-    
-    
-    if(filtersEnabled)
-    {
-        result =  m_omx_image_fx.Deinitialize();
-        ofLog() << __LINE__ << " : " << result;
-        
-    }
-    result = videoSplitter.Deinitialize();
-    ofLog() << __LINE__ << " : " << result;
-    
-    result = m_omx_render.Deinitialize();
-    ofLog() << __LINE__ << " : " << result;
-
-    if(m_omx_decoder.m_handle)
-    {
-        ofLogNotice(__func__) << "VIDEO_DECODE_OUTPUT_PORT: " << PrintPortDefinition(m_omx_decoder.m_handle, VIDEO_DECODE_OUTPUT_PORT);
-        ofLogNotice(__func__) << "VIDEO_DECODE_INPUT_PORT: " << PrintPortDefinition(m_omx_decoder.m_handle, VIDEO_DECODE_INPUT_PORT);
-        
-        result = m_omx_decoder.Deinitialize(); 
-        ofLog() << __LINE__ << " : " << result;
-    }
- 
-    
-    m_is_open       = false;
-    
-    m_video_codec_name  = "";
-    m_deinterlace       = false;
-    m_config.anaglyph   = OMX_ImageFilterAnaglyphNone;
-    m_av_clock          = NULL;
-    filtersEnabled = false;
+void COMXVideo::onFillBuffer(OMX_HANDLETYPE hComponent, OMX_BUFFERHEADERTYPE* pBuffer)
+{
+    OMX_FillThisBuffer(hComponent, pBuffer);
+    frameCounter++;
+    //ofLog() << "onFillBuffer: " << frameCounter;
 }
 
 void COMXVideo::SetDropState(bool bDrop)
@@ -1133,7 +862,7 @@ void COMXVideo::Reset(void)
         return;
     
     m_setStartTime      = true;
-    m_omx_decoder.FlushInput();
+    //m_omx_decoder.FlushInput();
     if(filtersEnabled)
     {
         //m_omx_image_fx.FlushInput();
@@ -1357,18 +1086,24 @@ void COMXVideo::SetFilter(OMX_IMAGEFILTERTYPE filterType, vector<int> params)
     
     OMX_ERRORTYPE error = OMX_ErrorNone;
 
-    //m_omx_decoder.FlushInput();
-    //m_omx_image_fx.FlushInput();
+    error = FlushOMXComponent(m_omx_decoder.GetComponent(), VIDEO_DECODE_OUTPUT_PORT);
+    OMX_TRACE(error); 
+    
+    error = FlushOMXComponent(m_omx_image_fx.GetComponent(), IMAGE_FX_INPUT_PORT);
+    OMX_TRACE(error);
 
     OMX_CONFIG_IMAGEFILTERPARAMSTYPE image_filter;
     OMX_INIT_STRUCTURE(image_filter);
     
     image_filter.nPortIndex = IMAGE_FX_OUTPUT_PORT;
     image_filter.eImageFilter = filterType;
+    image_filter.nNumParams = params.size();
+
     for(int i=0; i<params.size(); i++)
     {
         image_filter.nParams[i] = params[i];        
     }
+    ofLogNotice(__func__) << "SENDING PARAMS WITH: " << GetImageFilterString(filterType);
     
     error = m_omx_image_fx.SetConfig(OMX_IndexConfigCommonImageFilterParameters, &image_filter);
     OMX_TRACE(error);
@@ -1430,5 +1165,161 @@ bool COMXVideo::IsEOS()
     return true;
 }
 
-
+void COMXVideo::Close()
+{
+    CSingleLock lock (m_critSection);
+    if(!m_omx_decoder.m_handle && !m_is_open)
+    {
+        return;
+    }
+    OMX_ERRORTYPE error   = OMX_ErrorNone;
+    
+    error = m_omx_tunnel_clock.Deestablish();
+    OMX_TRACE(error);
+    
+    error = m_omx_tunnel_decoder.Deestablish();
+    OMX_TRACE(error);
+    
+    
+    OMX_PARAM_U32TYPE decoder_extra_buffers;
+    OMX_INIT_STRUCTURE(decoder_extra_buffers);
+    decoder_extra_buffers.nU32 = 0;
+    
+    
+    if(m_omx_decoder.GetComponent())
+    {
+        error = WaitForState(m_omx_decoder.GetComponent(), OMX_StateIdle);
+        OMX_TRACE(error);
+    }
+    
+    if(filtersEnabled)
+    {
+        
+        if(m_omx_image_fx.GetComponent())
+        {
+            error = WaitForState(m_omx_decoder.GetComponent(), OMX_StateIdle);
+            OMX_TRACE(error);
+        }
+        
+        error = m_omx_image_fx.SetParameter(OMX_IndexParamBrcmExtraBuffers, &decoder_extra_buffers);
+        OMX_TRACE(error);
+        
+        
+        error = m_omx_tunnel_image_fx.Deestablish();
+        OMX_TRACE(error);
+        
+    }
+    error = m_omx_tunnel_sched.Deestablish();
+    OMX_TRACE(error);
+    
+    error = m_omx_tunnel_splitter.Deestablish();
+    OMX_TRACE(error);
+    
+    
+    if(m_omx_decoder.GetComponent())
+    {
+        
+        error = FlushOMXComponent(m_omx_decoder.GetComponent(), VIDEO_DECODE_INPUT_PORT);
+        OMX_TRACE(error);
+        
+        error = FlushOMXComponent(m_omx_decoder.GetComponent(), VIDEO_DECODE_OUTPUT_PORT);
+        OMX_TRACE(error);
+        
+        
+        error = WaitForState(m_omx_decoder.GetComponent(), OMX_StateIdle);
+        OMX_TRACE(error);
+        
+        error = DisableAllPortsForComponent(&m_omx_decoder.m_handle);
+        OMX_TRACE(error);
+        
+        error = m_omx_decoder.SetParameter(OMX_IndexParamBrcmExtraBuffers, &decoder_extra_buffers);
+        OMX_TRACE(error);
+        
+        error = m_omx_decoder.FreeInputBuffers();
+        OMX_TRACE(error);
+    }
+    
+    
+    if(m_omx_image_fx.GetComponent())
+    {
+        error = WaitForState(m_omx_image_fx.GetComponent(), OMX_StateIdle);
+        OMX_TRACE(error);
+        
+        error = FlushOMXComponent(m_omx_image_fx.GetComponent(), IMAGE_FX_INPUT_PORT);
+        OMX_TRACE(error);
+        
+        error = FlushOMXComponent(m_omx_image_fx.GetComponent(), IMAGE_FX_OUTPUT_PORT);
+        OMX_TRACE(error);
+        
+        error = DisableAllPortsForComponent(&m_omx_image_fx.m_handle);
+        OMX_TRACE(error);
+    }
+    
+    
+    if(m_omx_sched.GetComponent())
+    {
+        error = WaitForState(m_omx_sched.GetComponent(), OMX_StateIdle);
+        OMX_TRACE(error);
+        
+        error = FlushOMXComponent(m_omx_sched.GetComponent(), OMX_ALL);
+        OMX_TRACE(error);
+        
+        error = DisableAllPortsForComponent(&m_omx_sched.m_handle);
+        OMX_TRACE(error);
+        
+    }
+    
+    if(videoSplitter.GetComponent())
+    {
+        error = WaitForState(videoSplitter.GetComponent(), OMX_StateIdle);
+        OMX_TRACE(error); 
+        
+        error = FlushOMXComponent(videoSplitter.GetComponent(), OMX_ALL);
+        OMX_TRACE(error);
+        
+        error = DisableAllPortsForComponent(&videoSplitter.m_handle);
+        OMX_TRACE(error);
+    }
+    
+    if(m_omx_render.GetComponent())
+    {
+        error = WaitForState(m_omx_render.GetComponent(), OMX_StateIdle);
+        OMX_TRACE(error);
+        
+        error = FlushOMXComponent(m_omx_render.GetComponent(), OMX_ALL);
+        OMX_TRACE(error);
+        
+        error = DisableAllPortsForComponent(&m_omx_render.m_handle);
+        OMX_TRACE(error);
+    }
+    
+    bool result = false;
+    
+    result = m_omx_sched.Deinitialize();
+    ofLog() << __LINE__ << " : " << result;
+    
+    if(filtersEnabled)
+    {
+        result =  m_omx_image_fx.Deinitialize();
+        ofLog() << __LINE__ << " : " << result;
+        
+    }
+    result = videoSplitter.Deinitialize();
+    ofLog() << __LINE__ << " : " << result;
+    
+    result = m_omx_render.Deinitialize();
+    ofLog() << __LINE__ << " : " << result;
+    
+    result = m_omx_decoder.Deinitialize(); 
+    ofLogVerbose(__func__) << __LINE__ << " : " << result;
+    
+    
+    m_is_open       = false;
+    
+    m_video_codec_name  = "";
+    m_deinterlace       = false;
+    m_config.anaglyph   = OMX_ImageFilterAnaglyphNone;
+    m_av_clock          = NULL;
+    filtersEnabled = false;
+}
 

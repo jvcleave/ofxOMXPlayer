@@ -536,7 +536,7 @@ void ofxOMXPlayer::scrubForward(int step)
     ofLogError() << " scrubForward NOT IMPLEMENTED";
     
 }
-
+#pragma mark FILTERS
 void ofxOMXPlayer::setFilter(OMX_IMAGEFILTERTYPE filterType)
 {
     

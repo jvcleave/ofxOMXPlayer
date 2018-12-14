@@ -40,7 +40,7 @@
 #include <EGL/eglplatform.h>
 #include <EGL/eglext.h>
 
-#define EXTRA_IMAGE_FX_BUFFERS 5
+#define EXTRA_IMAGE_FX_BUFFERS 2
 
 enum EDEINTERLACEMODE
 {
@@ -107,9 +107,7 @@ public:
     COMXVideo();
     ~COMXVideo();
     bool useTexture;
-    void processCodec(COMXStreamInfo& hints);
     
-    // Required overrides
     bool SendDecoderConfig();
     bool NaluFormatStartCodes(enum AVCodecID codec, uint8_t *in_extradata, int in_extrasize);
     bool Open(OMXClock *clock, const OMXVideoConfig &config);
@@ -135,8 +133,8 @@ public:
     
     OMX_BUFFERHEADERTYPE* eglBuffer;
     
-    void onFillBuffer(OMX_HANDLETYPE hComponent, OMX_BUFFERHEADERTYPE* pBuffer);
-    OMX_CALLBACKTYPE textureCallbacks;
+    //FillBufferListener
+    void onFillBuffer(OMX_HANDLETYPE hComponent, OMX_BUFFERHEADERTYPE* pBuffer) override;
     int frameCounter;
 
     void SetOrientation(int degreesClockWise, bool doMirror=false);

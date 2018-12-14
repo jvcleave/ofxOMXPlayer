@@ -51,7 +51,7 @@ void ofApp::setup()
 	settings.enableLooping = true;		//default true
 	settings.enableAudio = true;		//default true, save resources by disabling
     settings.enableFilters = true;
-    settings.filter  = GetImageFilter(imageFilterNames[currentFilterIndex]);
+    //settings.filter  = GetImageFilter(imageFilterNames[currentFilterIndex]);
 	
 	//so either pass in the settings
 	omxPlayer.setup(settings);
@@ -65,16 +65,46 @@ void ofApp::update()
 {
     if(doFilterChange)
     {
-        if(ofGetFrameNum() % 120 == 0)
+        doFilterChange = false;
+        if(currentFilterIndex+1 < imageFilterNames.size())
         {
-            if(currentFilterIndex+1 < imageFilterNames.size())
+            currentFilterIndex++;
+        }else
+        {
+            currentFilterIndex = 0;
+        }
+        OMX_IMAGEFILTERTYPE filter = GetImageFilter(imageFilterNames[currentFilterIndex]);
+        vector<int> params;
+        switch(filter)
+        {
+            case OMX_ImageFilterAntialias:
+            case OMX_ImageFilterDeRing:
             {
-                currentFilterIndex++;
-            }else
-            {
-                currentFilterIndex = 0;
+                break;
             }
-            omxPlayer.setFilter(GetImageFilter(imageFilterNames[currentFilterIndex]));
+            case OMX_ImageFilterFilm:
+            {
+                params.push_back((int)ofRandom(64, 255));
+                params.push_back(128);
+                params.push_back(128);
+                omxPlayer.setFilter(filter, params);
+                break;
+            }
+            case OMX_ImageFilterSolarize:
+            {
+                params.push_back((int)ofRandom(0, 255));
+                params.push_back((int)ofRandom(0, 255));
+                params.push_back((int)ofRandom(0, 255));
+                params.push_back((int)ofRandom(0, 255));
+                
+                omxPlayer.setFilter(filter, params);
+                break;
+            }
+            default:
+            {
+                omxPlayer.setFilter(filter);
+                break;
+            }
         }
         
     }
@@ -118,7 +148,7 @@ void ofApp::keyPressed  (int key)
     {
         case '1':
         {
-            omxPlayerRecorder.startRecording(1.0);
+            omxPlayerRecorder.startRecording(2.0);
             break;
         }
         case '2':
@@ -128,9 +158,19 @@ void ofApp::keyPressed  (int key)
         }
         case '3' :
         {
-            doFilterChange = !doFilterChange;
-
-
+            doFilterChange = true;
+            break;
+        }
+        case 'x' :
+        {
+            if(omxPlayerRecorder.isRecordingPaused)
+            {
+                omxPlayerRecorder.resumeRecording();
+            }else
+            {
+                omxPlayerRecorder.pauseRecording();
+            }
+            break;
         }
         default:
             break;
