@@ -323,30 +323,33 @@ private:
         
         imageFilters["None"] = OMX_ImageFilterNone;
         imageFilters["Noise"] = OMX_ImageFilterNoise;
-        imageFilters["Emboss"] = OMX_ImageFilterEmboss;
         imageFilters["Negative"] = OMX_ImageFilterNegative;
         imageFilters["Sketch"] = OMX_ImageFilterSketch;
         imageFilters["OilPaint"] = OMX_ImageFilterOilPaint;
-        imageFilters["Hatch"] = OMX_ImageFilterHatch;
-        imageFilters["Gpen"] = OMX_ImageFilterGpen;
-        imageFilters["Antialias"] = OMX_ImageFilterAntialias;
-        imageFilters["DeRing"] = OMX_ImageFilterDeRing;
-        imageFilters["Solarize"] = OMX_ImageFilterSolarize;
         imageFilters["Watercolor"] = OMX_ImageFilterWatercolor;
         imageFilters["Pastel"] = OMX_ImageFilterPastel;
         imageFilters["Sharpen"] = OMX_ImageFilterSharpen;
-        imageFilters["Film"] = OMX_ImageFilterFilm;
         imageFilters["Blur"] = OMX_ImageFilterBlur;
         imageFilters["Saturation"] = OMX_ImageFilterSaturation;
-        imageFilters["DeInterlaceLineDouble"] = OMX_ImageFilterDeInterlaceLineDouble;
-        imageFilters["DeInterlaceAdvanced"] = OMX_ImageFilterDeInterlaceAdvanced;
+
         imageFilters["ColourSwap"] = OMX_ImageFilterColourSwap;
         imageFilters["WashedOut"] = OMX_ImageFilterWashedOut;
         imageFilters["ColourPoint"] = OMX_ImageFilterColourPoint;
         imageFilters["Posterise"] = OMX_ImageFilterPosterise;
         imageFilters["ColourBalance"] = OMX_ImageFilterColourBalance;
         imageFilters["Cartoon"] = OMX_ImageFilterCartoon;
-        
+           
+        imageFilters["Gpen"] = OMX_ImageFilterGpen;
+        imageFilters["Hatch"] = OMX_ImageFilterHatch;
+
+        imageFilters["Emboss"] = OMX_ImageFilterEmboss;
+        imageFilters["Solarize"] = OMX_ImageFilterSolarize;
+        imageFilters["Film"] = OMX_ImageFilterFilm;
+        imageFilters["Antialias"] = OMX_ImageFilterAntialias;
+        imageFilters["DeInterlaceLineDouble"] = OMX_ImageFilterDeInterlaceLineDouble;
+        imageFilters["DeInterlaceAdvanced"] = OMX_ImageFilterDeInterlaceAdvanced;
+        imageFilters["DeRing"] = OMX_ImageFilterDeRing;
+
         collectNames<OMX_IMAGEFILTERTYPE>(imageFilters, imageFilterNames, imageFilterTypes);
         
         
@@ -1063,7 +1066,7 @@ void logOMXError(OMX_ERRORTYPE error, string comments="", string functionName=""
         }
         case OMX_LOG_LEVEL_VERBOSE:
         {
-            ofLogError(functionName)  << commentLine << omxErrorToString(error);
+            ofLogVerbose(functionName)  << lineNumber << " : " << omxErrorToString(error);
             break;
         }
         default:

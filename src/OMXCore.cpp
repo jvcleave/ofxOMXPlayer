@@ -783,10 +783,10 @@ OMX_ERRORTYPE COMXCoreComponent::FreeInputBuffers()
     CLog::Log(LOGERROR, "COMXCoreComponent::FreeInputBuffers WaitForCommand:OMX_CommandPortDisable failed on %s omx_err(0x%08x)\n", m_componentName.c_str(), omx_err);
   }
 
-  WaitForInputDone(1000);
+  //WaitForInputDone(1000);
 
   pthread_mutex_lock(&m_omx_input_mutex);
-  assert(m_omx_input_buffers.size() == m_omx_input_avaliable.size());
+  //assert(m_omx_input_buffers.size() == m_omx_input_avaliable.size());
 
   m_omx_input_buffers.clear();
 

@@ -3,33 +3,6 @@
 ofxOMXPlayer::ofxOMXPlayer()
 {
     playerID = 0;
-    currentFilterName = "";
-    imageFilters.push_back(ImageFilter("None", OMX_ImageFilterNone));
-    imageFilters.push_back(ImageFilter("Noise", OMX_ImageFilterNoise));
-    imageFilters.push_back(ImageFilter("Emboss", OMX_ImageFilterEmboss));
-    imageFilters.push_back(ImageFilter("Negative", OMX_ImageFilterNegative));
-    imageFilters.push_back(ImageFilter("Sketch", OMX_ImageFilterSketch));
-    imageFilters.push_back(ImageFilter("OilPaint", OMX_ImageFilterOilPaint));
-    imageFilters.push_back(ImageFilter("Hatch", OMX_ImageFilterHatch));
-    imageFilters.push_back(ImageFilter("Gpen", OMX_ImageFilterGpen));
-    //imageFilters.push_back(ImageFilter("Antialias", OMX_ImageFilterAntialias));
-    //imageFilters.push_back(ImageFilter("DeRing", OMX_ImageFilterDeRing));
-    imageFilters.push_back(ImageFilter("Solarize", OMX_ImageFilterSolarize));
-    imageFilters.push_back(ImageFilter("Watercolor", OMX_ImageFilterWatercolor));
-    imageFilters.push_back(ImageFilter("Pastel", OMX_ImageFilterPastel));
-    imageFilters.push_back(ImageFilter("Sharpen", OMX_ImageFilterSharpen));
-    imageFilters.push_back(ImageFilter("Film", OMX_ImageFilterFilm));
-    //imageFilters.push_back(ImageFilter("Blur", OMX_ImageFilterBlur));
-    imageFilters.push_back(ImageFilter("Saturation", OMX_ImageFilterSaturation));
-    //imageFilters.push_back(ImageFilter("DeInterlaceLineDouble", OMX_ImageFilterDeInterlaceLineDouble));
-    //imageFilters.push_back(ImageFilter("DeInterlaceAdvanced", OMX_ImageFilterDeInterlaceAdvanced));
-    imageFilters.push_back(ImageFilter("ColourSwap", OMX_ImageFilterColourSwap));
-    imageFilters.push_back(ImageFilter("WashedOut", OMX_ImageFilterWashedOut));
-    imageFilters.push_back(ImageFilter("ColourPoint", OMX_ImageFilterColourPoint));
-    imageFilters.push_back(ImageFilter("Posterise", OMX_ImageFilterPosterise));
-    imageFilters.push_back(ImageFilter("ColourBalance", OMX_ImageFilterColourBalance));
-    imageFilters.push_back(ImageFilter("Cartoon", OMX_ImageFilterCartoon));
-    
     listener = NULL;
     engineNeedsRestart = false;
     pendingLoopMessage = false;
@@ -58,7 +31,10 @@ bool ofxOMXPlayer::setup(ofxOMXPlayerSettings settings_)
     if(result)
     {
         engine.listener = this; 
-        currentFilterName = findFilterName(engine.m_config_video.filterType);
+        if(settings.enableFilters)
+        {
+            currentFilterName = GetImageFilterString(engine.m_config_video.filterType);
+        }
     }
     return result;
 }
@@ -560,28 +536,22 @@ void ofxOMXPlayer::scrubForward(int step)
     ofLogError() << " scrubForward NOT IMPLEMENTED";
     
 }
-
+#pragma mark FILTERS
 void ofxOMXPlayer::setFilter(OMX_IMAGEFILTERTYPE filterType)
 {
     
-    currentFilterName = findFilterName(filterType);
+    currentFilterName = GetImageFilterString(filterType);
     engine.setFilter(filterType);
 }
 
-string ofxOMXPlayer::findFilterName(OMX_IMAGEFILTERTYPE filterType)
+
+void ofxOMXPlayer::setFilter(OMX_IMAGEFILTERTYPE filterType, vector<int> params)
 {
-    string result = "";
-    for(int i=0; i<imageFilters.size(); i++)
-    {
-        if(imageFilters[i].filterType == filterType)
-        {
-            result = imageFilters[i].name;
-            break;
-        }
-        
-    }
-    return result;
+    currentFilterName = GetImageFilterString(filterType);
+    engine.setFilter(filterType, params);
 }
+
+
 
 COMXCoreComponent* ofxOMXPlayer::getVideoSplitter()
 {

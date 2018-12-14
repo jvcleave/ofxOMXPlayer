@@ -204,6 +204,11 @@ void OMXPlayerVideo::SetFilter(OMX_IMAGEFILTERTYPE filterType)
     m_decoder->SetFilter(filterType);
 
 }
+void OMXPlayerVideo::SetFilter(OMX_IMAGEFILTERTYPE filterType, vector<int>params)
+{
+    m_decoder->SetFilter(filterType, params);
+}
+
 
 bool OMXPlayerVideo::Decode(OMXPacket *pkt)
 {

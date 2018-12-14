@@ -10,6 +10,8 @@ class ofApp : public ofBaseApp, public KeyListener
     
 public:
     
+    
+    vector<string> imageFilterNames;
     void setup();
     void update();
     void draw();
