@@ -1139,6 +1139,8 @@ void COMXVideo::Reset(void)
         //m_omx_image_fx.FlushInput();
     }
     m_omx_render.ResetEos();
+    TRACE_LINE;
+    
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
