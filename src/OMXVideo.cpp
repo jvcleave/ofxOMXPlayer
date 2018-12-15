@@ -862,7 +862,7 @@ void COMXVideo::Reset(void)
         return;
     
     m_setStartTime      = true;
-    //m_omx_decoder.FlushInput();
+    m_omx_decoder.FlushInput();
     if(filtersEnabled)
     {
         //m_omx_image_fx.FlushInput();
