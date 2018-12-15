@@ -349,7 +349,7 @@ private:
         imageFilters["DeInterlaceLineDouble"] = OMX_ImageFilterDeInterlaceLineDouble;
         imageFilters["DeInterlaceAdvanced"] = OMX_ImageFilterDeInterlaceAdvanced;
         imageFilters["DeRing"] = OMX_ImageFilterDeRing;
-
+        imageFilters["Anaglyph"] = OMX_ImageFilterAnaglyph;
         collectNames<OMX_IMAGEFILTERTYPE>(imageFilters, imageFilterNames, imageFilterTypes);
         
         
