@@ -1099,11 +1099,12 @@ void COMXVideo::SetFilter(OMX_IMAGEFILTERTYPE filterType, vector<int> params)
     image_filter.eImageFilter = filterType;
     image_filter.nNumParams = params.size();
 
+    ofLogNotice(__func__) << "SENDING PARAMS WITH: " << GetImageFilterString(filterType);
     for(int i=0; i<params.size(); i++)
     {
+        ofLog() << params[i];
         image_filter.nParams[i] = params[i];        
     }
-    ofLogNotice(__func__) << "SENDING PARAMS WITH: " << GetImageFilterString(filterType);
     
     error = m_omx_image_fx.SetConfig(OMX_IndexConfigCommonImageFilterParameters, &image_filter);
     OMX_TRACE(error);
