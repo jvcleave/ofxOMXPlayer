@@ -11,7 +11,83 @@
 #include <IL/OMX_Broadcom.h>
 
 
+struct FilterParam
+{
+    string label="";
+    int index=0;
+    int min=0;
+    int max=0;
+    int defaultValue=0;
+};
 
+class FilterParamConfig
+{
+public:
+    string name;
+    vector<FilterParam> params;
+    
+    FilterParamConfig()
+    {
+        name="";
+    }
+    void addParam(string label, int min, int max, int defaultValue)
+    {
+        FilterParam param;
+        param.label = label;
+        param.index = params.size();
+        param.min = min;
+        param.max = max;
+        param.defaultValue = defaultValue;
+        params.push_back(param);
+    }
+    vector<int> getParams()
+    {
+        vector<int> result;
+        for(size_t i=0; i<params.size(); i++)
+        {
+            result.push_back(params[i].defaultValue);
+        }
+        return result;
+    }
+    
+    void fromJSON(ofJson& json)
+    {
+        name = json["name"];
+        ofJson paramsJSON = json["params"];
+        
+        params.resize(paramsJSON.size());
+        
+        for (auto itr : paramsJSON) 
+        {
+            FilterParam param;
+            param.label = itr["label"];
+            param.index = itr["index"];
+            param.min = itr["max"];
+            param.max = itr["min"];
+            param.defaultValue = itr["defaultValue"];
+            
+            params[param.index] = param;
+            
+        }
+    }
+    ofJson toJSON()
+    {
+        ofJson json;
+        json["name"]=name;
+        
+        for(size_t i=0; i<params.size(); i++)
+        {
+            ofJson paramJSON;
+            paramJSON["label"] = params[i].label;
+            paramJSON["index"] = params[i].index;
+            paramJSON["min"] = params[i].min;
+            paramJSON["max"] = params[i].max;
+            paramJSON["defaultValue"] = params[i].defaultValue;
+            json["params"][i]=paramJSON; 
+        }
+        return json;
+    }
+};
 
 class OMX_Maps
 {
@@ -21,6 +97,10 @@ public:
         static OMX_Maps    instance;
         return instance;
     }
+    
+    
+    vector<FilterParamConfig> filterParamConfigs;
+    
     
     map<OMX_DYNAMICRANGEEXPANSIONMODETYPE, int> dreTypes;
     
@@ -270,7 +350,94 @@ public:
     
     map<EGLint, string> eglErrors;
     
-private:	
+    
+    
+    
+    
+    FilterParamConfig createFilterParamConfig(OMX_IMAGEFILTERTYPE imageFilter)
+    {
+        FilterParamConfig filterParamConfig;
+        filterParamConfig.name = getImageFilter(imageFilter);
+        
+        switch (imageFilter) 
+        {
+            case OMX_ImageFilterSolarize:
+            {
+                //Linear mapping of [0,x0] to [0,y0>] and [x0,255] to [y1,y2]. Default is "128 128 128 0".
+                filterParamConfig.addParam("x1", 0, 255, 128);
+                filterParamConfig.addParam("x2", 0, 255, 128);
+                filterParamConfig.addParam("y1", 0, 255, 128);
+                filterParamConfig.addParam("y2", 0, 255, 0);
+                break;
+            }
+            case OMX_ImageFilterSharpen:
+            {
+                //sz size of filter, either 1 or 2. str strength of filter. th threshold of filter. Default is "1 40 20".
+                filterParamConfig.addParam("size", 1, 2, 1);
+                filterParamConfig.addParam("strength", 0, 255, 40);
+                filterParamConfig.addParam("threshold", 0, 255, 20);                    
+                break;
+            }
+            case OMX_ImageFilterFilm:
+            {
+                
+                /*
+                 str strength of effect. u sets u to constant value. v sets v to constant value. Default is "24".
+                 */
+                filterParamConfig.addParam("strength", 0, 255, 1);
+                filterParamConfig.addParam("u", 0, 255, 24);
+                filterParamConfig.addParam("v", 0, 255, 24);     
+                break;
+            }
+            case OMX_ImageFilterBlur:
+            {
+                filterParamConfig.addParam("strength", 0, 2, 2);
+                break;
+            }
+            case OMX_ImageFilterSaturation:
+            {
+                //str strength of effect, in 8.8 fixed point format. u/v value differences from 128 are multiplied by str. Default is "272".
+                filterParamConfig.addParam("strength", 0, 1024, 272);
+                break;
+            }
+            case OMX_ImageFilterColourBalance:
+            {
+                filterParamConfig.addParam("unused", 0, 255, 0);
+                filterParamConfig.addParam("r", 0, 255, 255);
+                filterParamConfig.addParam("g", 0, 255, 255);
+                filterParamConfig.addParam("b", 0, 255, 255);    
+                break;
+            }
+            case OMX_ImageFilterColourSwap:
+            {
+                filterParamConfig.addParam("mode", 0, 1, 0);  
+                break;
+            }
+            case OMX_ImageFilterColourPoint:
+            {
+                filterParamConfig.addParam("mode", 0, 3, 0);  
+                break;
+            }
+            case OMX_ImageFilterPosterise:
+            {
+                filterParamConfig.addParam("resolution", 0, 30, 15);  
+                break;
+            }
+            case OMX_ImageFilterSketch:
+            case OMX_ImageFilterWatercolor:
+            {
+                filterParamConfig.addParam("u", 0, 255, 24);
+                filterParamConfig.addParam("v", 0, 255, 24);  
+                break;
+            }
+            default:
+            {
+                break;
+            }
+        }
+        return filterParamConfig;
+    }    
+private:    
     OMX_Maps()
     {
         
@@ -323,37 +490,42 @@ private:
         
         imageFilters["None"] = OMX_ImageFilterNone;
         imageFilters["Noise"] = OMX_ImageFilterNoise;
+        imageFilters["Emboss"] = OMX_ImageFilterEmboss;
         imageFilters["Negative"] = OMX_ImageFilterNegative;
         imageFilters["Sketch"] = OMX_ImageFilterSketch;
         imageFilters["OilPaint"] = OMX_ImageFilterOilPaint;
+        imageFilters["Hatch"] = OMX_ImageFilterHatch;
+        imageFilters["Gpen"] = OMX_ImageFilterGpen;
+        imageFilters["Antialias"] = OMX_ImageFilterAntialias;
+        imageFilters["DeRing"] = OMX_ImageFilterDeRing;
+        imageFilters["Solarize"] = OMX_ImageFilterSolarize;
         imageFilters["Watercolor"] = OMX_ImageFilterWatercolor;
         imageFilters["Pastel"] = OMX_ImageFilterPastel;
         imageFilters["Sharpen"] = OMX_ImageFilterSharpen;
+        imageFilters["Film"] = OMX_ImageFilterFilm;
         imageFilters["Blur"] = OMX_ImageFilterBlur;
         imageFilters["Saturation"] = OMX_ImageFilterSaturation;
-
+        imageFilters["DeInterlaceLineDouble"] = OMX_ImageFilterDeInterlaceLineDouble;
+        imageFilters["DeInterlaceAdvanced"] = OMX_ImageFilterDeInterlaceAdvanced;
         imageFilters["ColourSwap"] = OMX_ImageFilterColourSwap;
         imageFilters["WashedOut"] = OMX_ImageFilterWashedOut;
         imageFilters["ColourPoint"] = OMX_ImageFilterColourPoint;
         imageFilters["Posterise"] = OMX_ImageFilterPosterise;
         imageFilters["ColourBalance"] = OMX_ImageFilterColourBalance;
         imageFilters["Cartoon"] = OMX_ImageFilterCartoon;
-           
-        imageFilters["Gpen"] = OMX_ImageFilterGpen;
-        imageFilters["Hatch"] = OMX_ImageFilterHatch;
-
-        imageFilters["Emboss"] = OMX_ImageFilterEmboss;
-        imageFilters["Solarize"] = OMX_ImageFilterSolarize;
-        imageFilters["Film"] = OMX_ImageFilterFilm;
-        imageFilters["Antialias"] = OMX_ImageFilterAntialias;
-        imageFilters["DeInterlaceLineDouble"] = OMX_ImageFilterDeInterlaceLineDouble;
-        imageFilters["DeInterlaceAdvanced"] = OMX_ImageFilterDeInterlaceAdvanced;
-        imageFilters["DeRing"] = OMX_ImageFilterDeRing;
-        imageFilters["Anaglyph"] = OMX_ImageFilterAnaglyph;
         collectNames<OMX_IMAGEFILTERTYPE>(imageFilters, imageFilterNames, imageFilterTypes);
         
         
-        
+        for (auto& it : imageFilters)
+        {            
+            FilterParamConfig filterParamConfig = createFilterParamConfig(it.second);
+            if(!filterParamConfig.params.empty())
+            {
+                filterParamConfigs.push_back(filterParamConfig);
+                
+                //ofLogNotice(__func__) << filterParamConfig.name << " HAS " << filterParamConfig.params.size() << " PARAMS";
+            }
+        }     
         
         whiteBalance["Off"] = OMX_WhiteBalControlOff;
         whiteBalance["Auto"] = OMX_WhiteBalControlAuto;
@@ -477,7 +649,7 @@ private:
         videoCoding["YUV"] = OMX_VIDEO_CodingYUV;
         videoCoding["Sorenson"] = OMX_VIDEO_CodingSorenson;
         videoCoding["Theora"] = OMX_VIDEO_CodingTheora;
-        videoCoding["MVC"] = OMX_VIDEO_CodingMVC; 	
+        videoCoding["MVC"] = OMX_VIDEO_CodingMVC;     
         
         
         collectNames<OMX_VIDEO_CODINGTYPE>(videoCoding, videoCodingNames, videoCodingTypes);
@@ -684,12 +856,35 @@ string  GetImageFilterString(OMX_IMAGEFILTERTYPE type)
     return OMX_Maps::getInstance().imageFilterTypes[type];
 };
 
+static
+ofJson GetFilterParamConfigJson()
+{
+    ofJson json;
+    for(size_t i=0; i<OMX_Maps::getInstance().filterParamConfigs.size(); i++)
+    {
+        ofJson filterParamConfigJSON = OMX_Maps::getInstance().filterParamConfigs[i].toJSON();
+        json["filterParamConfigs"][i] = filterParamConfigJSON;   
+    }
+    return json;
+}
 
 static
 OMX_IMAGEFILTERTYPE  GetImageFilter(string name)
 {
     return OMX_Maps::getInstance().imageFilters[name];
 };
+
+static  
+FilterParamConfig GetFilterParamConfig(OMX_IMAGEFILTERTYPE imageFilter, vector<int>& params)
+{
+    FilterParamConfig filterParamConfig = OMX_Maps::getInstance().createFilterParamConfig(imageFilter);
+    for(size_t i=0; i<params.size(); i++)
+    {
+        filterParamConfig.params[i].defaultValue = params[i];
+        
+    }
+    return filterParamConfig;
+}
 
 
 static
@@ -860,7 +1055,7 @@ string GetPortDefinitionString(OMX_PARAM_PORTDEFINITIONTYPE def)
     info << "bEnabled: " << def.bEnabled << endl;
     info << "bPopulated: " << def.bPopulated << endl;
     info << "bBuffersContiguous: " << def.bBuffersContiguous << endl;
-
+    
     if (def.eDomain == OMX_PortDomainVideo)
     {
         info << "eDomain: " << "OMX_PortDomainVideo" << endl;
@@ -1692,14 +1887,14 @@ string DebugEventHandlerString (OMX_HANDLETYPE hComponent, OMX_EVENTTYPE eEvent,
             string commandString = GetOMXCommandString(command);
             
             info << "command: "  << commandString << endl;
-
+            
             switch(command)
             {
                 case OMX_CommandStateSet:
                 {
                     OMX_STATETYPE state = (OMX_STATETYPE)nData2;
                     info << "state: "  << GetOMXStateString(state) << endl;
-
+                    
                     switch (state)
                     {
                         case OMX_StateInvalid:
@@ -1715,14 +1910,14 @@ string DebugEventHandlerString (OMX_HANDLETYPE hComponent, OMX_EVENTTYPE eEvent,
                     }
                     break;
                 }
-                
+                    
                 case OMX_CommandPortDisable:
                 case OMX_CommandPortEnable:
                 case OMX_CommandFlush:
                 {
                     info << "port: "  << nData2 << endl;
                     break;
-
+                    
                 }
                 case OMX_CommandMarkBuffer:
                 case OMX_CommandKhronosExtensions:
@@ -1780,14 +1975,14 @@ string PrintBuffer(OMX_BUFFERHEADERTYPE* pBuffer)
 {
     stringstream info;
     info << "nSize: " << pBuffer->nSize << endl;
-
+    
     info << "nAllocLen: " << pBuffer->nAllocLen << endl;
     info << "nFilledLen: " << pBuffer->nFilledLen << endl;
     info << "nOffset: " << pBuffer->nOffset << endl;
     info << "nOutputPortIndex: " << pBuffer->nOutputPortIndex << endl;
     info << "nInputPortIndex: " << pBuffer->nInputPortIndex << endl;
     info << "nFlags: " << pBuffer->nFlags << endl;
-
+    
     
 #if 0
     //info << "nVersion: " << pBuffer->nVersion << endl;
@@ -1800,7 +1995,7 @@ string PrintBuffer(OMX_BUFFERHEADERTYPE* pBuffer)
     info << "pMarkData: " << pBuffer->pMarkData << endl;
     info << "nTickCount: " << pBuffer->nTickCount << endl;
     //info << "nTimeStamp: " << pBuffer->nTimeStamp << endl;
-
+    
 #endif
     return info.str();
 #if 0
