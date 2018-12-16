@@ -80,6 +80,7 @@ public:
     int videoHeight;
     ofFbo           fbo;
     ofTexture       texture;
+    int displayAlpha;
     
     unsigned char*  pixels;
     GLuint          textureID;
