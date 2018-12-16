@@ -76,7 +76,7 @@ ofxOMXPlayerEngine::ofxOMXPlayerEngine()
     speeds.push_back(createSpeed(1.125));
     speeds.push_back(createSpeed(2.0));
     speeds.push_back(createSpeed(4.0));
-    
+    displayAlpha = 255;
     normalSpeedIndex = 5;
     clear();
   
@@ -431,7 +431,10 @@ void ofxOMXPlayerEngine::updatePixels()
     }
     fbo.begin();
     ofClear(0, 0, 0, 0);
+    ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+    ofSetColor(255, 255, 255, displayAlpha);
     texture.draw(0, 0);
+    ofDisableBlendMode();
     //ofLogVerbose() << "updatePixels";
     glReadPixels(0,0,videoWidth, videoHeight, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
     fbo.end();
@@ -1129,11 +1132,12 @@ void ofxOMXPlayerEngine::setLayer(int layer)
 void ofxOMXPlayerEngine::setAlpha(int alpha)
 {
     lock();
+    displayAlpha = alpha;
     if(m_has_video)
     {
         if(!useTexture)
         {
-            m_player_video.SetAlpha(alpha);
+            m_player_video.SetAlpha(displayAlpha);
         }
     }
     unlock();
