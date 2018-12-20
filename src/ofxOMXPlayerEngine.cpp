@@ -492,7 +492,10 @@ void ofxOMXPlayerEngine::onUpdate(ofEventArgs& eventArgs)
         hasNewFrame = true;
         fbo.begin();
         ofClear(0, 0, 0, 0);
-        texture.draw(0, 0, texture.getWidth(), texture.getHeight()); 
+        ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+        ofSetColor(255, 255, 255, displayAlpha);
+        texture.draw(0, 0);
+        ofDisableBlendMode();
         fbo.end();
         updateCounter = frameNumber;
     }else
