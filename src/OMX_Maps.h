@@ -364,8 +364,9 @@ public:
             case OMX_ImageFilterSolarize:
             {
                 //Linear mapping of [0,x0] to [0,y0>] and [x0,255] to [y1,y2]. Default is "128 128 128 0".
-                filterParamConfig.addParam("x1", 0, 255, 128);
-                filterParamConfig.addParam("x2", 0, 255, 128);
+                filterParamConfig.addParam("doYUV", 0, 1, 0);
+                filterParamConfig.addParam("x0", 0, 255, 128);
+                filterParamConfig.addParam("y0", 0, 255, 128);
                 filterParamConfig.addParam("y1", 0, 255, 128);
                 filterParamConfig.addParam("y2", 0, 255, 0);
                 break;
@@ -402,25 +403,27 @@ public:
             }
             case OMX_ImageFilterColourBalance:
             {
-                filterParamConfig.addParam("unused", 0, 255, 0);
+                filterParamConfig.addParam("lens", 0, 255, 0);
                 filterParamConfig.addParam("r", 0, 255, 255);
                 filterParamConfig.addParam("g", 0, 255, 255);
-                filterParamConfig.addParam("b", 0, 255, 255);    
+                filterParamConfig.addParam("b", 0, 255, 255);   
+                filterParamConfig.addParam("u", 0, 255, 0);    
+                filterParamConfig.addParam("v", 0, 255, 0);    
                 break;
             }
             case OMX_ImageFilterColourSwap:
             {
-                filterParamConfig.addParam("mode", 0, 1, 0);  
+                filterParamConfig.addParam("direction", 0, 1, 0);  
                 break;
             }
             case OMX_ImageFilterColourPoint:
             {
-                filterParamConfig.addParam("mode", 0, 3, 0);  
+                filterParamConfig.addParam("quadrant", 0, 3, 0);  
                 break;
             }
             case OMX_ImageFilterPosterise:
             {
-                filterParamConfig.addParam("resolution", 0, 30, 15);  
+                filterParamConfig.addParam("steps", 0, 32, 4);  
                 break;
             }
             case OMX_ImageFilterSketch:
