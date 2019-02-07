@@ -260,9 +260,9 @@ static OMX_ERRORTYPE gomx_component_tunnel_request(
 		if (param.eDomain != port->def.eDomain)
 			goto not_compatible;
 
-		param.nBufferCountActual = max(param.nBufferCountMin, port->def.nBufferCountMin);
-		param.nBufferSize = max(port->def.nBufferSize, param.nBufferSize);
-		param.nBufferAlignment = max(port->def.nBufferAlignment, param.nBufferAlignment);
+		param.nBufferCountActual = ::max(param.nBufferCountMin, port->def.nBufferCountMin);
+		param.nBufferSize = ::max(port->def.nBufferSize, param.nBufferSize);
+		param.nBufferAlignment = ::max(port->def.nBufferAlignment, param.nBufferAlignment);
 		port->def.nBufferCountActual = param.nBufferCountActual;
 		port->def.nBufferSize = param.nBufferSize;
 		port->def.nBufferAlignment = param.nBufferAlignment;
