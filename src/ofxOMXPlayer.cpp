@@ -30,7 +30,7 @@ ofxOMXPlayer::ofxOMXPlayer()
     imageFilters.push_back(ImageFilter("ColourBalance", OMX_ImageFilterColourBalance));
     imageFilters.push_back(ImageFilter("Cartoon", OMX_ImageFilterCartoon));
     
-    listener = NULL;
+    listener = nullptr;
     engineNeedsRestart = false;
     pendingLoopMessage = false;
     OMX_Init();
@@ -581,4 +581,9 @@ string ofxOMXPlayer::findFilterName(OMX_IMAGEFILTERTYPE filterType)
         
     }
     return result;
+}
+
+ofxOMXPlayer::~ofxOMXPlayer(){
+    ofRemoveListener(ofEvents().update, this, &ofxOMXPlayer::onUpdate);
+    listener = nullptr;
 }
