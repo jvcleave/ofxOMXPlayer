@@ -50,6 +50,12 @@ bool ofRPIVideoPlayer::load(string name)
     
 }
 
+bool ofRPIVideoPlayer::loadWithSettings(ofxOMXPlayerSettings newSettings)
+{
+    newSettings.listener = this;
+    return openOMXPlayer(newSettings);
+}
+
 bool ofRPIVideoPlayer::openOMXPlayer(ofxOMXPlayerSettings settings_)
 {
     settings = settings_;

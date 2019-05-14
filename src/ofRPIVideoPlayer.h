@@ -11,6 +11,7 @@ class ofRPIVideoPlayer: public ofBaseVideoPlayer, public ofxOMXPlayerListener
 public:
     ofRPIVideoPlayer();
     bool load(string name);
+    bool loadWithSettings(ofxOMXPlayerSettings newSettings);
     void loadAsync(string name);
     void play();
     void stop();
