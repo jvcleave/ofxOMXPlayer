@@ -8,8 +8,6 @@ Releases contain tested versions that work for specific versions of openFramewor
 ### CURRENT KNOWN MAJOR ISSUES:   
 Videos with and audio track (even silent) work best and allow more accurate looping/frame tracking
 
-[![Build status](https://travis-ci.org/jvcleave/ofxOMXPlayer.svg?branch=master)](https://travis-ci.org/jvcleave/ofxOMXPlayer)
-
 ### DESCRIPTION:   
 This is an openFrameworks video player addon for the Raspberry Pi. The video player is hardware accelerated and can provide textures to openFrameworks to be used for shaders, etc.
 
