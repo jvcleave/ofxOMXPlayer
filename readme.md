@@ -5,7 +5,8 @@ Use [Releases](https://github.com/jvcleave/ofxOMXPlayer/releases) unless you are
 
 Releases contain tested versions that work for specific versions of openFrameworks.
 
-### CURRENT KNOWN MAJOR ISSUES:   
+### CURRENT KNOWN MAJOR ISSUES:  
+Requires openFrameworks 10, Raspberry Pi 1-3    
 Videos with and audio track (even silent) work best and allow more accurate looping/frame tracking
 
 ### DESCRIPTION:   
