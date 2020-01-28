@@ -33,6 +33,7 @@ ofxOMXPlayer::ofxOMXPlayer()
     listener = NULL;
     engineNeedsRestart = false;
     pendingLoopMessage = false;
+    bcm_host_init();
     OMX_Init();
     av_register_all();
     avformat_network_init();

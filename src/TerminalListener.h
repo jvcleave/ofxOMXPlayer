@@ -53,6 +53,7 @@ public:
         
         tcsetattr(STDIN_FILENO, TCSANOW, &new_termios);
         startThread();
+        ofLog() << "FUCCCCK ME";
     }
     
     void threadedFunction()
@@ -80,7 +81,7 @@ public:
                 
                 if (chnum > 0)
                 {
-                    //ofLog(OF_LOG_VERBOSE, "TerminalListener: character %c", ch[0]);
+                    ofLog(OF_LOG_VERBOSE, "TerminalListener: character %c", ch[0]);
                     KeyListenerEventData eventData(ch[0], (void *)this);
                     listener->onCharacterReceived(eventData);
                 }

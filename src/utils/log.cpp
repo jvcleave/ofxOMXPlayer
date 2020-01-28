@@ -31,8 +31,8 @@ static FILE*       m_file           = NULL;
 static int         m_repeatCount    = 0;
 static int         m_repeatLogLevel = -1;
 static std::string m_repeatLine     = "";
-static int         m_logLevel       = LOG_LEVEL_NONE;
-static bool  logToOF = false;
+static int         m_logLevel       = LOG_LEVEL_NORMAL;
+static bool  logToOF = true;
 
 static pthread_mutex_t   m_log_mutex;
 
@@ -60,7 +60,23 @@ void CLog::Close()
 
 void CLog::Log(int loglevel, const char *format, ... )
 {
-  pthread_mutex_lock(&m_log_mutex);
+    m_logLevel       = LOG_LEVEL_DEBUG;
+
+#if 0
+    CStdString strPrefix, strData;
+    
+    strData.reserve(16384);
+    va_list va;
+    va_start(va, format);
+    strData.FormatV(format,va);
+    va_end(va);
+    
+    
+    m_logLevel       = LOG_LEVEL_DEBUG;
+    ofLog() << "format: " << format << " : " << strData;
+    return;
+#endif
+    pthread_mutex_lock(&m_log_mutex);
 
   static const char* prefixFormat = "%02.2d:%02.2d:%02.2d T:%" PRIu64 " %7s: ";
 #if !(defined(_DEBUG) || defined(PROFILE))

@@ -1,9 +1,15 @@
 #include "ofMain.h"
 #include "ofApp.h"
+#include "bcm_host.h" 
 
 int main()
 {
     ofSetLogLevel(OF_LOG_VERBOSE);
-	ofSetupOpenGL(1280, 720, OF_WINDOW);
-	ofRunApp( new ofApp());
+
+    
+    ofGLESWindowSettings settings;
+    settings.setSize(1280, 720);
+    settings.setGLESVersion(2);
+    ofCreateWindow(settings);
+    ofRunApp( new ofApp());
 }

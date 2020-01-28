@@ -25,4 +25,4 @@ common:
 	ADDON_PKG_CONFIG_LIBRARIES = libavcodec libavdevice libavfilter libavformat libavresample libavutil libpostproc libswresample libswscale
 	ADDON_INCLUDES = src 
 	ADDON_CFLAGS = -fPIC -U_FORTIFY_SOURCE -Wall -ftree-vectorize -ftree-vectorize -Wno-deprecated-declarations -Wno-sign-compare -Wno-unknown-pragmas -Wno-unused-function -Wno-unused-but-set-variable
-	ADDON_LDFLAGS= -lavcodec -lavformat -lswscale -lavutil -lswresample -lavfilter -lm -lz
+	ADDON_LDFLAGS= -lavcodec -lavformat -lswscale -lavutil -lswresample -lavfilter -lm -lz 
