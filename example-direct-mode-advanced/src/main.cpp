@@ -1,6 +1,7 @@
 #include "ofMain.h"
 #include "ofxOMXPlayer.h"
 #include "ofAppEGLWindow.h"
+#include "ofAppNoWindow.h"
 
 
 class ofApp : public ofBaseApp
@@ -28,7 +29,9 @@ public:
         settings2.layer = 3;
         
         player2.setup(settings2);
-        
+        player2.setVolumeNormalized(0.8);
+        player1.setVolumeNormalized(0.8);
+
     }
     
     
@@ -81,6 +84,7 @@ public:
     }
 };
 
+#if 0
 int main()
 {
     ofSetLogLevel(OF_LOG_VERBOSE);
@@ -103,5 +107,21 @@ int main()
 
     ofCreateWindow(settings);   
     ofRunApp( new ofApp()); 
+    
+    
+    
+}
+#endif
+
+int main()
+{
+    ofSetLogLevel(OF_LOG_VERBOSE);
+    
+    ofAppNoWindow window;
+    ofSetupOpenGL(&window, 1280, 720, OF_WINDOW);
+    
+    // and uncomment this line
+    // ofSetupOpenGL(300, 300, OF_WINDOW);
+    ofRunApp(new ofApp());
     
 }
