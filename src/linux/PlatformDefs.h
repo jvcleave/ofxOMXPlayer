@@ -318,8 +318,15 @@ typedef struct _TIME_ZONE_INFORMATION {
 // Network
 #define SOCKADDR_IN struct sockaddr_in
 #define IN_ADDR struct in_addr
+
+#ifndef SOCKET_ERROR
 #define SOCKET_ERROR (-1)
+#endif
+
+#ifndef INVALID_SOCKET
 #define INVALID_SOCKET (~0)
+#endif
+
 #define closesocket(s)  close(s)
 #define ioctlsocket(s, f, v) ioctl(s, f, v)
 #define WSAGetLastError() (errno)
