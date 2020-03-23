@@ -96,7 +96,7 @@ void ofxOMXPlayerEngine::clear()
     m_has_audio = false;
     //currentPlaybackSpeed = 0.0;
     hasNewFrame = false;
-    listener = NULL;
+    listener = nullptr;
     isOpen = false;
     duration = 0;
     totalNumFrames = 0;
@@ -1392,8 +1392,9 @@ void ofxOMXPlayerEngine::doExit()
 
 void ofxOMXPlayerEngine::close(bool clearTextures)//default clearTextures = false
 {
+    ofRemoveListener(ofEvents().update, this, &ofxOMXPlayerEngine::onUpdate);
+    listener = nullptr;
     lock();
-    //ofRemoveListener(ofEvents().update, this, &ofxOMXPlayerEngine::onUpdate);
     stopThread();
     //
     

@@ -24,7 +24,7 @@ class ofxOMXPlayer : public EngineListener
 {
 public:
     
-    
+    ~ofxOMXPlayer();
     COMXCore omxCore;
     ofxOMXPlayerEngine engine;
     ofxOMXPlayerSettings settings;
