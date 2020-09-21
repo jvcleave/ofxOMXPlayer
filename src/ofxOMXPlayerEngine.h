@@ -127,7 +127,7 @@ public:
     void onUpdate(ofEventArgs& eventArgs);
   
     void seekToFrame(int frameTarget);
-    void seekToTimeInSeconds(int timeInSeconds);
+    void seekToTimeInSeconds(double timeInSeconds);
     void increaseSpeed();
     void decreaseSpeed();
     void setNormalSpeed();
