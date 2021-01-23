@@ -1020,12 +1020,11 @@ void ofxOMXPlayerEngine::seekToFrame(int frameTarget)
     
 }
 
-void ofxOMXPlayerEngine::seekToTimeInSeconds(int timeInSeconds)
+void ofxOMXPlayerEngine::seekToTimeInSeconds(double timeInSeconds)
 {
     lock();
-    int seekTime = timeInSeconds%60;
     double oldPos = omxClock.OMXMediaTime()*1e-6;
-    m_incr = seekTime-oldPos;
+    m_incr = timeInSeconds-oldPos;
     ofLog() << "seekToTimeInSeconds: " << m_incr;
     unlock();
 }
