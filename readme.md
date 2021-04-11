@@ -1,23 +1,19 @@
-### STATUS
-Most code replaced 9/29/2018 (see bottom)
-
-Use [Releases](https://github.com/jvcleave/ofxOMXPlayer/releases) unless you are contributing or looking for bleeding edge.
-
-Releases contain tested versions that work for specific versions of openFrameworks.
+### REQUIREMENTS:   
+- GPU split set to 128 (may need to be higher for larger videos)
+- openFrameworks 10, Raspberry Pi 0-3 http://www.openframeworks.cc/setup/raspberrypi/
+- run install_depends.sh for necessary libav dependencies
 
 ### CURRENT KNOWN MAJOR ISSUES:  
-Requires openFrameworks 10, Raspberry Pi 1-3    
 Videos with and audio track (even silent) work best and allow more accurate looping/frame tracking
 
 ### DESCRIPTION:   
 This is an openFrameworks video player addon for the Raspberry Pi. The video player is hardware accelerated and can provide textures to openFrameworks to be used for shaders, etc.
 
-### REQUIREMENTS:   
-- GPU split set to 128 (may need to be higher for larger videos)
-- openFrameworks version 0.8 or higher http://www.openframeworks.cc/setup/raspberrypi/
-- run install_depends.sh for necessary libav dependencies
-
 ### USAGE:   
+
+Use [Releases](https://github.com/jvcleave/ofxOMXPlayer/releases) unless you are contributing or looking for bleeding edge. Releases contain tested versions that work for specific versions of openFrameworks.
+
+
 Clone into openFrameworks/addons
 
 There 2 modes of Playback, Direct (aka Non-textured) or Textured. 
