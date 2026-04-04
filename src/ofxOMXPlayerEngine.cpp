@@ -499,13 +499,17 @@ bool ofxOMXPlayerEngine::generateEGLImage()
     bool success = false;
     bool needsRegeneration = false;
     
+   ofxOMXPlayerEngine::generateEGLImage()
+
+
+
     if (!texture.isAllocated())
     {
         needsRegeneration = true;
     }
     else
     {
-        if (texture.getWidth() != videoWidth && texture.getHeight() != videoHeight)
+        if (texture.getWidth() != videoWidth || texture.getHeight() != videoHeight)
         {
             needsRegeneration = true;
         }
@@ -517,7 +521,7 @@ bool ofxOMXPlayerEngine::generateEGLImage()
     }
     else
     {
-        if (fbo.getWidth() != videoWidth && fbo.getHeight() != videoHeight)
+        if (fbo.getWidth() != videoWidth || fbo.getHeight() != videoHeight)
         {
             needsRegeneration = true;
         }
